@@ -46,6 +46,8 @@ public class JiaheParser {
 	    try{
             //		/api/query?token=xxxxxxxxxxxxxxxx&type=1&uid= ECD797683BA588E8EF87D08991ADD5E3&tagid=10000,10001,10002&ts=14570 0000
             String responseStr = "";
+            JSONObject jsonObject = JSONObject.fromObject(body);
+            System.out.println(jsonObject.toString());//输出提交的参数
             Map<String,String> map = urlRequest(url);
             if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
                 return packageResponse("400","Missing required parameters",null);
