@@ -21,9 +21,9 @@ public class User implements Serializable {
     private Integer age_high;//(F)  用户唯一标识；
     private String gender;//(F) 性别 “M”-Male “F”-Female “O”-Other“Null”-Unknown
     private String keywords;//(F)  用户兴趣或倾向，以逗号分隔；
-    public UserData data;//(F)  额外的用户数据。每个数据对象代表不同的数据源。；
+    private UserData data;//(F)  额外的用户数据。每个数据对象代表不同的数据源。；
     private Geo geo;//(F)  用户家庭位置；
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 
 
 }

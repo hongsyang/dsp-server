@@ -50,7 +50,7 @@ public class JiaheParser {
             Map<String,String> map = urlRequest(url);
             JSONObject jsonObject = JSONObject.fromObject(body);
             BidRequestBean bidRequestBean = (BidRequestBean) JSONObject.toBean(jsonObject, BidRequestBean.class);
-            System.out.println(jsonObject.toString());//输出提交的参数
+            System.out.println(bidRequestBean.toString());//输出提交的参数
             if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
                 return packageResponse("400","Missing required parameters",null);
             }else if(map.containsKey("token")){

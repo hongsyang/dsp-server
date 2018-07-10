@@ -22,6 +22,6 @@ public class Regs {
     用内容根据 COPPA 条例可以被认为是面
     向儿童(child-direct)*/
     private Integer coppa;
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 
 }

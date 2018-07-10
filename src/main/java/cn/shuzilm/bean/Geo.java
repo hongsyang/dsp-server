@@ -21,6 +21,6 @@ public class Geo implements Serializable {
     private String country;//(F)  国家，使用 ISO-3166-1 Alpha-3
     private String region;//(F) 地区，使用 ISO 3166-2
     private Integer type;//(F) 数据来源1-GPS 2-IP 3-User provided
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 
 }

@@ -30,7 +30,7 @@ public class BidRequestBean implements Serializable{
     private String[] badv ;//(F) 拒绝接受的广告主名单，采用域名标示广告主
     private String callback ;//(F) IOS 的激活回调 url，仅对下载IOS 类广告有效。
     private Regs regs ;//(T) 必须（美国流量）
-//    private Site site;//	媒体站点对象 （暂不支持，灵集系统支持）
-    private RequestExt requestExt;//扩展字段，参看request.ext字段说明
+    private Site site;//	媒体站点对象 （暂不支持，灵集系统支持）
+    private RequestExt ext;//扩展字段，参看request.ext字段说明
 }
 

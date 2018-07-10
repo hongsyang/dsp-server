@@ -40,5 +40,5 @@ public class Device implements Serializable {
     private Integer sw;//(F) 设备屏幕分辨率宽度，单位为像素 1080
     private Integer sh;//(F)设备屏幕分辨率高度，单位为像素  1920
     private Integer orientation;//(F)设备屏幕方向:0- 竖向 1- 横向   0
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 }

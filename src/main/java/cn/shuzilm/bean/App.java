@@ -24,6 +24,6 @@ public class App implements Serializable {
     private Integer paid;//(F) 是否为付费 App：0- 不是 1- 是付费 2- 应用内付费   0
     private String keywords;//(F) App 关键字，可以以逗号分隔多个
     private String storeurl;//(F) 市场下载地址
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 
 }

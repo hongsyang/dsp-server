@@ -19,5 +19,5 @@ public class UserData implements Serializable {
     private String id;//(建议) 数据源的唯一标识 ID，参考附录13
     private String name;//(建议) 数据源 名称  "momo"
     private UserSegment segment;//(建议) segment 数组，包含实际的数据值
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 }

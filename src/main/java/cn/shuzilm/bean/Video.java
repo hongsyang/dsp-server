@@ -27,5 +27,5 @@ public class Video implements Serializable {
     private Integer w;//(F) 广告位宽度
     private Integer h;//(F) 广告位高度
     private Integer[] api;//(F)  列出支持的广告 API
-    private RequestExt requestExt;//（F）扩展内容
+    private RequestExt ext;//（F）扩展内容
 }

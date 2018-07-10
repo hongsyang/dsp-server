@@ -19,5 +19,5 @@ public class NativeBean implements Serializable {
     private String ver;//(建议使用) 原生广告协议版本。
     private Integer[] api;//(F) 列出支持的广告 API，参考附录10
     private Integer[] battr;//(F) 拒绝的广告创意属性，参考附录4
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 }

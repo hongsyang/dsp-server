@@ -18,5 +18,5 @@ public class UserSegment implements Serializable {
     private String id;// (建议) 数据提供者特定的数据段编号 “0”
     private String name;// (建议)数据提供者特定的数据段名称 “interest”
     private String value;// (建议) 数据提供者特定的数据段的内容ID，参考附录 14
-    private RequestExt requestExt;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 }

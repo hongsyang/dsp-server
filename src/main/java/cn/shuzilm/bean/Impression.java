@@ -24,5 +24,5 @@ public class Impression implements Serializable {
     private Integer bidfloor;//(F/T)  at=0 或 1时(T)  CPM 底价，数值为 CPM 价格*10000，如底价为 0.6 元，则该字段值为 6000   实例6000
     private String bidfloorcur;//(F)  价格单位，取值可能是: USD、RMB，缺省 RMB
     private Integer secure;//(F) 标识曝光是否需要安全的 HTTPS URL 创意素材和标记，其中 0 =不安全，1 =安全。如果省略，安全状态是未知的，但非安全 HTTP 可以假设是支持的。缺省为 0。
-    private RequestExt requestExt;// 扩展内容
+    private RequestExt ext;// 扩展内容
 }
