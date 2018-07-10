@@ -1,6 +1,6 @@
 package cn.shuzilm.interf.parser;
 
-import cn.shuzilm.bean.LJBidRequestBean;
+import cn.shuzilm.bean.BidRequestBean;
 import cn.shuzilm.bean.TagBean;
 import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
@@ -49,7 +49,7 @@ public class JiaheParser {
             String responseStr = "";
             Map<String,String> map = urlRequest(url);
             JSONObject jsonObject = JSONObject.fromObject(body);
-            LJBidRequestBean ljBidRequestBean = (LJBidRequestBean) JSONObject.toBean(jsonObject, LJBidRequestBean.class);
+            BidRequestBean bidRequestBean = (BidRequestBean) JSONObject.toBean(jsonObject, BidRequestBean.class);
             System.out.println(jsonObject.toString());//输出提交的参数
             if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
                 return packageResponse("400","Missing required parameters",null);

@@ -13,4 +13,6 @@ import lombok.Data;
  */
 @Data
 public class RequestExt {
+    private String consent;//(F)   User.ext  Consent string according toIAB's consent string format1.1  BOMT6szOMT6szAAABAENAAAAAAAAoAAA
+    private Integer gdpr;//(F) Regs.ext  Whether or not the request issubject to GDPR.0:the request is not subject to GDPR1:the request is subject to GDPR  0
 }
