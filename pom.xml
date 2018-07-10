@@ -128,6 +128,11 @@
             <version>2.4</version>
             <classifier>jdk15</classifier><!--指定jdk版本-->
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.14</version>
+        </dependency>
 
 
     </dependencies>
