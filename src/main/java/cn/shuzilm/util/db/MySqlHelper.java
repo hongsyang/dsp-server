@@ -1,4 +1,4 @@
-package cn.shuzilm.util.dbutil;
+package cn.shuzilm.util.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
