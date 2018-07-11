@@ -13,7 +13,7 @@ import cn.shuzilm.bean.BidRequestBean;
 */
 public interface RequestService {
 
- //根据厂商名字区分
+    //根据厂商名字区分 TODO
 
     /**
      *  解析post提交报文，转换为BidRequestBean
