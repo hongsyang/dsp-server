@@ -20,4 +20,6 @@ public class ResponseExt implements Serializable {
     //二者填充一个
     private String endhtml;//(F) 视频播放完成后，加载该html 片段
     private String endimgurl;//(F) 视频播放完成后，展示该图片
+
+
 }
