@@ -1,7 +1,9 @@
 package cn.shuzilm.interf;
 
+import cn.shuzilm.bean.BidRequestBean;
+
 /**
-* @Description:    灵集系统 Bid Request 解析
+* @Description:    Bid Request 解析
 * @Author:         houkp
 * @CreateDate:     2018/7/10 11:20
 * @UpdateUser:     houkp
@@ -12,4 +14,11 @@ package cn.shuzilm.interf;
 public interface RequestService {
 
  //根据厂商名字区分
+
+    /**
+     *  解析post提交报文，转换为BidRequestBean
+     * @param dataStr 报文入参
+     * @return
+     */
+    public BidRequestBean parseRequest(String dataStr);
 }

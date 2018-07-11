@@ -2,6 +2,8 @@ package cn.shuzilm.interf.parser;
 
 import cn.shuzilm.bean.BidRequestBean;
 import cn.shuzilm.bean.TagBean;
+import cn.shuzilm.interf.RequestService;
+import cn.shuzilm.interf.RequestServiceImpl;
 import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
 import net.sf.json.JSONObject;
@@ -48,9 +50,11 @@ public class JiaheParser {
             //		/api/query?token=xxxxxxxxxxxxxxxx&type=1&uid= ECD797683BA588E8EF87D08991ADD5E3&tagid=10000,10001,10002&ts=14570 0000
             String responseStr = "";
             Map<String,String> map = urlRequest(url);
-            JSONObject jsonObject = JSONObject.fromObject(body);
-            BidRequestBean bidRequestBean = (BidRequestBean) JSONObject.toBean(jsonObject, BidRequestBean.class);
-            System.out.println(bidRequestBean.toString());//输出提交的参数
+            RequestService requestService=new RequestServiceImpl();
+            BidRequestBean bidRequestBean = requestService.parseRequest(body);
+            if (bidRequestBean!=null){
+                System.out.println(bidRequestBean.toString());//输出提交的参数
+            }
             if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
                 return packageResponse("400","Missing required parameters",null);
             }else if(map.containsKey("token")){
