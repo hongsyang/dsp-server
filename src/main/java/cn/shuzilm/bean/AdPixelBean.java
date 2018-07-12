@@ -5,7 +5,8 @@ package cn.shuzilm.bean;
  *
  * Created by thunders on 2018/7/11.
  */
-public class AdStatusBean {
+public class AdPixelBean {
+    private String host;
     private String adUid;
     private String adName;
     /**
@@ -16,6 +17,14 @@ public class AdStatusBean {
      * 实际耗费的量
      */
     private long winNoticeNums;
+
+    public String getHost() {
+        return host;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
 
     public String getAdUid() {
         return adUid;

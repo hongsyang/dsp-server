@@ -11,7 +11,8 @@ import java.util.ArrayList;
  *
  */
 public class NodeStatusBean implements ICommand{
-    private ArrayList<AdStatusBean> currentAdStatusList;
+    private ArrayList<AdPixelBean> pixelList;
+    private ArrayList<AdBidBean> bidList;
 
     private int nodeId;
     private String nodeName;
@@ -33,12 +34,20 @@ public class NodeStatusBean implements ICommand{
      */
     private int adNums;
 
-    public ArrayList<AdStatusBean> getCurrentAdStatusList() {
-        return currentAdStatusList;
+    public ArrayList<AdPixelBean> getPixelList() {
+        return pixelList;
     }
 
-    public void setCurrentAdStatusList(ArrayList<AdStatusBean> currentAdStatusList) {
-        this.currentAdStatusList = currentAdStatusList;
+    public void setPixelList(ArrayList<AdPixelBean> pixelList) {
+        this.pixelList = pixelList;
+    }
+
+    public ArrayList<AdBidBean> getBidList() {
+        return bidList;
+    }
+
+    public void setBidList(ArrayList<AdBidBean> bidList) {
+        this.bidList = bidList;
     }
 
     public String getHost(){
