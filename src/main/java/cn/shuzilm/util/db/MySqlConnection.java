@@ -1,4 +1,4 @@
-package cn.shuzilm.util.dbutil;
+package cn.shuzilm.util.db;
 
 
 
