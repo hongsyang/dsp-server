@@ -52,6 +52,7 @@ public class JiaheParser {
             Map<String,String> map = urlRequest(url);
             RequestService requestService=new RequestServiceImpl();
             BidRequestBean bidRequestBean = requestService.parseRequest(body);
+            System.out.println("__________-"+bidRequestBean.getDevice().getDpidsha1());
             if (bidRequestBean!=null){
                 System.out.println(bidRequestBean.toString());//输出提交的参数
             }

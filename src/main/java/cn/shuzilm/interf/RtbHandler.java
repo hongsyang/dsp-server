@@ -1,5 +1,6 @@
 package cn.shuzilm.interf;
 
+import cn.shuzilm.bean.BidRequestBean;
 import cn.shuzilm.interf.parser.JiaheParser;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
@@ -48,6 +49,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 								.equalsIgnoreCase(request
 										.getHeader(HttpHeaders.Names.CONNECTION));
 				// 获取对方的ip地址
+
 				String remoteIp = ctx.getChannel().getRemoteAddress()
 						.toString().split(":")[0].replace("/", "");
 //				System.out.println("remoteIp : "+remoteIp);

@@ -41,8 +41,13 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArguments>
+                        <extdirs>dsp-server\lib</extdirs>
+                    </compilerArguments>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
@@ -161,6 +166,22 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
+        <dependency>
+            <groupId>yao-config</groupId>
+            <artifactId>yao-config</artifactId>
+            <version>1.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/yao-config-1.4.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>yao-util</groupId>
+            <artifactId>yao-util</artifactId>
+            <version>1.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/yao-util-1.1.jar</systemPath>
+        </dependency>
+
 
 
     </dependencies>
