@@ -21,9 +21,10 @@ import java.time.format.DateTimeFormatter;
 public class DUFlowBean implements Serializable {
 
     private String infoId;//上报信息的唯一ID
+    private String did;
     private String requestId;//请求id
     private String deviceId;//   唯一识别用户
-    private String createTime;// timestamp  该条信息的创建时间
+    private LocalDateTime createTime;// timestamp  该条信息的创建时间
     private Integer infoType;//tinyint  0 imp 1 click 2 play 3 close 4 land
     private String adUid;// varchar(36)  广告ID
     private String audienceuid;//  varchar(36)  人群ID

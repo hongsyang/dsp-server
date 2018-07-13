@@ -60,16 +60,27 @@ public class JiaheParser {
             Map<String, String> map = urlRequest(url);
             RequestService requestService = new RequestServiceImpl();
             BidRequestBean bidRequestBean = requestService.parseRequest(body);
-            DUFlowBean duFlowBean = new DUFlowBean();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-            String format = LocalDateTime.now().format(formatter);
-            duFlowBean.setInfoId(format + bidRequestBean.getId());
-            duFlowBean.setRequestId(bidRequestBean.getId());
-            JSONObject jsonObject = JSONObject.fromObject(duFlowBean);
-            log.debug("/t {} /t {}",duFlowBean.getInfoId(),duFlowBean.getRequestId());
-//            System.out.println("__________-" + bidRequestBean.getDevice().getDpidsha1());
             if (bidRequestBean != null) {
-                System.out.println(bidRequestBean.toString());//输出提交的参数
+                DUFlowBean duFlowBean = new DUFlowBean();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+                String format = LocalDateTime.now().format(formatter);
+                duFlowBean.setInfoId(format + bidRequestBean.getId());
+                duFlowBean.setDid("数盟的标识did，不知道在哪取");
+                duFlowBean.setDeviceId(bidRequestBean.getDevice().getDpidsha1());
+                duFlowBean.setAdUid("广告id，听说张杰在做");
+                duFlowBean.setAudienceuid("人群id，听说张杰在做");
+                duFlowBean.setAdvertiserUid("广告主id，听说张杰在做");
+                duFlowBean.setAgencyUid("代理商id，听说张杰在做");
+                duFlowBean.setCreativeUid("创意id，听说张杰在做");
+                duFlowBean.setProvince("省，不知道在哪取");
+                duFlowBean.setCity("市，不知道在哪取");
+                duFlowBean.setRequestId(bidRequestBean.getId());
+                log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", duFlowBean.getInfoId(),
+                        duFlowBean.getDid(), duFlowBean.getDeviceId(),
+                        duFlowBean.getAdUid(),duFlowBean.getAdvertiserUid(),
+                        duFlowBean.getAdvertiserUid(), duFlowBean.getAgencyUid(),
+                        duFlowBean.getCreativeUid(), duFlowBean.getProvince(),
+                        duFlowBean.getCity(), body);
             }
             if (!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")) {
                 return packageResponse("400", "Missing required parameters", null);
