@@ -17,7 +17,7 @@ import java.io.Serializable;
 public class Bid implements Serializable {
     private String impid;//(T) 对应 Impression 的唯一标识
     private String dealid;//(F) 参考请求里的 deal.id，判断是否投标属于私有交易
-    private Integer price;//(T) CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，则取值为 6000。
+    private Integer price;//(T) CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，则取值为 6000。 //灵集DSP出价，注意单位是分/千次曝光，即CPM
     private Integer paymode;//(F) DSP 计费方式（可根据不同广告分别设置）1- CPM2- CPC【缺省为 1，竞价模式目前只支持 1】
     private Integer adct;//(T) 广告点击行为类型，参考附录 9
     private String bundle;//(F/ adct=2 时必须) 下载类广告必填，安卓下载类广告填写被下载 APP 的包名。iOS 下载类广告填写被下载 APP的 itunes id。

@@ -38,7 +38,7 @@ public class RtbServer {
 //		conn = mySqlConnection.getConn();
 		
 		RtbServer server = new RtbServer();
-		server.start(8080);
+		server.start(8780);
 	}
 
 	public void start(int port) {
