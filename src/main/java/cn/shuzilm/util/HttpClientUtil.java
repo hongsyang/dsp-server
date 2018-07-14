@@ -33,8 +33,6 @@ public class HttpClientUtil {
         HttpClient httpClient = null;
         HttpPost httpPost = null;
         String result = null;
-//        try{
-//            httpClient = new SSLClient();
         httpPost = new HttpPost(url);
 
         //设置参数
@@ -55,13 +53,10 @@ public class HttpClientUtil {
                 result = EntityUtils.toString(resEntity, charset);
             }
         }
-//        }catch(Exception ex){
-//            ex.printStackTrace();
-//        }
         return result;
     }
 
-    public static String HttpPostWithJson(String url, String json) throws Exception {
+    public static String HttpPostWithJson(String url, String json){
         String returnValue = "这是默认返回值，接口调用失败";
         CloseableHttpClient httpClient = HttpClients.createDefault();
         ResponseHandler<String> responseHandler = new BasicResponseHandler();
