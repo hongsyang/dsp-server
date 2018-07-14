@@ -158,12 +158,13 @@
         </dependency>
 
         <!--新增依赖 -->
+        <!--get、set方法的jar包-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.14</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+        <!-- log日志jar包 -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
@@ -174,6 +175,7 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
+        <!--本地jar 的引入-->
         <dependency>
             <groupId>yao-config</groupId>
             <artifactId>yao-config</artifactId>
@@ -181,7 +183,6 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/yao-config-1.4.jar</systemPath>
         </dependency>
-
         <dependency>
             <groupId>yao-util</groupId>
             <artifactId>yao-util</artifactId>
@@ -189,8 +190,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/yao-util-1.1.jar</systemPath>
         </dependency>
-
-
+        <!--http 请求jar包-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
+        </dependency>
 
     </dependencies>
 
