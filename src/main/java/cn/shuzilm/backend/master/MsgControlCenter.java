@@ -1,9 +1,7 @@
 package cn.shuzilm.backend.master;
 
-import cn.shuzilm.bean.control.AdPixelBean;
-import cn.shuzilm.bean.control.ICommand;
-import cn.shuzilm.bean.control.NodeStatusBean;
-import cn.shuzilm.bean.control.WorkNodeBean;
+import cn.shuzilm.bean.*;
+import cn.shuzilm.bean.NodeStatusBean;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 

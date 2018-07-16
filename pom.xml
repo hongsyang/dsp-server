@@ -41,8 +41,21 @@
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
+                    <encoding>UTF-8</encoding>
+                    <compilerArguments>
+                        <extdirs>dsp-server\lib</extdirs>
+                    </compilerArguments>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
@@ -144,6 +157,45 @@
             <classifier>jdk15</classifier><!--指定jdk版本-->
         </dependency>
 
+        <!--新增依赖 -->
+        <!--get、set方法的jar包-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.14</version>
+        </dependency>
+        <!-- log日志jar包 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <!--本地jar 的引入-->
+        <dependency>
+            <groupId>yao-config</groupId>
+            <artifactId>yao-config</artifactId>
+            <version>1.4</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/yao-config-1.4.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>yao-util</groupId>
+            <artifactId>yao-util</artifactId>
+            <version>1.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/yao-util-1.1.jar</systemPath>
+        </dependency>
+        <!--http 请求jar包-->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.3</version>
+        </dependency>
 
     </dependencies>
 

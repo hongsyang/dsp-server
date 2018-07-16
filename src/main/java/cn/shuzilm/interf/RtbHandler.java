@@ -48,6 +48,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 								.equalsIgnoreCase(request
 										.getHeader(HttpHeaders.Names.CONNECTION));
 				// 获取对方的ip地址
+
 				String remoteIp = ctx.getChannel().getRemoteAddress()
 						.toString().split(":")[0].replace("/", "");
 //				System.out.println("remoteIp : "+remoteIp);
