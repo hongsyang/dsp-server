@@ -2,13 +2,17 @@ package cn.shuzilm.interf.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.control.TagBean;
+import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.interf.RequestService;
 import cn.shuzilm.interf.RequestServiceImpl;
 import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
 import net.sf.json.JSONObject;
 import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +24,8 @@ import java.util.Map;
  */
 public class JiaheParser {
 
+
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(JiaheParser.class);
     enum Field {
         work_grid_id,
         work_city_id,
@@ -53,7 +59,28 @@ public class JiaheParser {
             RequestService requestService=new RequestServiceImpl();
             BidRequestBean bidRequestBean = requestService.parseRequest(body);
             if (bidRequestBean!=null){
-                System.out.println(bidRequestBean.toString());//输出提交的参数
+                DUFlowBean duFlowBean = new DUFlowBean();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+                String format = LocalDateTime.now().format(formatter);
+                duFlowBean.setInfoId(format + bidRequestBean.getId());
+                duFlowBean.setDid("数盟的标识did，不知道在哪取");
+                duFlowBean.setDeviceId(bidRequestBean.getDevice().getDpidsha1());
+                duFlowBean.setAdUid("广告id，听说张杰在做");
+                duFlowBean.setAudienceuid("人群id，听说张杰在做");
+                duFlowBean.setAdvertiserUid("广告主id，听说张杰在做");
+                duFlowBean.setAgencyUid("代理商id，听说张杰在做");
+                duFlowBean.setCreativeUid("创意id，听说张杰在做");
+                duFlowBean.setProvince("省，不知道在哪取");
+                duFlowBean.setCity("市，不知道在哪取");
+                duFlowBean.setRequestId(bidRequestBean.getId());
+                log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", duFlowBean.getInfoId(),
+                        duFlowBean.getDid(), duFlowBean.getDeviceId(),
+                        duFlowBean.getAdUid(),duFlowBean.getAdvertiserUid(),
+                        duFlowBean.getAdvertiserUid(), duFlowBean.getAgencyUid(),
+                        duFlowBean.getCreativeUid(), duFlowBean.getProvince(),
+                        duFlowBean.getCity(), body);
+
+
             }
 
             if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
