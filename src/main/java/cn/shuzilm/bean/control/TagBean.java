@@ -1,6 +1,5 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.control;
 
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 import java.util.ArrayList;

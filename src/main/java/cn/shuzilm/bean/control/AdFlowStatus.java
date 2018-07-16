@@ -1,4 +1,4 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.control;
 
 /**
  * 流量控制用的 BEAN

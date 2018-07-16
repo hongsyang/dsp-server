@@ -1,6 +1,6 @@
 package cn.shuzilm.interf.parser;
 
-import cn.shuzilm.bean.TagBean;
+import cn.shuzilm.bean.control.TagBean;
 import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
 import net.sf.json.JSONObject;
