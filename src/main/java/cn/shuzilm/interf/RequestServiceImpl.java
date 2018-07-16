@@ -1,6 +1,7 @@
 package cn.shuzilm.interf;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
+import com.alibaba.fastjson.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -14,9 +15,10 @@ public class RequestServiceImpl implements RequestService {
     public BidRequestBean parseRequest(String dataStr) {
         log.debug(" BidRequest参数入参：{}", dataStr);
         if (StringUtils.isNotBlank(dataStr)) {
-            JSONObject jsonObject = JSONObject.fromObject(dataStr);
-            log.debug(" jsonObject的结果：{}", jsonObject);
-            BidRequestBean bidRequestBean = (BidRequestBean) JSONObject.toBean(jsonObject, BidRequestBean.class);
+//            JSONObject jsonObject = JSONObject.fromObject(dataStr);
+            BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
+//            log.debug(" jsonObject的结果：{}", jsonObject);
+//            BidRequestBean bidRequestBean = (BidRequestBean) JSONObject.toBean(jsonObject, BidRequestBean.class);
             log.debug(" json转化为BidRequestBean的结果：{}", bidRequestBean);
             return bidRequestBean;
         }

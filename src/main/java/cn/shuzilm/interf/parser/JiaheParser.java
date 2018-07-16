@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.adview.response.Bid;
 import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
@@ -10,8 +11,8 @@ import cn.shuzilm.interf.RequestService;
 import cn.shuzilm.interf.RequestServiceImpl;
 import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
+import com.alibaba.fastjson.JSON;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
@@ -47,13 +48,13 @@ public class JiaheParser {
 
     public JiaheParser(){
         // 10.169.20.2,6379,123456yiguan,0
-        String[] jedisConf = Constants.getInstance().getConf("REDIS_CONF").split(",");
-        jedisManager = new JedisManager(jedisConf[0], Integer.parseInt(jedisConf[1]),jedisConf[3]);
+//        String[] jedisConf = Constants.getInstance().getConf("REDIS_CONF").split(",");
+//        jedisManager = new JedisManager(jedisConf[0], Integer.parseInt(jedisConf[1]),jedisConf[3]);
         tokenList = new ArrayList<>();
-        String[] tokenArray = Constants.getInstance().getConf("TOKEN").split(",");
-        for(String token : tokenArray){
-            tokenList.add(token);
-        }
+//        String[] tokenArray = Constants.getInstance().getConf("TOKEN").split(",");
+//        for(String token : tokenArray){
+//            tokenList.add(token);
+//        }
     }
 
     /**
@@ -79,10 +80,8 @@ public class JiaheParser {
             String format = LocalDateTime.now().format(formatter);//时间戳
 
             if (bidRequestBean!=null){
-                DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-                String format1 = LocalDateTime.now().format(formatter);//时间戳
                 DUFlowBean duFlowBean = new DUFlowBean();
-                duFlowBean.setInfoId(format1 + bidRequestBean.getId());
+                duFlowBean.setInfoId(format + bidRequestBean.getId());
                 duFlowBean.setDid("数盟的标识did，不知道在哪取");
                 duFlowBean.setDeviceId(bidRequestBean.getDevice().getDpidsha1());
                 duFlowBean.setAdUid("广告id，听说张杰在做");
@@ -123,7 +122,9 @@ public class JiaheParser {
 
             Bid bid =new Bid();
             bid.setAdid("adid"+format);//广告id，对应duFlowBean的AdUid；
-            bid.setImpid(bidRequestBean.getImp().get(0).getId());//从bidRequestBean里面取
+            List<Impression> imp = bidRequestBean.getImp();
+            Impression impression = imp.get(0);
+            bid.setImpid(impression.getId());//从bidRequestBean里面取
             bid.setWurl("http://dsp.example.com/winnotice?price="+"60000");//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
             List<Map<Integer, List<String>>>  nurl =new ArrayList();
             List<String> urls=  new ArrayList<>();
@@ -139,11 +140,8 @@ public class JiaheParser {
             bid.setPrice(6000);//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
             bid.setCurl(urls);//点击监控地址，客户端逐个发送通知
             bid.setCrid("crid"+format);//广告物料 ID
-            bid.setAdm("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /><style\n" +
-                    "type='text/css'>*{padding:0px;margin:0px;} a:link{text-decoration:none;}<\\/style><a\n" +
-                    "href='%%CLICK_URL%%'onclick='%%CLICK_SCRIPT%%'><img width='100%' height='100%'\n" +
-                    "src='http://www.adview.com/image/rtb/6f9f860f77aa2b509b319fee7cb96626_320x50.png'><\\/im\n" +
-                    "g><\\/a>%%IMPTRACK_SCRIPT%%");// 广告物料数据
+            String adm = "<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />";
+            bid.setAdm(adm);// 广告物料数据
             bid.setAdh(50);//广告物料高度
             bid.setAdw(320);//广告物料宽度
             bid.setAdct(1);// 广告点击行为类型，参考附录 9
@@ -151,11 +149,14 @@ public class JiaheParser {
             //添加到list中
             bidList.add(bid);
             seatBid.setBid(bidList);
+            seatBidList.add(seatBid);
             bidResponseBean.setSeatBid(seatBidList);
-
+            Object o = JSON.toJSON(bidResponseBean);
+            responseStr=o.toString();
+            System.out.println(responseStr);
 
             //下面的代码不知道是干什么的，先注释起来。houkp
-            String type = map.get("type");
+/*            String type = map.get("type");
             String uid = map.get("uid");
             String tagId = map.get("tagid");
             Object obj = jedisManager.getMap(uid);
@@ -177,7 +178,7 @@ public class JiaheParser {
             }else{
                 responseStr = packageResponse("0","Tag not found",null);
             }
-            //		responseStr = parseApp(dataValue,remoteIp,wdt,mqTool,gzip);
+            //		responseStr = parseApp(dataValue,remoteIp,wdt,mqTool,gzip);*/
 
             return responseStr;
         }catch(Exception ex){
