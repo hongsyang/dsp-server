@@ -1,4 +1,4 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.adview.request;
 
 import lombok.Data;
 
@@ -21,6 +21,6 @@ public class Deal implements Serializable {
     private Integer at;//(T) 竞拍类型：0 – 最高价格成交 1 – 次高价格成交 2 - 约定价格成交（不参加竞价
     private String[] wseat;//(F) 允许投标交易白名单;省略意味着没有限制。
     private String[] wadomain;//(F)允许的广告商域名，省略意味着不限制广告商。   [“adview.com”]
-    private  RequestExt ext;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 
 }

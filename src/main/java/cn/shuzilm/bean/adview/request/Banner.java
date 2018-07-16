@@ -1,4 +1,4 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.adview.request;
 
 import lombok.Data;
 
@@ -22,5 +22,5 @@ public class Banner implements Serializable{
     private  Integer[] battr;//(F) 拒绝的广告创意属性，参考附录4
     private  Integer[] mimes;//(F) 广告物料形式支持，已支持部分不列入。参考附录 5
     private  Integer[] api;//(F) 列出支持的广告 API，参考附录10
-    private  RequestExt ext;//(F) 扩展内容
+    private RequestExt ext;//(F) 扩展内容
 }

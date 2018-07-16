@@ -1,4 +1,4 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.lj.request;
 
 import lombok.Data;
 

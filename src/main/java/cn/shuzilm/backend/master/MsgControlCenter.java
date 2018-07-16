@@ -1,14 +1,11 @@
 package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.*;
-import cn.shuzilm.common.Constants;
+import cn.shuzilm.bean.NodeStatusBean;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
-import com.yao.config.Node;
-import com.yao.config.tool.SimpleConfigManager;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**

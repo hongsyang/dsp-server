@@ -1,5 +1,6 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.adview.request;
 
+import cn.shuzilm.bean.lj.request.LJContent;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -18,7 +19,7 @@ public class Site implements Serializable {
     private  String name;//媒体网站名称
     private  String page;//当前页面URL
     private  String ref;//referrer URL
-    private  LJContent content;//视频的内容相关信息。只有视频贴片类型的广告位才会有这个字段，参见site.content对象描述
+    private LJContent content;//视频的内容相关信息。只有视频贴片类型的广告位才会有这个字段，参见site.content对象描述
     private  String[] cat;//广告位内容分类，兼容IAB分类，符合openRTB 2.2表格6.1的分类方法。
 
 }

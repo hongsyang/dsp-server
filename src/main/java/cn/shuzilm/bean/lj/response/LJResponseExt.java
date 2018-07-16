@@ -1,5 +1,7 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.lj.response;
 
+import cn.shuzilm.bean.adview.response.ResponseExt;
+import cn.shuzilm.bean.lj.request.LJEvent;
 import lombok.Data;
 
 /**
@@ -25,6 +27,6 @@ public class LJResponseExt extends ResponseExt {
     private String imp_ext4;//曝光宏值，替换动态内容，该宏对搜狐(sourceid=3)和腾讯(sourceid=7)的Bidresponse返回有效；宏定义是单个宏字段，必须像数组一样按照顺序使用
     private String clk_ext1;//点击宏值，该宏对搜狐(sourceid=3)和腾讯(sourceid=7)的Bidresponse返回有效；宏定义是单个宏字段，必须像数组一样按照顺序使用
     private String clk_ext2;//	点击宏值，该宏对搜狐(sourceid=3)和腾讯(sourceid=7)的Bidresponse返回有效；宏定义是单个宏字段，必须像数组一样按照顺序使用
-    private  LJEvent event; //描述 监测事件或监测触发时间点。目前只对视频贴片广告有效。event object 可以有多个；目前支持event监测事件的视频媒体：优土、爱奇艺、乐视；其他视频媒体暂不支持
+    private LJEvent event; //描述 监测事件或监测触发时间点。目前只对视频贴片广告有效。event object 可以有多个；目前支持event监测事件的视频媒体：优土、爱奇艺、乐视；其他视频媒体暂不支持
 
 }

@@ -1,5 +1,6 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.lj.request;
 
+import cn.shuzilm.bean.adview.request.RequestExt;
 import lombok.Data;
 
 import java.io.Serializable;

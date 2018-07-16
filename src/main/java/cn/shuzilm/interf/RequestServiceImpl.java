@@ -1,6 +1,6 @@
 package cn.shuzilm.interf;
 
-import cn.shuzilm.bean.BidRequestBean;
+import cn.shuzilm.bean.adview.request.BidRequestBean;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;

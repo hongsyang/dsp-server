@@ -1,6 +1,8 @@
 package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.*;
+import cn.shuzilm.bean.CreativeBean;
+import cn.shuzilm.bean.NodeStatusBean;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 

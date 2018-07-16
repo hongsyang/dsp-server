@@ -1,6 +1,6 @@
 package cn.shuzilm.interf;
 
-import cn.shuzilm.bean.BidRequestBean;
+import cn.shuzilm.bean.adview.request.BidRequestBean;
 
 /**
 * @Description:    Bid Request 解析

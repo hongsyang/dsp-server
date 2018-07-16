@@ -1,7 +1,7 @@
 package cn.shuzilm.interf.parser;
 
-import cn.shuzilm.bean.BidRequestBean;
-import cn.shuzilm.bean.DUFlowBean;
+import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.TagBean;
 import cn.shuzilm.interf.RequestService;
 import cn.shuzilm.interf.RequestServiceImpl;

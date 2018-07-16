@@ -1,6 +1,5 @@
 package cn.shuzilm.interf;
 
-import cn.shuzilm.bean.BidRequestBean;
 import cn.shuzilm.interf.parser.JiaheParser;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
