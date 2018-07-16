@@ -3,6 +3,8 @@ package cn.shuzilm.bean.adview.response;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
+
 /**
 * @Description:    SeatBid  0 或多个 SeatBid 对象,表示备选的广告
 * @Author:         houkp
@@ -14,7 +16,7 @@ import java.io.Serializable;
 */
 @Data
 public class SeatBid implements Serializable {
-    private Bid[] bid;//(T) DSP 给的竞价广告对象
+    private List<Bid> bid;//(T) DSP 给的竞价广告对象
     private String seat;//(F) SeatBid 的标识,由 DSP 生成
     private ResponseExt ext;//(F) 扩展对象
 }

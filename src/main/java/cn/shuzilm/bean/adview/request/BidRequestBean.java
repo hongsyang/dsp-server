@@ -4,6 +4,7 @@ package cn.shuzilm.bean.adview.request;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Description: BidRequest Bean
@@ -17,7 +18,7 @@ import java.io.Serializable;
 @Data
 public class BidRequestBean implements Serializable{
     private String id;//(T)   广告请求唯一标识
-    private Impression[] imp;// (T)   曝光对象，一次request可以包含多个imp  ( Array of Impression) 需要广告的描述
+    private List<Impression> imp;// (T)   曝光对象，一次request可以包含多个imp  ( Array of Impression) 需要广告的描述
     private App app;//  (T)  应用对象（内含移动应用的信息）
     private Device device;//  (T)设备信息
     private User user;// (F)用户信息 (F)

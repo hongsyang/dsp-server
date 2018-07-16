@@ -1,6 +1,9 @@
 package cn.shuzilm.interf.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.adview.response.Bid;
+import cn.shuzilm.bean.adview.response.BidResponseBean;
+import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.control.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.interf.RequestService;
@@ -25,7 +28,7 @@ import java.util.Map;
 public class JiaheParser {
 
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(JiaheParser.class);
+
     enum Field {
         work_grid_id,
         work_city_id,
@@ -34,11 +37,13 @@ public class JiaheParser {
         residence_grid_id,
         residence_city_id,
         residence_county_id,
-        residence_province_id
+        residence_province_id;
     };
     private JedisManager jedisManager = null;
-    private static Logger logger = Logger.getLogger("jiahe");
+//    private static Logger logger = Logger.getLogger("jiahe");
     private ArrayList<String> tokenList = null;
+
+    private static final org.slf4j.Logger log = LoggerFactory.getLogger(JiaheParser.class);
 
     public JiaheParser(){
         // 10.169.20.2,6379,123456yiguan,0
@@ -51,18 +56,33 @@ public class JiaheParser {
         }
     }
 
+    /**
+     * 解析	Bid Request 报文
+     * 并返回结果 	Bid Response
+     * @param url
+     * @param body
+     * @param remoteIp
+     * @return
+     */
 	public String parseData(String url, String body , String remoteIp) {
 	    try{
-            //		/api/query?token=xxxxxxxxxxxxxxxx&type=1&uid= ECD797683BA588E8EF87D08991ADD5E3&tagid=10000,10001,10002&ts=14570 0000
             String responseStr = "";
             Map<String,String> map = urlRequest(url);
+            //请求报文BidRequest解析
             RequestService requestService=new RequestServiceImpl();
             BidRequestBean bidRequestBean = requestService.parseRequest(body);
+
+            //TODO 业务逻辑等待开发
+
+            //TODO  输出的标准log  start  未开始
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+            String format = LocalDateTime.now().format(formatter);//时间戳
+
             if (bidRequestBean!=null){
+                DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+                String format1 = LocalDateTime.now().format(formatter);//时间戳
                 DUFlowBean duFlowBean = new DUFlowBean();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-                String format = LocalDateTime.now().format(formatter);
-                duFlowBean.setInfoId(format + bidRequestBean.getId());
+                duFlowBean.setInfoId(format1 + bidRequestBean.getId());
                 duFlowBean.setDid("数盟的标识did，不知道在哪取");
                 duFlowBean.setDeviceId(bidRequestBean.getDevice().getDpidsha1());
                 duFlowBean.setAdUid("广告id，听说张杰在做");
@@ -79,35 +99,65 @@ public class JiaheParser {
                         duFlowBean.getAdvertiserUid(), duFlowBean.getAgencyUid(),
                         duFlowBean.getCreativeUid(), duFlowBean.getProvince(),
                         duFlowBean.getCity(), body);
-
-
             }
+            //TODO  输出的标准log  end
 
-            if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
+         /*   if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
                 return packageResponse("400","Missing required parameters",null);
             }else if(map.containsKey("token")){
                 String token = map.get("token").toLowerCase();
                 if(!tokenList.contains(token)){
                     return packageResponse("401","Requested with invalid token",null);
                 }
-            }
-//            0：cookie 1：IMEI   2：IDFA 3：MAC
+            }*/
+            //请求报文BidResponse返回
+
+            BidResponseBean bidResponseBean= new BidResponseBean();
+            bidResponseBean.setId(bidRequestBean.getId());
+            bidResponseBean.setBidid("Bidid"+format);//BidResponse 的唯一标识,由 DSP生成
+            List<SeatBid> seatBidList =new ArrayList<SeatBid>();//注意第一层数组  DSP出价
+            List<Bid> bidList =new ArrayList<Bid>();//注意第二层数组 针对单次曝光的出价
+
+            SeatBid seatBid =new SeatBid();
+            seatBid.setSeat("seat"+format);//SeatBid 的标识,由 DSP 生成
+
+            Bid bid =new Bid();
+            bid.setAdid("adid"+format);//广告id，对应duFlowBean的AdUid；
+            bid.setImpid(bidRequestBean.getImp().get(0).getId());//从bidRequestBean里面取
+            bid.setWurl("http://dsp.example.com/winnotice?price="+"60000");//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
+            List<Map<Integer, List<String>>>  nurl =new ArrayList();
+            List<String> urls=  new ArrayList<>();
+            urls.add("http://dsp.example1.com");
+            urls.add("http://dsp.example2.com");
+            urls.add("http://dsp.example3.com");
+            urls.add("http://dsp.example4.com");
+            Map nurlMap =new HashMap();
+            nurlMap.put(0,urls);
+            nurl.add(nurlMap);
+            bid.setNurl(nurl);//带延迟的展示汇报，由客户端发送
+            bid.setAdmt(4);//广告类型
+            bid.setPrice(6000);//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+            bid.setCurl(urls);//点击监控地址，客户端逐个发送通知
+            bid.setCrid("crid"+format);//广告物料 ID
+            bid.setAdm("<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /><style\n" +
+                    "type='text/css'>*{padding:0px;margin:0px;} a:link{text-decoration:none;}<\\/style><a\n" +
+                    "href='%%CLICK_URL%%'onclick='%%CLICK_SCRIPT%%'><img width='100%' height='100%'\n" +
+                    "src='http://www.adview.com/image/rtb/6f9f860f77aa2b509b319fee7cb96626_320x50.png'><\\/im\n" +
+                    "g><\\/a>%%IMPTRACK_SCRIPT%%");// 广告物料数据
+            bid.setAdh(50);//广告物料高度
+            bid.setAdw(320);//广告物料宽度
+            bid.setAdct(1);// 广告点击行为类型，参考附录 9
+            bid.setCid("cid"+format);//广告创意 ID，可用于去重
+            //添加到list中
+            bidList.add(bid);
+            seatBid.setBid(bidList);
+            bidResponseBean.setSeatBid(seatBidList);
+
+
+            //下面的代码不知道是干什么的，先注释起来。houkp
             String type = map.get("type");
             String uid = map.get("uid");
             String tagId = map.get("tagid");
-//| did             | string     |       |                                             |
-//| grid_id         | bigint     |       |                                             |
-//| city_id         | bigint     |       |                                             |
-//| county_id       | bigint     |       |                                             |
-//| lng             | double     |       |                                             |
-//| lat             | double     |       |                                             |
-//| type            | string     |       |                                             |
-//| imei            | string     |       |                                             |
-//| mac             | string     |       |                                             |
-//| imei_md5        | string     |       |                                             |
-//| mac_md5         | string     |       |                                             |
-//| city_name       | string     |       |                                             |
-//| county_name     | string     |       |                                             |
             Object obj = jedisManager.getMap(uid);
             if(obj != null){
                 Map<String,String> resultMap = (Map)obj;
@@ -138,14 +188,6 @@ public class JiaheParser {
 	}
 
 	private String packageResponse(String status, String message, List<TagBean> list){
-//        {
-//            "code": 0,
-//                "msg": "",
-//                "result": {
-//                      "10000": 0,
-//                      "10001": 1
-//                  }
-//        }
         JSONObject json = new JSONObject();
         json.put("code",status);
         json.put("msg",message);
