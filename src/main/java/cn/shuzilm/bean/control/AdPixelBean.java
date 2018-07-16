@@ -1,4 +1,4 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.control;
 
 /**
  * 从 PIXEL 服务器获得的 win notice 和 点击请求

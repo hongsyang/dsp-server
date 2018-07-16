@@ -1,4 +1,4 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.control;
 
 /**
  * Created by thunders on 2018/7/11.
