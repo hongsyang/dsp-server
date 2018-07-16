@@ -1,10 +1,6 @@
 package cn.shuzilm.interf.parser;
 
-import cn.shuzilm.bean.adview.request.BidRequestBean;
-import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.bean.TagBean;
-import cn.shuzilm.interf.RequestService;
-import cn.shuzilm.interf.RequestServiceImpl;
+import cn.shuzilm.bean.control.TagBean;
 import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
 import net.sf.json.JSONObject;

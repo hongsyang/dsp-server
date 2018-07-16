@@ -1,6 +1,4 @@
-package cn.shuzilm.bean;
-
-import cn.shuzilm.bean.AdBean;
+package cn.shuzilm.bean.control;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;

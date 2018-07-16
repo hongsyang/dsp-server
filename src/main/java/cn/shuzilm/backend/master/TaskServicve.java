@@ -1,8 +1,8 @@
 package cn.shuzilm.backend.master;
 
-import cn.shuzilm.bean.AdvertiserBean;
-import cn.shuzilm.bean.CreativeBean;
-import cn.shuzilm.bean.WorkNodeBean;
+import cn.shuzilm.bean.control.AdvertiserBean;
+import cn.shuzilm.bean.control.CreativeBean;
+import cn.shuzilm.bean.control.WorkNodeBean;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 

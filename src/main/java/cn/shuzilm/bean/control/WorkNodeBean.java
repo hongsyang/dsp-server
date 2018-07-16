@@ -1,4 +1,4 @@
-package cn.shuzilm.bean;
+package cn.shuzilm.bean.control;
 
 /**
  * 主机 BEAN
