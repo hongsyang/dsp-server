@@ -1,5 +1,6 @@
 package cn.shuzilm.bean.control;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class AdBean implements ICommand  {
     /**
      * 广告限额
      */
-    private float quotaAmount;
+    private BigDecimal quotaAmount;
 
     /**
      * 广告起始时间
@@ -140,11 +141,11 @@ public class AdBean implements ICommand  {
         this.name = name;
     }
 
-    public float getQuotaAmount() {
+    public BigDecimal getQuotaAmount() {
         return quotaAmount;
     }
 
-    public void setQuotaAmount(float quotaAmount) {
+    public void setQuotaAmount(BigDecimal quotaAmount) {
         this.quotaAmount = quotaAmount;
     }
 

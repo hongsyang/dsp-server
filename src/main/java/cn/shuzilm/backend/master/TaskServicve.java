@@ -103,5 +103,17 @@ public class TaskServicve extends Service {
         return null;
     }
 
+    public ResultMap queryAdviserAccountById(String adviserId){
+        String sql = "select * from balance where advertiser_uid = '"+adviserId+"'";
+
+        try {
+            ResultMap cMap =  select.selectSingle(sql);
+            return cMap;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
 }

@@ -1,11 +1,11 @@
 package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.*;
-import cn.shuzilm.bean.CreativeBean;
-import cn.shuzilm.bean.NodeStatusBean;
+import cn.shuzilm.bean.control.*;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,14 +57,16 @@ public class AdFlowControl {
     }
 
     /**
-     * 每隔 5 秒钟从消息中心获得所有节点的当前任务，并与当前两个 MAP 进行更新
+     * 每隔 5 秒钟从消息中心获得所有节点的当前任务，并与当前两个 MAP monitor 进行更新
      */
     public void pullAndUpdateTask(){
         //从各个 RTB 节点，获得最新的 BIDS 个数，并更新至内存监控
         for(WorkNodeBean node : nodeList){
             NodeStatusBean bean = MsgControlCenter.recvBidStatus(node.getName());
             ArrayList<AdBidBean> bidList = bean.getBidList();
+            for(AdBidBean bid : bidList){
 
+            }
         }
 
         //从各个 PIXCEL 节点获得最新 wins 和 金额消费情况， 并更新至内存监控
@@ -78,10 +80,112 @@ public class AdFlowControl {
 
     }
 
+    /**
+     * 小时计数器清零
+     */
+    public void resetHourMonitor(){
+        //清理小时计数器
+        for(String key :mapHourMonitor.keySet()){
+            AdFlowStatus status = mapHourMonitor.get(key);
+            status.setBidNums(0);
+            status.setAmount(0);
+            status.setMoney(0);
+            status.setWinNums(0);
+        }
+    }
 
+
+    /**
+     * 每天初始化一次小时 和 天计数器
+     */
+    public void resetMonitor(){
+        long time = 0;
+        ResultList rl = null;
+        try {
+            rl = taskService.queryAdByUpTime(time);
+            for(ResultMap map : rl){
+                String auid = map.getString("uid");
+                String name = map.getString("name");
+//                int winNumsHour = map.getInteger("cpm_hourly");
+//                int winNumsDaily = map.getInteger("cpm_daily");
+//                BigDecimal money = map.getBigDecimal("quota_amount");
+
+                //初始化天监视器
+                AdFlowStatus status = new AdFlowStatus();
+                status.reset();
+                status.setUid(auid);
+                status.setName(name);
+                mapDailyMonitor.put(auid,status);
+                //初始化小时监视器
+                AdFlowStatus status2 = new AdFlowStatus();
+                status2.reset();
+                status2.setUid(auid);
+                status2.setName(name);
+                mapHourMonitor.put(auid,status2);
+
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 每隔 10 分钟初始化一次天和小时的监视器
+     */
+    public void updateIndicator(){
+        long time = 0;
+        ResultList rl = null;
+        try {
+            rl = taskService.queryAdByUpTime(time);
+
+            for(ResultMap map : rl){
+                String auid = map.getString("uid");
+                String name = map.getString("name");
+                String adviserId = map.getString("advertiser_uid");
+                ResultMap balanceMap = taskService.queryAdviserAccountById(adviserId);
+                BigDecimal balance = balanceMap.getBigDecimal("balance");
+
+                int winNumsHour = map.getInteger("cpm_hourly");
+                int winNumsDaily = map.getInteger("cpm_daily");
+                BigDecimal money = map.getBigDecimal("quota_amount");
+                //如果这个账户的余额比每天或小时的限额还小，则赋予小的值
+                if(balance.floatValue() <= money.floatValue() ){
+                    money = balance;
+                }
+
+                //重新加载 天 参考指标
+                AdFlowStatus status3 = new AdFlowStatus();
+                status3.reset();
+                status3.setUid(auid);
+                status3.setName(name);
+                status3.setAmount(winNumsDaily);
+                status3.setMoney(money.floatValue());
+                mapThresholdDaily.put(auid,status3);
+                //重新加载 小时 参考指标
+                AdFlowStatus status4 = new AdFlowStatus();
+                status4.setUid(auid);
+                status4.setName(name);
+                status4.setAmount(winNumsHour);
+                status4.setMoney(money.floatValue());
+                mapThresholdHour.put(auid,status4);
+
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 统计每一个广告主的消费情况
+     */
     public void statConsumeByAdver(){
 
     }
+
 
     /**
      * 每隔 10 分钟
@@ -110,7 +214,9 @@ public class AdFlowControl {
                 AdvertiserBean adver = taskService.queryAdverByUid(adverUid);
                 ad.setAdvertiser(adver);
                 ad.setName(map.getString("name"));
+                //每天限制
                 ad.setCpmDailyLimit(map.getInteger("cpm_daily"));
+                //每小时限制
                 ad.setCpmHourLimit(map.getInteger("cpm_hourly"));
 
                 String creativeUid = map.getString("creative_uid");
@@ -124,7 +230,8 @@ public class AdFlowControl {
                 ad.setFrqHour(map.getInteger("frq_hourly"));
                 ad.setPrice(map.getFloat("price"));
                 ad.setPriority(map.getInteger("priority"));
-                ad.setQuotaAmount(map.getInteger("quota_amount"));
+                //限额
+                ad.setQuotaAmount(map.getBigDecimal("quota_amount"));
                 ad.setSpeedMode(map.getInteger("speed"));
                 ad.setStartTime(new Date(map.getInteger("s")));
                 String timeScheTxt = map.getString("time");
@@ -162,10 +269,18 @@ public class AdFlowControl {
 
     }
 
+    /**
+     * 达到限度，暂停广告投放
+     * @param adUid
+     */
     public void pauseAd(String adUid){
 
     }
 
+    /**
+     * 达到限度，停止广告投放，并回收资源
+     * @param adUid
+     */
     public void stopAd(String adUid){
 
     }

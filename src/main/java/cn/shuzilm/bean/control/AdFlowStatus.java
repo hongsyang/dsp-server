@@ -12,6 +12,13 @@ public class AdFlowStatus {
     private long winNums;
     private long bidNums;
 
+    public void reset(){
+        money = 0;
+        amount = 0;
+        winNums = 0;
+        bidNums = 0;
+    }
+
     public long getWinNums() {
         return winNums;
     }
