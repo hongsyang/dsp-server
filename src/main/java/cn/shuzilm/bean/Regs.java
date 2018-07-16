@@ -2,6 +2,8 @@ package cn.shuzilm.bean;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @Description: Regs请求中的对象，包含了相关法律、政府或行业法规。
  * @Author: houkp
@@ -12,13 +14,13 @@ import lombok.Data;
  * @Version: 1.0
  */
 @Data
-public class Regs {
+public class Regs implements Serializable {
 
 
     /*    适宜儿童内容标示，美国地区流量必须；
     coppa=0 标示你的应用内容根据
     COPPA 条例不可以被认为是面向儿童
-            (child-direct) coppa=1 标示你的应
+    (child-direct) coppa=1 标示你的应
     用内容根据 COPPA 条例可以被认为是面
     向儿童(child-direct)*/
     private Integer coppa;

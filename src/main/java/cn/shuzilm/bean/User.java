@@ -17,8 +17,8 @@ import java.io.Serializable;
 public class User implements Serializable {
     private String id;//(建议)  用户唯一标识；
     private Integer yob;//(F)出生年，4 位数字
-    private Integer age_low;//(F)  用户唯一标识；
-    private Integer age_high;//(F)  用户唯一标识；
+    private Integer age_low;//(F)  年龄范围，最小年龄
+    private Integer age_high;//(F) 年龄范围，最大年龄
     private String gender;//(F) 性别 “M”-Male “F”-Female “O”-Other“Null”-Unknown
     private String keywords;//(F)  用户兴趣或倾向，以逗号分隔；
     private UserData data;//(F)  额外的用户数据。每个数据对象代表不同的数据源。；
