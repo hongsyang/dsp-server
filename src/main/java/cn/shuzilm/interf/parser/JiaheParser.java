@@ -13,6 +13,7 @@ import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
 import com.alibaba.fastjson.JSON;
 import net.sf.json.JSONObject;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
@@ -41,20 +42,19 @@ public class JiaheParser {
         residence_province_id;
     };
     private JedisManager jedisManager = null;
-//    private static Logger logger = Logger.getLogger("jiahe");
     private ArrayList<String> tokenList = null;
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(JiaheParser.class);
+    private  static  final Logger log = LoggerFactory.getLogger(JiaheParser.class);
 
     public JiaheParser(){
         // 10.169.20.2,6379,123456yiguan,0
-//        String[] jedisConf = Constants.getInstance().getConf("REDIS_CONF").split(",");
-//        jedisManager = new JedisManager(jedisConf[0], Integer.parseInt(jedisConf[1]),jedisConf[3]);
+        String[] jedisConf = Constants.getInstance().getConf("REDIS_CONF").split(",");
+        jedisManager = new JedisManager(jedisConf[0], Integer.parseInt(jedisConf[1]),jedisConf[3]);
         tokenList = new ArrayList<>();
-//        String[] tokenArray = Constants.getInstance().getConf("TOKEN").split(",");
-//        for(String token : tokenArray){
-//            tokenList.add(token);
-//        }
+        String[] tokenArray = Constants.getInstance().getConf("TOKEN").split(",");
+        for(String token : tokenArray){
+            tokenList.add(token);
+        }
     }
 
     /**
@@ -126,7 +126,6 @@ public class JiaheParser {
             Impression impression = imp.get(0);
             bid.setImpid(impression.getId());//从bidRequestBean里面取
             bid.setWurl("http://dsp.example.com/winnotice?price="+"60000");//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
-            List<Map<Integer, List<String>>>  nurl =new ArrayList();
             List<String> urls=  new ArrayList<>();
             urls.add("http://dsp.example1.com");
             urls.add("http://dsp.example2.com");
@@ -134,8 +133,7 @@ public class JiaheParser {
             urls.add("http://dsp.example4.com");
             Map nurlMap =new HashMap();
             nurlMap.put(0,urls);
-            nurl.add(nurlMap);
-            bid.setNurl(nurl);//带延迟的展示汇报，由客户端发送
+            bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送
             bid.setAdmt(4);//广告类型
             bid.setPrice(6000);//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
             bid.setCurl(urls);//点击监控地址，客户端逐个发送通知

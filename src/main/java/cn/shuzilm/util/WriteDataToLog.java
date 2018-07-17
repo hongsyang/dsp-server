@@ -15,12 +15,12 @@ public class WriteDataToLog {
 	static Logger logger_OpInfo = Logger.getLogger("OpInfo");
 	static Logger logger_WebInfo = Logger.getLogger("WebInfo");
 	static Logger logger_apps = Logger.getLogger("apps");
-	
+
 	//******** 应用1.0 *******
 	static Logger logger_actionDataInfo = Logger.getLogger("actionDataInfo");
 	static Logger logger_basalDataInfo = Logger.getLogger("basalDataInfo");
-	
-	
+
+
 	//******* 设备2.0 *********
 	static Logger logger_DevInfo2 = Logger.getLogger("DevInfo2");
 	static Logger logger_NPLInfo = Logger.getLogger("NPLInfo");
@@ -28,15 +28,15 @@ public class WriteDataToLog {
 	static Logger logger_OCInfo = Logger.getLogger("OCInfo");
 	static Logger logger_WebInfo2 = Logger.getLogger("WebInfo2");
 	static Logger logger_InstalledAppInfo = Logger.getLogger("InstalledAppInfo");
-	
-	
+
+
 	//******* 应用2.0 *********
 	static Logger logger_appDevInfo = Logger.getLogger("appDevInfo");
 	static Logger logger_appNInfo = Logger.getLogger("appNInfo");
 	static Logger logger_appAInfo = Logger.getLogger("appAInfo");
 	static Logger logger_appPInfo = Logger.getLogger("appPInfo");
 	static Logger logger_appEInfo = Logger.getLogger("appEInfo");
-	
+
 	/**
 	 * 查看json中的key有没有
 	 * @param strarry
@@ -47,7 +47,7 @@ public class WriteDataToLog {
 		String str = "";
 		if(json.containsKey("UserId")){
 			for(int j = 0; j<strarry.length; j++){
-				
+
 				try {
 					if(j == strarry.length-1){
 						str = str+json.getString(strarry[j]);
@@ -61,18 +61,18 @@ public class WriteDataToLog {
 						str = str+"null"+"\t";
 					}
 				}
-				
+
 			}
 		}
-		
+
 //		System.out.println("str : "+str);
 		return str;
 	}
-	
+
 	private String checkJson_2_0_1(String[] strarry, JSONObject json){
 		String str = "";
 		for(int j = 0; j<strarry.length; j++){
-			
+
 			try {
 				if(j == strarry.length-1){
 					str = str+json.getString(strarry[j]);
@@ -86,14 +86,14 @@ public class WriteDataToLog {
 					str = str+"null"+"\t";
 				}
 			}
-			
+
 		}
-		
+
 //		System.out.println("str : "+str);
 		return str;
 	}
-	
-	
+
+
 	/**
 	 * 设备1.0
 	 * @param
@@ -128,26 +128,26 @@ public class WriteDataToLog {
 		if(jsonObject.containsKey("apps")){
 			jsonArrayApps = jsonObject.getJSONArray("apps");//APP_INFO --> app_info
 		}
-		
-		
+
+
 		if(jsonArrayDevInfo != null){
-			//DevInfo  checkdata表 --> ks_or_user.checkdata 
+			//DevInfo  checkdata表 --> ks_or_user.checkdata
 			for(int i = 0 ; i<jsonArrayDevInfo.size(); i++){
-				
+
 				JSONObject json = (JSONObject) jsonArrayDevInfo.get(i);
 				json.put("userip", jsonUserIp.getString("userip"));
-				
-				
+
+
 				String[] strarry = {"UserId","Device_Model","Network","System_Model","Location","Screen_Size",
 						"AgentName","AgentID","AgentChannel","SDKVersion","userip","Number","LBS"};
 				String logStr = checkJson(strarry, json);
 				logger_DevInfo.info(logStr);
-				
-				
+
+
 			}
 		}
-		
-		
+
+
 		//key_appinfo --stallpackageName
 		if(jsonArrayAppInfo != null){
 			//AppInfo 用户安装卸载数据 --> ks_or_user.users_install_unload_data  ----ok
@@ -158,12 +158,12 @@ public class WriteDataToLog {
 									//11111		"null"	  2015-04-13 16:54:49	2.11.4	安装	  com.achievo.vipshop
 				String logStr = checkJson(strarry,json);
 				logger_AppInfo.info(logStr);
-				
-				
+
+
 			}
 		}
-		
-		
+
+
 		//r_app_url -- Key_opinfo
 		if(jsonArrayOpInfo != null){
 			//OpInfo temp_MB_Fact_Action_2 --> ks_or_user.mb_fact_action
@@ -172,12 +172,12 @@ public class WriteDataToLog {
 				String[] strarry = {"UserId","Pro_App_Name","OpenTime","CloseTime_1","App_Version_1","Key_opinfo"};
 				String logStr = checkJson(strarry, json);
 				logger_OpInfo.info(logStr);
-				
-				
+
+
 			}
 		}
-		
-		
+
+
 		if(jsonArrayWebInfo != null){
 			//WebInfo 浏览器上网数据 --> ks_or_user.browser_online_data -----ok
 			for(int i = 0 ; i<jsonArrayWebInfo.size(); i++){
@@ -185,37 +185,37 @@ public class WriteDataToLog {
 				String[] strarry = {"UserId","Browser_Model","URL","OpenTime_1","CloseTime"};
 				String logStr = checkJson(strarry, json);
 				logger_WebInfo.info(logStr);
-				
+
 			}
 		}
-		
-		
+
+
 		if(jsonArrayApps != null){
 			//apps APP_INFO --> app_info
 			for(int i = 0 ; i<jsonArrayApps.size(); i++){
-				
+
 				String apps_userid = jsonObject.get("UserId").toString();//APP_INFO UserId
 				JSONObject json = (JSONObject) jsonArrayApps.get(i);
 				json.put("UserId", apps_userid);
-				
+
 				String[] strarry = {"UserId","app_name","package_name","version_name","version_code"};
 				String logStr = checkJson(strarry, json);
 				logger_apps.info(logStr);
-				
+
 			}
 		}
-		
-		
-		
+
+
+
 	}
-	
-	
-	
+
+
+
 	public String nowDate() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String date = sdf.format(new Date());
-		
+
 		return date;
 	}
-	
+
 }
