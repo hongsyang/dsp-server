@@ -4,17 +4,15 @@ package cn.shuzilm.bean.control;
  * 流量控制用的 BEAN
  * Created by thunders on 2018/7/11.
  */
-public class AdFlowStatus {
+public class AdFlowStatus implements ICommand{
     private String uid;
     private String name;
     private float money;
-    private long amount;
     private long winNums;
     private long bidNums;
 
     public void reset(){
         money = 0;
-        amount = 0;
         winNums = 0;
         bidNums = 0;
     }
@@ -26,6 +24,11 @@ public class AdFlowStatus {
     public void setWinNums(long winNums) {
         this.winNums = winNums;
     }
+
+    public void setWinNumsByThousand(long winNums) {
+        this.winNums = winNums * 1000;
+    }
+
 
     public long getBidNums() {
         return bidNums;
@@ -59,11 +62,10 @@ public class AdFlowStatus {
         this.money = money;
     }
 
-    public long getAmount() {
-        return amount;
-    }
 
-    public void setAmount(long amount) {
-        this.amount = amount;
+    @Override
+    public String toString() {
+        return "任务流监控对象：" + this.getUid() + "\t" + this.getName()  + "\tbid: " + this.getBidNums() + "\twin: " + this.getWinNums() + "\tmoney: " +
+                this.getMoney();
     }
 }

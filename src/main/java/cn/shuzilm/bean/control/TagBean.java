@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by thunders on 2018/6/4.
  */
-public class TagBean {
+public class TagBean implements ICommand{
     String tagName = null;
     String tagId = null;
     String tagValue = null;

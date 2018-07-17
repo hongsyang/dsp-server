@@ -20,8 +20,12 @@ public class TaskServicve extends Service {
      * @throws java.sql.SQLException
      */
     public ResultList queryAdByUpTime(long startTime) throws SQLException {
-
-        String sql = "select * from ad where updated_at >=  " + startTime;
+        long now = System.currentTimeMillis();
+        Object[] arr = new Object[3];
+        arr[0] = startTime;
+        arr[1] = now;
+        arr[2] = now;
+        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ?";
         return select.select(sql);
     }
 

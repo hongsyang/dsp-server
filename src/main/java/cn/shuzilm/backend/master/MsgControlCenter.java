@@ -63,31 +63,21 @@ public class MsgControlCenter {
 
 
 
-
-    public static List<AdPixelBean> listRecvNodeStatus(){
-        List<AdPixelBean> list = new ArrayList<AdPixelBean>();
-        for(WorkNodeBean node : AdFlowControl.nodeList){
-            AdPixelBean bean = recvPixelStatus(node.getName());
-            list.add(bean);
-        }
-        return list;
-    }
-
     /**
-     * 主控接收从转码机发来的 机器状态 报告
+     *  主控节点： 接收 pixel 状态报告
      * @param nodeId
      * @return
      */
-    public static AdPixelBean recvPixelStatus(String nodeId){
+    public static NodeStatusBean recvPixelStatus(String nodeId){
         Object obj =  JedisQueueManager.getElementFromQueue(nodeId + PIXEL_STATUS);
         if(obj!=null)
-            return (AdPixelBean)obj;
+            return (NodeStatusBean)obj;
         else
             return null;
     }
 
     /**
-     * 转码机定时将状态报告发送至 主控机
+     * PIXEL 节点  发送 pixel 状态报告
      * @param nodeId
      * @param bean
      * @return
@@ -99,7 +89,7 @@ public class MsgControlCenter {
 
 
     /**
-     * 主控接收从转码机发来的 机器状态 报告
+     * 主控机 ： 接收 bid 报告
      * @param nodeId
      * @return
      */
@@ -112,7 +102,7 @@ public class MsgControlCenter {
     }
 
     /**
-     * 转码机定时将状态报告发送至 主控机
+     * RTB 节点：发送 bid 报告
      * @param nodeId
      * @param bean
      * @return

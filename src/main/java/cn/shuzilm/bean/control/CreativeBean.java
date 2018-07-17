@@ -4,7 +4,7 @@ package cn.shuzilm.bean.control;
  * Created by thunders on 2018/7/10.
  * 关联创意
  */
-public class CreativeBean {
+public class CreativeBean implements ICommand {
     private String uid;
     private String name;
     /**
