@@ -2,7 +2,8 @@ package cn.shuzilm.util;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,32 +11,32 @@ import java.util.Date;
 public class WriteDataToLog {
 
 	//******** 设备1.0 *******
-	static Logger logger_DevInfo = Logger.getLogger("DevInfo");
-	static Logger logger_AppInfo = Logger.getLogger("AppInfo");
-	static Logger logger_OpInfo = Logger.getLogger("OpInfo");
-	static Logger logger_WebInfo = Logger.getLogger("WebInfo");
-	static Logger logger_apps = Logger.getLogger("apps");
+	static Logger logger_DevInfo = LoggerFactory.getLogger("DevInfo");
+	static Logger logger_AppInfo = LoggerFactory.getLogger("AppInfo");
+	static Logger logger_OpInfo = LoggerFactory.getLogger("OpInfo");
+	static Logger logger_WebInfo = LoggerFactory.getLogger("WebInfo");
+	static Logger logger_apps = LoggerFactory.getLogger("apps");
 
 	//******** 应用1.0 *******
-	static Logger logger_actionDataInfo = Logger.getLogger("actionDataInfo");
-	static Logger logger_basalDataInfo = Logger.getLogger("basalDataInfo");
+	static Logger logger_actionDataInfo = LoggerFactory.getLogger("actionDataInfo");
+	static Logger logger_basalDataInfo = LoggerFactory.getLogger("basalDataInfo");
 
 
 	//******* 设备2.0 *********
-	static Logger logger_DevInfo2 = Logger.getLogger("DevInfo2");
-	static Logger logger_NPLInfo = Logger.getLogger("NPLInfo");
-	static Logger logger_IUUInfo = Logger.getLogger("IUUInfo");
-	static Logger logger_OCInfo = Logger.getLogger("OCInfo");
-	static Logger logger_WebInfo2 = Logger.getLogger("WebInfo2");
-	static Logger logger_InstalledAppInfo = Logger.getLogger("InstalledAppInfo");
+	static Logger logger_DevInfo2 = LoggerFactory.getLogger("DevInfo2");
+	static Logger logger_NPLInfo = LoggerFactory.getLogger("NPLInfo");
+	static Logger logger_IUUInfo = LoggerFactory.getLogger("IUUInfo");
+	static Logger logger_OCInfo = LoggerFactory.getLogger("OCInfo");
+	static Logger logger_WebInfo2 = LoggerFactory.getLogger("WebInfo2");
+	static Logger logger_InstalledAppInfo = LoggerFactory.getLogger("InstalledAppInfo");
 
 
 	//******* 应用2.0 *********
-	static Logger logger_appDevInfo = Logger.getLogger("appDevInfo");
-	static Logger logger_appNInfo = Logger.getLogger("appNInfo");
-	static Logger logger_appAInfo = Logger.getLogger("appAInfo");
-	static Logger logger_appPInfo = Logger.getLogger("appPInfo");
-	static Logger logger_appEInfo = Logger.getLogger("appEInfo");
+	static Logger logger_appDevInfo = LoggerFactory.getLogger("appDevInfo");
+	static Logger logger_appNInfo = LoggerFactory.getLogger("appNInfo");
+	static Logger logger_appAInfo = LoggerFactory.getLogger("appAInfo");
+	static Logger logger_appPInfo = LoggerFactory.getLogger("appPInfo");
+	static Logger logger_appEInfo = LoggerFactory.getLogger("appEInfo");
 
 	/**
 	 * 查看json中的key有没有
