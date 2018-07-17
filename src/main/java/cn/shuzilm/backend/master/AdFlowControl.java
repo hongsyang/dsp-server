@@ -116,15 +116,31 @@ public class AdFlowControl {
         for(String auid : mapThresholdHour.keySet()){
             AdFlowStatus threshold = mapThresholdHour.get(auid);
             AdFlowStatus monitor = mapMonitorHour.get(auid);
+            //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
             if(threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()){
-                logger.info(monitor.toString() + "\t #### CPM 超限，参考指标：" +threshold.getWinNums()+ " ###" );
+                String reason = "#### CPM 超限，参考指标：" +threshold.getWinNums()+ " ###";
+                pauseAd(auid,reason,true);
+                logger.info(monitor.toString() + "\t" + reason );
             }
             if(threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()){
+                //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                 logger.info(monitor.toString() + "\t #### 金额 超限，参考指标：" +threshold.getMoney()+ " ###" );
             }
-
         }
-        //根据返回的 winnotice 个数 和金额，重新调节和下发需要提供的 BIDS 的个数
+
+        //跟每日监控作比对
+        for(String auid : mapThresholdDaily.keySet()){
+            AdFlowStatus threshold = mapThresholdDaily.get(auid);
+            AdFlowStatus monitor = mapMonitorDaily.get(auid);
+            if(threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()){
+                //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
+                String reason = "#### 每日金额 超限，参考指标：" +threshold.getMoney()+ " ###";
+                stopAd(auid,reason,false);
+                logger.info(monitor.toString() + "\t" + reason );
+            }
+        }
+
+        //根据返回的 winnotice 个数 和金额，重新调节和下发需要提供的 bids 的个数
 
     }
 
@@ -339,30 +355,41 @@ public class AdFlowControl {
      * @param bean
      */
     private void pushTaskSingleNode(String nodeName,TaskBean bean){
-        MsgControlCenter.sendCommand(nodeName,bean, Priority.NORM_PRIORITY);
+        MsgControlCenter.sendTask(nodeName,bean, Priority.NORM_PRIORITY);
     }
 
 
     /**
-     * 达到限度，暂停广告投放
      * @param adUid
+     * @param reason
+     * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
-    public void pauseAd(String nodeName,String adUid,String reason){
-        TaskBean task = mapAd.get(adUid);
-        task.setCommandMemo(reason);
-        task.setCommand(TaskBean.TASK_STATE_PAUSED);
-        pushTaskSingleNode(nodeName,task);
+    public void pauseAd(String adUid,String reason,boolean isHourOrAll){
+        for(WorkNodeBean node :nodeList){
+            TaskBean task = mapAd.get(adUid);
+            task.setCommandMemo(reason);
+            task.setCommand(TaskBean.TASK_STATE_PAUSED);
+            task.setScope(isHourOrAll?0:1);
+            pushTaskSingleNode(node.getName(),task);
+        }
+
     }
 
     /**
-     * 达到限度，停止广告投放，并回收资源
+     *
      * @param adUid
+     * @param reason
+     * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
-    public void stopAd(String nodeName,String adUid,String reason){
-        TaskBean task = mapAd.get(adUid);
-        task.setCommandMemo(reason);
-        task.setCommand(TaskBean.TASK_STATE_STOPED);
-        pushTaskSingleNode(nodeName,task);
+    public void stopAd(String adUid,String reason,boolean isHourOrAll){
+        for(WorkNodeBean node :nodeList){
+            TaskBean task = mapAd.get(adUid);
+            task.setCommandMemo(reason);
+            task.setCommand(TaskBean.TASK_STATE_STOPED);
+            task.setScope(isHourOrAll?0:1);
+            pushTaskSingleNode(node.getName(),task);
+        }
+
     }
 
 }

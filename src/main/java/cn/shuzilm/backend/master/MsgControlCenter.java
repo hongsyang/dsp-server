@@ -1,10 +1,7 @@
 package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.*;
-import cn.shuzilm.bean.control.AdPixelBean;
-import cn.shuzilm.bean.control.ICommand;
-import cn.shuzilm.bean.control.NodeStatusBean;
-import cn.shuzilm.bean.control.WorkNodeBean;
+import cn.shuzilm.bean.control.*;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 
@@ -46,6 +43,19 @@ public class MsgControlCenter {
      */
     public static boolean sendCommand(String nodeName,ICommand command,Priority priority){
         return JedisQueueManager.putElementToQueue(nodeName + DOWN,command,priority);
+    }
+
+
+    public static boolean sendTask(String nodeName, TaskBean bean, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + DOWN,bean,priority);
+    }
+
+    public static TaskBean recvTask(String nodeName){
+        Object obj = JedisQueueManager.getElementFromQueue(nodeName + DOWN);
+        if(obj == null)
+            return null;
+        else
+            return (TaskBean)obj;
     }
 
     /**

@@ -16,6 +16,11 @@ public class TaskBean implements ICommand {
      */
     private int command;
     /**
+     * 作用域，是指当前小时，还是全部
+     * 0 当前小时 1 全部
+     */
+    private int scope;
+    /**
      * 操作说明，一般指原因
      */
     private String commandMemo;
@@ -55,6 +60,14 @@ public class TaskBean implements ICommand {
 		stateMap.put(TASK_STATE_FINISHED, "投放完成");
 
 	}
+
+    public int getScope() {
+        return scope;
+    }
+
+    public void setScope(int scope) {
+        this.scope = scope;
+    }
 
     public String getCommandMemo() {
         return commandMemo;
