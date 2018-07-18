@@ -1,5 +1,6 @@
 package cn.shuzilm.interf.parser;
 
+import ch.qos.logback.classic.sift.MDCBasedDiscriminator;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.adview.response.Bid;
@@ -15,6 +16,7 @@ import com.alibaba.fastjson.JSON;
 import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -46,7 +48,7 @@ public class JiaheParser {
     private JedisManager jedisManager = null;
     private ArrayList<String> tokenList = null;
 
-    private static final Logger log = LoggerFactory.getLogger(JiaheParser.class);
+    private static final Logger log = LoggerFactory.getLogger("ceshi");
 
     public JiaheParser() {
         // 10.169.20.2,6379,123456yiguan,0
@@ -70,6 +72,12 @@ public class JiaheParser {
      */
     public String parseData(String url, String body, String remoteIp) {
         try {
+            log.debug("Application started");
+            MDC.put("sift","interface");
+            log.debug("interface says hello");
+            MDC.put("sift","rtb");
+            log.debug("rtb says hello");
+//            MDC.put("interface",null);
             String responseStr = "";
             Map<String, String> map = urlRequest(url);
             //请求报文BidRequest解析
@@ -154,7 +162,7 @@ public class JiaheParser {
             bidResponseBean.setSeatBid(seatBidList);
             Object o = JSON.toJSON(bidResponseBean);
             responseStr = o.toString();
-            System.out.println(responseStr);
+//            System.out.println(responseStr);
 
             //下面的代码不知道是干什么的，先注释起来。houkp
 /*            String type = map.get("type");
