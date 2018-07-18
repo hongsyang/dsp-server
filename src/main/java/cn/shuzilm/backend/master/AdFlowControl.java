@@ -35,6 +35,16 @@ public class AdFlowControl {
      * 广告资源管理
      */
     private static HashMap<String,TaskBean> mapAd = null;
+
+    /**
+     * 广告组与广告的对应关系
+     */
+    private static HashMap<String,GroupAdBean> mapAdGroup = null;
+
+    /**
+     * 广告永久的指标监控
+     */
+    private static HashMap<String,AdFlowStatus> mapMonitorTotal = null;
     /**
      * 广告每天的指标监控
      */
@@ -65,9 +75,28 @@ public class AdFlowControl {
         adverConsumeMapCurr = new HashMap<>();
         mapThresholdDaily = new HashMap<>();
         mapThresholdHour = new HashMap<>();
+        mapAdGroup = new HashMap<>();
+        mapMonitorTotal = new HashMap<>();
 //        adviserMap = new HashMap<>();
     }
 
+    public void trigger(int type){
+        // 5 s 触发
+        pullAndUpdateTask();
+        // 10 min 触发
+        loadAdInterval(true);
+        //每小时触发
+        resetHourMonitor();
+        //每天触发
+        resetDayMonitor();
+
+    }
+
+    /**
+     * 将 RTB 数量更新到天 和小时监视器中
+     * @param adUid
+     * @param addBidNums
+     */
     private void updateBids(String adUid,long addBidNums){
         AdFlowStatus statusHour =  mapMonitorHour.get(adUid);
         statusHour.setBidNums(statusHour.getBidNums() + addBidNums);
@@ -75,14 +104,27 @@ public class AdFlowControl {
         statusDaily.setBidNums(statusDaily.getBidNums() + addBidNums);
     }
 
+    /**
+     * 将 曝光和产生的费用更新到 天和小时监视器中
+     * @param adUid
+     * @param addWinNoticeNums
+     * @param addMoney
+     */
     private void updatePixel(String adUid,long addWinNoticeNums,float addMoney){
         AdFlowStatus statusHour = mapMonitorHour.get(adUid);
         statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
         statusHour.setMoney(statusHour.getMoney() + addMoney);
+
         AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
         statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
         statusDaily.setMoney(statusDaily.getMoney() + addMoney);
+
+        AdFlowStatus statusAll = mapMonitorTotal.get(adUid);
+        statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
+        statusAll.setMoney(statusAll.getMoney() + addMoney);
     }
+
+
 
     /**
      * 每隔 5 秒钟从消息中心获得所有节点的当前任务，并与当前两个 MAP monitor 进行更新
@@ -96,6 +138,8 @@ public class AdFlowControl {
         //从各个 RTB 节点，获得最新的 bids 个数，并更新至内存监控
         for(WorkNodeBean node : nodeList){
             NodeStatusBean bean = MsgControlCenter.recvBidStatus(node.getName());
+            if(bean == null)
+                continue;
             ArrayList<AdBidBean> bidList = bean.getBidList();
             for(AdBidBean bid : bidList){
                 updateBids(bid.getUid(),bid.getBidNums());
@@ -105,6 +149,8 @@ public class AdFlowControl {
         //从各个 PIXCEL 节点获得最新 wins 和 金额消费情况， 并更新至内存监控
         for(WorkNodeBean node : nodeList){
             NodeStatusBean bean = MsgControlCenter.recvPixelStatus(node.getName());
+            if(bean == null)
+                continue;
             ArrayList<AdPixelBean> pixelList = bean.getPixelList();
             for(AdPixelBean pix : pixelList){
                 updatePixel(pix.getAdUid(),pix.getWinNoticeNums(),pix.getMoney());
@@ -124,10 +170,16 @@ public class AdFlowControl {
             }
             if(threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()){
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
-                logger.info(monitor.toString() + "\t #### 金额 超限，参考指标：" +threshold.getMoney()+ " ###" );
+                String reason = "#### 金额 超限，参考指标：" +threshold.getMoney()+ " ###" ;
+                pauseAd(auid,reason,true);
+                logger.info(monitor.toString() + "\t" +  reason);
+
             }
         }
 
+        //账户的余额和每日的限额都在这里做适配，以最低的为准，
+        //其中来自于三个地方： 2 个是 balance 表的 balance 字段 和 quota_amount 字段 ，
+        // 还有一个地方来自于 广告组限额
         //跟每日监控作比对
         for(String auid : mapThresholdDaily.keySet()){
             AdFlowStatus threshold = mapThresholdDaily.get(auid);
@@ -161,7 +213,7 @@ public class AdFlowControl {
     /**
      * 每天初始化一次小时 和 天计数器
      */
-    public void resetMonitor(){
+    public void resetDayMonitor(){
         long time = 0;
         ResultList rl = null;
         try {
@@ -207,14 +259,21 @@ public class AdFlowControl {
                 String adviserId = map.getString("advertiser_uid");
                 ResultMap balanceMap = taskService.queryAdviserAccountById(adviserId);
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
+                BigDecimal quotaMoneyPerDay = balanceMap.getBigDecimal("quota_amount");
 
                 int winNumsHour = map.getInteger("cpm_hourly");
                 int winNumsDaily = map.getInteger("cpm_daily");
                 BigDecimal money = map.getBigDecimal("quota_amount");
+
+                if(quotaMoneyPerDay.floatValue()!= 0 && quotaMoneyPerDay.floatValue()<= money.floatValue()){
+                    money = quotaMoneyPerDay;
+                }
                 //如果这个账户的余额比每天或小时的限额还小，则赋予小的值
-                if(balance.floatValue() <= money.floatValue() ){
+                if(balance.floatValue()!=0 && balance.floatValue() <= money.floatValue() ){
                     money = balance;
                 }
+
+
 
                 //重新加载 天 参考指标
                 AdFlowStatus status3 = new AdFlowStatus();
@@ -259,10 +318,14 @@ public class AdFlowControl {
             //加载 主机节点信息
             nodeList = taskService.getWorkNodeAll();
 
-
             //加载最新广告信息
             if(isInitial){
                 timeBefore = 0;
+            }
+            //加载广告组信息
+            ArrayList<GroupAdBean> groupList = taskService.queryAdGroupAll(timeBefore);
+            for(GroupAdBean group : groupList){
+                mapAdGroup.put(group.getGroupId(),group);
             }
             ResultList rl = taskService.queryAdByUpTime(timeBefore);
             //更新监视器阀值信息
@@ -271,6 +334,8 @@ public class AdFlowControl {
             for(ResultMap map : rl){
                 AdBean ad = new AdBean();
                 ad.setAdUid(map.getString("uid"));
+                String groupId = map.getString("group_uid");
+                ad.setGroupId(groupId);
                 String adverUid = map.getString("advertiser_uid");
 
                 //根据 广告主ID 获得 广告主
@@ -330,7 +395,7 @@ public class AdFlowControl {
      * 每隔 10 分钟，从数据库中获得最新变更的广告信息，并进行任务拆解， 同时 通过消息中心将任务下发到每一个节点中
      * 其中包括各种对广告的控制，包括开启广告，暂停广告，终止广告等
      */
-    public void dispatchTask(){
+    private void dispatchTask(){
         int nodeNums = nodeList.size();
         //遍历所有的广告
         for(String adUid : mapAd.keySet()){
@@ -340,7 +405,7 @@ public class AdFlowControl {
             //给每一个节点分配自己的 曝光 额度
             task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
             task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
-            task.setCommand(TaskBean.TASK_STATE_READY);
+            task.setCommand(TaskBean.COMMAND_START);
 
             for(WorkNodeBean node : nodeList){
                 pushTaskSingleNode(node.getName(),task);
@@ -368,8 +433,8 @@ public class AdFlowControl {
         for(WorkNodeBean node :nodeList){
             TaskBean task = mapAd.get(adUid);
             task.setCommandMemo(reason);
-            task.setCommand(TaskBean.TASK_STATE_PAUSED);
-            task.setScope(isHourOrAll?0:1);
+            task.setCommand(TaskBean.COMMAND_PAUSE);
+            task.setScope(isHourOrAll?TaskBean.SCOPE_HOUR:TaskBean.SCOPE_ALL);
             pushTaskSingleNode(node.getName(),task);
         }
 
@@ -385,8 +450,8 @@ public class AdFlowControl {
         for(WorkNodeBean node :nodeList){
             TaskBean task = mapAd.get(adUid);
             task.setCommandMemo(reason);
-            task.setCommand(TaskBean.TASK_STATE_STOPED);
-            task.setScope(isHourOrAll?0:1);
+            task.setCommand(TaskBean.COMMAND_STOP);
+            task.setScope(isHourOrAll?TaskBean.SCOPE_HOUR:TaskBean.SCOPE_ALL);
             pushTaskSingleNode(node.getName(),task);
         }
 

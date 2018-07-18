@@ -34,20 +34,23 @@ public class TaskBean implements ICommand {
     private final String taskId; // 任务编号
 
 
-    private static final int COMMAND_START = 0;
-    private static final int COMMAND_UPDATE = 1;
-    private static final int COMMAND_PAUSE = 2;
-    private static final int COMMAND_STOP = 3;
-    private static final int COMMAND_RECOVERY = 4;
+    public static final int COMMAND_START = 0;
+    public static final int COMMAND_UPDATE = 1;
+    public static final int COMMAND_PAUSE = 2;
+    public static final int COMMAND_STOP = 3;
+    public static final int COMMAND_RECOVERY = 4;
+
+    public static final int SCOPE_HOUR = 0;
+    public static final int SCOPE_ALL = 1;
 
 
 
 	/** 等待初始化 */
-	public static final int TASK_STATE_READY = 0;
-    public static final int TASK_STATE_RUNNING = 1;
-    public static final int TASK_STATE_FINISHED = 2;
-    public static final int TASK_STATE_PAUSED = 3;
-    public static final int TASK_STATE_STOPED = 4;
+	private static final int TASK_STATE_READY = 0;
+    private static final int TASK_STATE_RUNNING = 1;
+    private static final int TASK_STATE_FINISHED = 2;
+    private static final int TASK_STATE_PAUSED = 3;
+    private static final int TASK_STATE_STOPED = 4;
 
 	public static final Map<Integer, String> stateMap = new LinkedHashMap<Integer, String>();
 

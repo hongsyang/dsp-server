@@ -33,6 +33,7 @@ public class AdBean implements ICommand  {
      */
     private AdvertiserBean advertiser;
 
+    private String groupId;
 
 
     /**
@@ -108,6 +109,14 @@ public class AdBean implements ICommand  {
      * 当前时间戳
      */
     private long timestamp;
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
 
     public float getExposureRate() {
         return exposureRate;

@@ -5,6 +5,7 @@ import com.yao.util.pool.NewObjectException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class Update {
 
@@ -36,5 +37,30 @@ public class Update {
 			DBPool.getInstance().releaseConnection(con);
 		}
 	}
+
+	/** 执行一批SQL语句 */
+	public static int[] updateInsertBatch( String[] sqls) throws Exception {
+		Connection con = DBPool.getInstance().getConnection();
+		if (sqls == null) {
+			return null;
+		}
+		Statement sm = null;
+		try {
+			sm = con.createStatement();
+			for (int i = 0; i < sqls.length; i++) {
+				sm.addBatch(sqls[i]);
+				// 将所有的SQL语句添加到Statement中
+			}
+			// 一次执行多条SQL语句
+			return sm.executeBatch();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			sm.close();
+			DBPool.getInstance().releaseConnection(con);
+		}
+		return null;
+	}
+
 	
 }
