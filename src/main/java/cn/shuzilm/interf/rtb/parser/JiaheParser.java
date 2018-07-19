@@ -159,7 +159,7 @@ public class JiaheParser {
             bidResponseBean.setSeatBid(seatBidList);
             Object o = JSON.toJSON(bidResponseBean);
             responseStr = o.toString();
-//            System.out.println(responseStr);
+            log.debug("bidResponseBean:{}",responseStr);
 
             //下面的代码不知道是干什么的，先注释起来。houkp
 /*            String type = map.get("type");

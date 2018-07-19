@@ -1,6 +1,6 @@
 package cn.shuzilm.interf.pixcel;
 
-import cn.shuzilm.interf.pixcel.parser.ClickParser;
+import cn.shuzilm.interf.pixcel.parser.RequestParser;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
@@ -21,12 +21,11 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class PixcelHandler extends SimpleChannelUpstreamHandler {
 //	private WriteDataToLog wdt;
-    ClickParser parser = null;
+	RequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
 
 	public PixcelHandler() {
-//		wdt = new WriteDataToLog();
-        parser = new ClickParser();
+        parser = new RequestParser();
         System.out.println(Thread.currentThread().getName() + " parser 初始化成功。。。");
     }
 

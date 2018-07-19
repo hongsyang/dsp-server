@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,20 +23,22 @@ public class RequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
 
-    private ArrayList<String> tokenList = null;
 
     public String parseData(String url, String body, String remoteIp) {
+        String responseStr="没有对应的解析器";
         log.debug("url:{},body:{}", url, body);
-        Map<String, String> map = UrlParserUtil.urlRequest(url);
-        if (!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")) {
-            return UrlParserUtil.packageResponse("400", "Missing required parameters", null);
-        } else if (map.containsKey("token")) {
-            String token = map.get("token").toLowerCase();
-            if (!tokenList.contains(token)) {
-                return UrlParserUtil.packageResponse("401", "Requested with invalid token", null);
+        List<String> urlList = UrlParserUtil.urlParser(url);
+        for (String urls : urlList) {
+            if (urls.equals("exp")){
+            ParameterParser parameterParser =ParameterParserFactory.getParameterParser("cn.shuzilm.interf.pixcel.parser.ExpParser");
+                responseStr = parameterParser.parseUrl(url);
+            }else if (urls.equals("click")){
+                ParameterParser parameterParser =ParameterParserFactory.getParameterParser("cn.shuzilm.interf.pixcel.parser.ClickParser");
+                responseStr = parameterParser.parseUrl(url);
             }
         }
-        return url;
+
+        return responseStr;
     }
 
 
