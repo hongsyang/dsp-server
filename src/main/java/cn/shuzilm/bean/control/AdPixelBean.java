@@ -5,7 +5,7 @@ package cn.shuzilm.bean.control;
  *
  * Created by thunders on 2018/7/11.
  */
-public class AdPixelBean {
+public class AdPixelBean implements ICommand{
     private String host;
     private String adUid;
     private String adName;

@@ -1,10 +1,7 @@
 package cn.shuzilm.backend.master;
 
-
-import cn.shuzilm.bean.control.AdPixelBean;
-import cn.shuzilm.bean.control.ICommand;
-import cn.shuzilm.bean.control.NodeStatusBean;
-import cn.shuzilm.bean.control.WorkNodeBean;
+import cn.shuzilm.bean.*;
+import cn.shuzilm.bean.control.*;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 
@@ -48,6 +45,19 @@ public class MsgControlCenter {
         return JedisQueueManager.putElementToQueue(nodeName + DOWN,command,priority);
     }
 
+
+    public static boolean sendTask(String nodeName, TaskBean bean, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + DOWN,bean,priority);
+    }
+
+    public static TaskBean recvTask(String nodeName){
+        Object obj = JedisQueueManager.getElementFromQueue(nodeName + DOWN);
+        if(obj == null)
+            return null;
+        else
+            return (TaskBean)obj;
+    }
+
     /**
      * 转码机接收主控发送的指令
      * @param nodeName
@@ -63,31 +73,21 @@ public class MsgControlCenter {
 
 
 
-
-    public static List<AdPixelBean> listRecvNodeStatus(){
-        List<AdPixelBean> list = new ArrayList<AdPixelBean>();
-        for(WorkNodeBean node : AdFlowControl.nodeList){
-            AdPixelBean bean = recvPixelStatus(node.getName());
-            list.add(bean);
-        }
-        return list;
-    }
-
     /**
-     * 主控接收从转码机发来的 机器状态 报告
+     *  主控节点： 接收 pixel 状态报告
      * @param nodeId
      * @return
      */
-    public static AdPixelBean recvPixelStatus(String nodeId){
+    public static NodeStatusBean recvPixelStatus(String nodeId){
         Object obj =  JedisQueueManager.getElementFromQueue(nodeId + PIXEL_STATUS);
         if(obj!=null)
-            return (AdPixelBean)obj;
+            return (NodeStatusBean)obj;
         else
             return null;
     }
 
     /**
-     * 转码机定时将状态报告发送至 主控机
+     * PIXEL 节点  发送 pixel 状态报告
      * @param nodeId
      * @param bean
      * @return
@@ -99,7 +99,7 @@ public class MsgControlCenter {
 
 
     /**
-     * 主控接收从转码机发来的 机器状态 报告
+     * 主控机 ： 接收 bid 报告
      * @param nodeId
      * @return
      */
@@ -112,7 +112,7 @@ public class MsgControlCenter {
     }
 
     /**
-     * 转码机定时将状态报告发送至 主控机
+     * RTB 节点：发送 bid 报告
      * @param nodeId
      * @param bean
      * @return

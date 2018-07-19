@@ -4,7 +4,7 @@ package cn.shuzilm.bean.control;
  * 主机 BEAN
  * Created by thunders on 2018/7/11.
  */
-public class WorkNodeBean {
+public class WorkNodeBean implements ICommand{
     private int id;
     private String name;
     private String ip;

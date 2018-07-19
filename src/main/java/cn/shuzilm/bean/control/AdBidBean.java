@@ -3,7 +3,7 @@ package cn.shuzilm.bean.control;
 /**
  * Created by thunders on 2018/7/11.
  */
-public class AdBidBean {
+public class AdBidBean implements ICommand{
     private String uid;
     private String name;
     private long bidNums;

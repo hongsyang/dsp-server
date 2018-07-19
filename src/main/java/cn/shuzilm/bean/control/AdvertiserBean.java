@@ -4,7 +4,7 @@ package cn.shuzilm.bean.control;
  * Created by thunders on 2018/7/10.
  * 广告主
  */
-public class AdvertiserBean {
+public class AdvertiserBean implements ICommand{
     private String uid;
     private String name;
 

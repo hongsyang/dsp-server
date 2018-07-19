@@ -2,6 +2,7 @@ package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
+import cn.shuzilm.bean.control.GroupAdBean;
 import cn.shuzilm.bean.control.WorkNodeBean;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
@@ -20,9 +21,13 @@ public class TaskServicve extends Service {
      * @throws java.sql.SQLException
      */
     public ResultList queryAdByUpTime(long startTime) throws SQLException {
-
-        String sql = "select * from ad where updated_at >=  " + startTime;
-        return select.select(sql);
+        long now = System.currentTimeMillis();
+        Object[] arr = new Object[3];
+        arr[0] = startTime;
+        arr[1] = now;
+        arr[2] = now;
+        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ?";
+        return select.select(sql,arr);
     }
 
     /**
@@ -99,6 +104,45 @@ public class TaskServicve extends Service {
             return list;
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ResultMap queryAdviserAccountById(String adviserId){
+        String sql = "select * from balance where advertiser_uid = '"+adviserId+"'";
+
+        try {
+            ResultMap cMap =  select.selectSingle(sql);
+            return cMap;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<GroupAdBean> queryAdGroupAll(long updateTimeStamp){
+        long now = System.currentTimeMillis();
+        Object[] arr = new Object[3];
+        arr[0] = 0;
+        arr[1] = now;
+        arr[2] = now;
+
+//        String sql = "select a.*, b.uid ad_uid group a join ad b on a.uid = b.group_uid where b.s <= ? and b.e >= ? ";
+        String sql = "select * from group where updated_at >= " + updateTimeStamp ;
+        try{
+            ArrayList<GroupAdBean> list = new ArrayList<>();
+            ResultList rl = select.select(sql,arr);
+            for(ResultMap rm : rl){
+                GroupAdBean g = new GroupAdBean();
+                g.setGroupId(rm.getString("uid"));
+                g.setAdviserId(rm.getString("advertiser_uid"));
+                g.setGroupName(rm.getString("name"));
+                g.setQuotaMoney(rm.getBigDecimal("quota_amount"));
+                list.add(g);
+            }
+            return list;
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
         return null;
     }

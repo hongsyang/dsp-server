@@ -10,15 +10,22 @@ import java.util.Map;
  * 
  * @author wanght by 20180710
  */
-public class TaskBean implements Serializable {
+public class TaskBean implements ICommand {
     /**
      * 命令
      */
     private int command;
     /**
-     * 延迟执行时间
+     * 作用域，是指当前小时，还是全部
+     * 0 当前小时 1 全部
      */
-    private int timeSlaped;
+    private int scope;
+    /**
+     * 操作说明，一般指原因
+     */
+    private String commandMemo;
+    private long exposureLimitPerHour;
+    private long exposureLimitPerDay;
 
     private AdBean adBean;
 
@@ -27,20 +34,23 @@ public class TaskBean implements Serializable {
     private final String taskId; // 任务编号
 
 
-    private static final int COMMAND_START = 0;
-    private static final int COMMAND_UPDATE = 1;
-    private static final int COMMAND_PAUSE = 2;
-    private static final int COMMAND_STOP = 3;
-    private static final int COMMAND_RECOVERY = 4;
+    public static final int COMMAND_START = 0;
+    public static final int COMMAND_UPDATE = 1;
+    public static final int COMMAND_PAUSE = 2;
+    public static final int COMMAND_STOP = 3;
+    public static final int COMMAND_RECOVERY = 4;
+
+    public static final int SCOPE_HOUR = 0;
+    public static final int SCOPE_ALL = 1;
 
 
 
 	/** 等待初始化 */
-	public static final int TASK_STATE_READY = 0;
-    public static final int TASK_STATE_RUNNING = 1;
-    public static final int TASK_STATE_FINISHED = 2;
-    public static final int TASK_STATE_PAUSED = 3;
-    public static final int TASK_STATE_STOPED = 4;
+	private static final int TASK_STATE_READY = 0;
+    private static final int TASK_STATE_RUNNING = 1;
+    private static final int TASK_STATE_FINISHED = 2;
+    private static final int TASK_STATE_PAUSED = 3;
+    private static final int TASK_STATE_STOPED = 4;
 
 	public static final Map<Integer, String> stateMap = new LinkedHashMap<Integer, String>();
 
@@ -54,8 +64,45 @@ public class TaskBean implements Serializable {
 
 	}
 
+    public int getScope() {
+        return scope;
+    }
 
+    public void setScope(int scope) {
+        this.scope = scope;
+    }
 
+    public String getCommandMemo() {
+        return commandMemo;
+    }
+
+    public void setCommandMemo(String commandMemo) {
+        this.commandMemo = commandMemo;
+    }
+
+    public int getCommand() {
+        return command;
+    }
+
+    public void setCommand(int command) {
+        this.command = command;
+    }
+
+    public long getExposureLimitPerHour() {
+        return exposureLimitPerHour;
+    }
+
+    public void setExposureLimitPerHour(long exposureLimitPerHour) {
+        this.exposureLimitPerHour = exposureLimitPerHour;
+    }
+
+    public long getExposureLimitPerDay() {
+        return exposureLimitPerDay;
+    }
+
+    public void setExposureLimitPerDay(long exposureLimitPerDay) {
+        this.exposureLimitPerDay = exposureLimitPerDay;
+    }
 
     public String getTaskId(){
         return this.adBean.getAdUid();
