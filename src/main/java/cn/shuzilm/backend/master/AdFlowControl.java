@@ -4,7 +4,10 @@ import cn.shuzilm.bean.control.*;
 import cn.shuzilm.common.jedis.Priority;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,7 +20,8 @@ import java.util.HashMap;
  *
  */
 public class AdFlowControl {
-    private static Logger logger = Logger.getLogger("control");
+
+    private static final Logger myLog = LoggerFactory.getLogger(AdFlowControl.class);
 
     public static ArrayList<WorkNodeBean> nodeList = null;
     /**
@@ -69,6 +73,7 @@ public class AdFlowControl {
     private static HashMap<String,AdFlowStatus> adverConsumeMapCurr = null;
 
     public AdFlowControl(){
+        MDC.put("sift","control");
         mapAd = new HashMap<>();
         mapMonitorDaily = new HashMap<>();
         mapMonitorHour = new HashMap<>();
@@ -187,13 +192,13 @@ public class AdFlowControl {
             if(threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()){
                 String reason = "#### CPM 超限，参考指标：" +threshold.getWinNums()+ " ###";
                 pauseAd(auid,reason,true);
-                logger.info(monitor.toString() + "\t" + reason );
+                myLog.info(monitor.toString() + "\t" + reason );
             }
             if(threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()){
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                 String reason = "#### 金额 超限，参考指标：" +threshold.getMoney()+ " ###" ;
                 pauseAd(auid,reason,true);
-                logger.info(monitor.toString() + "\t" +  reason);
+                myLog.info(monitor.toString() + "\t" +  reason);
 
             }
         }
@@ -209,7 +214,7 @@ public class AdFlowControl {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                 String reason = "#### 每日金额 超限，参考指标：" +threshold.getMoney()+ " ###";
                 stopAd(auid,reason,false);
-                logger.info(monitor.toString() + "\t" + reason );
+                myLog.info(monitor.toString() + "\t" + reason );
             }
         }
 
@@ -416,10 +421,10 @@ public class AdFlowControl {
 
             }
 
-            logger.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
+            myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
             dispatchTask();
-            logger.info("主控： 开始分发任务，此次有 " + counter + " 分发完毕。。。");
-            logger.info("主控： 共有 " + mapAd.keySet().size() +" 个广告在运行");
+            myLog.info("主控： 开始分发任务，此次有 " + counter + " 分发完毕。。。");
+            myLog.info("主控： 共有 " + mapAd.keySet().size() +" 个广告在运行");
         } catch (SQLException e) {
             e.printStackTrace();
         }
