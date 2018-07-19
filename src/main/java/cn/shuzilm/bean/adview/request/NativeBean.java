@@ -15,7 +15,7 @@ import java.io.Serializable;
 */
 @Data
 public class NativeBean implements Serializable {
-    private RequestBean requestBean;//(T) 根据 RTB 原生广告协议组装成NativeRequest。参考《AdView移动交易平台 RTB 原生广告协议 V1.2》
+    private RequestBean request;//(T) 根据 RTB 原生广告协议组装成NativeRequest。参考《AdView移动交易平台 RTB 原生广告协议 V1.2》
     private String ver;//(建议使用) 原生广告协议版本。
     private Integer[] api;//(F) 列出支持的广告 API，参考附录10
     private Integer[] battr;//(F) 拒绝的广告创意属性，参考附录4
