@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 public class DUFlowBean implements Serializable {
 
     private String infoId;//上报信息的唯一ID
-    private String did;
+    private String did;//数盟的设备id
     private String requestId;//请求id
     private String deviceId;//   唯一识别用户
     private LocalDateTime createTime;// timestamp  该条信息的创建时间
@@ -33,6 +33,9 @@ public class DUFlowBean implements Serializable {
     private String creativeUid;//varchar(36)  创意ID
     private String province;//varchar(20)  省
     private String city;//varchar(20)  市
+    private String actualPrice ;//成本价(张迁需要)
+    private String actualPricePremium ;//溢价（张迁需要）
+    private String biddingPrice  ;//广告主出价（张迁需要）
 
     public static void main(String[] args) {
         LocalDateTime ldt = LocalDateTime.now();

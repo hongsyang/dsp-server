@@ -12,7 +12,7 @@ public class Constants
         try
         {
             p = new Properties();
-            InputStream fis = Constants.class.getClassLoader().getResourceAsStream("config.properties");
+            InputStream fis = Constants.class.getClassLoader().getResourceAsStream("configs.properties");
             try {
                 p.load(fis);
             } catch (IOException e) {
