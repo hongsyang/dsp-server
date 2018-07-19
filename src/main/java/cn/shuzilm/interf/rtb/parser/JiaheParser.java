@@ -1,6 +1,5 @@
-package cn.shuzilm.interf.parser;
+package cn.shuzilm.interf.rtb.parser;
 
-import ch.qos.logback.classic.sift.MDCBasedDiscriminator;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.adview.response.Bid;
@@ -8,12 +7,11 @@ import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.control.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.interf.RequestService;
-import cn.shuzilm.interf.RequestServiceImpl;
+import cn.shuzilm.interf.rtb.RequestService;
+import cn.shuzilm.interf.rtb.RequestServiceImpl;
 import cn.shuzilm.util.*;
 import cn.shuzilm.util.JedisManager;
 import com.alibaba.fastjson.JSON;
-import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -48,7 +46,7 @@ public class JiaheParser {
     private JedisManager jedisManager = null;
     private ArrayList<String> tokenList = null;
 
-    private static final Logger log = LoggerFactory.getLogger("ceshi");
+    private static final Logger log = LoggerFactory.getLogger(JiaheParser.class);
 
     public JiaheParser() {
         // 10.169.20.2,6379,123456yiguan,0
@@ -64,7 +62,6 @@ public class JiaheParser {
     /**
      * 解析	Bid Request 报文
      * 并返回结果 	Bid Response
-     *
      * @param url
      * @param body
      * @param remoteIp
@@ -79,7 +76,7 @@ public class JiaheParser {
             log.debug("rtb says hello");
 //            MDC.put("interface",null);
             String responseStr = "";
-            Map<String, String> map = urlRequest(url);
+            Map<String, String> map = UrlParserUtil.urlRequest(url);
             //请求报文BidRequest解析
             RequestService requestService = new RequestServiceImpl();
             BidRequestBean bidRequestBean = requestService.parseRequest(body);
@@ -192,89 +189,12 @@ public class JiaheParser {
             return responseStr;
         } catch (Exception ex) {
             ex.printStackTrace();
-            return packageResponse("500", "Internal server error ", null);
+            return UrlParserUtil.packageResponse("500", "Internal server error ", null);
         }
 
     }
 
-    private String packageResponse(String status, String message, List<TagBean> list) {
-        JSONObject json = new JSONObject();
-        json.put("code", status);
-        json.put("msg", message);
-        JSONObject json2 = new JSONObject();
-        if (list != null && list.size() > 0) {
-            for (TagBean tag : list) {
-                if (tag.getTagId() != null)
-                    json2.put(tag.getTagName(), tag.getTagId());
-            }
-        }
 
-        json.put("result", json2);
-        return json.toString();
-
-    }
-
-
-    /**
-     * 解析出url参数中的键值对
-     * 如 "index.jsp?Action=del&id=123"，解析出Action:del,id:123存入map中
-     *
-     * @param URL url地址
-     * @return url请求参数部分
-     */
-    public static Map<String, String> urlRequest(String URL) {
-        Map<String, String> mapRequest = new HashMap<String, String>();
-
-        String[] arrSplit = null;
-
-        String strUrlParam = truncateUrlPage(URL);
-        if (strUrlParam == null) {
-            return mapRequest;
-        }
-        //每个键值为一组 www.2cto.com
-        arrSplit = strUrlParam.split("[&]");
-        for (String strSplit : arrSplit) {
-            String[] arrSplitEqual = null;
-            arrSplitEqual = strSplit.split("[=]");
-
-            //解析出键值
-            if (arrSplitEqual.length > 1) {
-                //正确解析
-                mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
-
-            } else {
-                if (arrSplitEqual[0] != "") {
-                    //只有参数没有值，不加入
-                    mapRequest.put(arrSplitEqual[0], "");
-                }
-            }
-        }
-        return mapRequest;
-    }
-
-    /**
-     * 去掉url中的路径，留下请求参数部分
-     *
-     * @param strURL url地址
-     * @return url 请求参数部分
-     */
-    private static String truncateUrlPage(String strURL) {
-        String strAllParam = null;
-        String[] arrSplit = null;
-
-        strURL = strURL.trim();
-
-        arrSplit = strURL.split("[?]");
-        if (strURL.length() > 1) {
-            if (arrSplit.length > 1) {
-                if (arrSplit[1] != null) {
-                    strAllParam = arrSplit[1];
-                }
-            }
-        }
-
-        return strAllParam;
-    }
 
 
 }

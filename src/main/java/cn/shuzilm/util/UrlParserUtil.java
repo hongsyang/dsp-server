@@ -1,0 +1,97 @@
+package cn.shuzilm.util;
+
+import cn.shuzilm.bean.control.TagBean;
+import net.sf.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @Description: UrlParserUtil  解析get  url的后缀参数
+ * @Author: houkp
+ * @CreateDate: 2018/7/19 15:47
+ * @UpdateUser: houkp
+ * @UpdateDate: 2018/7/19 15:47
+ * @UpdateRemark: 修改内容
+ * @Version: 1.0
+ */
+public class UrlParserUtil {
+    /**
+     * 解析出url参数中的键值对
+     * 如 "index.jsp?Action=del&id=123"，解析出Action:del,id:123存入map中
+     *
+     * @param URL url地址
+     * @return url请求参数部分
+     */
+    public static Map<String, String> urlRequest(String URL) {
+        Map<String, String> mapRequest = new HashMap<String, String>();
+
+        String[] arrSplit = null;
+
+        String strUrlParam = truncateUrlPage(URL);
+        if (strUrlParam == null) {
+            return mapRequest;
+        }
+        //每个键值为一组 www.2cto.com
+        arrSplit = strUrlParam.split("[&]");
+        for (String strSplit : arrSplit) {
+            String[] arrSplitEqual = null;
+            arrSplitEqual = strSplit.split("[=]");
+
+            //解析出键值
+            if (arrSplitEqual.length > 1) {
+                //正确解析
+                mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
+
+            } else {
+                if (arrSplitEqual[0] != "") {
+                    //只有参数没有值，不加入
+                    mapRequest.put(arrSplitEqual[0], "");
+                }
+            }
+        }
+        return mapRequest;
+    }
+
+    /**
+     * 去掉url中的路径，留下请求参数部分
+     *
+     * @param strURL url地址
+     * @return url 请求参数部分
+     */
+    private static String truncateUrlPage(String strURL) {
+        String strAllParam = null;
+        String[] arrSplit = null;
+
+        strURL = strURL.trim();
+
+        arrSplit = strURL.split("[?]");
+        if (strURL.length() > 1) {
+            if (arrSplit.length > 1) {
+                if (arrSplit[1] != null) {
+                    strAllParam = arrSplit[1];
+                }
+            }
+        }
+
+        return strAllParam;
+    }
+
+    public static  String packageResponse(String status, String message, List<TagBean> list) {
+        JSONObject json = new JSONObject();
+        json.put("code", status);
+        json.put("msg", message);
+        JSONObject json2 = new JSONObject();
+        if (list != null && list.size() > 0) {
+            for (TagBean tag : list) {
+                if (tag.getTagId() != null)
+                    json2.put(tag.getTagName(), tag.getTagId());
+            }
+        }
+
+        json.put("result", json2);
+        return json.toString();
+
+    }
+}

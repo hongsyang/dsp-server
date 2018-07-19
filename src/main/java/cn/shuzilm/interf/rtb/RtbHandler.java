@@ -1,6 +1,6 @@
-package cn.shuzilm.interf;
+package cn.shuzilm.interf.rtb;
 
-import cn.shuzilm.interf.parser.JiaheParser;
+import cn.shuzilm.interf.rtb.parser.JiaheParser;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;

@@ -1,4 +1,4 @@
-package cn.shuzilm.interf;
+package cn.shuzilm.interf.rtb;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import com.alibaba.fastjson.JSON;

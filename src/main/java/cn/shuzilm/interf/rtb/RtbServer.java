@@ -1,4 +1,4 @@
-package cn.shuzilm.interf;
+package cn.shuzilm.interf.rtb;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
