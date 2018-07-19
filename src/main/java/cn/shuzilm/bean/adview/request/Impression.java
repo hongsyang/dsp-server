@@ -16,7 +16,7 @@ import java.io.Serializable;
 public class Impression implements Serializable {
     private String id;// (T) 唯一标识，由 AdView 生成
     private Banner banner;//(F)  横幅或插屏广告信息描述
-    private NativeBean nativeBean;//(F) 原生广告信息描述
+    private NativeBean Native;//(F) 原生广告信息描述
     private Video video;//(F) 视频广告信息描述
     private Pmp pmp;//(F) 私有交易
     private Integer instl;//(T) 0- 横幅广告 1- 插屏或全插屏广告 4- 开屏广告 5- 视频广告 6- 原生广告

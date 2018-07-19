@@ -1,10 +1,11 @@
-package cn.shuzilm.interf;
+package cn.shuzilm.interf.rtb;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
@@ -31,7 +32,6 @@ public class RtbServer {
 	public static Connection conn ;
 	
 	public static void main(String[] args) {
-
 		appKeySet = new HashSet<String>();
 		appKeyIdMap = new HashMap<String, String>();
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
@@ -50,10 +50,10 @@ public class RtbServer {
 		bootstrap.setOption("reuseAddress", true);
 		bootstrap.setOption("child.linger", 60);
 		bootstrap.setOption("child.TIMEOUT", 1);
-//		bootstrap.setOption("sendBufferSize", 1048576);
-//		bootstrap.setOption("writeBufferHighWaterMark", 10 * 64 * 1024);
-//		
-//		bootstrap.setOption("receiveBufferSize", 1048576);
+		bootstrap.setOption("sendBufferSize", 1048576);
+		bootstrap.setOption("writeBufferHighWaterMark", 10 * 64 * 1024);
+
+		bootstrap.setOption("receiveBufferSize", 1048576);
 		bootstrap.setPipelineFactory(new ServerPipelineFactory());
 		// 绑定端口
 		bootstrap.bind(new InetSocketAddress(port));
@@ -74,7 +74,7 @@ public class RtbServer {
 			pipeline.addLast("decoder", new HttpRequestDecoder());
 			pipeline.addLast("encoder", new HttpResponseEncoder());
 //		         pipeline.addLast("streamer", new ChunkedWriteHandler());
-//            pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
+            pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
 			//http处理handler
 			pipeline.addLast("handler", new RtbHandler());
 

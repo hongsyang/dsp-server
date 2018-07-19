@@ -21,4 +21,5 @@ public class RequestExt {
     private String quality;//灵集site.content.ext   流量质量 1---流量质量保障 2---流量质量未知
     private String[] models;//灵集user
     private String showtype;//灵集imp
+    private String required;//灵集imp
 }
