@@ -1,14 +1,15 @@
 package cn.shuzilm.backend.master;
 
-import cn.shuzilm.bean.control.AdvertiserBean;
-import cn.shuzilm.bean.control.CreativeBean;
-import cn.shuzilm.bean.control.GroupAdBean;
-import cn.shuzilm.bean.control.WorkNodeBean;
+import cn.shuzilm.bean.control.*;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Created by thunders on 2018/7/11.
@@ -86,6 +87,10 @@ public class TaskServicve extends Service {
         }
     }
 
+    /**
+     * 获得所有的 RTB 主机节点
+     * @return
+     */
     public ArrayList<WorkNodeBean> getWorkNodeAll(){
         String sql = "select * from work_node where status = 1";
         ResultList rl = null;
@@ -108,6 +113,11 @@ public class TaskServicve extends Service {
         return null;
     }
 
+    /**
+     * 广告主余额查询
+     * @param adviserId
+     * @return
+     */
     public ResultMap queryAdviserAccountById(String adviserId){
         String sql = "select * from balance where advertiser_uid = '"+adviserId+"'";
 
@@ -120,6 +130,11 @@ public class TaskServicve extends Service {
         return null;
     }
 
+    /**
+     * 广告分组查询
+     * @param updateTimeStamp
+     * @return
+     */
     public ArrayList<GroupAdBean> queryAdGroupAll(long updateTimeStamp){
         long now = System.currentTimeMillis();
         Object[] arr = new Object[3];
@@ -128,7 +143,7 @@ public class TaskServicve extends Service {
         arr[2] = now;
 
 //        String sql = "select a.*, b.uid ad_uid group a join ad b on a.uid = b.group_uid where b.s <= ? and b.e >= ? ";
-        String sql = "select * from group where updated_at >= " + updateTimeStamp ;
+        String sql = "select * from group where updated_at >= " + String.valueOf(updateTimeStamp) ;
         try{
             ArrayList<GroupAdBean> list = new ArrayList<>();
             ResultList rl = select.select(sql,arr);
@@ -145,6 +160,70 @@ public class TaskServicve extends Service {
             ex.printStackTrace();
         }
         return null;
+    }
+
+    public HashMap<String,ReportBean> statAdCostTotal(){
+        long startStamp = 0;
+        long nowStamp = System.currentTimeMillis();
+        return statAdCost(startStamp,nowStamp);
+    }
+
+    /**
+     * 加载当前小时 0 分 到现在的账户消耗数据
+     * @return
+     */
+    public HashMap<String,ReportBean> statAdCostHour(){
+        int minute = Calendar.getInstance().get(Calendar.MINUTE);
+        Calendar start = Calendar.getInstance();
+        start.set(Calendar.MINUTE,0);
+        //从这个小时的 0 分作为开始时间
+        long startStamp = start.getTimeInMillis();
+        //以当前时间作为结束时间
+        long nowStamp = System.currentTimeMillis();
+        return statAdCost(startStamp,nowStamp);
+    }
+
+    public HashMap<String,ReportBean> statAdCostDaily(){
+        Calendar start = Calendar.getInstance();
+        start.set(Calendar.HOUR,0);
+        start.set(Calendar.MINUTE,0);
+        long startStamp = start.getTimeInMillis();
+        long nowStamp = System.currentTimeMillis();
+        return statAdCost(startStamp,nowStamp);
+    }
+
+    /**
+     * 统计费用实际消耗情况
+     * @return
+     * @param startTime
+     * @param endTime
+     */
+    public HashMap<String,ReportBean> statAdCost(long startTime, long endTime){
+        // type：
+        // 0 : 小时存量费用的统计，对于一个小时前，当天的广告耗费的汇总
+        // 1 : 天存量费用的统计，
+        Object [] arr = new Object[2];
+        arr[0] = startTime;
+        arr[1] = endTime;
+        String sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where created_at >= ? and create_at<= ?  group by ad_uid";
+        try {
+            ResultList rl = select.select(sql,arr);
+            HashMap<String,ReportBean> map = new HashMap<>();
+            for(ResultMap rm : rl){
+                ReportBean report = new ReportBean();
+                String adUid = rm.getString("ad_uid");
+                BigDecimal expense = rm.getBigDecimal("expense");
+                BigDecimal cost = rm.getBigDecimal("cost");
+                report.setAdUid(adUid);
+                report.setExpense(expense);
+                report.setCost(cost);
+                map.put(adUid,report);
+            }
+            return map;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 

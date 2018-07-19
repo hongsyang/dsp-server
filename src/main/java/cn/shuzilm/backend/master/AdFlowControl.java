@@ -109,19 +109,39 @@ public class AdFlowControl {
      * @param adUid
      * @param addWinNoticeNums
      * @param addMoney
+     * @param type 0 hour  1 daily  2 total -1 全部都更新
      */
-    private void updatePixel(String adUid,long addWinNoticeNums,float addMoney){
-        AdFlowStatus statusHour = mapMonitorHour.get(adUid);
-        statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
-        statusHour.setMoney(statusHour.getMoney() + addMoney);
+    private void updatePixel(String adUid,long addWinNoticeNums,float addMoney,int type){
+        switch(type){
+            case 0 :
+                AdFlowStatus statusHour = mapMonitorHour.get(adUid);
+                statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
+                statusHour.setMoney(statusHour.getMoney() + addMoney);
+                break;
+            case 1:
+                AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
+                statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
+                statusDaily.setMoney(statusDaily.getMoney() + addMoney);
+                break;
+            case 2:
+                AdFlowStatus statusAll = mapMonitorTotal.get(adUid);
+                statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
+                statusAll.setMoney(statusAll.getMoney() + addMoney);
+                break;
+            case -1:
+                statusHour = mapMonitorHour.get(adUid);
+                statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
+                statusHour.setMoney(statusHour.getMoney() + addMoney);
 
-        AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
-        statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
-        statusDaily.setMoney(statusDaily.getMoney() + addMoney);
+                statusDaily = mapMonitorDaily.get(adUid);
+                statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
+                statusDaily.setMoney(statusDaily.getMoney() + addMoney);
 
-        AdFlowStatus statusAll = mapMonitorTotal.get(adUid);
-        statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
-        statusAll.setMoney(statusAll.getMoney() + addMoney);
+                statusAll = mapMonitorTotal.get(adUid);
+                statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
+                statusAll.setMoney(statusAll.getMoney() + addMoney);
+                break;
+        }
     }
 
 
@@ -153,7 +173,8 @@ public class AdFlowControl {
                 continue;
             ArrayList<AdPixelBean> pixelList = bean.getPixelList();
             for(AdPixelBean pix : pixelList){
-                updatePixel(pix.getAdUid(),pix.getWinNoticeNums(),pix.getMoney());
+                //更新全部监视器
+                updatePixel(pix.getAdUid(),pix.getWinNoticeNums(),pix.getMoney(),-1);
             }
 
         }
@@ -327,6 +348,8 @@ public class AdFlowControl {
             for(GroupAdBean group : groupList){
                 mapAdGroup.put(group.getGroupId(),group);
             }
+
+
             ResultList rl = taskService.queryAdByUpTime(timeBefore);
             //更新监视器阀值信息
             updateIndicator(rl);
@@ -334,6 +357,24 @@ public class AdFlowControl {
             for(ResultMap map : rl){
                 AdBean ad = new AdBean();
                 ad.setAdUid(map.getString("uid"));
+
+                if(isInitial){
+                    //加载 小时 历史消费金额
+                    HashMap<String,ReportBean> reportMapHour = taskService.statAdCostHour();
+                    BigDecimal expense = reportMapHour.get(ad.getAdUid()).getExpense();
+                    this.updatePixel(ad.getAdUid(),0,expense.floatValue(),0);
+                    //加载 天 历史消费金额
+                    HashMap<String,ReportBean> reportMapDaily = taskService.statAdCostDaily();
+                    expense = reportMapDaily.get(ad.getAdUid()).getExpense();
+                    this.updatePixel(ad.getAdUid(),0,expense.floatValue(),1);
+                    //加载 总 历史消费金额
+                    HashMap<String,ReportBean> reportMapTotal = taskService.statAdCostTotal();
+                    expense = reportMapTotal.get(ad.getAdUid()).getExpense();
+                    this.updatePixel(ad.getAdUid(),0,expense.floatValue(),2);
+
+                }
+
+
                 String groupId = map.getString("group_uid");
                 ad.setGroupId(groupId);
                 String adverUid = map.getString("advertiser_uid");
