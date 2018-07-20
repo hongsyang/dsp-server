@@ -13,6 +13,7 @@ public class LingjiParser implements RequestService {
 
     @Override
     public String parseRequest(String dataStr) {
+
         return "lingji";
     }
 }
