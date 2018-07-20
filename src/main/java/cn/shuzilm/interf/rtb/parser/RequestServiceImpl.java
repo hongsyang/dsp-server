@@ -1,4 +1,4 @@
-package cn.shuzilm.interf.rtb;
+package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import com.alibaba.fastjson.JSON;
@@ -11,15 +11,16 @@ public class RequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(RequestServiceImpl.class);
 
+
+
     @Override
-    public BidRequestBean parseRequest(String dataStr) {
+    public String parseRequest(String dataStr) {
         MDC.put("sift","interface");
         log.debug(" BidRequest参数入参：{}", dataStr);
         if (StringUtils.isNotBlank(dataStr)) {
             BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
             log.debug(" json转化为BidRequestBean的结果：{}", bidRequestBean);
             MDC.remove("sift");
-            return bidRequestBean;
         }
         return null;
 

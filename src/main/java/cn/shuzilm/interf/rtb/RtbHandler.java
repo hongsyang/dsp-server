@@ -1,6 +1,6 @@
 package cn.shuzilm.interf.rtb;
 
-import cn.shuzilm.interf.rtb.parser.JiaheParser;
+import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
@@ -21,12 +21,12 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class RtbHandler extends SimpleChannelUpstreamHandler {
 //	private WriteDataToLog wdt;
-    JiaheParser parser = null;
+    RtbRequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
 
 	public RtbHandler() {
 //		wdt = new WriteDataToLog();
-        parser = new JiaheParser();
+        parser = new RtbRequestParser();
         System.out.println(Thread.currentThread().getName() + " parser 初始化成功。。。");
     }
 

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @Description:  ClickParser 点击量解析
+ * @Description:  RequestParser get请求解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:38
  * @UpdateUser: houkp
@@ -24,9 +24,9 @@ public class RequestParser {
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
 
 
-    public String parseData(String url, String body, String remoteIp) {
+    public String parseData(String url, String dataStr, String remoteIp) {
         String responseStr="没有对应的解析器";
-        log.debug("url:{},body:{}", url, body);
+        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
         List<String> urlList = UrlParserUtil.urlParser(url);
         for (String urls : urlList) {
             if (urls.equals("exp")){

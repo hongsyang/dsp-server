@@ -1,6 +1,9 @@
 package cn.shuzilm.bean.internalflow;
 
+import cn.shuzilm.util.HttpClientUtil;
+import cn.shuzilm.util.HttpRequestUtil;
 import lombok.Data;
+import sun.net.www.http.HttpClient;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -37,15 +40,5 @@ public class DUFlowBean implements Serializable {
     private String actualPricePremium ;//溢价（张迁需要）
     private String biddingPrice  ;//广告主出价（张迁需要）
 
-    public static void main(String[] args) {
-        LocalDateTime ldt = LocalDateTime.now();
-        ZonedDateTime zdt = ldt.atZone(ZoneOffset.UTC); //you might use a different zone
-        String iso8601 = zdt.toString();
-        System.out.println(iso8601);
 
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-        String format = LocalDateTime.now().format(formatter);
-        System.out.println(format);
-    }
 }

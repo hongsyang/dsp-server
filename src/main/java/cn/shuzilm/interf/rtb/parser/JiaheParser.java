@@ -1,3 +1,4 @@
+/*
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
@@ -23,11 +24,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+*/
 /**
  * 加和广告 DSP 请求
  *
  * @author wanght 20180604
- */
+ *//*
+
 public class JiaheParser {
 
 
@@ -59,14 +62,16 @@ public class JiaheParser {
         }
     }
 
-    /**
+    */
+/**
      * 解析	Bid Request 报文
      * 并返回结果 	Bid Response
      * @param url
      * @param body
      * @param remoteIp
      * @return
-     */
+     *//*
+
     public String parseData(String url, String body, String remoteIp) {
         try {
             log.debug("Application started");
@@ -109,14 +114,16 @@ public class JiaheParser {
             }
             //TODO  输出的标准log  end
 
-         /*   if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
+         */
+/*   if(!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")){
                 return packageResponse("400","Missing required parameters",null);
             }else if(map.containsKey("token")){
                 String token = map.get("token").toLowerCase();
                 if(!tokenList.contains(token)){
                     return packageResponse("401","Requested with invalid token",null);
                 }
-            }*/
+            }*//*
+
             //请求报文BidResponse返回
 
             BidResponseBean bidResponseBean = new BidResponseBean();
@@ -162,6 +169,7 @@ public class JiaheParser {
             log.debug("bidResponseBean:{}",responseStr);
 
             //下面的代码不知道是干什么的，先注释起来。houkp
+*/
 /*            String type = map.get("type");
             String uid = map.get("uid");
             String tagId = map.get("tagid");
@@ -184,7 +192,8 @@ public class JiaheParser {
             }else{
                 responseStr = packageResponse("0","Tag not found",null);
             }
-            //		responseStr = parseApp(dataValue,remoteIp,wdt,mqTool,gzip);*/
+            //		responseStr = parseApp(dataValue,remoteIp,wdt,mqTool,gzip);*//*
+
 
             return responseStr;
         } catch (Exception ex) {
@@ -198,3 +207,4 @@ public class JiaheParser {
 
 
 }
+*/

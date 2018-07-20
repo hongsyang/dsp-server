@@ -33,7 +33,9 @@ public class UrlParserUtil {
             String urlParameter = urlSplit[0];
             String[] split = urlParameter.split("/");
             for (String s : split) {
-                listUrl.add(s);
+                if (StringUtils.isNotBlank(s)) {
+                    listUrl.add(s);
+                }
             }
         }
         return listUrl;
