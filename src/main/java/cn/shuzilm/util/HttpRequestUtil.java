@@ -25,7 +25,7 @@ public class HttpRequestUtil {
         BufferedReader in = null;
         try {
             String urlNameString = url + "?" + param;
-            System.out.println("发给李毅的参数："+urlNameString);
+            System.out.println("发测试的参数："+urlNameString);
             URL realUrl = new URL(urlNameString);
             // 打开和URL之间的连接
             URLConnection connection = realUrl.openConnection();

@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.pixcel;
 
-import cn.shuzilm.interf.pixcel.parser.ClickParser;
+import cn.shuzilm.interf.pixcel.parser.RequestParser;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
@@ -21,12 +22,11 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class PixcelHandler extends SimpleChannelUpstreamHandler {
 //	private WriteDataToLog wdt;
-    ClickParser parser = null;
+	RequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
 
 	public PixcelHandler() {
-//		wdt = new WriteDataToLog();
-        parser = new ClickParser();
+        parser = new RequestParser();
         System.out.println(Thread.currentThread().getName() + " parser 初始化成功。。。");
     }
 
@@ -104,12 +104,13 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 	 * @throws UnsupportedEncodingException
 	 */
 	public byte[] parseRequest(String url, String dataStr, String remoteIp) throws UnsupportedEncodingException {
-		/**********		POST主业务逻辑		***************/
+		/**********		GET主业务逻辑		***************/
 		String resultData = parser.parseData(url, dataStr,remoteIp);//SDK 2.0.1
-
-		byte[] content = null;
-		content = resultData.getBytes("utf-8");
-		return content;
+        byte[] content ={0};//c初始值
+        if (StringUtils.isNotBlank(resultData)){
+            content = resultData.getBytes("utf-8");
+        }
+        return content;
 	}
 
 
