@@ -1,14 +1,10 @@
 package cn.shuzilm.interf.rtb.parser;
 
-import cn.shuzilm.interf.pixcel.parser.ParameterParser;
-import cn.shuzilm.interf.pixcel.parser.ParameterParserFactory;
-import cn.shuzilm.interf.pixcel.parser.RequestParser;
 import cn.shuzilm.util.UrlParserUtil;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
