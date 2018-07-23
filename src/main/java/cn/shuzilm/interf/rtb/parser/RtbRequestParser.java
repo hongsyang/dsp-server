@@ -4,10 +4,13 @@ import cn.shuzilm.interf.pixcel.parser.ParameterParser;
 import cn.shuzilm.interf.pixcel.parser.ParameterParserFactory;
 import cn.shuzilm.interf.pixcel.parser.RequestParser;
 import cn.shuzilm.util.UrlParserUtil;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Description: RtbRequestParser  post参数解析
@@ -30,20 +33,22 @@ public class RtbRequestParser {
      * @return
      */
     public String parseData(String url, String dataStr, String remoteIp) {
-
         String responseStr = "没有对应的厂商";
 //        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
         List<String> urlList = UrlParserUtil.urlParser( url);
-        for (String urls : urlList) {
-            if (urls.equals("adview")) {
-                RequestService requestService = RequestServiceFactory.getRequestService("cn.shuzilm.interf.rtb.parser.KuaiyouParser");
-                responseStr = requestService.parseRequest(dataStr);
-            } else if (urls.equals("lingji")) {
-                RequestService requestService = RequestServiceFactory.getRequestService("cn.shuzilm.interf.rtb.parser.LingjiParser");
-                responseStr = requestService.parseRequest(dataStr);
+        Reflections reflections = new Reflections("cn.shuzilm.interf.rtb.parser");
+        Set<Class<? extends RequestService>> monitorClasses = reflections.getSubTypesOf(RequestService.class);
+        String className =null;
+        for (Class<? extends RequestService> monitorClass : monitorClasses) {
+            for (int i = 0; i <urlList.size() ; i++) {
+                if (monitorClass.getName().toLowerCase().contains(urlList.get(i))){
+                    className=monitorClass.getName();
+                    break;
+                }
             }
         }
-
+        RequestService requestService = RequestServiceFactory.getRequestService(className);
+        responseStr = requestService.parseRequest(dataStr);
         return responseStr;
     }
 }

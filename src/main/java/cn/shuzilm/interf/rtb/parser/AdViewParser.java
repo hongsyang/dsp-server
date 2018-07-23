@@ -27,9 +27,9 @@ import java.util.Map;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class KuaiyouParser implements RequestService {
+public class AdViewParser implements RequestService {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AdViewParser.class);
 
     @Override
     public String parseRequest(String dataStr) {

@@ -4,10 +4,7 @@ import cn.shuzilm.bean.control.TagBean;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description: UrlParserUtil  解析get  url的后缀参数
