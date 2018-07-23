@@ -7,6 +7,7 @@ import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import com.alibaba.fastjson.JSON;
+import com.yao.util.bean.BeanUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +38,13 @@ public class KuaiyouParser implements RequestService {
         //请求报文解析
         BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
         //创建返回结果
-        DUFlowBean duFlowBean = new DUFlowBean();
-        //Todo 规则引擎
-
-        BidResponseBean bidResponseBean = convertBidResponse(duFlowBean);
-
+        DUFlowBean sourceDuFlowBean = new DUFlowBean();
+        sourceDuFlowBean.setRequestId(bidRequestBean.getId());
+        sourceDuFlowBean.setImpression(bidRequestBean.getImp());
+        DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
+        BeanUtil.copyPropertyByNotNull(sourceDuFlowBean, targetDuFlowBean);
+        log.debug("拷贝targetDuFlowBean:{}",targetDuFlowBean);
+        BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
         response = JSON.toJSONString(bidResponseBean);
         log.debug("bidResponseBean:{}", response);
         return response;
@@ -53,7 +56,7 @@ public class KuaiyouParser implements RequestService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         String format = LocalDateTime.now().format(formatter);//时间戳
         bidResponseBean.setId(duFlowBean.getRequestId());//从bidRequestBean里面取 bidRequest的id
-        bidResponseBean.setBidid(duFlowBean.getBidid() + formatter);//BidResponse 的唯一标识,由 DSP生成
+        bidResponseBean.setBidid(duFlowBean.getBidid() + format);//BidResponse 的唯一标识,由 DSP生成
         List<SeatBid> seatBidList = new ArrayList<SeatBid>();//注意第一层数组  DSP出价 目前仅支持一个
         List<Bid> bidList = new ArrayList<Bid>();//注意第二层数组 针对单次曝光的出价
         SeatBid seatBid = new SeatBid();
