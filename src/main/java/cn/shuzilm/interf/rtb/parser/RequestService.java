@@ -1,4 +1,4 @@
-package cn.shuzilm.interf.rtb;
+package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 
@@ -13,12 +13,10 @@ import cn.shuzilm.bean.adview.request.BidRequestBean;
 */
 public interface RequestService {
 
-    //根据厂商名字区分 TODO
-
     /**
-     *  解析post提交报文，转换为BidRequestBean
+     *  解析post提交报文，转换为BidResponseBean
      * @param dataStr 报文入参
      * @return
      */
-    public BidRequestBean parseRequest(String dataStr);
+    public String parseRequest(String dataStr);
 }

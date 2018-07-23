@@ -4,7 +4,9 @@ import cn.shuzilm.bean.control.*;
 import cn.shuzilm.common.jedis.Priority;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.HashMap;
  *
  */
 public class AdFlowControl {
-    private static Logger logger = Logger.getLogger("control");
+    private static Logger logger = LoggerFactory.getLogger("control");
 
     public static ArrayList<WorkNodeBean> nodeList = null;
     /**

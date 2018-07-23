@@ -1,16 +1,20 @@
 package cn.shuzilm.interf.pixcel.parser;
 
 import cn.shuzilm.bean.control.TagBean;
+import cn.shuzilm.interf.rtb.parser.RequestService;
 import cn.shuzilm.util.UrlParserUtil;
 import net.sf.json.JSONObject;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * @Description:  ClickParser 点击量解析
+ * @Description: RequestParser get请求解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:38
  * @UpdateUser: houkp
@@ -22,20 +26,25 @@ public class RequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
 
-    private ArrayList<String> tokenList = null;
 
-    public String parseData(String url, String body, String remoteIp) {
-        log.debug("url:{},body:{}", url, body);
-        Map<String, String> map = UrlParserUtil.urlRequest(url);
-        if (!map.containsKey("token") || !map.containsKey("uid") || !map.containsKey("type")) {
-            return UrlParserUtil.packageResponse("400", "Missing required parameters", null);
-        } else if (map.containsKey("token")) {
-            String token = map.get("token").toLowerCase();
-            if (!tokenList.contains(token)) {
-                return UrlParserUtil.packageResponse("401", "Requested with invalid token", null);
+    public String parseData(String url, String dataStr, String remoteIp) {
+        String responseStr = "没有对应的解析器";
+        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
+        List<String> urlList = UrlParserUtil.urlParser(url);
+        Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");
+        Set<Class<? extends ParameterParser>> monitorClasses = reflections.getSubTypesOf(ParameterParser.class);
+        String className = null;
+        for (Class<? extends ParameterParser> monitorClass : monitorClasses) {
+            for (int i = 0; i < urlList.size(); i++) {
+                if (monitorClass.getName().toLowerCase().contains(urlList.get(i))) {
+                    className = monitorClass.getName();
+                    break;
+                }
             }
         }
-        return url;
+        ParameterParser parameterParser = ParameterParserFactory.getParameterParser(className);
+        responseStr = parameterParser.parseUrl(url);
+        return responseStr;
     }
 
 

@@ -2,10 +2,9 @@ package cn.shuzilm.util;
 
 import cn.shuzilm.bean.control.TagBean;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description: UrlParserUtil  解析get  url的后缀参数
@@ -17,6 +16,28 @@ import java.util.Map;
  * @Version: 1.0
  */
 public class UrlParserUtil {
+
+    /**
+     * 解析url的路径名称
+     *
+     * @param url
+     * @return
+     */
+    public static List<String> urlParser(String url) {
+        List<String> listUrl = new ArrayList<>();
+        if (StringUtils.isNotBlank(url)) {
+            String[] urlSplit = url.split("[?]");
+            String urlParameter = urlSplit[0];
+            String[] split = urlParameter.split("/");
+            for (String s : split) {
+                if (StringUtils.isNotBlank(s)) {
+                    listUrl.add(s);
+                }
+            }
+        }
+        return listUrl;
+    }
+
     /**
      * 解析出url参数中的键值对
      * 如 "index.jsp?Action=del&id=123"，解析出Action:del,id:123存入map中
@@ -78,7 +99,7 @@ public class UrlParserUtil {
         return strAllParam;
     }
 
-    public static  String packageResponse(String status, String message, List<TagBean> list) {
+    public static String packageResponse(String status, String message, List<TagBean> list) {
         JSONObject json = new JSONObject();
         json.put("code", status);
         json.put("msg", message);
