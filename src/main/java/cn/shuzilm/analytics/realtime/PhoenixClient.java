@@ -1,10 +1,10 @@
 package cn.shuzilm.analytics.realtime;
 
 import org.apache.phoenix.jdbc.PhoenixResultSet;
-
-import java.sql.DriverManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.DriverManager;
 
 
 import java.sql.*;
