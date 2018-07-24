@@ -28,6 +28,13 @@ public class AdFlowControl {
         return control;
     }
 
+    private static AdFlowControl control;
+    public static AdFlowControl getInstance(){
+        if(control == null){
+            control = new AdFlowControl();
+        }
+        return control;
+    }
     private static final Logger myLog = LoggerFactory.getLogger(AdFlowControl.class);
 
     public static ArrayList<WorkNodeBean> nodeList = null;

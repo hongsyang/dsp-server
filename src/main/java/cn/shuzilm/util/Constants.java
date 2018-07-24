@@ -1,5 +1,6 @@
 package cn.shuzilm.util;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -11,7 +12,7 @@ public class Constants
     {
         try
         {
-            p = new Properties();
+            p = new java.util.Properties();
             InputStream fis = Constants.class.getClassLoader().getResourceAsStream("configs.properties");
             try {
                 p.load(fis);
