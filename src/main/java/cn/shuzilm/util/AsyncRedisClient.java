@@ -1,9 +1,7 @@
 package cn.shuzilm.util;
 
-import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.RedisURI;
-import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
@@ -18,7 +16,6 @@ import java.util.concurrent.TimeUnit;
  * 异步同时获取 IP 黑名单和 设备标签~~
  *
  * https://github.com/lettuce-io/lettuce-core/wiki/Asynchronous-API
- *
  */
 public class AsyncRedisClient {
     private StatefulRedisClusterConnection<String, String> connection = null;
