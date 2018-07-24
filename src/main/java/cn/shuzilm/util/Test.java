@@ -13,6 +13,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,15 +21,24 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Test {
     public static void main(String[] args)  {
         JedisQueueManager.init();
-        String houkp="192.168.1.1";
-
-        boolean b = JedisQueueManager.putElementToQueue("houkp", houkp, Priority.MAX_PRIORITY);
-        if (b){
-            Object houkp1 = JedisQueueManager.getElementFromQueue("houkp");
-            System.out.println(houkp1+"----------");
-        }else {
-            System.out.println("未成功");
+        Set<String> stringSet = new HashSet<>();
+        for (int i = 0; i <100 ; i++) {
+            stringSet.add("houkp"+i);
         }
+        boolean b = JedisQueueManager.putElementToQueue("houkp", stringSet, Priority.MAX_PRIORITY);
+        Set<String> elementFromQueue = (Set) JedisQueueManager.getElementFromQueue("houkp");
+        String houkp ="houkp12";
+        for (String s : elementFromQueue) {
+            System.out.println(s);
+        }
+        boolean houkp1 = elementFromQueue.contains(houkp);
+        System.out.println(houkp1);
+//        if (b){
+//            Object houkp1 = JedisQueueManager.getElementFromQueue("houkp");
+//
+//        }else {
+//            System.out.println("未成功");
+//        }
 //        //连接本地的 Redis 服务
 //        Jedis jedis = new Jedis("101.200.56.200");
 //        jedis.append("houkp","ceshi");
