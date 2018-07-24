@@ -21,6 +21,13 @@ import java.util.HashMap;
  */
 public class AdFlowControl {
 
+    private static AdFlowControl control;
+    public static AdFlowControl getInstance(){
+        if(control == null){
+            control = new AdFlowControl();
+        }
+        return control;
+    }
     private static final Logger myLog = LoggerFactory.getLogger(AdFlowControl.class);
 
     public static ArrayList<WorkNodeBean> nodeList = null;

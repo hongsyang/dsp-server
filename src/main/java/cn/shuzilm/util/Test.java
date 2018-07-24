@@ -1,8 +1,11 @@
 package cn.shuzilm.util;
 
+import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.interf.rtb.parser.RequestService;
 import cn.shuzilm.interf.rtb.parser.RequestServiceFactory;
 import org.reflections.Reflections;
+import redis.clients.jedis.Jedis;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,27 +17,38 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 public class Test {
-    private static String driver = "org.apache.phoenix.jdbc.PhoenixDriver";
-    public static void main(String[] args) throws SQLException {
-        try {
+    public static void main(String[] args)  {
 
-            Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        Connection con = DriverManager.getConnection("jdbc:phoenix:hadoop0,hadoop1,hadoop2:2181");
-        stmt = con.createStatement();
-        String sql = "select * from test";
-        rs = stmt.executeQuery(sql);
-        while (rs.next()) {
-            System.out.print("id:"+rs.getString("id"));
-            System.out.println(",name:"+rs.getString("name"));
-        }
-        stmt.close();
-        con.close();
+        JedisManager jedisManager = JedisManager.getInstance();
+        Jedis jedis = jedisManager.getResource();
+        System.out.println(jedis.get("houkp"));
+//        //连接本地的 Redis 服务
+//        Jedis jedis = new Jedis("101.200.56.200");
+//        jedis.append("houkp","ceshi");
+//        String houkp = jedis.get("houkp");
+//        System.out.println(houkp);
+//        System.out.println("连接成功");
+//        //查看服务是否运行
+//        System.out.println("服务正在运行: "+jedis.ping());
+//        try {
+//
+//            Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        }
+//        Statement stmt = null;
+//        ResultSet rs = null;
+//
+//        Connection con = DriverManager.getConnection("jdbc:phoenix:hadoop0,hadoop1,hadoop2:2181");
+//        stmt = con.createStatement();
+//        String sql = "select * from test";
+//        rs = stmt.executeQuery(sql);
+//        while (rs.next()) {
+//            System.out.print("id:"+rs.getString("id"));
+//            System.out.println(",name:"+rs.getString("name"));
+//        }
+//        stmt.close();
+//        con.close();
 
 //        DUFlowBean duFlowBean =new DUFlowBean();
 //        duFlowBean.setRequestId("11111111111111111111111");
