@@ -2,6 +2,7 @@ package cn.shuzilm.util;
 
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.interf.rtb.parser.RequestService;
 import cn.shuzilm.interf.rtb.parser.RequestServiceFactory;
 import org.reflections.Reflections;
@@ -18,10 +19,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Test {
     public static void main(String[] args)  {
+        JedisQueueManager.init();
+        String houkp="192.168.1.1";
 
-        JedisManager jedisManager = JedisManager.getInstance();
-        Jedis jedis = jedisManager.getResource();
-        System.out.println(jedis.get("houkp"));
+        boolean b = JedisQueueManager.putElementToQueue("houkp", houkp, Priority.MAX_PRIORITY);
+        if (b){
+            Object houkp1 = JedisQueueManager.getElementFromQueue("houkp");
+            System.out.println(houkp1+"----------");
+        }else {
+            System.out.println("未成功");
+        }
 //        //连接本地的 Redis 服务
 //        Jedis jedis = new Jedis("101.200.56.200");
 //        jedis.append("houkp","ceshi");
