@@ -42,7 +42,18 @@ public class CronDispatch {
 
 
     public static void main(String[] args) {
-        CronDispatch.startTimer(0);
+//        CronDispatch.startTimer(0);
+//        System.out.println();
+        //    // 5 s 触发
+//    pullAndUpdateTask();
+//    // 10 min 触发
+        AdFlowControl.getInstance().loadAdInterval(true);
+//    //每小时触发
+//    resetHourMonitor();
+//    //每天触发
+//    resetDayMonitor();
+
+
     }
 
     /**
@@ -57,7 +68,6 @@ public class CronDispatch {
     public static void  startTimer(int type){
        switch(type){
            case 0 :
-//               0 0 1 * * ? 每天凌晨 1 点执行
                dispatch(RealTask.class,"0/5 * * * * ?");
                break;
            case 1:
@@ -74,42 +84,11 @@ public class CronDispatch {
        }
     }
 
-    //    // 5 s 触发
-//    pullAndUpdateTask();
-//    // 10 min 触发
-//    loadAdInterval(true);
-//    //每小时触发
-//    resetHourMonitor();
-//    //每天触发
-//    resetDayMonitor();
 
-    class DailyTask implements Job {
-        @Override
-        public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-            control.resetDayMonitor();
-        }
-    }
 
-    class TenMinuteTask implements Job  {
-        @Override
-        public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-            control.loadAdInterval(true);
-        }
-    }
 
-    class HourTask  implements Job  {
-        @Override
-        public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-            control.resetHourMonitor();
-        }
-    }
 
-    class RealTask   implements Job{
-        @Override
-        public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-            control.pullAndUpdateTask();
-        }
-    }
+
 
 
 

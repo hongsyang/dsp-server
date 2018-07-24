@@ -20,6 +20,13 @@ import java.util.HashMap;
  *
  */
 public class AdFlowControl {
+    private static AdFlowControl control;
+    public static AdFlowControl getInstance(){
+        if(control == null){
+            control = new AdFlowControl();
+        }
+        return control;
+    }
 
     private static final Logger myLog = LoggerFactory.getLogger(AdFlowControl.class);
 
@@ -350,11 +357,11 @@ public class AdFlowControl {
             }
             //加载广告组信息
             ArrayList<GroupAdBean> groupList = taskService.queryAdGroupAll(timeBefore);
-            for(GroupAdBean group : groupList){
-                mapAdGroup.put(group.getGroupId(),group);
+            if(groupList != null){
+                for(GroupAdBean group : groupList){
+                    mapAdGroup.put(group.getGroupId(),group);
+                }
             }
-
-
             ResultList rl = taskService.queryAdByUpTime(timeBefore);
             //更新监视器阀值信息
             updateIndicator(rl);

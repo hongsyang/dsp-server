@@ -137,13 +137,11 @@ public class TaskServicve extends Service {
      */
     public ArrayList<GroupAdBean> queryAdGroupAll(long updateTimeStamp){
         long now = System.currentTimeMillis();
-        Object[] arr = new Object[3];
-        arr[0] = 0;
-        arr[1] = now;
-        arr[2] = now;
+        Object[] arr = new Object[1];
+        arr[0] = (int)updateTimeStamp;
 
 //        String sql = "select a.*, b.uid ad_uid group a join ad b on a.uid = b.group_uid where b.s <= ? and b.e >= ? ";
-        String sql = "select * from group where updated_at >= " + String.valueOf(updateTimeStamp) ;
+        String sql = "select * from ad_group where updated_at >= ?";
         try{
             ArrayList<GroupAdBean> list = new ArrayList<>();
             ResultList rl = select.select(sql,arr);
