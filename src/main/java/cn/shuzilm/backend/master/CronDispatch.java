@@ -46,12 +46,13 @@ public class CronDispatch {
 //        System.out.println();
         //    // 5 s 触发
 //    pullAndUpdateTask();
-//    // 10 min 触发
+        //  每小时触发
+        AdFlowControl.getInstance().resetHourMonitor();
+        //  每天触发
+        AdFlowControl.getInstance().resetDayMonitor();
+        //10 min 触发
         AdFlowControl.getInstance().loadAdInterval(true);
-//    //每小时触发
-//    resetHourMonitor();
-//    //每天触发
-//    resetDayMonitor();
+
 
 
     }

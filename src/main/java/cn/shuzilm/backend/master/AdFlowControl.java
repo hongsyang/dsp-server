@@ -127,31 +127,44 @@ public class AdFlowControl {
         switch(type){
             case 0 :
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
+                if(statusHour == null)
+                    break;
                 statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
                 statusHour.setMoney(statusHour.getMoney() + addMoney);
                 break;
             case 1:
                 AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
+                if(statusDaily == null)
+                    break;
                 statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
                 statusDaily.setMoney(statusDaily.getMoney() + addMoney);
                 break;
             case 2:
                 AdFlowStatus statusAll = mapMonitorTotal.get(adUid);
+                if(statusAll == null)
+                    break;
                 statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
                 statusAll.setMoney(statusAll.getMoney() + addMoney);
                 break;
             case -1:
                 statusHour = mapMonitorHour.get(adUid);
-                statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
-                statusHour.setMoney(statusHour.getMoney() + addMoney);
+                if(statusHour != null){
+                    statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
+                    statusHour.setMoney(statusHour.getMoney() + addMoney);
+                }
 
                 statusDaily = mapMonitorDaily.get(adUid);
-                statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
-                statusDaily.setMoney(statusDaily.getMoney() + addMoney);
+                if(statusDaily != null){
+                    statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
+                    statusDaily.setMoney(statusDaily.getMoney() + addMoney);
+                }
 
                 statusAll = mapMonitorTotal.get(adUid);
-                statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
-                statusAll.setMoney(statusAll.getMoney() + addMoney);
+                if(statusAll != null){
+                    statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
+                    statusAll.setMoney(statusAll.getMoney() + addMoney);
+                }
+
                 break;
         }
     }
@@ -373,16 +386,36 @@ public class AdFlowControl {
                 if(isInitial){
                     //加载 小时 历史消费金额
                     HashMap<String,ReportBean> reportMapHour = taskService.statAdCostHour();
-                    BigDecimal expense = reportMapHour.get(ad.getAdUid()).getExpense();
-                    this.updatePixel(ad.getAdUid(),0,expense.floatValue(),0);
+                    if(reportMapHour.size() >0){
+                        ReportBean report = reportMapHour.get(ad.getAdUid());
+                        if(report != null){
+                            BigDecimal expense = report.getExpense();
+                            this.updatePixel(ad.getAdUid(),0,expense.floatValue(),0);
+                        }
+
+                    }
+
                     //加载 天 历史消费金额
                     HashMap<String,ReportBean> reportMapDaily = taskService.statAdCostDaily();
-                    expense = reportMapDaily.get(ad.getAdUid()).getExpense();
-                    this.updatePixel(ad.getAdUid(),0,expense.floatValue(),1);
+                    if(reportMapDaily.size() > 0){
+                        ReportBean report = reportMapDaily.get(ad.getAdUid());
+                        if(report != null){
+                            BigDecimal expense = report.getExpense();
+                            this.updatePixel(ad.getAdUid(),0,expense.floatValue(),1);
+                        }
+                    }
+
                     //加载 总 历史消费金额
                     HashMap<String,ReportBean> reportMapTotal = taskService.statAdCostTotal();
-                    expense = reportMapTotal.get(ad.getAdUid()).getExpense();
-                    this.updatePixel(ad.getAdUid(),0,expense.floatValue(),2);
+                    if(reportMapTotal.size() >0){
+                        ReportBean report =  reportMapTotal.get(ad.getAdUid());
+                        if(report != null){
+                            BigDecimal expense =report.getExpense();
+                            this.updatePixel(ad.getAdUid(),0,expense.floatValue(),2);
+                        }
+
+                    }
+
 
                 }
 
@@ -409,7 +442,7 @@ public class AdFlowControl {
                 ad.setEndTime(new Date(map.getInteger("e")));
                 ad.setFrqDaily(map.getInteger("frq_daily"));
                 ad.setFrqHour(map.getInteger("frq_hourly"));
-                ad.setPrice(map.getFloat("price"));
+                ad.setPrice(map.getBigDecimal("price").floatValue());
                 ad.setPriority(map.getInteger("priority"));
                 //限额
                 ad.setQuotaAmount(map.getBigDecimal("quota_amount"));
@@ -418,7 +451,7 @@ public class AdFlowControl {
                 String timeScheTxt = map.getString("time");
                 int[][] timeScheduling = timeTxtToMatrix(timeScheTxt);
                 ad.setTimeSchedulingArr(timeScheduling);
-                ad.setTimestamp(map.getLong("created_at"));
+                ad.setTimestamp(map.getInteger("created_at"));
 
                 TaskBean task = new TaskBean(ad.getAdUid(),ad);
                 //如果是价格和配额发生了变化，直接通知

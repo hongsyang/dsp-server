@@ -1,13 +1,16 @@
 package cn.shuzilm.util;
 
+import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.RedisURI;
+import io.lettuce.core.api.async.RedisAsyncCommands;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,12 +35,28 @@ public class AsyncRedisClient {
     }
 
     public static void main(String[] args) {
-        String[] urls = new String[]{"192.168.1.241","101.200.56.200"};
+        RedisClient client = RedisClient.create("redis://192.168.1.241");
+        RedisAsyncCommands<String, String> commands = client.connect().async();
+        RedisFuture<String> future = commands.get("key");
+
+        RedisFuture<String> futureSet =  commands.set("","");
+
+        String value = null;
+        try {
+            value = future.get();
+            System.out.println(value);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+       /* String[] urls = new String[]{"192.168.1.241","101.200.56.200"};
         AsyncRedisClient client = new AsyncRedisClient(urls,6379);
         String key1 = "180.212.6.151";
         String key2 = "113.88.87.72";
         Object[] objects = client.get(key1,key2);
-        System.out.println(objects[0] + " " + objects[1]);
+        System.out.println(objects[0] + " " + objects[1]);*/
     }
 
     public Object[] get(String key1 , String key2){

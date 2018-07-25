@@ -22,11 +22,11 @@ public class TaskServicve extends Service {
      * @throws java.sql.SQLException
      */
     public ResultList queryAdByUpTime(long startTime) throws SQLException {
-        long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis() ;
         Object[] arr = new Object[3];
-        arr[0] = startTime;
-        arr[1] = now;
-        arr[2] = now;
+        arr[0] = startTime / 1000;
+        arr[1] = now / 1000;
+        arr[2] = now / 1000;
         String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ?";
         return select.select(sql,arr);
     }
@@ -138,7 +138,7 @@ public class TaskServicve extends Service {
     public ArrayList<GroupAdBean> queryAdGroupAll(long updateTimeStamp){
         long now = System.currentTimeMillis();
         Object[] arr = new Object[1];
-        arr[0] = (int)updateTimeStamp;
+        arr[0] = (int)(updateTimeStamp / 1000);
 
 //        String sql = "select a.*, b.uid ad_uid group a join ad b on a.uid = b.group_uid where b.s <= ? and b.e >= ? ";
         String sql = "select * from ad_group where updated_at >= ?";
@@ -163,7 +163,7 @@ public class TaskServicve extends Service {
     public HashMap<String,ReportBean> statAdCostTotal(){
         long startStamp = 0;
         long nowStamp = System.currentTimeMillis();
-        return statAdCost(startStamp,nowStamp);
+        return statAdCost(startStamp,nowStamp,false);
     }
 
     /**
@@ -178,7 +178,7 @@ public class TaskServicve extends Service {
         long startStamp = start.getTimeInMillis();
         //以当前时间作为结束时间
         long nowStamp = System.currentTimeMillis();
-        return statAdCost(startStamp,nowStamp);
+        return statAdCost(startStamp,nowStamp,true);
     }
 
     public HashMap<String,ReportBean> statAdCostDaily(){
@@ -187,7 +187,7 @@ public class TaskServicve extends Service {
         start.set(Calendar.MINUTE,0);
         long startStamp = start.getTimeInMillis();
         long nowStamp = System.currentTimeMillis();
-        return statAdCost(startStamp,nowStamp);
+        return statAdCost(startStamp,nowStamp,false);
     }
 
     /**
@@ -196,14 +196,19 @@ public class TaskServicve extends Service {
      * @param startTime
      * @param endTime
      */
-    public HashMap<String,ReportBean> statAdCost(long startTime, long endTime){
+    public HashMap<String,ReportBean> statAdCost(long startTime, long endTime,boolean isHour){
         // type：
         // 0 : 小时存量费用的统计，对于一个小时前，当天的广告耗费的汇总
         // 1 : 天存量费用的统计，
         Object [] arr = new Object[2];
-        arr[0] = startTime;
-        arr[1] = endTime;
-        String sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where created_at >= ? and create_at<= ?  group by ad_uid";
+        //转换成秒的时间戳
+        arr[0] = startTime / 1000;
+        arr[1] = endTime / 1000;
+        String sql = "";
+        if(isHour)
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour where created_at >= ? and created_at <= ?  group by ad_uid";
+        else
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where created_at >= ? and created_at <= ?  group by ad_uid";
         try {
             ResultList rl = select.select(sql,arr);
             HashMap<String,ReportBean> map = new HashMap<>();
