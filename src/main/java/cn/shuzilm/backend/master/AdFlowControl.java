@@ -375,6 +375,7 @@ public class AdFlowControl {
                     mapAdGroup.put(group.getGroupId(),group);
                 }
             }
+            //加载广告信息
             ResultList rl = taskService.queryAdByUpTime(timeBefore);
             //更新监视器阀值信息
             updateIndicator(rl);

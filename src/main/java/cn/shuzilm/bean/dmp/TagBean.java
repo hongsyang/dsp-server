@@ -9,23 +9,34 @@ import lombok.Data;
 @Data
 public class TagBean {
     /**
-     * 该 TAG 所在标签管理表中的
+     * 该 TAG 所在标签管理表中的 ID
      */
-    private int tagId;
-    private float[] work;
-    private float[] residence;
-    private float[] activity;
-    private int incomeId;
-    private String brand;
-    private int platformId;
-    private int networkId;
-    private int carrierId;
-    private String appPreferenceId;
+    private int tagId;//标签 id
+
+    //地理位置
+    private float[] work;//工作地
+    private float[] residence;//居住地
+    private float[] activity;//活动地
+    private int provinceId;//省份ID
+    private int cityId;//城市ID
+    private int countyId;//县级ID
+
+    //属性筛选
+    private int incomeId; //收入水平
+    private String appPreferenceIds;//兴趣
+
+    private int platformId; //平台 安卓或 IOS
+    private String brand; //品牌
+    private int phonePrice;//设备价格 分档
+    private int networkId; //网络类型 LTE 3G
+    private int carrierId; // 运营商
+    private String appPreferenceId;// 应用偏好
 
 
     public static void main(String[] args) {
         TagBean tag = new TagBean();
-
+//        tag.setActivity();
+//        tag.setAppPreferenceId();
         String json = JsonTools.toJsonString(tag);
         System.out.println(json);
     }

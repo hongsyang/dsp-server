@@ -50,12 +50,12 @@ public class RuleMatching {
      * 将设备ID 的标签从加速层取出，并做规则判断
      * @param deviceId
      */
-    public void match(String deviceId,String ip,String adType,int width,int height){
+    public void match(String deviceId,String adType,int width,int height){
         //取出标签
         //
-        Object[] objArr = redis.get(deviceId,ip);
-        String tagJson = (String)objArr[0];
-        String ipResult = (String)objArr[1];
+        String tagJson = redis.getAsync(deviceId);
+//        String tagJson = (String)objArr[0];
+//        String ipResult = (String)objArr[1];
 
         TagBean tagBean = (TagBean)JsonTools.fromJson(tagJson);
 

@@ -11,6 +11,7 @@ import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by thunders on 2018/7/24.
@@ -64,7 +65,7 @@ public class AsyncRedisClient {
         System.out.println(objects[0] + " " + objects[1]);*/
     }
 
-    public Object[] get(String deviceId , String ip){
+    public Object[] getAsyncDouble(String deviceId,String ip ){
         RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
         RedisFuture<String> future1 = commands.get(deviceId);
         RedisFuture<String> future2 = commands.get(ip);
@@ -76,6 +77,22 @@ public class AsyncRedisClient {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    public String getAsync(String deviceId){
+        RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+        RedisFuture<String> future1 = commands.get(deviceId);
+        String value = null;
+        try {
+            value = future1.get(100, TimeUnit.MILLISECONDS );
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+        return value;
     }
 
 
