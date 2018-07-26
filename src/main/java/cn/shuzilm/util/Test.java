@@ -20,19 +20,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Test {
     public static void main(String[] args)  {
-        JedisQueueManager.init();
-        Set<String> stringSet = new HashSet<>();
-        for (int i = 0; i <100 ; i++) {
-            stringSet.add("houkp"+i);
-        }
-        boolean b = JedisQueueManager.putElementToQueue("houkp", stringSet, Priority.MAX_PRIORITY);
-        Set<String> elementFromQueue = (Set) JedisQueueManager.getElementFromQueue("houkp");
-        String houkp ="houkp12";
-        for (String s : elementFromQueue) {
-            System.out.println(s);
-        }
-        boolean houkp1 = elementFromQueue.contains(houkp);
-        System.out.println(houkp1);
+//        JedisQueueManager.init();
+//        Set<String> stringSet = new HashSet<>();
+//        for (int i = 0; i <100 ; i++) {
+//            stringSet.add("houkp"+i);
+//        }
+//        boolean b = JedisQueueManager.putElementToQueue("houkp", stringSet, Priority.MAX_PRIORITY);
+        Object elementFromQueue = JedisQueueManager.getElementFromQueue("417bbac771636dd6d3f5de3850455da7");
+        System.out.println(elementFromQueue);
+//        String houkp ="houkp12";
+//        for (String s : elementFromQueue) {
+//            System.out.println(s);
+//        }
+//        boolean houkp1 = elementFromQueue.contains(houkp);
+//        System.out.println(houkp1);
 //        if (b){
 //            Object houkp1 = JedisQueueManager.getElementFromQueue("houkp");
 //
