@@ -1,20 +1,50 @@
 package cn.shuzilm.backend.rtb;
 
 import cn.shuzilm.backend.master.MsgControlCenter;
+import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.TaskBean;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by thunders on 2018/7/17.
  */
 public class RtbFlowControl {
+    private static RtbFlowControl rtb = null;
+    private RtbFlowControl(){
+
+    }
+
+    public static RtbFlowControl getInstance(){
+        if(rtb == null){
+            rtb = new RtbFlowControl();
+        }
+        return rtb;
+    }
+
+    public ConcurrentHashMap<String,TaskBean> getAdMap(){
+        return mapAd;
+    }
+
+    public ConcurrentHashMap<String,List<TaskBean>> getCreativeMap(){
+        return mapAdCreative;
+    }
+
+
     private String nodeName ;
     /**
      * 广告资源管理
      */
     private static ConcurrentHashMap<String,TaskBean> mapAd = null;
+    /**
+     * 广告资源的倒置
+     * key: 广告类型  + 广告宽 + 广告高
+     */
+    private static ConcurrentHashMap<String,List<TaskBean>> mapAdCreative = null;
+
     public RtbFlowControl(String nodeName){
         this.nodeName = nodeName;
         mapAd = new ConcurrentHashMap<>();
@@ -26,6 +56,7 @@ public class RtbFlowControl {
         // 1 hour
         refreshAdStatus();
     }
+
     /**
      * 每隔 5 秒钟从消息中心获得当前节点的当前任务，并与当前两个 MAP monitor 进行更新
      *
@@ -34,7 +65,21 @@ public class RtbFlowControl {
         TaskBean task = MsgControlCenter.recvTask(nodeName);
         if(task != null){
             String uid = task.getTaskBean().getAdUid();
+            //广告内容的更新
             mapAd.put(uid,task);
+            //广告内容的更新 ，按照素材的类型和尺寸
+            CreativeBean creative = task.getTaskBean().getCreativeList().get(0);
+            String creativeKey = creative.getType() + creative.getWidth() + creative.getHeight();
+
+            if(!mapAdCreative.contains(creativeKey)){
+                List<TaskBean> taskList = new ArrayList<TaskBean>();
+                taskList.add(task);
+                mapAdCreative.put(creativeKey,taskList);
+            }else{
+                List<TaskBean> taskList = mapAdCreative.get(creativeKey);
+                taskList.add(task);
+            }
+
         }
 
     }

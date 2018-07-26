@@ -468,9 +468,6 @@ public class AdFlowControl {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
-
-
     }
 
     private int[][] timeTxtToMatrix(String text){
