@@ -74,6 +74,14 @@ public class FilterRule {
                     }
                 }
             } else {
+                if (StringUtils.isNotBlank(userDevice.getImei())){
+                    String imei = userDevice.getImei();
+                    String substring = imei.substring(0, 8);
+                    String complianceImei = jedis.get(substring);
+                    if (complianceImei!=null){//合规库有IMEI的值判断厂商和品牌合规
+
+                    }
+                }
                 if (StringUtils.isBlank(userDevice.getIp())) {//判断设备ip地址
                     log.debug("设备ip为空,BidRequest参数入参：{}", bidRequestBean);
                     return false;
