@@ -1,5 +1,8 @@
 package cn.shuzilm.bean.control;
 
+import cn.shuzilm.bean.dmp.AudienceBean;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -7,6 +10,7 @@ import java.util.List;
 /**
  * Created by thunders on 2018/7/10.
  */
+@Data
 public class AdBean implements ICommand  {
     //Apache Log Config
 //日志版本||URL||参数||请求时间||IP地址||UID类型||UID值||模式MODE||ADX来源||广告位ID||广告ID||资源ID||创意ID||匹配标签||广告单价||附加参数||状态码||UserAgent/设备属性||受众/环境参数||Refer/bundle ID||服务器ID||响应时间（微秒）||返回字节数||排错信息
@@ -22,6 +26,7 @@ public class AdBean implements ICommand  {
 //    Refer/Bundle ID：如果存在，直接记录。
 //    ext附加参数：参数传递宏
 
+    private AudienceBean audience;
     /**
      * 曝光率<br>
      * wins / bids 的比值，是动态变化的，并由流量控制中心更新变化
@@ -34,7 +39,6 @@ public class AdBean implements ICommand  {
     private AdvertiserBean advertiser;
 
     private String groupId;
-
 
     /**
      * 广告单元ID
@@ -67,8 +71,6 @@ public class AdBean implements ICommand  {
      * 出价
      */
     private float price;
-
-
     /**
      * 广告排期(对应 ad 数据表中的 time ，需要转换成 int[][]形式)
      */
@@ -93,7 +95,6 @@ public class AdBean implements ICommand  {
      */
     private long cpmHourLimit;
 
-
     /**
      * 单用户每日频次限制
      */
@@ -103,154 +104,9 @@ public class AdBean implements ICommand  {
      */
     private int frqHour;
 
-
-
     /**
      * 当前时间戳
      */
     private long timestamp;
 
-    public String getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-    }
-
-    public float getExposureRate() {
-        return exposureRate;
-    }
-
-    public void setExposureRate(float exposureRate) {
-        this.exposureRate = exposureRate;
-    }
-
-    public AdvertiserBean getAdvertiser() {
-        return advertiser;
-    }
-
-    public void setAdvertiser(AdvertiserBean advertiser) {
-        this.advertiser = advertiser;
-    }
-
-    public String getAdUid() {
-        return adUid;
-    }
-
-    public void setAdUid(String adUid) {
-        this.adUid = adUid;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getQuotaAmount() {
-        return quotaAmount;
-    }
-
-    public void setQuotaAmount(BigDecimal quotaAmount) {
-        this.quotaAmount = quotaAmount;
-    }
-
-    public Date getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public List<CreativeBean> getCreativeList() {
-        return creativeList;
-    }
-
-    public void setCreativeList(List<CreativeBean> creativeList) {
-        this.creativeList = creativeList;
-    }
-
-    public float getPrice() {
-        return price;
-    }
-
-    public void setPrice(float price) {
-        this.price = price;
-    }
-
-    public int[][] getTimeSchedulingArr() {
-        return timeSchedulingArr;
-    }
-
-    public void setTimeSchedulingArr(int[][] timeSchedulingArr) {
-        this.timeSchedulingArr = timeSchedulingArr;
-    }
-
-    public int getSpeedMode() {
-        return speedMode;
-    }
-
-    public void setSpeedMode(int speedMode) {
-        this.speedMode = speedMode;
-    }
-
-    public int getPriority() {
-        return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
-    public long getCpmDailyLimit() {
-        return cpmDailyLimit;
-    }
-
-    public void setCpmDailyLimit(long cpmDailyLimit) {
-        this.cpmDailyLimit = cpmDailyLimit;
-    }
-
-    public long getCpmHourLimit() {
-        return cpmHourLimit;
-    }
-
-    public void setCpmHourLimit(long cpmHourLimit) {
-        this.cpmHourLimit = cpmHourLimit;
-    }
-
-    public int getFrqDaily() {
-        return frqDaily;
-    }
-
-    public void setFrqDaily(int frqDaily) {
-        this.frqDaily = frqDaily;
-    }
-
-    public int getFrqHour() {
-        return frqHour;
-    }
-
-    public void setFrqHour(int frqHour) {
-        this.frqHour = frqHour;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
 }

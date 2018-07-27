@@ -1,6 +1,10 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.TaskBean;
+import cn.shuzilm.bean.dmp.AreaBean;
+import cn.shuzilm.bean.dmp.GpsBean;
+import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.JsonTools;
@@ -8,7 +12,6 @@ import cn.shuzilm.util.JsonTools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by thunders on 2018/7/17.
@@ -56,16 +59,37 @@ public class RuleMatching {
         String tagJson = redis.getAsync(deviceId);
 //        String tagJson = (String)objArr[0];
 //        String ipResult = (String)objArr[1];
-
         TagBean tagBean = (TagBean)JsonTools.fromJson(tagJson);
 
         //开始匹配
         String creativeKey = adType + width + height;
-        List<TaskBean> adList = rtbIns.getCreativeMap().get(creativeKey);
+        List<String> auidList = rtbIns.getCreativeMap().get(creativeKey);
 
         //开始遍历符合广告素材尺寸的广告
-        for(TaskBean bean : adList){
-            String adUid = bean.getTaskBean().getAdUid();
+        for(String adUid : auidList){
+            AdBean ad = rtbIns.getAdMap().get(adUid);
+
+            AudienceBean audience = ad.getAudience();
+
+            if(audience.getType().equals("location")){//地理位置
+                if(audience.getGeos().equals("")){
+                    //todo 省市县的匹配
+                    List<AreaBean> areaList = new ArrayList<>();
+                    for(AreaBean area:areaList){
+
+                    }
+
+                }else{//todo 按照经纬度匹配
+                    List<GpsBean> geoList = new ArrayList<>();
+                    for(GpsBean gps : geoList){
+
+                    }
+                }
+            }else if(audience.getType().equals("demographic")){ //特定人群
+
+            }else if(audience.getType().equals("company")){ // 具体公司
+
+            }
             boolean isAvaliable = rtbIns.checkAvalable(adUid);
             //是否投当前的广告
             if(!isAvaliable)

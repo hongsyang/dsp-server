@@ -45,7 +45,12 @@ public class AdFlowControl {
     /**
      * 广告资源管理
      */
-    private static HashMap<String,TaskBean> mapAd = null;
+    private static HashMap<String,AdBean> mapAd = null;
+
+    /**
+     * 广告任务管理
+     */
+    private static HashMap<String,TaskBean> mapTask = null;
 
     /**
      * 广告组与广告的对应关系
@@ -82,6 +87,8 @@ public class AdFlowControl {
     public AdFlowControl(){
         MDC.put("sift","control");
         mapAd = new HashMap<>();
+        mapTask = new HashMap<>();
+
         mapMonitorDaily = new HashMap<>();
         mapMonitorHour = new HashMap<>();
         adverConsumeMapCurr = new HashMap<>();
@@ -454,10 +461,11 @@ public class AdFlowControl {
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
 
-                TaskBean task = new TaskBean(ad.getAdUid(),ad);
+
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
-                mapAd.put(ad.getAdUid(),task);
+                mapAd.put(ad.getAdUid(),ad);
+                mapTask.put(ad.getAdUid(),new TaskBean(ad.getAdUid()));
                 counter ++;
 
             }
@@ -484,16 +492,20 @@ public class AdFlowControl {
         //遍历所有的广告
         for(String adUid : mapAd.keySet()){
             //对任务进行拆解
-            TaskBean task = mapAd.get(adUid);
-            AdBean ad = task.getTaskBean();
+            TaskBean task = new TaskBean(adUid);
+            AdBean ad = mapAd.get(adUid);
             //给每一个节点分配自己的 曝光 额度
             task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
             task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
             task.setCommand(TaskBean.COMMAND_START);
 
             for(WorkNodeBean node : nodeList){
+                //发送广告
+                pushAdSingleNode(node.getName(),ad);
+                //发送广告状态
                 pushTaskSingleNode(node.getName(),task);
             }
+
         }
 
     }
@@ -507,6 +519,15 @@ public class AdFlowControl {
         MsgControlCenter.sendTask(nodeName,bean, Priority.NORM_PRIORITY);
     }
 
+    /**
+     *
+     * @param nodeName
+     * @param bean
+     */
+    private void pushAdSingleNode(String nodeName,AdBean bean){
+        MsgControlCenter.sendAdBean(nodeName,bean, Priority.NORM_PRIORITY);
+    }
+
 
     /**
      * @param adUid
@@ -515,7 +536,7 @@ public class AdFlowControl {
      */
     public void pauseAd(String adUid,String reason,boolean isHourOrAll){
         for(WorkNodeBean node :nodeList){
-            TaskBean task = mapAd.get(adUid);
+            TaskBean task = mapTask.get(adUid);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll?TaskBean.SCOPE_HOUR:TaskBean.SCOPE_ALL);
@@ -532,7 +553,7 @@ public class AdFlowControl {
      */
     public void stopAd(String adUid,String reason,boolean isHourOrAll){
         for(WorkNodeBean node :nodeList){
-            TaskBean task = mapAd.get(adUid);
+            TaskBean task = mapTask.get(adUid);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll?TaskBean.SCOPE_HOUR:TaskBean.SCOPE_ALL);
