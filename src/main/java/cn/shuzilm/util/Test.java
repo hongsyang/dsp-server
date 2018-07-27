@@ -26,7 +26,10 @@ public class Test {
 //            stringSet.add("houkp"+i);
 //        }
 //        boolean b = JedisQueueManager.putElementToQueue("houkp", stringSet, Priority.MAX_PRIORITY);
-        Object elementFromQueue = JedisQueueManager.getElementFromQueue("417bbac771636dd6d3f5de3850455da7");
+        for (int i = 0; i < 100; i++) {
+            JedisQueueManager.putElementToQueue("houkp","houkp"+i,Priority.MAX_PRIORITY);
+        }
+        Object elementFromQueue = JedisQueueManager.getElementFromQueue("houkp");
         System.out.println(elementFromQueue);
 //        String houkp ="houkp12";
 //        for (String s : elementFromQueue) {

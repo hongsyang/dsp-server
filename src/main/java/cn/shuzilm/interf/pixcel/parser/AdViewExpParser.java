@@ -1,5 +1,7 @@
 package cn.shuzilm.interf.pixcel.parser;
 
+import cn.shuzilm.backend.pixel.PixelFlowControl;
+import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.util.UrlParserUtil;
@@ -32,8 +34,10 @@ public class AdViewExpParser  implements  ParameterParser{
         DUFlowBean duFlowBean = new DUFlowBean();
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         log.debug("urlRequest:{}",urlRequest);
-        Object element = JedisQueueManager.getElementFromQueue(urlRequest.get("requestId"));
+        Object element = JedisQueueManager.getElementFromQueue(urlRequest.get("req"));
         log.debug("element:{}",element);
+        AdPixelBean bean = new AdPixelBean();
+        PixelFlowControl.getInstance().sendStatus(bean);
         duFlowBean.setInfoId( urlRequest.get("houkp")+ UUID.randomUUID());
         String duFlowBeanJson = JSON.toJSONString(duFlowBean);
         log.debug("duFlowBeanJson:{}",duFlowBeanJson);

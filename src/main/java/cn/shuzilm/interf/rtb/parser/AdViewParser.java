@@ -1,7 +1,6 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
-import cn.shuzilm.bean.adview.request.Device;
 import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.adview.response.Bid;
 import cn.shuzilm.bean.adview.response.BidResponseBean;
@@ -12,16 +11,13 @@ import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.FilterRule;
 import com.alibaba.fastjson.JSON;
 import com.yao.util.bean.BeanUtil;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Description: KuaiyouParser 快友post参数解析
