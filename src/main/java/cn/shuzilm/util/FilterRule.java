@@ -2,11 +2,13 @@ package cn.shuzilm.util;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.adview.request.Device;
+import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 /**
  * @Description: FilterRule 过滤规则
@@ -56,18 +58,19 @@ public class FilterRule {
             log.debug("没有设备信息,BidRequest参数入参：{}", bidRequestBean);
             return false;
         } else {
+            Jedis jedis= JedisManager.getInstance().getResource();
             Device userDevice = bidRequestBean.getDevice();
             if (flag) {
                 if (StringUtils.isBlank(userDevice.getDidsha1())) {//判断设备IMEI 的 SHA1 值
                     log.debug("设备IMEI 的 SHA1 值为空,BidRequest参数入参：{}", bidRequestBean);
                     return false;
                 } else {
-                    Object queue = JedisQueueManager.getElementFromQueue(userDevice.getDidsha1());
-                    if (queue != null) {
+                    String didsha1 = jedis.get(userDevice.getDidsha1());
+                    if (didsha1 != null) {
+                        tag = true;
+                    } else {
                         log.debug(" 此设备不在数盟有效设备库中,BidRequest参数入参：{}", bidRequestBean);
                         return false;
-                    } else {
-                        tag = true;
                     }
                 }
             } else {
@@ -75,8 +78,8 @@ public class FilterRule {
                     log.debug("设备ip为空,BidRequest参数入参：{}", bidRequestBean);
                     return false;
                 } else {
-                    Object queue = JedisQueueManager.getElementFromQueue(userDevice.getIp());
-                    if (queue != null) {
+                    String ip = jedis.get(userDevice.getIp());
+                    if (ip != null) {
                         log.debug(" 此设备IP在黑名单中,BidRequest参数入参：{}", bidRequestBean);
                         return false;
                     } else {
