@@ -6,6 +6,7 @@ import cn.shuzilm.bean.adview.response.Bid;
 import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
+import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.FilterRule;
@@ -13,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.yao.util.bean.BeanUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -49,13 +51,15 @@ public class AdViewParser implements RequestService {
             BeanUtil.copyPropertyByNotNull(sourceDuFlowBean, targetDuFlowBean);
             log.debug("拷贝targetDuFlowBean:{}", targetDuFlowBean);
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
-            JedisQueueManager.putElementToQueue(bidResponseBean.getId(),bidResponseBean, Priority.MAX_PRIORITY);
+            Jedis jedis = JedisManager.getInstance().getResource();
+            jedis.set(bidResponseBean.getId(), JSON.toJSONString(targetDuFlowBean));
+            jedis.expire(bidResponseBean.getId(), 5 * 60);//设置超时时间为5分钟
+//            JedisQueueManager.putElementToQueue(bidResponseBean.getId(), targetDuFlowBean, Priority.MAX_PRIORITY);
             response = JSON.toJSONString(bidResponseBean);
             log.debug("bidResponseBean:{}", response);
         }
         return response;
     }
-
 
 
     private BidResponseBean convertBidResponse(DUFlowBean duFlowBean) {
@@ -75,7 +79,7 @@ public class AdViewParser implements RequestService {
         bid.setImpid(impression.getId());//从bidRequestBean里面取
         bid.setAdid(duFlowBean.getAdUid());//广告id，对应duFlowBean的AdUid；
         //曝光url
-        String wurl="http://localhost:8880/" + "adviewexp?" +
+        String wurl = "http://localhost:8880/" + "adviewexp?" +
                 "price=" + duFlowBean.getActualPrice() +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
@@ -86,7 +90,7 @@ public class AdViewParser implements RequestService {
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&req=" + duFlowBean.getRequestId() +
                 "&imp=" + impression.getId() +
-                "&pmp=" + duFlowBean.getDealid() ;
+                "&pmp=" + duFlowBean.getDealid();
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
 //        List<String> urls = new ArrayList<>();
@@ -97,7 +101,7 @@ public class AdViewParser implements RequestService {
 //        Map nurlMap = new HashMap();
 //        nurlMap.put("0", urls);
 //        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送//TODO 确认一下
-        String curl ="http://dsp.example.com/" + "adviewclick?" +
+        String curl = "http://dsp.example.com/" + "adviewclick?" +
                 "price=" + duFlowBean.getActualPrice() +
                 "&actualCreateTime=" + format +
                 "&adxId=" + duFlowBean.getAdxId() +
@@ -108,8 +112,8 @@ public class AdViewParser implements RequestService {
                 "&appVersion=" + duFlowBean.getAppVersion() +
                 "&requestId=" + duFlowBean.getRequestId() +
                 "&impId=" + impression.getId() +
-                "&pmpId=" + duFlowBean.getDealid() ;
-        List curls =new ArrayList();
+                "&pmpId=" + duFlowBean.getDealid();
+        List curls = new ArrayList();
         curls.add(curl);
         bid.setAdmt(duFlowBean.getAdmt());//广告类型
         bid.setPrice(duFlowBean.getPrice());//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
