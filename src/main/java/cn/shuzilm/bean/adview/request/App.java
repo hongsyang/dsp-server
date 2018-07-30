@@ -18,7 +18,7 @@ public class App implements Serializable {
     private String id;//(T) App 唯一标识，由 AdView 生成
     private String name;//(T) App 名称
     private String domain;//(F)  官网地址
-    private Integer[] cat;//(F) App 类型，参考附录 6 [
+    private String[] cat;//(F) App 类型，参考附录 6 [
     private String ver;//(F)  App 版本
     private String bundle;//(F) App 程序主包名
     private Integer paid;//(F) 是否为付费 App：0- 不是 1- 是付费 2- 应用内付费   0

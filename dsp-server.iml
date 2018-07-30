@@ -29,7 +29,7 @@
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.3" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.3" level="project" />
     <orderEntry type="module-library">
-      <library name="Maven: yao-config:yao-config:1.4">
+      <library name="Maven: com.yao.config:yao-config:1.4">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/yao-config-1.4.jar!/" />
         </CLASSES>
@@ -38,7 +38,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library name="Maven: yao-util:yao-util:1.1">
+      <library name="Maven: com.yao.utl:yao-util:1.1">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/yao-util-1.1.jar!/" />
         </CLASSES>

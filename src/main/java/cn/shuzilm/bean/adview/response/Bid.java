@@ -58,7 +58,7 @@ public class Bid implements Serializable {
 
     //广告上报与落地页等相关字段：【视频广告的播放汇报字段在 Video 对象中,见 5.5 章节】
     private String wurl;//(F)赢价通知，由 AdView 服务器发出
-    private Map<Integer, List<String>> nurl;//(F) 带延迟的展示汇报，由客户端发送。形如：{"0":["URL1", "URL2"],"10":["URL3", "URL4"]}
+//    private Map<Integer, List<String>> nurl;//(F) 带延迟的展示汇报，由客户端发送。形如：{"0":["URL1", "URL2"],"10":["URL3", "URL4"]}
     private List<String> curl;//(F)点击监控地址，客户端逐个发送通知
     private String adurl;//(T) 广告点击跳转落地页，可以支持重定向
     private String deeplink;//(F) 包含 deeplink 的点击跳转地址，无法打开则使用 adurl

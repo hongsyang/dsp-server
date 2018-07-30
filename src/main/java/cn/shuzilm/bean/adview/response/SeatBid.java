@@ -16,7 +16,7 @@ import java.util.List;
 */
 @Data
 public class SeatBid implements Serializable {
-    private List<Bid> bid;//(T) DSP 给的竞价广告对象
+    private List bid;//(T) DSP 给的竞价广告对象
     private String seat;//(F) SeatBid 的标识,由 DSP 生成
     private ResponseExt ext;//(F) 扩展对象
 }
