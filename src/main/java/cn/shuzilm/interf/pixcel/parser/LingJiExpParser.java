@@ -35,7 +35,6 @@ public class LingJiExpParser implements ParameterParser {
     @Override
     public String parseUrl(String url) {
         AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        DUFlowBean duFlowBean = new DUFlowBean();
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "LingJiExp");
         log.debug("LingJiExp曝光的wurl值:{}", urlRequest);
@@ -73,7 +72,7 @@ public class LingJiExpParser implements ParameterParser {
         }else {
             log.debug("发送到Phoenix：{}",lingJiExp);
         }
-        String duFlowBeanJson = JSON.toJSONString(duFlowBean);
+        String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return duFlowBeanJson;
     }
