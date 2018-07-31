@@ -38,13 +38,13 @@ public class LingJiExpParser implements ParameterParser {
         DUFlowBean duFlowBean = new DUFlowBean();
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "LingJiExp");
-        log.debug("LingJiExp曝光的nurl值:{}", urlRequest);
+        log.debug("LingJiExp曝光的wurl值:{}", urlRequest);
         String requestId = urlRequest.get("id");
         Jedis jedis = JedisManager.getInstance().getResource();
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
 //        DUFlowBean element = (DUFlowBean) JedisQueueManager.getElementFromQueue(urlRequest.get("req"));
-        log.debug("LingJiExp曝光的requestid:{},wurl值:{}:[]", requestId, element);
+        log.debug("LingJiExp曝光的requestid:{},nurl值:{}:[]", requestId, element);
         MDC.put("sift", "pixel");
         AdPixelBean bean = new AdPixelBean();
         if (element != null) {
@@ -54,21 +54,25 @@ public class LingJiExpParser implements ParameterParser {
         bean.setMoney(Float.valueOf(urlRequest.get("price")));
         bean.setWinNoticeNums(1);
         //pixel服务器发送到主控模块
-        log.debug("pixel服务器发送到主控模块的AdPixelBean：{}", bean);
+        log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
         PixelFlowControl.getInstance().sendStatus(bean);
 
         //pixel服务器发送到Phoenix
-        element.setInfoId(urlRequest.get("req") + UUID.randomUUID());
+        element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
         element.setRequestId(requestId);
-        MDC.put("sift", "AdViewExp");
+        MDC.put("sift", "LingJiExp");
         log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
                 element.getDid(), element.getDeviceId(),
                 element.getAdUid(), element.getAdvertiserUid(),
                 element.getAdvertiserUid(), element.getAgencyUid(),
                 element.getCreativeUid(), element.getProvince(),
                 element.getCity(), element.getRequestId());
-        JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
-
+        boolean lingJiExp = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
+        if (lingJiExp){
+            log.debug("发送到Phoenix：{}",lingJiExp);
+        }else {
+            log.debug("发送到Phoenix：{}",lingJiExp);
+        }
         String duFlowBeanJson = JSON.toJSONString(duFlowBean);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return duFlowBeanJson;

@@ -23,15 +23,14 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Test {
     public static void main(String[] args)  {
 
-        Jedis jedis = JedisManager.getInstance().getResource();
-        DUFlowBean duFlowBean =new DUFlowBean();
-        duFlowBean.setRequestId("houkp");
-        String elementJson = jedis.get("y053-test-t24-1533027411-0-594");
-        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
+//        Jedis jedis = JedisManager.getInstance().getResource();
+        Object lingJiExp = JedisQueueManager.getElementFromQueue("LingJiExp");
+//        String elementJson = jedis.get("LingJiExp");
+//        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
 //        jedis.set("houkp", JSON.toJSONString(duFlowBean));
 //        jedis.expire("houkp",10);
 //        String houkp = jedis.get("houkp");
-        System.out.println(element.toString());
+        System.out.println(lingJiExp.toString());
 //        JedisQueueManager.init();
 //        Set<String> stringSet = new HashSet<>();
 //        for (int i = 0; i <100 ; i++) {
