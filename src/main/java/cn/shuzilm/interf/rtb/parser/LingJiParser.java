@@ -59,9 +59,9 @@ public class LingJiParser implements RequestService {
 //            BeanUtil.copyPropertyByNotNull(sourceDuFlowBean, targetDuFlowBean);
             log.debug("拷贝targetDuFlowBean:{}", targetDuFlowBean);
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
-            Jedis jedis = JedisManager.getInstance().getResource();
-            jedis.set(bidResponseBean.getId(), JSON.toJSONString(targetDuFlowBean));
-            jedis.expire(bidResponseBean.getId(), 5 * 60);//设置超时时间为5分钟
+//            Jedis jedis = JedisManager.getInstance().getResource();
+//            jedis.set(bidResponseBean.getId(), JSON.toJSONString(targetDuFlowBean));
+//            jedis.expire(bidResponseBean.getId(), 5 * 60);//设置超时时间为5分钟
 //            JedisQueueManager.putElementToQueue(bidResponseBean.getId(), targetDuFlowBean, Priority.MAX_PRIORITY);
             response = JSON.toJSONString(bidResponseBean);
             log.debug("bidResponseBean:{}", response);
@@ -90,11 +90,11 @@ public class LingJiParser implements RequestService {
         bid.setPrice(600);//duFlowBean.getPrice() 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCrid("1000014");//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
         //曝光nurl
-        String nurl = "http://localhost:8880/" + "lingjiexp?" +
-                "&id=" + duFlowBean.getRequestId() +
+        String nurl = "http://101.200.56.200:8880/" + "lingjiexp?" +
+                "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-                "price=" + duFlowBean.getActualPrice() +
+                "&price=" + duFlowBean.getActualPrice() +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
@@ -105,7 +105,7 @@ public class LingJiParser implements RequestService {
                 "&pmp=" + duFlowBean.getDealid();
         bid.setNurl(nurl);
 
-        String curl = "http://dsp.example.com/" + "adviewclick?" +
+        String curl = "http://101.200.56.200:8880/" + "lingjiclick?" +
                 "price=" + duFlowBean.getActualPrice() +
                 "&actualCreateTime=" + format +
                 "&adxId=" + duFlowBean.getAdxId() +
@@ -124,7 +124,6 @@ public class LingJiParser implements RequestService {
         ljResponseExt.setCm(curls);
         ljResponseExt.setPm(curls);
         bid.setExt(ljResponseExt);
-
 
         //添加到list中
         bidList.add(bid);
