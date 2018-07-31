@@ -37,14 +37,14 @@ public class LingJiExpParser implements ParameterParser {
         AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
         DUFlowBean duFlowBean = new DUFlowBean();
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
-        MDC.put("sift", "AdViewWurl");
-        log.debug("AdViewExp曝光的wurl值:{}", urlRequest);
-        String requestId = urlRequest.get("req");
+        MDC.put("sift", "LingJiExp");
+        log.debug("LingJiExp曝光的nurl值:{}", urlRequest);
+        String requestId = urlRequest.get("id");
         Jedis jedis = JedisManager.getInstance().getResource();
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
 //        DUFlowBean element = (DUFlowBean) JedisQueueManager.getElementFromQueue(urlRequest.get("req"));
-        log.debug("AdViewExp曝光的requestid:{},wurl值:{}:[]", requestId, element);
+        log.debug("LingJiExp曝光的requestid:{},wurl值:{}:[]", requestId, element);
         MDC.put("sift", "pixel");
         AdPixelBean bean = new AdPixelBean();
         if (element != null) {

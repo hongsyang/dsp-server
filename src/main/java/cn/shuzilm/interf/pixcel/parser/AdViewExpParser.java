@@ -39,7 +39,7 @@ public class AdViewExpParser implements ParameterParser {
         AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
         DUFlowBean duFlowBean = new DUFlowBean();
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
-        MDC.put("sift", "AdViewWurl");
+        MDC.put("sift", "AdViewExp");
         log.debug("AdViewExp曝光的wurl值:{}", urlRequest);
         String requestId = urlRequest.get("req");
         Jedis jedis = JedisManager.getInstance().getResource();

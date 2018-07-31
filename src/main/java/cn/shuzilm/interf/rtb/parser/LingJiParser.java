@@ -2,35 +2,35 @@ package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.adview.request.Impression;
-import cn.shuzilm.bean.adview.response.Bid;
 import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.lj.response.LJBid;
 import cn.shuzilm.bean.lj.response.LJResponseExt;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.FilterRule;
 import com.alibaba.fastjson.JSON;
-import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import redis.clients.jedis.Jedis;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
-* @Description:    LingjiParser 灵集post参数解析
-* @Author:         houkp
-* @CreateDate:     2018/7/20 14:37
-* @UpdateUser:     houkp
-* @UpdateDate:     2018/7/20 14:37
-* @UpdateRemark:   修改内容
-* @Version:        1.0
-*/
+ * @Description: LingjiParser 灵集post参数解析
+ * @Author: houkp
+ * @CreateDate: 2018/7/20 14:37
+ * @UpdateUser: houkp
+ * @UpdateDate: 2018/7/20 14:37
+ * @UpdateRemark: 修改内容
+ * @Version: 1.0
+ */
 public class LingJiParser implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(LingJiParser.class);
@@ -49,23 +49,24 @@ public class LingJiParser implements RequestService {
             sourceDuFlowBean.setImpression(bidRequestBean.getImp());
             sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
             DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
-        try {
-            BeanUtils.copyProperties(targetDuFlowBean,sourceDuFlowBean);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
+            BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
 //            BeanUtil.copyPropertyByNotNull(sourceDuFlowBean, targetDuFlowBean);
             log.debug("拷贝targetDuFlowBean:{}", targetDuFlowBean);
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
-//            Jedis jedis = JedisManager.getInstance().getResource();
-//            jedis.set(bidResponseBean.getId(), JSON.toJSONString(targetDuFlowBean));
-//            jedis.expire(bidResponseBean.getId(), 5 * 60);//设置超时时间为5分钟
-//            JedisQueueManager.putElementToQueue(bidResponseBean.getId(), targetDuFlowBean, Priority.MAX_PRIORITY);
+            Jedis jedis = JedisManager.getInstance().getResource();
+            if (jedis != null) {
+                log.debug("jedis：{}", jedis);
+                jedis.set(bidResponseBean.getId(), JSON.toJSONString(targetDuFlowBean));
+                jedis.expire(bidResponseBean.getId(), 5 * 60);//设置超时时间为5分钟
+            } else {
+                log.debug("jedis为空：{}", jedis);
+            }
             response = JSON.toJSONString(bidResponseBean);
             log.debug("bidResponseBean:{}", response);
-//        }
+       /* } else {
+            response = "参数不合规";
+        }*/
+
         return response;
     }
 
@@ -119,7 +120,7 @@ public class LingJiParser implements RequestService {
                 "&pmpId=" + duFlowBean.getDealid();
         List curls = new ArrayList();
         curls.add(curl);
-        LJResponseExt ljResponseExt =new LJResponseExt();
+        LJResponseExt ljResponseExt = new LJResponseExt();
         ljResponseExt.setLdp(curl);
         ljResponseExt.setCm(curls);
         ljResponseExt.setPm(curls);

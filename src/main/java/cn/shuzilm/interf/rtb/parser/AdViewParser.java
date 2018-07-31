@@ -7,11 +7,11 @@ import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.jedis.JedisManager;
+import org.springframework.beans.BeanUtils;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.FilterRule;
 import com.alibaba.fastjson.JSON;
-import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -49,22 +49,22 @@ public class AdViewParser implements RequestService {
             sourceDuFlowBean.setImpression(bidRequestBean.getImp());
             sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
             DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
-            try {
-                BeanUtils.copyProperties(sourceDuFlowBean,targetDuFlowBean);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            }
+            BeanUtils.copyProperties(sourceDuFlowBean,targetDuFlowBean);
 //            BeanUtil.copyPropertyByNotNull(sourceDuFlowBean, targetDuFlowBean);
             log.debug("拷贝targetDuFlowBean:{}", targetDuFlowBean);
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
             Jedis jedis = JedisManager.getInstance().getResource();
-            jedis.set(bidResponseBean.getId(), JSON.toJSONString(targetDuFlowBean));
-            jedis.expire(bidResponseBean.getId(), 5 * 60);//设置超时时间为5分钟
-//            JedisQueueManager.putElementToQueue(bidResponseBean.getId(), targetDuFlowBean, Priority.MAX_PRIORITY);
+            if (jedis != null) {
+                log.debug("jedis：{}", jedis);
+                jedis.set(bidResponseBean.getId(), JSON.toJSONString(targetDuFlowBean));
+                jedis.expire(bidResponseBean.getId(), 5 * 60);//设置超时时间为5分钟
+            } else {
+                log.debug("jedis为空：{}", jedis);
+            }
             response = JSON.toJSONString(bidResponseBean);
             log.debug("bidResponseBean:{}", response);
+        }else {
+            response = "参数不合规";
         }
         return response;
     }
