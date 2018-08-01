@@ -18,6 +18,7 @@ public class MsgControlCenter {
 
     public static final String UP = "_up";
     public static final String DOWN = "_down";
+    public static final String AD_BEAN = "ad";
     public static final String PIXEL_STATUS = "_pixel";
     public static final String BID_STATUS = "_bid";
     public static final String MASTER_QUEUE_NAME = "task_queue";
@@ -44,6 +45,21 @@ public class MsgControlCenter {
     public static boolean sendCommand(String nodeName,ICommand command,Priority priority){
         return JedisQueueManager.putElementToQueue(nodeName + DOWN,command,priority);
     }
+
+
+
+    public static boolean sendAdBean(String nodeName, AdBean bean, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + AD_BEAN,bean,priority);
+    }
+
+    public static AdBean recvAdBean(String nodeName){
+        Object obj = JedisQueueManager.getElementFromQueue(nodeName + AD_BEAN);
+        if(obj == null)
+            return null;
+        else
+            return (AdBean)obj;
+    }
+
 
 
     public static boolean sendTask(String nodeName, TaskBean bean, Priority priority){

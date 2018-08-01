@@ -9,9 +9,9 @@ import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by thunders on 2018/7/24.
@@ -22,10 +22,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class AsyncRedisClient {
     private StatefulRedisClusterConnection<String, String> connection = null;
-    public AsyncRedisClient(String[] nodes,int port){
+
+    public AsyncRedisClient(String[] nodes){
         ArrayList<RedisURI> nodeList = new ArrayList<>();
         for(String node : nodes){
-            RedisURI nodeUri = RedisURI.create(node, port);
+            String[] nodeArr = node.split(",");
+            RedisURI nodeUri = RedisURI.create(nodeArr[0], Integer.parseInt(nodeArr[1]));
             nodeList.add(nodeUri);
         }
 
@@ -37,14 +39,18 @@ public class AsyncRedisClient {
     public static void main(String[] args) {
         RedisClient client = RedisClient.create("redis://192.168.1.241");
         RedisAsyncCommands<String, String> commands = client.connect().async();
-        RedisFuture<String> future = commands.get("key");
+        commands.hset("AA","age","18");
+        commands.hset("AA","income","5000");
 
-        RedisFuture<String> futureSet =  commands.set("","");
+        RedisFuture future = commands.get("AA");
+//        RedisFuture<String> futureSet =  commands.set("","");
 
         String value = null;
         try {
-            value = future.get();
-            System.out.println(value);
+
+            Object obj = future.get();
+            System.out.println(obj);
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -59,10 +65,10 @@ public class AsyncRedisClient {
         System.out.println(objects[0] + " " + objects[1]);*/
     }
 
-    public Object[] get(String key1 , String key2){
+    public Object[] getAsyncDouble(String deviceId,String ip ){
         RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
-        RedisFuture<String> future1 = commands.get(key1);
-        RedisFuture<String> future2 = commands.get(key2);
+        RedisFuture<String> future1 = commands.get(deviceId);
+        RedisFuture<String> future2 = commands.get(ip);
         try{
             String value = future1.get(100, TimeUnit.MILLISECONDS );
             String value2 = future2.get(100, TimeUnit.MILLISECONDS );
@@ -71,6 +77,22 @@ public class AsyncRedisClient {
             ex.printStackTrace();
             return null;
         }
+    }
+
+    public String getAsync(String deviceId){
+        RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+        RedisFuture<String> future1 = commands.get(deviceId);
+        String value = null;
+        try {
+            value = future1.get(100, TimeUnit.MILLISECONDS );
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            e.printStackTrace();
+        }
+        return value;
     }
 
 

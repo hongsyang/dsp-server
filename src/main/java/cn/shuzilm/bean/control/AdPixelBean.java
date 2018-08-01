@@ -11,7 +11,7 @@ import lombok.Data;
 public class AdPixelBean implements ICommand{
     private String host;//根据配置文件获取
     private String adUid;//广告id
-    private String adName;
+      private String adName;//可以留空
     /**
      * 实际耗费的金额
      */
@@ -20,4 +20,5 @@ public class AdPixelBean implements ICommand{
      * 实际耗费的量
      */
     private long winNoticeNums;
+
 }

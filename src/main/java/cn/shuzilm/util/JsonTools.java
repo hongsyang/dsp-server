@@ -1,5 +1,6 @@
 package cn.shuzilm.util;
 
+import com.alibaba.fastjson.JSONObject;
 import net.sf.json.JSON;
 import net.sf.json.JSONSerializer;
 
@@ -16,6 +17,11 @@ public class JsonTools {
 //		JSON json = js.toJSON(bean);
 //		return json.toString();
 //	}
+
+    public static Object fromJson(String json){
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        return jsonObject;
+    }
 
     public static String toJsonString(Object bean){
         JSONSerializer js = new JSONSerializer() ;

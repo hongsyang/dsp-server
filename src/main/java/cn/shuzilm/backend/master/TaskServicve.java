@@ -16,6 +16,24 @@ import java.util.HashMap;
  */
 public class TaskServicve extends Service {
     /**
+     * 查找 10 分钟前的 人群包条件
+     *
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public ResultList queryAudienceByUpTime(long startTime) throws SQLException {
+        long now = System.currentTimeMillis() ;
+        Object[] arr = new Object[3];
+        arr[0] = startTime / 1000;
+        arr[1] = now / 1000;
+        arr[2] = now / 1000;
+        String sql = "select c.* from ad join map_ad_audience b on ad.uid = b.ad_uid" +
+                " join audience c on b.ad_uid = c.uid" +
+                " where ad.updated_at >= ? and ad.s <= ? and ad.e >= ?";
+        return select.select(sql,arr);
+    }
+
+    /**
      * 查找 10 分钟前的数据
      *
      * @return

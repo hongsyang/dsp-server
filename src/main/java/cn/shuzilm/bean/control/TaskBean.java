@@ -1,5 +1,7 @@
 package cn.shuzilm.bean.control;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -10,7 +12,9 @@ import java.util.Map;
  * 
  * @author wanght by 20180710
  */
+@Data
 public class TaskBean implements ICommand {
+    private String adUid;
     /**
      * 命令
      */
@@ -27,11 +31,7 @@ public class TaskBean implements ICommand {
     private long exposureLimitPerHour;
     private long exposureLimitPerDay;
 
-    private AdBean adBean;
-
     public static final long serialVersionUID = 1123223132123L;
-
-    private final String taskId; // 任务编号
 
 
     public static final int COMMAND_START = 0;
@@ -64,62 +64,8 @@ public class TaskBean implements ICommand {
 
 	}
 
-    public int getScope() {
-        return scope;
-    }
-
-    public void setScope(int scope) {
-        this.scope = scope;
-    }
-
-    public String getCommandMemo() {
-        return commandMemo;
-    }
-
-    public void setCommandMemo(String commandMemo) {
-        this.commandMemo = commandMemo;
-    }
-
-    public int getCommand() {
-        return command;
-    }
-
-    public void setCommand(int command) {
-        this.command = command;
-    }
-
-    public long getExposureLimitPerHour() {
-        return exposureLimitPerHour;
-    }
-
-    public void setExposureLimitPerHour(long exposureLimitPerHour) {
-        this.exposureLimitPerHour = exposureLimitPerHour;
-    }
-
-    public long getExposureLimitPerDay() {
-        return exposureLimitPerDay;
-    }
-
-    public void setExposureLimitPerDay(long exposureLimitPerDay) {
-        this.exposureLimitPerDay = exposureLimitPerDay;
-    }
-
-    public String getTaskId(){
-        return this.adBean.getAdUid();
-    }
-
-    public AdBean getTaskBean() {
-        return adBean;
-    }
-
-    public void setTaskBean(AdBean adBean) {
-        this.adBean = adBean;
-    }
-
-
-	public TaskBean(String taskId, AdBean adBean) {
-        this.adBean = adBean;
-		this.taskId = taskId;
+	public TaskBean(String adUid) {
+		this.adUid = adUid;
 		init();
 	}
 
@@ -136,8 +82,7 @@ public class TaskBean implements ICommand {
     public String toString() {
         final StringBuilder sb = new StringBuilder();
         sb.append("Task");
-        sb.append("{adBean=").append(adBean);
-        sb.append(", taskId=").append(taskId);
+        sb.append(", adUid=").append(adUid);
         sb.append('}');
         return sb.toString();
     }
