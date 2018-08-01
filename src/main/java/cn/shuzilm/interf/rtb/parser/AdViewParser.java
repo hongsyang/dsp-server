@@ -41,7 +41,7 @@ public class AdViewParser implements RequestService {
         log.debug(" BidRequest参数入参：{}", dataStr);
         //请求报文解析
         BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
-        //初步过滤规则
+        //初步过滤规则  FilterRule.filterRuleBidRequest(bidRequestBean)
         if (FilterRule.filterRuleBidRequest(bidRequestBean)) {
             //创建返回结果
             DUFlowBean sourceDuFlowBean = new DUFlowBean();
@@ -50,7 +50,6 @@ public class AdViewParser implements RequestService {
             sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
             DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
             BeanUtils.copyProperties(sourceDuFlowBean,targetDuFlowBean);
-//            BeanUtil.copyPropertyByNotNull(sourceDuFlowBean, targetDuFlowBean);
             log.debug("拷贝targetDuFlowBean:{}", targetDuFlowBean);
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
             Jedis jedis = JedisManager.getInstance().getResource();
@@ -87,7 +86,7 @@ public class AdViewParser implements RequestService {
         bid.setImpid(impression.getId());//从bidRequestBean里面取
         bid.setAdid(duFlowBean.getAdUid());//广告id，对应duFlowBean的AdUid；
         //曝光url
-        String wurl = "http://localhost:8880/" + "adviewexp?" +
+        String wurl = "http://101.200.56.200:8880/" + "adviewexp?" +
                 "price=" + duFlowBean.getActualPrice() +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
@@ -109,7 +108,7 @@ public class AdViewParser implements RequestService {
 //        Map nurlMap = new HashMap();
 //        nurlMap.put("0", urls);
 //        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送//TODO 确认一下
-        String curl = "http://dsp.example.com/" + "adviewclick?" +
+        String curl = "http://101.200.56.200:8880/" + "adviewclick?" +
                 "price=" + duFlowBean.getActualPrice() +
                 "&actualCreateTime=" + format +
                 "&adxId=" + duFlowBean.getAdxId() +

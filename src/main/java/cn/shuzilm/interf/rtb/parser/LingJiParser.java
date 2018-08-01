@@ -42,7 +42,7 @@ public class LingJiParser implements RequestService {
         //请求报文解析
         BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
         //初步过滤规则
-//        if (FilterRule.filterRuleBidRequest(bidRequestBean)) {
+        if (FilterRule.filterRuleBidRequest(bidRequestBean)) {
             //创建返回结果
             DUFlowBean sourceDuFlowBean = new DUFlowBean();
             sourceDuFlowBean.setRequestId(bidRequestBean.getId());
@@ -50,7 +50,6 @@ public class LingJiParser implements RequestService {
             sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
             DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
             BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
-//            BeanUtil.copyPropertyByNotNull(sourceDuFlowBean, targetDuFlowBean);
             log.debug("拷贝targetDuFlowBean:{}", targetDuFlowBean);
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
             Jedis jedis = JedisManager.getInstance().getResource();
@@ -63,9 +62,9 @@ public class LingJiParser implements RequestService {
             }
             response = JSON.toJSONString(bidResponseBean);
             log.debug("bidResponseBean:{}", response);
-       /* } else {
+        } else {
             response = "参数不合规";
-        }*/
+        }
 
         return response;
     }

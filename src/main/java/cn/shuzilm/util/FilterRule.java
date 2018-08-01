@@ -22,7 +22,7 @@ import redis.clients.jedis.Jedis;
 public class FilterRule {
 
     private static final Logger log = LoggerFactory.getLogger(FilterRule.class);
-
+    //TODO 根据ADX服务商做过滤规则，快友用IMEI的sha1，灵集用MAC的MD5值
     /**
      * 请求过滤规则
      *
