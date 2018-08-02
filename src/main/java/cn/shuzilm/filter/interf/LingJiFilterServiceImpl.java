@@ -3,6 +3,7 @@ package cn.shuzilm.filter.interf;
 import cn.shuzilm.bean.adview.request.Device;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
+import cn.shuzilm.filter.code.SystemCodeEnum;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +26,20 @@ public class LingJiFilterServiceImpl implements ADXFilterService {
 
     private Jedis jedis = null;
 
+    /**
+     * 根据ADX服务商做过滤规则，快友用IMEI的sha1，灵集用MAC的MD5值
+     * @param userDevice
+     * @param flag
+     * @param message
+     * @return
+     */
     @Override
     public Boolean filterDeviceParameter(Device userDevice, Boolean flag, Map message) {
         jedis = JedisManager.getInstance().getResource();
         if (flag) {
-            if (StringUtils.isBlank(userDevice.getDidsha1())) {//判断设备IMEI 的 SHA1 值
-                log.debug("设备IMEI 的 SHA1 值为空,userDevice参数入参：{}", userDevice);
+            if (StringUtils.isBlank(userDevice.getDidsha1())) {//判断设备 MAC 的 MD5  值
+                log.debug("设备 MAC 的 MD5 值为空,userDevice参数入参：{}", userDevice);
+                message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备 MAC 的 MD5 值为空");
                 return false;
             } else {
                 String didsha1 = jedis.get(userDevice.getDidsha1());
@@ -44,7 +53,7 @@ public class LingJiFilterServiceImpl implements ADXFilterService {
         } else {
             if (StringUtils.isNotBlank(userDevice.getImei())) {
                 String imei = userDevice.getImei();
-                String substring = imei.substring(0, 8);
+                String substring = imei.substring(0, 7);
                 String complianceImei = jedis.get(substring);
                 if (complianceImei != null) {//合规库有IMEI的值判断厂商和品牌合规
 

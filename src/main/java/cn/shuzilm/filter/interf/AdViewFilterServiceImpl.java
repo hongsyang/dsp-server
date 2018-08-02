@@ -18,6 +18,14 @@ import java.util.Map;
 public class AdViewFilterServiceImpl implements ADXFilterService {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewFilterServiceImpl.class);
+
+    /**
+     * 根据ADX服务商做过滤规则，快友用IMEI的sha1，灵集用MAC的MD5值
+     * @param userDevice
+     * @param flag
+     * @param message
+     * @return
+     */
     @Override
     public Boolean filterDeviceParameter(Device userDevice, Boolean flag, Map message) {
         return null;
