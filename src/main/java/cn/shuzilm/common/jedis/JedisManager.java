@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.JedisSentinelPool;
 
 import java.util.HashMap;
 
@@ -86,7 +87,7 @@ public class JedisManager {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-//            jedis.auth(configs.getString("REDIS_PASSWORD"));
+            jedis.auth(configs.getString("REDIS_PASSWORD"));
 //            jedis.select(configs.getInt("REDIS_DBNUM"));
         } catch (Exception e) {
             e.printStackTrace();

@@ -37,6 +37,7 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.7</source>
@@ -181,14 +182,14 @@
         </dependency>
         <!--本地jar 的引入-->
         <dependency>
-            <groupId>yao-config</groupId>
+            <groupId>com.yao.config</groupId>
             <artifactId>yao-config</artifactId>
             <version>1.4</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/yao-config-1.4.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>yao-util</groupId>
+            <groupId>com.yao.utl</groupId>
             <artifactId>yao-util</artifactId>
             <version>1.1</version>
             <scope>system</scope>
@@ -247,8 +248,11 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>5.0.5.RELEASE</version>
+        </dependency>
 
     </dependencies>
 
