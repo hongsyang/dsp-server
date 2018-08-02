@@ -1,7 +1,6 @@
 package cn.shuzilm.interf.pixcel.parser;
 
 import cn.shuzilm.backend.pixel.PixelFlowControl;
-import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -28,9 +26,9 @@ import java.util.UUID;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class AdViewExpParser implements ParameterParser {
+public class AdViewExpParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(AdViewExpParser.class);
+    private static final Logger log = LoggerFactory.getLogger(AdViewExpParameterParserImpl.class);
 
     private AppConfigs configs = null;
 

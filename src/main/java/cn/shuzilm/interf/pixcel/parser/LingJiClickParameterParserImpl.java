@@ -19,9 +19,9 @@ import java.util.UUID;
 * @UpdateRemark:   修改内容
 * @Version:        1.0
 */
-public class LingJiClickParser implements ParameterParser {
+public class LingJiClickParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(LingJiClickParser.class);
+    private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
     @Override
     public String parseUrl(String url) {

@@ -19,9 +19,9 @@ import java.util.UUID;
 * @UpdateRemark:   修改内容
 * @Version:        1.0
 */
-public class AdViewClickParser implements ParameterParser {
+public class AdViewClickParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(AdViewClickParser.class);
+    private static final Logger log = LoggerFactory.getLogger(AdViewClickParameterParserImpl.class);
 
     @Override
     public String parseUrl(String url) {

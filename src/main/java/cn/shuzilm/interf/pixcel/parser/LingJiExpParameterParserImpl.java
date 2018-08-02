@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * @Description: LingJiExpParser  曝光量解析
+ * @Description: LingJiExpParameterParserImpl  曝光量解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:57
  * @UpdateUser: houkp
@@ -26,9 +26,9 @@ import java.util.UUID;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class LingJiExpParser implements ParameterParser {
+public class LingJiExpParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(LingJiExpParser.class);
+    private static final Logger log = LoggerFactory.getLogger(LingJiExpParameterParserImpl.class);
 
     private static final String PIXEL_CONFIG = "pixel.properties";
 

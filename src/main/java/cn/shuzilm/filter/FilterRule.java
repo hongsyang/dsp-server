@@ -3,13 +3,18 @@ package cn.shuzilm.filter;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.adview.request.Device;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.filter.code.SystemCodeEnum;
+import cn.shuzilm.filter.interf.ADXFilterService;
+import cn.shuzilm.filter.interf.ADXFilterServiceFactory;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @Description: FilterRule 过滤规则
@@ -65,56 +70,29 @@ public class FilterRule {
      * @return
      */
     public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Boolean flag, Map message, String adxName) {
-        message.put("1", "1");
-        if (StringUtils.isNotBlank(adxName)) {
-        } else {
-
-        }
-        boolean tag = false;
         //初步的过滤规则
         if (bidRequestBean.getDevice() == null) {
-            log.debug("没有设备信息,BidRequest参数入参：{}", bidRequestBean);
+            log.debug("设备信息为空,BidRequest参数入参：{}", bidRequestBean);
+            message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备信息为空");
             return false;
         } else {
-            Jedis jedis = JedisManager.getInstance().getResource();
             Device userDevice = bidRequestBean.getDevice();
-            if (flag) {
-                if (StringUtils.isBlank(userDevice.getDidsha1())) {//判断设备IMEI 的 SHA1 值
-                    log.debug("设备IMEI 的 SHA1 值为空,BidRequest参数入参：{}", bidRequestBean);
-                    return false;
-                } else {
-                    String didsha1 = jedis.get(userDevice.getDidsha1());
-                    if (didsha1 != null) {
-                        tag = true;
-                    } else {
-                        log.debug(" 此设备不在数盟有效设备库中,BidRequest参数入参：{}", bidRequestBean);
-                        return false;
-                    }
-                }
+            if (StringUtils.isNotBlank(adxName)) {
+                log.debug("无对应ADX服务商过滤器，请检查代码。厂商名称为：{}", adxName);
+                message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，无对应ADX服务商过滤器");
+                return false;
             } else {
-                if (StringUtils.isNotBlank(userDevice.getImei())) {
-                    String imei = userDevice.getImei();
-                    String substring = imei.substring(0, 8);
-                    String complianceImei = jedis.get(substring);
-                    if (complianceImei != null) {//合规库有IMEI的值判断厂商和品牌合规
-
-                    }
-                }
-                if (StringUtils.isBlank(userDevice.getIp())) {//判断设备ip地址
-                    log.debug("设备ip为空,BidRequest参数入参：{}", bidRequestBean);
-                    return false;
-                } else {
-                    String ip = jedis.get(userDevice.getIp());
-                    if (ip != null) {
-                        log.debug(" 此设备IP在黑名单中,BidRequest参数入参：{}", bidRequestBean);
-                        return false;
-                    } else {
-                        tag = true;
+                Reflections reflections = new Reflections(" cn.shuzilm.filter.interf");
+                Set<Class<? extends ADXFilterService>> monitorClasses = reflections.getSubTypesOf(ADXFilterService.class);
+                for (Class<? extends ADXFilterService> monitorClass : monitorClasses) {
+                    if (monitorClass.getSimpleName().toLowerCase().contains(adxName)) {
+                        ADXFilterService adxFilterService = ADXFilterServiceFactory.getADXFilterService(monitorClass.getName());
+                        log.debug("adxFilterService的名称:{}",adxFilterService.getClass().getSimpleName());
+                        return adxFilterService.filterDeviceParameter(userDevice, flag, message);
                     }
                 }
             }
-
-            return false;
         }
+        return false;
     }
 }

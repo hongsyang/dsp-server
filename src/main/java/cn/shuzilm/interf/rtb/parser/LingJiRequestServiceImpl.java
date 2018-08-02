@@ -32,9 +32,9 @@ import java.util.Map;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class LingJiParser implements RequestService {
+public class LingJiRequestServiceImpl implements RequestService {
 
-    private static final Logger log = LoggerFactory.getLogger(LingJiParser.class);
+    private static final Logger log = LoggerFactory.getLogger(LingJiRequestServiceImpl.class);
 
     private AppConfigs configs = null;
 
@@ -56,7 +56,7 @@ public class LingJiParser implements RequestService {
         sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
         //初步过滤规则开关
         if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
-            if (FilterRule.filterRuleBidRequest(bidRequestBean,msg)) {
+            if (FilterRule.filterRuleBidRequest(bidRequestBean,false,msg,"lingji")) {
                 DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
                 BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
                 log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);

@@ -9,6 +9,10 @@ package cn.shuzilm.interf.pixcel.parser;
 * @Version:        1.0
 */
 public interface ParameterParser {
-
+    /**
+     * 解析ADX服务商的get请求
+     * @param url
+     * @return
+     */
     public String parseUrl(String url);
 }
