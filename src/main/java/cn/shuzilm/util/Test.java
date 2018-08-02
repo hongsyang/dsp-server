@@ -15,7 +15,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,11 +25,18 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Test {
     public static void main(String[] args)  {
 
+//        Map msg = new HashMap();
+//        msg.put("code",1001);
+//        msg.put("message","参数异常");
+//        String jsonString = JSON.toJSONString(msg);
+//        Test test =new Test();
+//        System.out.println(jsonString);
         Jedis jedis = JedisManager.getInstance().getResource();
-        JedisQueueManager.getElementFromQueue("LingJiExp");
+//        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson = jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
-//        jedis.set("houkp", JSON.toJSONString(duFlowBean));
+        String set = jedis.set("houkp", "houkp");
+        System.out.println(set);
 //        jedis.expire("houkp",10);
 //        String houkp = jedis.get("houkp");
 //        System.out.println(element.toString());
@@ -118,5 +127,9 @@ public class Test {
 //            }
 //        }
 //        String s = RequestServiceFactory.getRequestService(className).parseRequest(className);
+    }
+
+    public  String parseRequest(String dataStr) {
+       return this.getClass().getSimpleName();
     }
 }

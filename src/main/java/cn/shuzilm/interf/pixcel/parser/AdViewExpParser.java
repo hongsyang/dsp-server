@@ -32,11 +32,13 @@ public class AdViewExpParser implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewExpParser.class);
 
+    private AppConfigs configs = null;
+
     private static final String PIXEL_CONFIG = "pixel.properties";
 
     @Override
     public String parseUrl(String url) {
-        AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
+        this.configs= AppConfigs.getInstance(PIXEL_CONFIG);
         DUFlowBean duFlowBean = new DUFlowBean();
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "AdViewExp");
@@ -52,7 +54,7 @@ public class AdViewExpParser implements ParameterParser {
         if (element != null) {
             bean.setAdUid(element.getAdUid());
         }
-        bean.setHost(configs.getString("host"));
+        bean.setHost(configs.getString("HOST"));
         bean.setMoney(Float.valueOf(urlRequest.get("price")));
         bean.setWinNoticeNums(1);
         //pixel服务器发送到主控模块

@@ -1,14 +1,15 @@
-package cn.shuzilm.util;
+package cn.shuzilm.filter;
 
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.adview.request.Device;
 import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.common.jedis.JedisQueueManager;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
+
+import java.util.Map;
 
 /**
  * @Description: FilterRule 过滤规则
@@ -22,15 +23,15 @@ import redis.clients.jedis.Jedis;
 public class FilterRule {
 
     private static final Logger log = LoggerFactory.getLogger(FilterRule.class);
-    //TODO 根据ADX服务商做过滤规则，快友用IMEI的sha1，灵集用MAC的MD5值
+
     /**
-     * 请求过滤规则
+     * 请求过滤规则  BidRequestBean
      *
      * @param bidRequestBean
      * @return
      */
-    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean) {
-        return filterRuleBidRequest(bidRequestBean, true);
+    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Map message) {
+        return filterRuleBidRequest(bidRequestBean, true, message);
     }
 
     /**
@@ -39,9 +40,9 @@ public class FilterRule {
      * @param bidRequestBeanStr
      * @return
      */
-    public static Boolean filterRuleBidRequest(String bidRequestBeanStr) {
+    public static Boolean filterRuleBidRequest(String bidRequestBeanStr, Map message) {
         BidRequestBean bidRequestBean = JSON.parseObject(bidRequestBeanStr, BidRequestBean.class);
-        return filterRuleBidRequest(bidRequestBean, true);
+        return filterRuleBidRequest(bidRequestBean, true, message);
     }
 
     /**
@@ -51,14 +52,31 @@ public class FilterRule {
      * @param flag
      * @return
      */
-    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Boolean flag) {
+    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Boolean flag, Map message) {
+        return filterRuleBidRequest(bidRequestBean, flag, message, " ");
+    }
+
+    /**
+     * 根据ADX服务商做过滤规则，快友用IMEI的sha1，灵集用MAC的MD5值
+     *
+     * @param bidRequestBean
+     * @param flag
+     * @param adxName        ADX服务商
+     * @return
+     */
+    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Boolean flag, Map message, String adxName) {
+        message.put("1", "1");
+        if (StringUtils.isNotBlank(adxName)) {
+        } else {
+
+        }
         boolean tag = false;
         //初步的过滤规则
         if (bidRequestBean.getDevice() == null) {
             log.debug("没有设备信息,BidRequest参数入参：{}", bidRequestBean);
             return false;
         } else {
-            Jedis jedis= JedisManager.getInstance().getResource();
+            Jedis jedis = JedisManager.getInstance().getResource();
             Device userDevice = bidRequestBean.getDevice();
             if (flag) {
                 if (StringUtils.isBlank(userDevice.getDidsha1())) {//判断设备IMEI 的 SHA1 值
@@ -74,11 +92,11 @@ public class FilterRule {
                     }
                 }
             } else {
-                if (StringUtils.isNotBlank(userDevice.getImei())){
+                if (StringUtils.isNotBlank(userDevice.getImei())) {
                     String imei = userDevice.getImei();
                     String substring = imei.substring(0, 8);
                     String complianceImei = jedis.get(substring);
-                    if (complianceImei!=null){//合规库有IMEI的值判断厂商和品牌合规
+                    if (complianceImei != null) {//合规库有IMEI的值判断厂商和品牌合规
 
                     }
                 }
@@ -95,7 +113,8 @@ public class FilterRule {
                     }
                 }
             }
-            return tag;
+
+            return false;
         }
     }
 }
