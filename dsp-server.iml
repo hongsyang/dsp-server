@@ -63,6 +63,9 @@
     <orderEntry type="library" name="Maven: org.javassist:javassist:3.16.1-GA" level="project" />
     <orderEntry type="library" name="Maven: dom4j:dom4j:1.6.1" level="project" />
     <orderEntry type="library" name="Maven: xml-apis:xml-apis:1.0.b2" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-beans:5.0.5.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-core:5.0.5.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-jcl:5.0.5.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.apache.phoenix:phoenix-core:4.13.2-cdh5.11.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.tephra:tephra-api:0.13.0-incubating" level="project" />
     <orderEntry type="library" name="Maven: org.apache.tephra:tephra-core:0.13.0-incubating" level="project" />

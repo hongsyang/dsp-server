@@ -4,6 +4,7 @@ import cn.shuzilm.bean.control.ICommand;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,10 +24,10 @@ public class AudienceBean implements ICommand {
 
     //地理位置
     private String citys; //地理位置 省份、地级、县级 选定列表
-
+    @Getter
     private List<AreaBean> cityList;
     private String geos; //地理位置 经纬度  对应：mysql 中的 location_map
-
+    @Getter
     private ArrayList<GpsBean> geoList;
     private String mobilityType; //流动性 不限制、居住地、工作地、活动地
     private String demographicTagId; //特定人群-标签选定项  例如： 大学生、家长、户外爱好者
