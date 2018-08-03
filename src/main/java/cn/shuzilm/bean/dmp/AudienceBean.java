@@ -23,7 +23,11 @@ public class AudienceBean implements ICommand {
 
     //地理位置
     private String citys; //地理位置 省份、地级、县级 选定列表
+
+    private List<AreaBean> cityList;
     private String geos; //地理位置 经纬度  对应：mysql 中的 location_map
+
+    private ArrayList<GpsBean> geoList;
     private String mobilityType; //流动性 不限制、居住地、工作地、活动地
     private String demographicTagId; //特定人群-标签选定项  例如： 大学生、家长、户外爱好者
     private String demographicCitys; //特定人群 - 城市范围选定列表 省份地级县级市
@@ -44,22 +48,33 @@ public class AudienceBean implements ICommand {
     private String comFullName;//公司全称
     private String comAddress;//公司地址
 
-    public List<AreaBean> getCityList(){
-        ArrayList<AreaBean> list = new ArrayList<>();
-        //todo 解析 city json  为 list
-//        JsonObject obj = JSONObject.parseObject(citys);
-        return list;
+    public String getCitys() {
+        return citys;
     }
 
-    /**
-     * 经纬度、POI GPS 坐标点名称
-     * @return
-     */
-    public ArrayList<GpsBean> getGeoList(){
+    public void setCitys(String citys) {
+        this.citys = citys;
+
+        //todo 解析 city json  为 list
+//        JsonObject obj = JSONObject.parseObject(citys);
+
+//       赋值给cityList
+
+    }
+
+
+
+    public String getGeos() {
+        return geos;
+    }
+
+    public void setGeos(String geos) {
+        this.geos = geos;
         ArrayList<GpsBean> gpsList = new ArrayList<>();
         //todo 解析 geo json 为 List
 //        JSONObject.parseObject(this.geos);
-        return gpsList;
+//        赋值给  geoList
+
     }
 
 }
