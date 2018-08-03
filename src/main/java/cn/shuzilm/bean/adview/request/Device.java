@@ -1,5 +1,6 @@
 package cn.shuzilm.bean.adview.request;
 
+import cn.shuzilm.bean.lj.request.DeviceExt;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -42,5 +43,5 @@ public class Device implements Serializable {
     private Integer orientation;//(F)设备屏幕方向:0- 竖向 1- 横向   0
     private String imei;//IMEI原始值
     private String mac;//Mac原始值  //灵集字段为原值mac未去掉“：”的MD5值
-    private RequestExt ext;//(F) 扩展内容
+    private DeviceExt ext;//(F) 扩展内容
 }

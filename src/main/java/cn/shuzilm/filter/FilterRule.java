@@ -77,12 +77,12 @@ public class FilterRule {
             return false;
         } else {
             Device userDevice = bidRequestBean.getDevice();
-            if (StringUtils.isNotBlank(adxName)) {
+            if (StringUtils.isBlank(adxName)) {
                 log.debug("无对应ADX服务商过滤器，请检查代码。厂商名称为：{}", adxName);
                 message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，无对应ADX服务商过滤器");
                 return false;
             } else {
-                Reflections reflections = new Reflections(" cn.shuzilm.filter.interf");
+                Reflections reflections = new Reflections("cn.shuzilm.filter.interf");
                 Set<Class<? extends ADXFilterService>> monitorClasses = reflections.getSubTypesOf(ADXFilterService.class);
                 for (Class<? extends ADXFilterService> monitorClass : monitorClasses) {
                     if (monitorClass.getSimpleName().toLowerCase().contains(adxName)) {

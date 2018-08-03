@@ -56,7 +56,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
         //初步过滤规则开关
         if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
-            if (FilterRule.filterRuleBidRequest(bidRequestBean,false,msg,"lingji")) {
+            if (FilterRule.filterRuleBidRequest(bidRequestBean,true,msg,"lingji")) {
                 DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
                 BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
                 log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
