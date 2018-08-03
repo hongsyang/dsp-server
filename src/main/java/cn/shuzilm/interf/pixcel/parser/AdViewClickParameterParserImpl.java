@@ -44,34 +44,38 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
         Jedis jedis = JedisManager.getInstance().getResource();
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
-        log.debug("AdViewClick曝光的requestid:{},curl值:{}:[]", requestId, element);
-        MDC.put("sift", "pixel");
-        AdPixelBean bean = new AdPixelBean();
-        if (element != null) {
-            bean.setAdUid(element.getAdUid());
-        }
-        bean.setHost(configs.getString("HOST"));
-        bean.setMoney(Float.valueOf(urlRequest.get("price")));
-        bean.setWinNoticeNums(1);
-        //pixel服务器发送到主控模块
-        log.debug("pixel服务器发送到主控模块的AdViewClickBean：{}", bean);
-        PixelFlowControl.getInstance().sendStatus(bean);
+        try {
+            log.debug("AdViewClick曝光的requestid:{},curl值:{}:[]", requestId, element);
+            MDC.put("sift", "pixel");
+            AdPixelBean bean = new AdPixelBean();
+            if (element != null) {
+                bean.setAdUid(element.getAdUid());
+            }
+            bean.setHost(configs.getString("HOST"));
+            bean.setMoney(Float.valueOf(urlRequest.get("price")));
+            bean.setWinNoticeNums(1);
+            //pixel服务器发送到主控模块
+            log.debug("pixel服务器发送到主控模块的AdViewClickBean：{}", bean);
+            PixelFlowControl.getInstance().sendStatus(bean);
 
-        //pixel服务器发送到Phoenix
-        element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
-        element.setRequestId(requestId);
-        MDC.put("sift", "AdViewClick");
-        log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
-                element.getDid(), element.getDeviceId(),
-                element.getAdUid(), element.getAdvertiserUid(),
-                element.getAdvertiserUid(), element.getAgencyUid(),
-                element.getCreativeUid(), element.getProvince(),
-                element.getCity(), element.getRequestId());
-        boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewClick", element, Priority.MAX_PRIORITY);
-        if (lingJiClick) {
-            log.debug("发送到Phoenix：{}", lingJiClick);
-        } else {
-            log.debug("发送到Phoenix：{}", lingJiClick);
+            //pixel服务器发送到Phoenix
+            element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
+            element.setRequestId(requestId);
+            MDC.put("sift", "AdViewClick");
+            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+                    element.getDid(), element.getDeviceId(),
+                    element.getAdUid(), element.getAdvertiserUid(),
+                    element.getAdvertiserUid(), element.getAgencyUid(),
+                    element.getCreativeUid(), element.getProvince(),
+                    element.getCity(), element.getRequestId());
+            boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewClick", element, Priority.MAX_PRIORITY);
+            if (lingJiClick) {
+                log.debug("发送到Phoenix：{}", lingJiClick);
+            } else {
+                log.debug("发送到Phoenix：{}", lingJiClick);
+            }
+        }catch (Exception e){
+            log.error("redis获取失败或者超时 ，异常：{}",e);
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);

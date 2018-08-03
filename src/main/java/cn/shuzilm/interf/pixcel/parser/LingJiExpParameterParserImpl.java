@@ -33,43 +33,49 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
     private static final String PIXEL_CONFIG = "pixel.properties";
 
     @Override
-    public String parseUrl(String url) {
+    public String parseUrl(String url)  {
         AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "LingJiExp");
-        log.debug("LingJiExp曝光的nurl值:{}", urlRequest);
+        log.debug("LingJiExp曝光的nurl值:{}", url);
+        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
+        log.debug("LingJiExp转换之后曝光的nurl值:{}", urlRequest);
         String requestId = urlRequest.get("id");
         Jedis jedis = JedisManager.getInstance().getResource();
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
-        log.debug("LingJiExp曝光的requestid:{},nurl值:{}:[]", requestId, element);
-        MDC.put("sift", "pixel");
-        AdPixelBean bean = new AdPixelBean();
-        if (element != null) {
-            bean.setAdUid(element.getAdUid());
-        }
-        bean.setHost(configs.getString("HOST"));
-        bean.setMoney(Float.valueOf(urlRequest.get("price")));
-        bean.setWinNoticeNums(1);
-        //pixel服务器发送到主控模块
-        log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
-        PixelFlowControl.getInstance().sendStatus(bean);
+        try{
+            log.debug("LingJiExp曝光的requestid:{},nurl值:{}:[]", requestId, element);
+            MDC.put("sift", "pixel");
+            AdPixelBean bean = new AdPixelBean();
+            if (element != null) {
+                bean.setAdUid(element.getAdUid());
+            }
+            bean.setHost(configs.getString("HOST"));
+            bean.setMoney(Float.valueOf(urlRequest.get("price")));
+            bean.setWinNoticeNums(1);
+            //pixel服务器发送到主控模块
+            log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
+            PixelFlowControl.getInstance().sendStatus(bean);
 
-        //pixel服务器发送到Phoenix
-        element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
-        element.setRequestId(requestId);
-        MDC.put("sift", "LingJiExp");
-        log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
-                element.getDid(), element.getDeviceId(),
-                element.getAdUid(), element.getAdvertiserUid(),
-                element.getAdvertiserUid(), element.getAgencyUid(),
-                element.getCreativeUid(), element.getProvince(),
-                element.getCity(), element.getRequestId());
-        boolean lingJiExp = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
-        if (lingJiExp){
-            log.debug("发送到Phoenix：{}",lingJiExp);
-        }else {
-            log.debug("发送到Phoenix：{}",lingJiExp);
+            //pixel服务器发送到Phoenix
+            element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
+            element.setRequestId(requestId);
+            MDC.put("sift", "LingJiExp");
+            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+                    element.getDid(), element.getDeviceId(),
+                    element.getAdUid(), element.getAdvertiserUid(),
+                    element.getAdvertiserUid(), element.getAgencyUid(),
+                    element.getCreativeUid(), element.getProvince(),
+                    element.getCity(), element.getRequestId());
+            boolean lingJiExp = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
+            if (lingJiExp){
+                log.debug("发送到Phoenix：{}",lingJiExp);
+            }else {
+                log.debug("发送到Phoenix：{}",lingJiExp);
+            }
+
+        }catch (Exception e){
+            log.error("redis获取失败或者超时 ，异常：{}",e);
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
