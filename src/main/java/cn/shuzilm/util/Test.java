@@ -1,10 +1,12 @@
 package cn.shuzilm.util;
 
+import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.interf.rtb.parser.RequestService;
 import cn.shuzilm.interf.rtb.parser.RequestServiceFactory;
+import com.alibaba.fastjson.JSON;
 import org.reflections.Reflections;
 import redis.clients.jedis.Jedis;
 
@@ -20,19 +22,36 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Test {
     public static void main(String[] args)  {
-        JedisQueueManager.init();
-        Set<String> stringSet = new HashSet<>();
-        for (int i = 0; i <100 ; i++) {
-            stringSet.add("houkp"+i);
-        }
-        boolean b = JedisQueueManager.putElementToQueue("houkp", stringSet, Priority.MAX_PRIORITY);
-        Set<String> elementFromQueue = (Set) JedisQueueManager.getElementFromQueue("houkp");
-        String houkp ="houkp12";
-        for (String s : elementFromQueue) {
-            System.out.println(s);
-        }
-        boolean houkp1 = elementFromQueue.contains(houkp);
-        System.out.println(houkp1);
+
+        Jedis jedis = JedisManager.getInstance().getResource();
+        JedisQueueManager.getElementFromQueue("LingJiExp");
+//        String elementJson = jedis.get("LingJiExp");
+//        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
+//        jedis.set("houkp", JSON.toJSONString(duFlowBean));
+//        jedis.expire("houkp",10);
+//        String houkp = jedis.get("houkp");
+//        System.out.println(element.toString());
+//        JedisQueueManager.init();
+//        Set<String> stringSet = new HashSet<>();
+//        for (int i = 0; i <100 ; i++) {
+//            stringSet.add("houkp"+i);
+//        }
+//        boolean b = JedisQueueManager.putElementToQueue("houkp", stringSet, Priority.MAX_PRIORITY);
+//        for (int i = 0; i < 100; i++) {
+//            duFlowBean.setRequestId("houkp"+i);
+//            JedisQueueManager.putElementToQueue("houkp",duFlowBean,Priority.MAX_PRIORITY);
+//        }
+//        for (int i = 0; i <99 ; i++) {
+//            DUFlowBean elementFromQueue = (DUFlowBean) JedisQueueManager.getElementFromQueue("houkp");
+//            System.out.println(elementFromQueue);
+//        }
+
+//        String houkp ="houkp12";
+//        for (String s : elementFromQueue) {
+//            System.out.println(s);
+//        }
+//        boolean houkp1 = elementFromQueue.contains(houkp);
+//        System.out.println(houkp1);
 //        if (b){
 //            Object houkp1 = JedisQueueManager.getElementFromQueue("houkp");
 //

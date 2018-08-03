@@ -2,6 +2,8 @@ package cn.shuzilm.bean.adview.request;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @Description: RequestExt  扩展内容
  * @Author: houkp
@@ -12,7 +14,7 @@ import lombok.Data;
  * @Version: 1.0
  */
 @Data
-public class RequestExt {
+public class RequestExt implements Serializable {
     private String consent;//(F)   User.ext  Consent string according toIAB's consent string format1.1  BOMT6szOMT6szAAABAENAAAAAAAAoAAA
     private Integer gdpr;//(F) Regs.ext  Whether or not the request issubject to GDPR.0:the request is not subject to GDPR1:the request is subject to GDPR  0
     private String channel;//  灵集site.content.ext 	视频的频道ID，例如"1"。频道id需要与sourceid配合使用。视频流量的频道字典详见

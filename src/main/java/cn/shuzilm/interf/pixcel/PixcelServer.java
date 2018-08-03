@@ -1,6 +1,5 @@
 package cn.shuzilm.interf.pixcel;
 
-import cn.shuzilm.interf.rtb.RtbHandler;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;

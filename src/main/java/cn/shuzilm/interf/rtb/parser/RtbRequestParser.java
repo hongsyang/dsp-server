@@ -43,8 +43,10 @@ public class RtbRequestParser {
                 }
             }
         }
-        RequestService requestService = RequestServiceFactory.getRequestService(className);
-        responseStr = requestService.parseRequest(dataStr);
+        if(className!=null){
+            RequestService requestService = RequestServiceFactory.getRequestService(className);
+            responseStr = requestService.parseRequest(dataStr);
+        }
         return responseStr;
     }
 }
