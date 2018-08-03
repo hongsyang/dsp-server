@@ -37,36 +37,45 @@ public class LingJiFilterServiceImpl implements ADXFilterService {
     @Override
     public Boolean filterDeviceParameter(Device userDevice, Boolean flag, Map message) {
         jedis = JedisManager.getInstance().getResource();
-        log.debug("jedis 是否为空：{}",jedis);
+        log.debug("jedis 是否为空：{}", jedis);
         if (flag) {
-            if (StringUtils.isBlank(userDevice.getMac())) {//判断设备 MAC 的 MD5 值
-                log.debug("设备 MAC 的 MD5 值为空,userDevice参数入参：{}", userDevice);
-                message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备 MAC 的 MD5 值为空");
-                return false;
-            } else {
-                String mac = jedis.get(userDevice.getMac());
-                if (mac != null) {
-                    message.put(SystemCodeEnum.CODE_SUCCESS.getCode(), SystemCodeEnum.CODE_SUCCESS.getMessage() + "，此设备MAC的MD5值在数盟数据库中");
-                    return true;
-                } else {
-                    log.debug(" 此设备不在数盟有效设备库中,userDevice参数入参：{}", userDevice);
-                    message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，此设备MAC的MD5值不在数盟有效设备库中");
-                    return false;
-                }
-            }
+            return isShuZiLianMengData(userDevice, message);
         } else {
             if (fieldCompliance(userDevice, message)) {//设备字段是否合规
                 if (ipCompliance(userDevice, message)) {//设备IP是否合规
-
+                    return isShuZiLianMengData(userDevice, message);//是否在数盟库
                 } else {
                     return false;
                 }
-
             } else {
                 return false;
             }
         }
-        return false;
+    }
+
+    /**
+     * 条件3：是否在数盟库
+     *
+     * @param userDevice
+     * @param message
+     * @return
+     */
+    private Boolean isShuZiLianMengData(Device userDevice, Map message) {
+        if (StringUtils.isBlank(userDevice.getMac())) {//判断设备 MAC 的 MD5 值
+            log.debug("设备 MAC 的 MD5 值为空,userDevice参数入参：{}", userDevice);
+            message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备 MAC 的 MD5 值为空");
+            return false;
+        } else {
+            String mac = jedis.get(userDevice.getMac());
+            if (mac != null) {
+                message.put(SystemCodeEnum.CODE_SUCCESS.getCode(), SystemCodeEnum.CODE_SUCCESS.getMessage() + "，此设备MAC的MD5值在数盟数据库中");
+                return true;
+            } else {
+                log.debug(" 此设备不在数盟有效设备库中,userDevice参数入参：{}", userDevice);
+                message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，此设备MAC的MD5值不在数盟有效设备库中");
+                return false;
+            }
+        }
     }
 
     /**
