@@ -4,9 +4,15 @@ import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.TaskBean;
+import cn.shuzilm.bean.dmp.AreaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
+import cn.shuzilm.bean.dmp.GpsBean;
+import cn.shuzilm.bean.dmp.GpsGridBean;
+import cn.shuzilm.util.geo.GeoHash;
+import cn.shuzilm.util.geo.GridMark;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -42,6 +48,9 @@ public class RtbFlowControl {
      */
     private static ConcurrentHashMap<String,AdBean> mapAd = null;
 
+    /**
+     * 广告任务管理
+     */
     private static ConcurrentHashMap<String,TaskBean> mapTask = null;
     /**
      * 广告资源的倒置
@@ -56,13 +65,17 @@ public class RtbFlowControl {
      * value：aduid
      */
     private static ConcurrentHashMap<String,String> areaMap = null;
-
+    // 判断标签坐标是否在 广告主的选取范围内
+    private GridMark grid = null;
 
     public RtbFlowControl(String nodeName){
         this.nodeName = nodeName;
         mapAd = new ConcurrentHashMap<>();
         mapTask = new ConcurrentHashMap<>();
         areaMap = new ConcurrentHashMap<>();
+        // 判断标签坐标是否在 广告主的选取范围内
+        grid = new GridMark();
+
     }
 
     public void trigger(){
@@ -73,29 +86,68 @@ public class RtbFlowControl {
     }
 
     /**
+     * 检查设备的标签所带的居住地、工作地、活动地坐标
+     * @param lng
+     * @param lat
+     * @return
+     */
+    public boolean checkInBound( double lng,double lat){
+//        String uid = grid.findGrid(lng,lat,);
+        //todo
+        return false;
+    }
+
+    /**
      * 每隔 10 分钟更新一次广告素材或者人群包
      */
     public void pullTenMinutes(){
         //从 10 分钟的队列中获得广告素材和人群包
-        AdBean adBean = MsgControlCenter.recvAdBean(nodeName);
-        if(adBean != null){
-            //广告ID
-            String uid = adBean.getAdUid();
-            mapAd.put(uid,adBean);
-            AudienceBean audience =  adBean.getAudience();
+        ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
+        ArrayList<GpsBean> gpsAll = new ArrayList<>();
+        if(adBeanList != null){
+            for(AdBean adBean : adBeanList){
+                //广告ID
+                String uid = adBean.getAdUid();
 
-            //广告内容的更新 ，按照素材的类型和尺寸
-            CreativeBean creative =  adBean.getCreativeList().get(0);
-            String creativeKey = creative.getType() + creative.getWidth() + creative.getHeight();
+                mapAd.put(uid,adBean);
+                AudienceBean audience =  adBean.getAudience();
 
-            if(!mapAdCreative.contains(creativeKey)){
-                List<String> taskList = new ArrayList<String>();
-                taskList.add(uid);
-                mapAdCreative.put(creativeKey,taskList);
-            }else{
-                List<String> taskList = mapAdCreative.get(creativeKey);
-                taskList.add(uid);
+                //将 经纬度坐标装载到 MAP 中，便于快速查找
+                ArrayList<GpsBean> gpsList = audience.getGeoList();
+                for(GpsBean gps : gpsList){
+                    gps.setPayload(uid);
+                }
+                gpsAll.addAll(gpsList);
+
+                //将 省、地级、县级装载到 MAP 中，便于快速查找
+                List<AreaBean> areaList = audience.getCityList();
+                for(AreaBean area: areaList){
+                    if(area.getCountyId() == 0){
+                        //当县级选项为 0 的时候，则认为是匹配全地级市
+                        areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
+                    }else
+                        areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId(),adBean.getAdUid());
+
+                }
+
+                //广告内容的更新 ，按照素材的类型和尺寸
+                CreativeBean creative =  adBean.getCreativeList().get(0);
+                String creativeKey = creative.getType() + creative.getWidth() + creative.getHeight();
+
+                if(!mapAdCreative.contains(creativeKey)){
+                    List<String> taskList = new ArrayList<String>();
+                    taskList.add(uid);
+                    mapAdCreative.put(creativeKey,taskList);
+                }else{
+                    List<String> taskList = mapAdCreative.get(creativeKey);
+                    taskList.add(uid);
+                }
             }
+
+            //将 GPS 坐标加载到 栅格快速比对处理类中
+            ArrayList<GpsGridBean> list = grid.reConvert(gpsAll);
+            grid.init(list);
+
         }
 
     }
@@ -109,11 +161,8 @@ public class RtbFlowControl {
         TaskBean task = MsgControlCenter.recvTask(nodeName);
         if(task != null){
             mapTask.put(task.getAdUid(),task);
-            //广告ID
-            String uid = task.getAdUid();
-
-
-
+//            //广告ID
+//            String uid = task.getAdUid();
         }
 
     }

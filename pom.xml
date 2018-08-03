@@ -37,7 +37,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.7</source>
@@ -182,14 +181,14 @@
         </dependency>
         <!--本地jar 的引入-->
         <dependency>
-            <groupId>com.yao.config</groupId>
+            <groupId>yao-config</groupId>
             <artifactId>yao-config</artifactId>
             <version>1.4</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/yao-config-1.4.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>com.yao.utl</groupId>
+            <groupId>yao-util</groupId>
             <artifactId>yao-util</artifactId>
             <version>1.1</version>
             <scope>system</scope>
@@ -248,11 +247,20 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/nl.cloudfarming.client/lib-geotools -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-beans</artifactId>
-            <version>5.0.5.RELEASE</version>
+            <groupId>nl.cloudfarming.client</groupId>
+            <artifactId>lib-geotools</artifactId>
+            <version>2.7.7-NB72</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.python</groupId>
+            <artifactId>jython</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+
 
     </dependencies>
 

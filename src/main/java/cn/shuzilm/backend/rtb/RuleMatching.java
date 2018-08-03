@@ -36,8 +36,7 @@ public class RuleMatching {
         tagRandom = new Random();
         adRandom = new Random();
 
-        //获得广告价格、素材、广告主资金余额、
-        //TODO
+
         //加载标签溢价比例
         //TODO
     }
@@ -55,10 +54,7 @@ public class RuleMatching {
      */
     public void match(String deviceId,String adType,int width,int height){
         //取出标签
-        //
         String tagJson = redis.getAsync(deviceId);
-//        String tagJson = (String)objArr[0];
-//        String ipResult = (String)objArr[1];
         TagBean tagBean = (TagBean)JsonTools.fromJson(tagJson);
 
         //开始匹配
@@ -85,19 +81,19 @@ public class RuleMatching {
 
                     }
                 }
-            }else if(audience.getType().equals("demographic")){ //特定人群
+            }else if(audience.getType().equals("demographic")){ //todo 特定人群
 
-            }else if(audience.getType().equals("company")){ // 具体公司
+            }else if(audience.getType().equals("company")){ // todo 具体公司
 
             }
             boolean isAvaliable = rtbIns.checkAvalable(adUid);
             //是否投当前的广告
             if(!isAvaliable)
                 continue;
-            //判断标签是否匹配
+            //todo 判断标签是否匹配
 //            bean.getTaskBean().getCreativeList().
 
-            //匹配
+            //todo 排序
         }
     }
 
@@ -105,10 +101,7 @@ public class RuleMatching {
      * 对匹配的广告按照规则进行排序
      */
     public void order(){
-
+        //todo
     }
-
-
-
 
 }

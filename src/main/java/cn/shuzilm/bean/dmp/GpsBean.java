@@ -17,6 +17,10 @@ public class GpsBean implements ICommand{
     private double lng;
     private double lat;
     private int radius;
+    private String poiName;
+    private String payload;// 附带的一些有价值的信息，比如 广告 UID 等
+
+    public GpsBean(){}
     public GpsBean(double lat,double lng ){
         this.lng = lng;
         this.lat = lat;
@@ -33,6 +37,14 @@ public class GpsBean implements ICommand{
         return newValue;
     }
 
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
+    }
+
     public double getLng() {
         return lng;
     }
@@ -40,12 +52,26 @@ public class GpsBean implements ICommand{
         return lat;
     }
 
-    public double[] getGpsLngLat(double lng,double lat){
+    public String getPoiName() {
+        return poiName;
+    }
+
+    public void setPoiName(String poiName) {
+        this.poiName = poiName;
+    }
+
+    public double[] getGpsLngLat(double lng, double lat){
         double[] des = convertFromBd09(lng,lat);
         return des;
     }
 
+    public String getPayload() {
+        return payload;
+    }
 
+    public void setPayload(String payload) {
+        this.payload = payload;
+    }
 
     public int getRadius() {
         return radius;

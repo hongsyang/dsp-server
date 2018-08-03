@@ -3,25 +3,26 @@ import cn.shuzilm.bean.dmp.GpsBean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 /**
  *@Description: GeoHash实现经纬度的转化
+ * https://www.jianshu.com/p/46c0b77092e5
+ * https://www.cnblogs.com/cannel/p/5323925.html
+ *
  */
-
-
-
 public class GeoHash {
     public static final double MINLAT = -90;
     public static final double MAXLAT = 90;
     public static final double MINLNG = -180;
     public static final double MAXLNG = 180;
 
-    private GpsBean location;
+
     /**
      * 1 2500km;2 630km;3 78km;4 30km
      * 5 2.4km; 6 610m; 7 76m; 8 19m
      */
-    private int hashLength = 8; //经纬度转化为geohash长度
+//    private int hashLength = 8; //经纬度转化为geohash长度
     private int latLength = 20; //纬度转化为二进制长度
     private int lngLength = 20; //经度转化为二进制长度
 
@@ -30,15 +31,14 @@ public class GeoHash {
     private static final char[] CHARS = {'0', '1', '2', '3', '4', '5', '6', '7',
             '8', '9', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm', 'n',
             'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-
-    public GeoHash(double lat, double lng) {
-        location = new GpsBean(lat, lng);
+//    private GpsBean location;
+    public GeoHash() {
         setMinLatLng();
     }
-
-    public int gethashLength() {
-        return hashLength;
-    }
+//
+//    public int gethashLength() {
+//        return hashLength;
+//    }
 
     /**
      * @Author:lulei
@@ -55,11 +55,11 @@ public class GeoHash {
         }
     }
 
-    /**
+     /**  //**
      * @return
      * @Author:lulei
      * @Description: 求所在坐标点及周围点组成的九个
-     */
+     *//*
     public List<String> getGeoHashBase32For9() {
         double leftLat = location.getLat() - minLat;
         double rightLat = location.getLat() + minLat;
@@ -106,37 +106,30 @@ public class GeoHash {
             base32For9.add(rightDown);
         }
         return base32For9;
-    }
+    }*/
 
-    /**
-     * @param length
-     * @return
-     * @Author:lulei
-     * @Description: 设置经纬度转化为geohash长度
-     */
-    public boolean sethashLength(int length) {
-        if (length < 1) {
-            return false;
-        }
-        hashLength = length;
-        latLength = (length * 5) / 2;
-        if (length % 2 == 0) {
-            lngLength = latLength;
-        } else {
-            lngLength = latLength + 1;
-        }
-        setMinLatLng();
-        return true;
-    }
+//    /**
+//     * @param length
+//     * @return
+//     * @Author:lulei
+//     * @Description: 设置经纬度转化为geohash长度
+//     */
+//    public boolean sethashLength(int length) {
+//        if (length < 1) {
+//            return false;
+//        }
+//        hashLength = length;
+//        latLength = (length * 5) / 2;
+//        if (length % 2 == 0) {
+//            lngLength = latLength;
+//        } else {
+//            lngLength = latLength + 1;
+//        }
+//        setMinLatLng();
+//        return true;
+//    }
 
-    /**
-     * @return
-     * @Author:lulei
-     * @Description: 获取经纬度的base32字符串
-     */
-    public String getGeoHashBase32() {
-        return getGeoHashBase32(location.getLat(), location.getLng());
-    }
+
 
     /**
      * @param lat
@@ -145,7 +138,7 @@ public class GeoHash {
      * @Author:lulei
      * @Description: 获取经纬度的base32字符串
      */
-    private String getGeoHashBase32(double lat, double lng) {
+    public String getGeoHashBase32(double lat, double lng) {
         boolean[] bools = getGeoBinary(lat, lng);
         if (bools == null) {
             return null;
@@ -251,11 +244,37 @@ public class GeoHash {
 
 
     public static void main(String[] args) {
-        GeoHash g = new GeoHash(40.222012, 116.248283);
-        System.out.println(g.getGeoHashBase32());
-        List<String> list = g.getGeoHashBase32For9();
-        for(String str :list){
-            System.out.println(str);
+        String[] geo = new String[]{
+
+            "116.781703,39.995896",
+                "117.019718,39.997664",
+
+//             "116.40075,39.974833",
+//                "116.402969,39.974556", //200
+//                "116.412437,39.974653", //1km
+//                "116.424061,39.974943",//2km
+//                "116.435919,39.97522",//3km
+//                "116.459239,39.975469",//5km
+//                "116.517809,39.976243", //10km
+//                "116.770097,39.989594",  //30km
+//                "116.882781,39.98871",  //40km
+//                "117.116196,39.992248",//60km   wx579037
+        };
+
+        GeoHash g = new GeoHash();
+        HashSet<String> dup = new HashSet<>();
+
+        for(String lnglat : geo){
+            if(!dup.contains(lnglat)){
+                dup.add(lnglat);
+            }
+
+            String[] arr = lnglat.split(",");
+            double [] coords = new double[2];
+            coords[0] = Double.parseDouble(arr[0]);
+            coords[1] = Double.parseDouble(arr[1]);
+
+            System.out.println(g.getGeoHashBase32(coords[1],coords[0]));
         }
 
     }

@@ -46,18 +46,16 @@ public class MsgControlCenter {
         return JedisQueueManager.putElementToQueue(nodeName + DOWN,command,priority);
     }
 
-
-
-    public static boolean sendAdBean(String nodeName, AdBean bean, Priority priority){
-        return JedisQueueManager.putElementToQueue(nodeName + AD_BEAN,bean,priority);
+    public static boolean sendAdBean(String nodeName, ArrayList<AdBean> beanList, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + AD_BEAN,beanList,priority);
     }
 
-    public static AdBean recvAdBean(String nodeName){
+    public static ArrayList<AdBean> recvAdBean(String nodeName){
         Object obj = JedisQueueManager.getElementFromQueue(nodeName + AD_BEAN);
         if(obj == null)
             return null;
         else
-            return (AdBean)obj;
+            return (ArrayList<AdBean>)obj;
     }
 
 

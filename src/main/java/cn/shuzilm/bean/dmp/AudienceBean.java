@@ -1,7 +1,12 @@
 package cn.shuzilm.bean.dmp;
 
 import cn.shuzilm.bean.control.ICommand;
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonObject;
 import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by thunders on 2018/7/26.
@@ -39,5 +44,22 @@ public class AudienceBean implements ICommand {
     private String comFullName;//公司全称
     private String comAddress;//公司地址
 
+    public List<AreaBean> getCityList(){
+        ArrayList<AreaBean> list = new ArrayList<>();
+        //todo 解析 city json  为 list
+//        JsonObject obj = JSONObject.parseObject(citys);
+        return list;
+    }
+
+    /**
+     * 经纬度、POI GPS 坐标点名称
+     * @return
+     */
+    public ArrayList<GpsBean> getGeoList(){
+        ArrayList<GpsBean> gpsList = new ArrayList<>();
+        //todo 解析 geo json 为 List
+//        JSONObject.parseObject(this.geos);
+        return gpsList;
+    }
 
 }

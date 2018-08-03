@@ -484,12 +484,13 @@ public class AdFlowControl {
     }
 
     /**
-     * 每隔 10 分钟，从数据库中获得最新变更的广告信息，并进行任务拆解， 同时 通过消息中心将任务下发到每一个节点中
+     * 每隔 10 分钟，从数据库中获得所有的广告信息，并进行任务拆解， 同时 通过消息中心将任务下发到每一个节点中
      * 其中包括各种对广告的控制，包括开启广告，暂停广告，终止广告等
      */
     private void dispatchTask(){
         int nodeNums = nodeList.size();
         //遍历所有的广告
+        ArrayList<AdBean> adList = new ArrayList<>();
         for(String adUid : mapAd.keySet()){
             //对任务进行拆解
             TaskBean task = new TaskBean(adUid);
@@ -498,16 +499,17 @@ public class AdFlowControl {
             task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
             task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
             task.setCommand(TaskBean.COMMAND_START);
-
+            adList.add(ad);
             for(WorkNodeBean node : nodeList){
-                //发送广告
-                pushAdSingleNode(node.getName(),ad);
                 //发送广告状态
                 pushTaskSingleNode(node.getName(),task);
             }
-
         }
 
+        for(WorkNodeBean node : nodeList){
+            //发送广告
+            pushAdSingleNode(node.getName(),adList);
+        }
     }
 
     /**
@@ -522,10 +524,10 @@ public class AdFlowControl {
     /**
      *
      * @param nodeName
-     * @param bean
+     * @param beanList
      */
-    private void pushAdSingleNode(String nodeName,AdBean bean){
-        MsgControlCenter.sendAdBean(nodeName,bean, Priority.NORM_PRIORITY);
+    private void pushAdSingleNode(String nodeName,ArrayList<AdBean> beanList){
+        MsgControlCenter.sendAdBean(nodeName,beanList, Priority.NORM_PRIORITY);
     }
 
 
