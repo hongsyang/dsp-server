@@ -61,18 +61,18 @@ public class LingJiFilterServiceImpl extends AbstractFilter implements ADXFilter
      * @return
      */
     public Boolean isShuZiLianMengData(Device userDevice, Map message) {
-        if (StringUtils.isBlank(userDevice.getExt().getChannel())) {//判断设备 IMEI 的 sha1 值
-            log.debug("设备 IMEI 的 sha1 值为空,userDevice参数入参：{}", userDevice);
-            message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备 IMEI 的 sha1 值为空");
+        if (StringUtils.isBlank(userDevice.getExt().getMac())) {//判断设备 MAC 的 MD5 值
+            log.debug("设备 MAC 的 MD5 值为空,userDevice参数入参：{}", userDevice);
+            message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备 MAC 的 MD5 值为空");
             return false;
         } else {
-            String mac = jedis.get(userDevice.getDidsha1());
+            String mac = jedis.get(userDevice.getExt().getMac());
             if (mac != null) {
-                message.put(SystemCodeEnum.CODE_SUCCESS.getCode(), SystemCodeEnum.CODE_SUCCESS.getMessage() + "，此设备IMEI的sha1值在数盟数据库中");
+                message.put(SystemCodeEnum.CODE_SUCCESS.getCode(), SystemCodeEnum.CODE_SUCCESS.getMessage() + "，此设备MAC的MD5值在数盟数据库中");
                 return true;
             } else {
                 log.debug(" 此设备不在数盟有效设备库中,userDevice参数入参：{}", userDevice);
-                message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，此设备IMEI的sha1值不在数盟有效设备库中");
+                message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，此设备MAC的MD5值不在数盟有效设备库中");
                 return false;
             }
         }
