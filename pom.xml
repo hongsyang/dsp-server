@@ -214,7 +214,7 @@
             <artifactId>reflections-spring</artifactId>
             <version>0.9.9-RC1</version>
         </dependency>
-        <!---->
+        <!--BeanUtils jar包引入-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>

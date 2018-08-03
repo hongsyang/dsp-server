@@ -28,16 +28,30 @@ public class Test {
 //        String jsonString = JSON.toJSONString(msg);
 //        Test test =new Test();
 //        System.out.println(jsonString);
-        Jedis jedis = JedisManager.getInstance().getResource();
+
+        String test=" [[6,62,737],[4,45,0],[23,271,2504]]";
+        String[] split = test.split("],");
+        List<String> list =new ArrayList();
+        String re="[";
+        String ra="]";
+        for (String s : split) {
+            String replace = s.replace(re, "").trim().replace(ra,"");
+            list.add(replace);
+        }
+        for (String s : list) {
+            System.out.println(s);
+        }
+
+//        Jedis jedis = JedisManager.getInstance().getResource();
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson = jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
 
-        DUFlowBean element =new DUFlowBean();
-        element.setRequestId("1111");
+//        DUFlowBean element =new DUFlowBean();
+//        element.setRequestId("1111");
 //        boolean b = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
-        DUFlowBean lingJiExp = (DUFlowBean) JedisQueueManager.getElementFromQueue("LingJiExp");
-        System.out.println(lingJiExp);
+//        DUFlowBean lingJiExp = (DUFlowBean) JedisQueueManager.getElementFromQueue("LingJiExp");
+//        System.out.println(lingJiExp);
 //        Object lingJiExp = JedisQueueManager.getElementFromQueue("LingJiExp");
 //        DUFlowBean lingJiExp = (DUFlowBean) JedisQueueManager.getElementFromQueue("LingJiExp");
 //        System.out.println(lingJiExp);

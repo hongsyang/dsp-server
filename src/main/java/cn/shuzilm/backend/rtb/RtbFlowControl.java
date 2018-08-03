@@ -111,7 +111,6 @@ public class RtbFlowControl {
 
                 mapAd.put(uid,adBean);
                 AudienceBean audience =  adBean.getAudience();
-
                 //将 经纬度坐标装载到 MAP 中，便于快速查找
                 ArrayList<GpsBean> gpsList = audience.getGeoList();
                 for(GpsBean gps : gpsList){
