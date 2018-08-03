@@ -35,8 +35,10 @@ public class Test {
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson = jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
-        String set = jedis.set("houkp", "houkp");
-        System.out.println(set);
+//        String set = jedis.set("houkp", "houkp");
+        String test="test";
+        String substring = test.substring(1,2);
+        System.out.println(substring);
 //        jedis.expire("houkp",10);
 //        String houkp = jedis.get("houkp");
 //        System.out.println(element.toString());
