@@ -15,10 +15,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -35,9 +32,15 @@ public class Test {
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson = jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
-        String set = jedis.set("LingJiExp", "houkp");
+
+        DUFlowBean element =new DUFlowBean();
+        element.setRequestId("1111");
+//        boolean b = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
         DUFlowBean lingJiExp = (DUFlowBean) JedisQueueManager.getElementFromQueue("LingJiExp");
         System.out.println(lingJiExp);
+//        Object lingJiExp = JedisQueueManager.getElementFromQueue("LingJiExp");
+//        DUFlowBean lingJiExp = (DUFlowBean) JedisQueueManager.getElementFromQueue("LingJiExp");
+//        System.out.println(lingJiExp);
 //        jedis.expire("houkp",10);
 //        String houkp = jedis.get("houkp");
 //        System.out.println(element.toString());

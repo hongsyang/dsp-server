@@ -12,6 +12,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: DUFlowBean 数盟流转Bean
@@ -24,6 +25,8 @@ import java.util.List;
  */
 @Data
 public class DUFlowBean implements Serializable {
+
+    private static final long serialVersionUID = -6743567631108323096L;
 
     private String requestId;//对应Bid Request中的id
     private List<Impression> impression;//广告位信息
@@ -56,8 +59,5 @@ public class DUFlowBean implements Serializable {
     private String appPackageName  ;//应用包名称
     private String appVersion  ;//应用版本
     private String dealid  ;//私有交易id，判断是否属于私有交易
-
-
-
 
 }
