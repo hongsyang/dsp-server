@@ -121,17 +121,18 @@ public class LingJiRequestServiceImpl implements RequestService {
         bid.setNurl(nurl);
 
         String curl = "http://101.200.56.200:8880/" + "lingjiclick?" +
-                "price=" + duFlowBean.getActualPrice() +
-                "&actualCreateTime=" + format +
-                "&adxId=" + duFlowBean.getAdxId() +
+                "id=" + duFlowBean.getRequestId() +
+                "&bidid=" + bidResponseBean.getBidid() +
+                "&impid=" + impression.getId() +
+                "&price=" + duFlowBean.getActualPrice() +
+                "&act=" + format +
+                "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
-                "&deviceId=" + duFlowBean.getDeviceId() +
-                "&appId=" + duFlowBean.getAppId() +
-                "&appPackageName=" + duFlowBean.getAppPackageName() +
-                "&appVersion=" + duFlowBean.getAppVersion() +
-                "&requestId=" + duFlowBean.getRequestId() +
-                "&impId=" + impression.getId() +
-                "&pmpId=" + duFlowBean.getDealid();
+                "&device=" + duFlowBean.getDeviceId() +
+                "&app=" + duFlowBean.getAppId() +
+                "&appn=" + duFlowBean.getAppPackageName() +
+                "&appv=" + duFlowBean.getAppVersion() +
+                "&pmp=" + duFlowBean.getDealid();
         List curls = new ArrayList();
         curls.add(curl);
         LJResponseExt ljResponseExt = new LJResponseExt();

@@ -99,9 +99,12 @@ public class AdViewRequestServiceImpl implements RequestService {
         Impression impression = imp.get(0);
         bid.setImpid(impression.getId());//从bidRequestBean里面取
         bid.setAdid(duFlowBean.getAdUid());//广告id，对应duFlowBean的AdUid；
-        //曝光url
+        //曝光wurl
         String wurl = "http://101.200.56.200:8880/" + "adviewexp?" +
-                "price=" + duFlowBean.getActualPrice() +
+                "id=" + duFlowBean.getRequestId() +
+                "&bidid=" + bidResponseBean.getBidid() +
+                "&impid=" + impression.getId() +
+                "&price=" + duFlowBean.getActualPrice() +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
@@ -109,8 +112,6 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppId() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
-                "&req=" + duFlowBean.getRequestId() +
-                "&imp=" + impression.getId() +
                 "&pmp=" + duFlowBean.getDealid();
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
@@ -121,24 +122,25 @@ public class AdViewRequestServiceImpl implements RequestService {
 //        urls.add("http://dsp.example4.com");
 //        Map nurlMap = new HashMap();
 //        nurlMap.put("0", urls);
-//        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送//TODO 确认一下
+//        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送
         String curl = "http://101.200.56.200:8880/" + "adviewclick?" +
-                "price=" + duFlowBean.getActualPrice() +
-                "&actualCreateTime=" + format +
-                "&adxId=" + duFlowBean.getAdxId() +
+                "id=" + duFlowBean.getRequestId() +
+                "&bidid=" + bidResponseBean.getBidid() +
+                "&impid=" + impression.getId() +
+                "&price=" + duFlowBean.getActualPrice() +
+                "&act=" + format +
+                "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
-                "&deviceId=" + duFlowBean.getDeviceId() +
-                "&appId=" + duFlowBean.getAppId() +
-                "&appPackageName=" + duFlowBean.getAppPackageName() +
-                "&appVersion=" + duFlowBean.getAppVersion() +
-                "&requestId=" + duFlowBean.getRequestId() +
-                "&impId=" + impression.getId() +
-                "&pmpId=" + duFlowBean.getDealid();
+                "&device=" + duFlowBean.getDeviceId() +
+                "&app=" + duFlowBean.getAppId() +
+                "&appn=" + duFlowBean.getAppPackageName() +
+                "&appv=" + duFlowBean.getAppVersion() +
+                "&pmp=" + duFlowBean.getDealid();
         List curls = new ArrayList();
         curls.add(curl);
         bid.setAdmt(duFlowBean.getAdmt());//广告类型
         bid.setPrice(duFlowBean.getPrice());//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
-        bid.setCurl(curls);//点击监控地址，客户端逐个发送通知 //TODO 等待确认
+        bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
         bid.setCrid(duFlowBean.getCrid());//广告物料 ID
         bid.setAdm(duFlowBean.getAdm());// 广告物料数据
         bid.setAdh(duFlowBean.getAdw());//广告物料高度

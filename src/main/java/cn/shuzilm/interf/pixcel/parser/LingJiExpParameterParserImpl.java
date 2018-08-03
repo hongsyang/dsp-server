@@ -37,19 +37,18 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "LingJiExp");
-        log.debug("LingJiExp曝光的wurl值:{}", urlRequest);
+        log.debug("LingJiExp曝光的nurl值:{}", urlRequest);
         String requestId = urlRequest.get("id");
         Jedis jedis = JedisManager.getInstance().getResource();
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
-//        DUFlowBean element = (DUFlowBean) JedisQueueManager.getElementFromQueue(urlRequest.get("req"));
         log.debug("LingJiExp曝光的requestid:{},nurl值:{}:[]", requestId, element);
         MDC.put("sift", "pixel");
         AdPixelBean bean = new AdPixelBean();
         if (element != null) {
             bean.setAdUid(element.getAdUid());
         }
-        bean.setHost(configs.getString("host"));
+        bean.setHost(configs.getString("HOST"));
         bean.setMoney(Float.valueOf(urlRequest.get("price")));
         bean.setWinNoticeNums(1);
         //pixel服务器发送到主控模块
