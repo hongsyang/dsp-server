@@ -19,7 +19,7 @@ public class Test {
 //        System.out.println(jsonString);
 
 //        String test=" [[6,62,737],[4,45,0],[23,271,2504]]";
-        AudienceBean audienceBean =new AudienceBean();
+        AudienceBean audienceBean = new AudienceBean();
 //        audienceBean.setCitys(test);
 //        List<AreaBean> areaBeans = audienceBean.getCityList();
 //        for (AreaBean areaBean : areaBeans) {
@@ -33,28 +33,25 @@ public class Test {
 //            System.out.println(gpsBean);
 //        }
 
-        String scheduleTime ="{\"1\":[3,4,9],\"2\":[3,4,9],\"3\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[3,4,9],\"6\":[3,4,9],\"7\":[3,4,9]}";
-        JSONObject parse = JSONObject.parseObject(scheduleTime);
-        Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
-        List<Map.Entry> list = new ArrayList<Map.Entry>();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> entry = iterator.next();
-//            System.out.println(entry.getKey() + ":" + entry.getValue());
-            list.add(entry);
-        }
-       int[][] timeSchedulingArr = new int[7][24];
-        for (int i = 0; i <timeSchedulingArr.length ; i++) {
-            for (int j = 0; j < timeSchedulingArr[i].length; j++) {
-                System.out.println(i+":"+j);
-            }
-        }
-        for (Map.Entry entry : list) {
-//            System.out.println(entry.getKey()+":"+entry.getValue());
-            JSONArray values = (JSONArray) entry.getValue();
-            for (Object o : values) {
-
-            }
-        }
+        String scheduleTime = "{\"1\":[3,4,19],\"2\":[3,4,9],\"3\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[4,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[5,4,9],\"6\":[6,4,9],\"7\":[7,4,9]}";
+        int[][] timeTxtToMatrix = TimeSchedulingUtil.timeTxtToMatrix(scheduleTime);
+        System.out.println(timeTxtToMatrix[6][7]);
+//        JSONObject parse = JSONObject.parseObject(scheduleTime);
+//        Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
+//        List<Map.Entry> list = new ArrayList<Map.Entry>();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, Object> entry = iterator.next();
+//            list.add(entry);
+//        }
+//        String re = "[";
+//        String ra = "]";
+//        int[][] timeSchedulingArr = new int[7][24];
+//        for (int i = 0; i < list.size(); i++) {
+//            String[] split = list.get(i).getValue().toString().replace(re, "").trim().replace(ra, "").split(",");
+//            for (int i1 = 0; i1 < split.length; i1++) {
+//                timeSchedulingArr[i][Integer.parseInt(split[i1])]=1;
+//            }
+//        }
 //        JSONArray objects = JSONArray.parseArray(parse1.getString("1"));
 
 //        for (Object object : objects) {

@@ -90,7 +90,7 @@ public class AdBean implements ICommand  {
     /**
      * 广告排期(对应 ad 数据表中的 time ，需要转换成 int[][]形式)
      */
-    @Setter
+
     private int[][] timeSchedulingArr;
 
     /**
