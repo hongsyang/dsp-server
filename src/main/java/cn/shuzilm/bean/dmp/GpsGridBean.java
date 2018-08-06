@@ -7,6 +7,7 @@ import lombok.Data;
  */
 @Data
 public class GpsGridBean {
+    private int id;
     private double lngLeft;
     private double latDown;
     private double lngRight;
