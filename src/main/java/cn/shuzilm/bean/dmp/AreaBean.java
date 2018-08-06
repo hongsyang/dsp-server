@@ -9,11 +9,11 @@ import lombok.Data;
  */
 @Data
 public class AreaBean implements ICommand {
-    private int provinceId;
-    private String provinceName;
-    private int cityId;
-    private String cityName;
-    private int countyId;
-    private String countyName;
+    private int provinceId;//省编码
+    private String provinceName;//省名称
+    private int cityId;//市编码
+    private String cityName;//市名称
+    private int countyId;//县编码
+    private String countyName;//县名称
 
 }

@@ -7,7 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by thunders on 2018/7/26.
@@ -79,11 +81,12 @@ public class AudienceBean implements ICommand {
             String replace = s.replace(re, "").trim().replace(ra, "");
             list.add(replace);
         }
-        this.cityList= convertToAreaBeanList(list);
+        this.cityList = convertToAreaBeanList(list);
     }
 
     /**
      * 转换省市区 编码
+     *
      * @param list
      * @return
      */
@@ -110,11 +113,43 @@ public class AudienceBean implements ICommand {
 
     public void setGeos(String geos) {
         this.geos = geos;
-        ArrayList<GpsBean> gpsList = new ArrayList<>();
-        //todo 解析 geo json 为 List
-//        JSONObject.parseObject(this.geos);
-//        赋值给  geoList
+        JSONObject parse = JSONObject.parseObject(geos);
+        Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
+        List<Map.Entry> list = new ArrayList<Map.Entry>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Object> entry = iterator.next();
+//            System.out.println(entry.getKey() + ":" + entry.getValue());
+            list.add(entry);
+        }
+        this.geoList = convertToGpsBeanList(list);
+    }
 
+    /**
+     * 转换对应经纬度和位置描述
+     *
+     * @param list
+     * @return
+     */
+    private ArrayList<GpsBean> convertToGpsBeanList(List<Map.Entry> list) {
+        String re = "[";
+        String ra = "]";
+        ArrayList<GpsBean> geoList = new ArrayList<>();
+        for (Map.Entry entry : list) {
+            GpsBean gpsBean = new GpsBean();
+            gpsBean.setPayload((String) entry.getKey());
+            Object gpsValue = entry.getValue();
+            String value = gpsValue.toString();
+            String[] gpsDetail = value.replace(re, "").trim().replace(ra, "").split(",");
+            Double provinceId = Double.valueOf(gpsDetail[0]);
+            gpsBean.setLng(provinceId);
+            Double cityId = Double.valueOf(gpsDetail[1]);
+            gpsBean.setLat(cityId);
+            Integer countyId = Integer.valueOf(gpsDetail[2]);
+            gpsBean.setRadius(countyId);
+//            System.out.println(value);
+            geoList.add(gpsBean);
+        }
+        return geoList;
     }
 
 }

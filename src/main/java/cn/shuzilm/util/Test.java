@@ -1,28 +1,14 @@
 package cn.shuzilm.util;
 
-import cn.shuzilm.bean.dmp.AreaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
-import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.common.jedis.JedisQueueManager;
-import cn.shuzilm.common.jedis.Priority;
-import cn.shuzilm.interf.rtb.parser.RequestService;
-import cn.shuzilm.interf.rtb.parser.RequestServiceFactory;
-import com.alibaba.fastjson.JSON;
-import org.reflections.Reflections;
-import redis.clients.jedis.Jedis;
+import cn.shuzilm.bean.dmp.GpsBean;
+import com.alibaba.fastjson.JSONObject;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class Test {
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
 
 //        Map msg = new HashMap();
 //        msg.put("code",1001);
@@ -31,13 +17,28 @@ public class Test {
 //        Test test =new Test();
 //        System.out.println(jsonString);
 
-        String test=" [[6,62,737],[4,45,0],[23,271,2504]]";
+//        String test=" [[6,62,737],[4,45,0],[23,271,2504]]";
         AudienceBean audienceBean =new AudienceBean();
-        audienceBean.setCitys(test);
-        List<AreaBean> areaBeans = audienceBean.getCityList();
-        for (AreaBean areaBean : areaBeans) {
-            System.out.println(areaBean);
+//        audienceBean.setCitys(test);
+//        List<AreaBean> areaBeans = audienceBean.getCityList();
+//        for (AreaBean areaBean : areaBeans) {
+//            System.out.println(areaBean);
+//        }
+
+        String geos = "{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}";
+        audienceBean.setGeos(geos);
+        ArrayList<GpsBean> geoList = audienceBean.getGeoList();
+        for (GpsBean gpsBean : geoList) {
+            System.out.println(gpsBean);
         }
+
+
+//        JSONArray objects = JSONArray.parseArray(parse1.getString("1"));
+
+//        for (Object object : objects) {
+//
+//            System.out.println(object);
+//        }
 //        Jedis jedis = JedisManager.getInstance().getResource();
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson = jedis.get("LingJiExp");
@@ -143,7 +144,7 @@ public class Test {
 //        String s = RequestServiceFactory.getRequestService(className).parseRequest(className);
     }
 
-    public  String parseRequest(String dataStr) {
-       return this.getClass().getSimpleName();
+    public String parseRequest(String dataStr) {
+        return this.getClass().getSimpleName();
     }
 }
