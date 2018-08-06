@@ -14,9 +14,9 @@ import static cn.shuzilm.util.geo.GpsConvert.bd09_To_Gps84;
 public class GpsBean implements ICommand{
 
 
-    private double lng;
-    private double lat;
-    private int radius;
+    private double lng;//经度
+    private double lat;//纬度
+    private int radius;//半径
     private String poiName;
     private String payload;// 附带的一些有价值的信息，比如 广告 UID 等
 
@@ -79,5 +79,16 @@ public class GpsBean implements ICommand{
 
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+
+    @Override
+    public String toString() {
+        return "GpsBean{" +
+                "lng=" + lng +
+                ", lat=" + lat +
+                ", radius=" + radius +
+                ", poiName='" + poiName + '\'' +
+                ", payload='" + payload + '\'' +
+                '}';
     }
 }

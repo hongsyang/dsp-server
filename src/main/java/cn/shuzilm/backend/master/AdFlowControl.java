@@ -2,6 +2,7 @@ package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.control.*;
 import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.util.TimeSchedulingUtil;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 import org.slf4j.Logger;
@@ -457,8 +458,7 @@ public class AdFlowControl {
                 ad.setSpeedMode(map.getInteger("speed"));
                 ad.setStartTime(new Date(map.getInteger("s")));
                 String timeScheTxt = map.getString("time");
-                //todo
-//                int[][] timeScheduling = timeTxtToMatrix(timeScheTxt);
+                int[][] timeScheduling = TimeSchedulingUtil.timeTxtToMatrix(timeScheTxt);
 //                ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
 
@@ -479,6 +479,7 @@ public class AdFlowControl {
             e.printStackTrace();
         }
     }
+
 
     /**
      * 每隔 10 分钟，从数据库中获得所有的广告信息，并进行任务拆解， 同时 通过消息中心将任务下发到每一个节点中

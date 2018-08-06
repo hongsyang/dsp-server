@@ -1,5 +1,6 @@
 package cn.shuzilm.bean.adview.request;
 
+import cn.shuzilm.bean.lj.request.DeviceExt;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -25,7 +26,7 @@ public class Device implements Serializable {
     private String macsha1;//(建议) MAC 地址的 SHA1 值
     private String didmd5;//(建议) IMEI 的 md5 值
     private String dpidmd5;//(建议) AndroidID 或 IDFA 的 MD5 值
-    private String macmd5;//(建议) MAC 地址的 MD5 值
+    private String macmd5;//(建议) MAC 地址的 MD5 值  //灵集字段为原值mac去掉“：”的MD5值
     private String carrier;//(F) 设备使用的运营商，MCC+MNC46000、46002、46007=>中国移动46001、46006=>中国联通 46003、46005=>中国电信  参考：http://en.wikipedia.org/wiki/Mobile_Network_Code
     private String language;//(F) 设备的语言设置,使用 alpha2/ISO639-1 "en"
     private String make;//(F) 设备制造商 “Apple
@@ -41,6 +42,6 @@ public class Device implements Serializable {
     private Integer sh;//(F)设备屏幕分辨率高度，单位为像素  1920
     private Integer orientation;//(F)设备屏幕方向:0- 竖向 1- 横向   0
     private String imei;//IMEI原始值
-    private String mac;//Mac原始值
-    private RequestExt ext;//(F) 扩展内容
+    private String mac;//Mac原始值  //灵集字段为原值mac未去掉“：”的MD5值
+    private DeviceExt ext;//(F) 扩展内容
 }

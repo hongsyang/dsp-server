@@ -1,5 +1,6 @@
 package cn.shuzilm.bean.adview.request;
 
+import cn.shuzilm.bean.lj.request.UsertExt;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -23,7 +24,7 @@ public class User implements Serializable {
     private String keywords;//(F)  用户兴趣或倾向，以逗号分隔；
     private UserData data;//(F)  额外的用户数据。每个数据对象代表不同的数据源。；
     private Geo geo;//(F)  用户家庭位置；
-    private RequestExt ext;//(F) 扩展内容
+    private UsertExt ext;//(F) 扩展内容
 
 
 }

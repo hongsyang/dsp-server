@@ -1,33 +1,76 @@
 package cn.shuzilm.util;
 
-import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.common.jedis.JedisQueueManager;
-import cn.shuzilm.common.jedis.Priority;
-import cn.shuzilm.interf.rtb.parser.RequestService;
-import cn.shuzilm.interf.rtb.parser.RequestServiceFactory;
-import com.alibaba.fastjson.JSON;
-import org.reflections.Reflections;
-import redis.clients.jedis.Jedis;
+import cn.shuzilm.bean.dmp.AudienceBean;
+import cn.shuzilm.bean.dmp.GpsBean;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.*;
 
 
 public class Test {
-    public static void main(String[] args)  {
+    public static void main(String[] args) {
 
-        Jedis jedis = JedisManager.getInstance().getResource();
-        JedisQueueManager.getElementFromQueue("LingJiExp");
-//        String elementJson = jedis.get("LingJiExp");
+//        Map msg = new HashMap();
+//        msg.put("code",1001);
+//        msg.put("message","参数异常");
+//        String jsonString = JSON.toJSONString(msg);
+//        Test test =new Test();
+//        System.out.println(jsonString);
+
+//        String test=" [[6,62,737],[4,45,0],[23,271,2504]]";
+        AudienceBean audienceBean = new AudienceBean();
+//        audienceBean.setCitys(test);
+//        List<AreaBean> areaBeans = audienceBean.getCityList();
+//        for (AreaBean areaBean : areaBeans) {
+//            System.out.println(areaBean);
+//        }
+
+//        String geos = "{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}";
+//        audienceBean.setGeos(geos);
+//        ArrayList<GpsBean> geoList = audienceBean.getGeoList();
+//        for (GpsBean gpsBean : geoList) {
+//            System.out.println(gpsBean);
+//        }
+
+        String scheduleTime = "{\"1\":[3,4,19],\"2\":[3,4,9],\"3\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[4,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[5,4,9],\"6\":[6,4,9],\"7\":[7,4,9]}";
+        int[][] timeTxtToMatrix = TimeSchedulingUtil.timeTxtToMatrix(scheduleTime);
+        System.out.println(timeTxtToMatrix[6][7]);
+//        JSONObject parse = JSONObject.parseObject(scheduleTime);
+//        Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
+//        List<Map.Entry> list = new ArrayList<Map.Entry>();
+//        while (iterator.hasNext()) {
+//            Map.Entry<String, Object> entry = iterator.next();
+//            list.add(entry);
+//        }
+//        String re = "[";
+//        String ra = "]";
+//        int[][] timeSchedulingArr = new int[7][24];
+//        for (int i = 0; i < list.size(); i++) {
+//            String[] split = list.get(i).getValue().toString().replace(re, "").trim().replace(ra, "").split(",");
+//            for (int i1 = 0; i1 < split.length; i1++) {
+//                timeSchedulingArr[i][Integer.parseInt(split[i1])]=1;
+//            }
+//        }
+//        JSONArray objects = JSONArray.parseArray(parse1.getString("1"));
+
+//        for (Object object : objects) {
+//
+//            System.out.println(object);
+//        }
+//        Jedis jedis = JedisManager.getInstance().getResource();
+//        JedisQueueManager.getElementFromQueue("LingJiExp");
+//        String elementJson  jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
-//        jedis.set("houkp", JSON.toJSONString(duFlowBean));
+
+//        DUFlowBean element =new DUFlowBean();
+//        element.setRequestId("1111");
+//        boolean b = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
+//        DUFlowBean lingJiExp = (DUFlowBean) JedisQueueManager.getElementFromQueue("LingJiExp");
+//        System.out.println(lingJiExp);
+//        Object lingJiExp = JedisQueueManager.getElementFromQueue("LingJiExp");
+//        DUFlowBean lingJiExp = (DUFlowBean) JedisQueueManager.getElementFromQueue("LingJiExp");
+//        System.out.println(lingJiExp);
 //        jedis.expire("houkp",10);
 //        String houkp = jedis.get("houkp");
 //        System.out.println(element.toString());
@@ -118,5 +161,9 @@ public class Test {
 //            }
 //        }
 //        String s = RequestServiceFactory.getRequestService(className).parseRequest(className);
+    }
+
+    public String parseRequest(String dataStr) {
+        return this.getClass().getSimpleName();
     }
 }
