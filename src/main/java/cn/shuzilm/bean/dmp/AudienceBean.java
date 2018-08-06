@@ -71,29 +71,37 @@ public class AudienceBean implements ICommand {
 
     public void setCitys(String citys) {
         this.citys = citys;
-        ArrayList<AreaBean> cityList = new ArrayList<>();
-        AreaBean areaBean =new AreaBean();
         String[] split = citys.split("],");
-        List<String> list =new ArrayList();
-        String re="[";
-        String ra="]";
+        List<String> list = new ArrayList();
+        String re = "[";
+        String ra = "]";
         for (String s : split) {
-            String replace = s.replace(re, "").trim().replace(ra,"");
+            String replace = s.replace(re, "").trim().replace(ra, "");
             list.add(replace);
         }
-        for (int i = 0; i <list.size(); i++) {
-            String city = list.get(i);
-            String[] strings = city.split(",");
-            for (String string : strings) {
-            }
-        }
-        //todo 解析 city json  为 list
-//        JsonObject obj = JSONObject.parseObject(citys);
-
-//       赋值给cityList
-
+        this.cityList= convertToAreaBeanList(list);
     }
 
+    /**
+     * 转换省市区 编码
+     * @param list
+     * @return
+     */
+    private ArrayList<AreaBean> convertToAreaBeanList(List<String> list) {
+        ArrayList<AreaBean> cityList = new ArrayList<>();
+        for (String city : list) {
+            AreaBean areaBean = new AreaBean();
+            String[] cityDetail = city.split(",");
+            Integer provinceId = Integer.valueOf(cityDetail[0]);
+            areaBean.setProvinceId(provinceId);
+            Integer cityId = Integer.valueOf(cityDetail[1]);
+            areaBean.setCityId(cityId);
+            Integer countyId = Integer.valueOf(cityDetail[2]);
+            areaBean.setCountyId(countyId);
+            cityList.add(areaBean);
+        }
+        return cityList;
+    }
 
 
     public String getGeos() {

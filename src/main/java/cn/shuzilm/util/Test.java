@@ -1,5 +1,7 @@
 package cn.shuzilm.util;
 
+import cn.shuzilm.bean.dmp.AreaBean;
+import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
@@ -30,18 +32,12 @@ public class Test {
 //        System.out.println(jsonString);
 
         String test=" [[6,62,737],[4,45,0],[23,271,2504]]";
-        String[] split = test.split("],");
-        List<String> list =new ArrayList();
-        String re="[";
-        String ra="]";
-        for (String s : split) {
-            String replace = s.replace(re, "").trim().replace(ra,"");
-            list.add(replace);
+        AudienceBean audienceBean =new AudienceBean();
+        audienceBean.setCitys(test);
+        List<AreaBean> areaBeans = audienceBean.getCityList();
+        for (AreaBean areaBean : areaBeans) {
+            System.out.println(areaBean);
         }
-        for (String s : list) {
-            System.out.println(s);
-        }
-
 //        Jedis jedis = JedisManager.getInstance().getResource();
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson = jedis.get("LingJiExp");
