@@ -2,6 +2,7 @@ package cn.shuzilm.util;
 
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.*;
@@ -25,14 +26,35 @@ public class Test {
 //            System.out.println(areaBean);
 //        }
 
-        String geos = "{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}";
-        audienceBean.setGeos(geos);
-        ArrayList<GpsBean> geoList = audienceBean.getGeoList();
-        for (GpsBean gpsBean : geoList) {
-            System.out.println(gpsBean);
+//        String geos = "{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}";
+//        audienceBean.setGeos(geos);
+//        ArrayList<GpsBean> geoList = audienceBean.getGeoList();
+//        for (GpsBean gpsBean : geoList) {
+//            System.out.println(gpsBean);
+//        }
+
+        String scheduleTime ="{\"1\":[3,4,9],\"2\":[3,4,9],\"3\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[3,4,9],\"6\":[3,4,9],\"7\":[3,4,9]}";
+        JSONObject parse = JSONObject.parseObject(scheduleTime);
+        Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
+        List<Map.Entry> list = new ArrayList<Map.Entry>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, Object> entry = iterator.next();
+//            System.out.println(entry.getKey() + ":" + entry.getValue());
+            list.add(entry);
         }
+       int[][] timeSchedulingArr = new int[7][24];
+        for (int i = 0; i <timeSchedulingArr.length ; i++) {
+            for (int j = 0; j < timeSchedulingArr[i].length; j++) {
+                System.out.println(i+":"+j);
+            }
+        }
+        for (Map.Entry entry : list) {
+//            System.out.println(entry.getKey()+":"+entry.getValue());
+            JSONArray values = (JSONArray) entry.getValue();
+            for (Object o : values) {
 
-
+            }
+        }
 //        JSONArray objects = JSONArray.parseArray(parse1.getString("1"));
 
 //        for (Object object : objects) {
@@ -41,7 +63,7 @@ public class Test {
 //        }
 //        Jedis jedis = JedisManager.getInstance().getResource();
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
-//        String elementJson = jedis.get("LingJiExp");
+//        String elementJson  jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
 
 //        DUFlowBean element =new DUFlowBean();
