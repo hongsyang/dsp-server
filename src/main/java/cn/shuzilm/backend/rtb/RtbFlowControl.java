@@ -10,6 +10,7 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.util.geo.GeoHash;
 import cn.shuzilm.util.geo.GridMark;
+import cn.shuzilm.util.geo.GridMark2;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,7 +67,7 @@ public class RtbFlowControl {
      */
     private static ConcurrentHashMap<String,String> areaMap = null;
     // 判断标签坐标是否在 广告主的选取范围内
-    private GridMark grid = null;
+    private GridMark2 grid = null;
 
     public RtbFlowControl(String nodeName){
         this.nodeName = nodeName;
@@ -74,7 +75,7 @@ public class RtbFlowControl {
         mapTask = new ConcurrentHashMap<>();
         areaMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
-        grid = new GridMark();
+        grid = new GridMark2();
 
     }
 
@@ -91,10 +92,9 @@ public class RtbFlowControl {
      * @param lat
      * @return
      */
-    public boolean checkInBound( double lng,double lat){
-//        String uid = grid.findGrid(lng,lat,);
-        //todo
-        return false;
+    public ArrayList<String> checkInBound( double lng,double lat){
+        ArrayList<String> uidList = grid.findGrid(lng,lat);
+        return uidList;
     }
 
     /**
@@ -159,9 +159,8 @@ public class RtbFlowControl {
     public void pullAndUpdateTask(){
         TaskBean task = MsgControlCenter.recvTask(nodeName);
         if(task != null){
+            //把最新的任务更新到 MAP task 中
             mapTask.put(task.getAdUid(),task);
-//            //广告ID
-//            String uid = task.getAdUid();
         }
 
     }

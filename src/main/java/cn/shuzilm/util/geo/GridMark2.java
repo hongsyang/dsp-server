@@ -8,7 +8,10 @@ import java.util.*;
 
 public class GridMark2 {
 
-
+    /**
+     * gps 坐标内部ID 与 广告UID 对应
+     */
+    HashMap<Integer,String> gpsMap = null;
     /**
      * lng ,<lat ,ad uid>
      */
@@ -63,7 +66,7 @@ public class GridMark2 {
 
             System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
             System.out.println("new BMap.Point(" + gridBean.getLngRight() + "," + gridBean.getLatUp() + ")");
-
+            counter ++;
         }
         return destList;
 
@@ -74,11 +77,13 @@ public class GridMark2 {
             //使用 treemap 进行排序，先按照经度查找子树，然后再根据纬度进行查找，最终找到 第一个小于等于 当前经纬度的栅格,并将该栅格 ID 打上标记
             //grid_id,longileft,longiright,latibottom,latitop
             if(tmRightLng != null){
+                gpsMap.clear();
                 tmRightLng.clear();
                 tmLeftLng.clear();
                 tmUpLat.clear();
                 tmDownlat.clear();
             }else{
+                gpsMap = new HashMap<>();
                 tmRightLng = new TreeMap();
                 tmLeftLng = new TreeMap<>();
                 tmUpLat = new TreeMap<>();
@@ -87,6 +92,8 @@ public class GridMark2 {
 
             for(GpsGridBean gps : coords) {
                 try{
+                    gpsMap.put(gps.getId(),gps.getPayload());
+
                     if(!tmRightLng.containsKey(gps.getLngRight())){
                         tmRightLng.put(gps.getLngRight(),gps.getId());
                     }
@@ -117,13 +124,12 @@ public class GridMark2 {
      * @param lat
      * @return
      */
-    public ArrayList<Integer> findGrid(Double lng,Double lat){
+    public ArrayList<String> findGrid(Double lng,Double lat){
         try {
+            ArrayList<String> adUidList = new ArrayList<>();
             ArrayList<Integer> destList = new ArrayList<>();
-            // coord id
-            GpsGridBean gps = null;
             if(lng == null || lat == null)
-                return destList;
+                return adUidList;
             else{
                 SortedMap smRight = tmRightLng.tailMap(lng);
                 destList.addAll(smRight.values());
@@ -139,8 +145,11 @@ public class GridMark2 {
 
                 SortedMap smDown = tmDownlat.headMap(lat);
                 destList.retainAll(smDown.values());
+                for(Integer id : destList){
+                    adUidList.add(gpsMap.get(id));
+                }
 
-                return destList;
+                return adUidList;
             }
         }catch(Exception ex){
             ex.printStackTrace();
@@ -185,7 +194,7 @@ public class GridMark2 {
 
 //        114.44290747073296,38.09787235002915 out
 
-        ArrayList<Integer> gridIdList = m.findGrid(lng,lat);
+        ArrayList<String> gridIdList = m.findGrid(lng,lat);
 //        for(String gird : gridIdList){
 //            System.out.println(gird);
 //        }

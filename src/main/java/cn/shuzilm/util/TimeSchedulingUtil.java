@@ -25,6 +25,8 @@ public class TimeSchedulingUtil {
      * @return
      */
     public static int[][] timeTxtToMatrix(String timeScheTxt) {
+        if(timeScheTxt == null)
+            return null;
         int[][] timeSchedulingArr = new int[7][24];
         JSONObject parse = JSONObject.parseObject(timeScheTxt);
         Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
