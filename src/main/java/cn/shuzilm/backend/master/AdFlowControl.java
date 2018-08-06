@@ -457,8 +457,9 @@ public class AdFlowControl {
                 ad.setSpeedMode(map.getInteger("speed"));
                 ad.setStartTime(new Date(map.getInteger("s")));
                 String timeScheTxt = map.getString("time");
-                int[][] timeScheduling = timeTxtToMatrix(timeScheTxt);
-                ad.setTimeSchedulingArr(timeScheduling);
+                //todo
+//                int[][] timeScheduling = timeTxtToMatrix(timeScheTxt);
+//                ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
 
 
@@ -477,10 +478,6 @@ public class AdFlowControl {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }
-
-    private int[][] timeTxtToMatrix(String text){
-        return null;
     }
 
     /**
