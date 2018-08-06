@@ -12,7 +12,6 @@ public class InvokePython {
             StringBuilder sb = new StringBuilder();
             String line = "";
             while ((line = in.readLine()) != null) {
-                System.out.println(line);
                 sb.append(line);
             }
             in.close();
@@ -28,7 +27,6 @@ public class InvokePython {
             Process pr = Runtime.getRuntime().exec(args, new String[]{""}, new File(dirPath));
             pr.waitFor();
             String error = readFromStream(pr.getErrorStream());
-//            System.out.println(error);
             String info = readFromStream(pr.getInputStream());
             return  info;
         }catch(Exception ex){

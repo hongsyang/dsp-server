@@ -55,7 +55,7 @@ public class GridMark {
 
             destList.add(gridBean);
 
-            System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
+//            System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
             System.out.println("new BMap.Point(" + gridBean.getLngRight() + "," + gridBean.getLatUp() + ")");
 
         }
@@ -125,31 +125,37 @@ public class GridMark {
             if(lng == null || lat == null)
                 return destList;
             else{
+
                 SortedMap sm = tm.tailMap(lng);
+
                 if(sm != null && sm.size() > 0){
+                    Double gridLng = 0.0;
+                    TreeMap<Double,GpsGridBean> tmChild = null;
+                    SortedMap gridLatMap = null;
+
+//                    Double gridLng = (Double)sm.firstKey();
+//                    TreeMap<Double,GpsGridBean> tmChild = tm.get(gridLng);
+//                    SortedMap gridLatMap = tmChild.tailMap(lat);
+
+                    //先提取出右上角的所有坐标，然后再对 左下角坐标进行一轮比对，筛选出合适的坐标
 
                     for(Object obj : sm.keySet()){
-                        Double gridLng = (Double)obj;
-                        GpsGridBean gridBean = (GpsGridBean)sm.get(gridLng);
-                        if(lng >= gridBean.getLngLeft() && lat >= gridBean.getLatDown()){
-                            destList.add(gridBean.getPayload());
+                       gridLng = (Double)obj;
+                        tmChild = tm.get(gridLng);
+                        gridLatMap = tmChild.tailMap(lat);
+
+                        if (gridLatMap != null && gridLatMap.size() > 0) {
+                            for(Object obj2 : gridLatMap.keySet()){
+                                Double gridLat = (Double)obj2;
+                                gps = tmChild.get(gridLat);
+                                //在对右上角做完筛选过滤后，再对左下角做判断，如果框选的矩形区域包含该坐标点，则加入输出列表
+                                if (gps.getLngLeft() <= lng && gps.getLatDown() <= lat)
+                                    destList.add(gps.getPayload());
+                                else{
+                                    break;
+                                }
+                            }
                         }
-                    }
-
-                    Double gridLng = (Double)sm.firstKey();
-                    TreeMap<Double,GpsGridBean> tmChild = tm.get(gridLng);
-                    SortedMap gridLatMap = tmChild.tailMap(lat);
-                    if(gridLatMap != null && gridLatMap.size() > 0){
-
-                        //先提取出右上角的所有坐标，然后再对 左下角坐标进行一轮比对，筛选出合适的坐标
-
-
-
-                        Double gridLat = (Double)gridLatMap.firstKey();
-//                    if(lat < gridLat)
-//                        return -1L;
-                        gps = tmChild.get(gridLat);
-                        destList.add(gps.getPayload());
                     }
                 }
                 return destList;
@@ -167,9 +173,11 @@ public class GridMark {
         double minLat =	38.085325 ;
 
         String[] geoArray = new String[]{
+            "115.324324,39.4324234",
                 "114.428794	,38.085325		",
                 "114.427794	,38.084875    ",
                 "114.426794	,38.083425    ",
+                "113.4324432,37.43242342",
 
         };
         GridMark m = new GridMark();
