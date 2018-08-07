@@ -11,12 +11,10 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class GridMark {
-
-    private double LNG_DISTANCE = 0.0;
     /**
      * lng ,<lat ,ad uid>
      */
-    private TreeMap<Double,TreeMap<Double,GpsGridBean>> tm = null;
+    private TreeMap<Double,GpsGridBean> tm = null;
 
     private static final String pythonFile = "E:\\工作源码\\数盟网络\\es-api\\util\\geo_transfer.py";
     private static final String dir  = "E:\\工作源码\\数盟网络\\es-api\\util\\";
@@ -80,20 +78,16 @@ public class GridMark {
 //                    String gridId = gps.getPayload();
 
                     if(!tm.containsKey(lng)){
-                        TreeMap<Double,GpsGridBean> tmChild =  new TreeMap<Double, GpsGridBean>();
-                        tmChild.put(lat,gps);
-                        tm.put(lng,tmChild);
-                    }else{
-                        TreeMap<Double,GpsGridBean> tmChild = tm.get(lng);
-                        if(!tmChild.containsKey(lat))
-                            tmChild.put(lat,gps);
+//                        TreeMap<Double,GpsGridBean> tmChild =  new TreeMap<Double, GpsGridBean>();
+//                        tmChild.put(lat,gps);
+                        tm.put(lng,gps);
                     }
                 }catch(Exception ex){
                     ex.printStackTrace();
                 }
             }
 
-            double firstKey = 0;
+         /*   double firstKey = 0;
             double secondKey = 0;
             int i = 0;
             for(Double d :  tm.keySet()){
@@ -105,7 +99,7 @@ public class GridMark {
                 }
                 i ++;
             }
-            LNG_DISTANCE = secondKey - firstKey;
+            LNG_DISTANCE = secondKey - firstKey;*/
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -141,7 +135,7 @@ public class GridMark {
 
                     for(Object obj : sm.keySet()){
                        gridLng = (Double)obj;
-                        tmChild = tm.get(gridLng);
+                        GpsGridBean gpsBean = (GpsGridBean)tm.get(gridLng);
                         gridLatMap = tmChild.tailMap(lat);
 
                         if (gridLatMap != null && gridLatMap.size() > 0) {

@@ -4,17 +4,26 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.util.InvokePython;
 
-import java.util.ArrayList;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class GridMark2 {
 
-    private double LNG_DISTANCE = 0.0;
+    /**
+     * gps 坐标内部ID 与 广告UID 对应
+     */
+    HashMap<Integer,String> gpsMap = null;
     /**
      * lng ,<lat ,ad uid>
      */
-    private TreeMap<Double,TreeMap<Double,GpsGridBean>> tm = null;
+    private TreeMap<Double,Integer> tmRightLng = null;
+
+    private TreeMap<Double,Integer> tmLeftLng = null;
+
+    private TreeMap<Double,Integer> tmUpLat = null;
+
+    private TreeMap<Double,Integer> tmDownlat = null;
+
+
 
     private static final String pythonFile = "E:\\工作源码\\数盟网络\\es-api\\util\\geo_transfer.py";
     private static final String dir  = "E:\\工作源码\\数盟网络\\es-api\\util\\";
@@ -27,6 +36,7 @@ public class GridMark2 {
      */
     public ArrayList<GpsGridBean> reConvert(ArrayList<GpsBean> coords){
         ArrayList<GpsGridBean> destList = new ArrayList<>();
+        int counter = 0;
         for(GpsBean gps : coords){
             String[] args = new String[]{
                     "E:\\python_2.7_64\\python",
@@ -41,6 +51,7 @@ public class GridMark2 {
             double lngLeft = Double.parseDouble(arr[1].split(",")[0]);
             double latDown = Double.parseDouble(arr[1].split(",")[1]);
             GpsGridBean gridBean = new GpsGridBean();
+            gridBean.setId(counter);
             //变成了 右上角坐标
             gridBean.setLngLeft(lngLeft);
             gridBean.setLatDown(latDown);
@@ -55,7 +66,7 @@ public class GridMark2 {
 
             System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
             System.out.println("new BMap.Point(" + gridBean.getLngRight() + "," + gridBean.getLatUp() + ")");
-
+            counter ++;
         }
         return destList;
 
@@ -65,45 +76,43 @@ public class GridMark2 {
         try {
             //使用 treemap 进行排序，先按照经度查找子树，然后再根据纬度进行查找，最终找到 第一个小于等于 当前经纬度的栅格,并将该栅格 ID 打上标记
             //grid_id,longileft,longiright,latibottom,latitop
-            if(tm != null)
-                tm.clear();
-                tm = null;
+            if(tmRightLng != null){
+                gpsMap.clear();
+                tmRightLng.clear();
+                tmLeftLng.clear();
+                tmUpLat.clear();
+                tmDownlat.clear();
+            }else{
+                gpsMap = new HashMap<>();
+                tmRightLng = new TreeMap();
+                tmLeftLng = new TreeMap<>();
+                tmUpLat = new TreeMap<>();
+                tmDownlat = new TreeMap<>();
+            }
 
-            tm = new TreeMap();
             for(GpsGridBean gps : coords) {
                 try{
-                    double lng = gps.getLngRight();//long right
-                    double lat = gps.getLatUp();//lat up
-                    //在广告业务场景中是适用于的 广告 UID
-//                    String gridId = gps.getPayload();
+                    gpsMap.put(gps.getId(),gps.getPayload());
 
-                    if(!tm.containsKey(lng)){
-                        TreeMap<Double,GpsGridBean> tmChild =  new TreeMap<Double, GpsGridBean>();
-                        tmChild.put(lat,gps);
-                        tm.put(lng,tmChild);
-                    }else{
-                        TreeMap<Double,GpsGridBean> tmChild = tm.get(lng);
-                        if(!tmChild.containsKey(lat))
-                            tmChild.put(lat,gps);
+                    if(!tmRightLng.containsKey(gps.getLngRight())){
+                        tmRightLng.put(gps.getLngRight(),gps.getId());
                     }
+                    if(!tmLeftLng.containsKey(gps.getLngLeft())){
+                        tmLeftLng.put(gps.getLngLeft(),gps.getId());
+                    }
+                    if(!tmUpLat.containsKey(gps.getLatUp())){
+                        tmUpLat.put(gps.getLatUp(),gps.getId());
+                    }
+                    if(!tmDownlat.containsKey(gps.getLatDown())){
+                        tmDownlat.put(gps.getLatDown(),gps.getId());
+                    }
+
                 }catch(Exception ex){
                     ex.printStackTrace();
                 }
             }
 
-            double firstKey = 0;
-            double secondKey = 0;
-            int i = 0;
-            for(Double d :  tm.keySet()){
-                if( i == 0)
-                    firstKey = d;
-                if( i == 1){
-                    secondKey = d;
-                    break;
-                }
-                i ++;
-            }
-            LNG_DISTANCE = secondKey - firstKey;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -113,45 +122,34 @@ public class GridMark2 {
      *
      * @param lng
      * @param lat
-     * @param minLng 如果小于这个经度，则返回 -1
-     * @param minLat 如果小于这个维度，则返回 -1
      * @return
      */
-    public ArrayList<String> findGrid(Double lng,Double lat,Double minLng,Double minLat){
+    public ArrayList<String> findGrid(Double lng,Double lat){
         try {
-            // pay load
-            ArrayList<String> destList = new ArrayList<>();
-            GpsGridBean gps = null;
+            ArrayList<String> adUidList = new ArrayList<>();
+            ArrayList<Integer> destList = new ArrayList<>();
             if(lng == null || lat == null)
-                return destList;
+                return adUidList;
             else{
-                SortedMap sm = tm.tailMap(lng);
-                if(sm != null && sm.size() > 0){
-                    Double gridLng = (Double)sm.firstKey();
-                    if(lng < minLng || lat < minLat)
-                        return null;
-                    TreeMap<Double,GpsGridBean> tmChild = tm.get(gridLng);
-                    SortedMap gridLatMap = tmChild.tailMap(lat);
-                    if(gridLatMap != null && gridLatMap.size() > 0){
+                SortedMap smRight = tmRightLng.tailMap(lng);
+                destList.addAll(smRight.values());
 
-                        //先提取出右上角的所有坐标，然后再对 左下角坐标进行一轮比对，筛选出合适的坐标
+                ArrayList<Integer> leftList = new ArrayList<>();
+                SortedMap smLeft = tmLeftLng.headMap(lng);
+                leftList.addAll(smLeft.values());
 
-//                        for(Object obj : sm.keySet()){
-//                            Double gridLng = (Double)obj;
-//                            GpsGridBean gridBean = (GpsGridBean)sm.get(gridLng);
-//                            if(lng >= gridBean.getLngLeft() && lat >= gridBean.getLatDown()){
-//                                destList.add(gridBean.getPayload());
-//                            }
-//                        }
+                destList.retainAll(leftList);
 
-                        Double gridLat = (Double)gridLatMap.firstKey();
-//                    if(lat < gridLat)
-//                        return -1L;
-                        gps = tmChild.get(gridLat);
-                        destList.add(gps.getPayload());
-                    }
+                SortedMap smUp = tmUpLat.tailMap(lat);
+                destList.retainAll(smUp.values());
+
+                SortedMap smDown = tmDownlat.headMap(lat);
+                destList.retainAll(smDown.values());
+                for(Integer id : destList){
+                    adUidList.add(gpsMap.get(id));
                 }
-                return destList;
+
+                return adUidList;
             }
         }catch(Exception ex){
             ex.printStackTrace();
@@ -166,9 +164,11 @@ public class GridMark2 {
         double minLat =	38.085325 ;
 
         String[] geoArray = new String[]{
+                "115.324324,39.4324234",
                 "114.428794	,38.085325		",
                 "114.427794	,38.084875    ",
                 "114.426794	,38.083425    ",
+                "113.4324432,37.43242342",
 
         };
         GridMark2 m = new GridMark2();
@@ -194,10 +194,10 @@ public class GridMark2 {
 
 //        114.44290747073296,38.09787235002915 out
 
-        ArrayList<String> gridIdList = m.findGrid(lng,lat,minLng,minLat);
-        for(String gird : gridIdList){
-            System.out.println(gird);
-        }
+        ArrayList<String> gridIdList = m.findGrid(lng,lat);
+//        for(String gird : gridIdList){
+//            System.out.println(gird);
+//        }
 
 
 

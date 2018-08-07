@@ -25,6 +25,18 @@ public class AdvertiserBean implements ICommand{
      * 每小时流量消耗
      */
     private long amountHour;
+    /**
+     * 广告主分级
+     */
+    private int grade;
+
+    public int getGrade() {
+        return grade;
+    }
+
+    public void setGrade(int grade) {
+        this.grade = grade;
+    }
 
     public String getUid() {
         return uid;
