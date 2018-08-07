@@ -36,7 +36,7 @@ public class AudienceBean implements ICommand {
     private String geos; //地理位置 经纬度  对应：mysql 中的 location_map
     private ArrayList<GpsBean> geoList;
     @Setter
-    private String mobilityType; //流动性 不限制、居住地、工作地、活动地
+    private int mobilityType; //地理位置-流动性 0 不限 1 居住地 2 工作地 3 活动地
     @Setter
     private String demographicTagId; //特定人群-标签选定项  例如： 大学生、家长、户外爱好者
     @Setter
@@ -52,7 +52,7 @@ public class AudienceBean implements ICommand {
     @Setter
     private int platformId; //平台 安卓  或 IOS  0 不限 1 安卓 2 ios
     @Setter
-    private String brandId; //品牌
+    private String brandIds; //品牌
     @Setter
     private int phonePriceLevel;//设备价格 分档  0 不限 1 1000 元内 2 1000-4000 3 4000- 10000  4 10000 以上
     @Setter
@@ -62,11 +62,10 @@ public class AudienceBean implements ICommand {
 
     //公司定向
     @Setter
-    private String comApNames; //公司WIFI名称 ，多个用 ，号隔开
+    private String companyIds; //公司 ID 列表 ，多个用 ，号隔开
     @Setter
-    private String comFullName;//公司全称
-    @Setter
-    private String comAddress;//公司地址
+    private String companyNames;//公司全称 ，用","号隔开
+
 
     public String getCitys() {
         return citys;

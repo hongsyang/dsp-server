@@ -1,6 +1,8 @@
 package cn.shuzilm.backend.master;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
 import cn.shuzilm.bean.control.*;
+import cn.shuzilm.bean.dmp.AudienceBean;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 
@@ -21,16 +23,45 @@ public class TaskServicve extends Service {
      * @return
      * @throws java.sql.SQLException
      */
-    public ResultList queryAudienceByUpTime(long startTime) throws SQLException {
-        long now = System.currentTimeMillis() ;
-        Object[] arr = new Object[3];
-        arr[0] = startTime / 1000;
-        arr[1] = now / 1000;
-        arr[2] = now / 1000;
+    public AudienceBean queryAudienceByUpTime(String adUid) throws SQLException {
+        AudienceBean bean = new AudienceBean();
+        Object[] arr = new Object[1];
+        arr[0] = adUid;
         String sql = "select c.* from ad join map_ad_audience b on ad.uid = b.ad_uid" +
                 " join audience c on b.ad_uid = c.uid" +
-                " where ad.updated_at >= ? and ad.s <= ? and ad.e >= ?";
-        return select.select(sql,arr);
+                " where b.ad_uid = ?";
+        ResultList list =  select.select(sql,arr);
+        if(list.size() >0 ){
+            ResultMap rm = (ResultMap)list.get(0);
+            bean.setAdUid(adUid);
+            bean.setName(rm.getString("name"));
+            bean.setType(rm.getString("type"));
+            bean.setAdviserId(rm.getString("advertiser_uid"));
+
+            //特定人群
+            bean.setDemographicCitys(rm.getString("demographic_city"));
+            bean.setDemographicTagId(rm.getString("demographic_tag"));
+            //兴趣偏好标签
+            bean.setAppPreferenceIds(rm.getString("ap_preference_ids"));
+            bean.setBrandIds(rm.getString("brand_ids"));
+            bean.setCarrierId(rm.getInteger("carrier_id"));
+            //选定城市或者经纬度 工作地、居住地、活动地
+            bean.setMobilityType(rm.getInteger("location_type"));
+            bean.setCitys(rm.getString("location_city"));
+            bean.setGeos(rm.getString("location_map"));
+            bean.setIncomeLevel(rm.getInteger("income_level"));
+            bean.setNetworkId(rm.getInteger("network_id"));
+            bean.setPhonePriceLevel(rm.getInteger("phone_price_level"));
+            bean.setPlatformId(rm.getInteger("platform_id"));
+            //特定公司
+            bean.setCompanyIds(rm.getString("company_ids"));
+            bean.setCompanyNames(rm.getString("company_names"));
+            return bean;
+        }else{
+            return null;
+        }
+
+
     }
 
     /**

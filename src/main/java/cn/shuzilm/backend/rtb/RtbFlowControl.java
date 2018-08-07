@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.CreativeBean;
@@ -8,9 +9,13 @@ import cn.shuzilm.bean.dmp.AreaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
+import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.geo.GeoHash;
 import cn.shuzilm.util.geo.GridMark;
 import cn.shuzilm.util.geo.GridMark2;
+import com.jcraft.jsch.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,16 +26,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by thunders on 2018/7/17.
  */
 public class RtbFlowControl {
+    private static final org.slf4j.Logger myLog = LoggerFactory.getLogger(AdFlowControl.class);
     private static RtbFlowControl rtb = null;
-    private RtbFlowControl(){
-
-    }
 
     public static RtbFlowControl getInstance(){
         if(rtb == null){
             rtb = new RtbFlowControl();
         }
         return rtb;
+    }
+
+    public static void main(String[] args) {
+        RtbFlowControl.getInstance().trigger();
     }
 
     public ConcurrentHashMap<String,AdBean> getAdMap(){
@@ -69,7 +76,9 @@ public class RtbFlowControl {
     // 判断标签坐标是否在 广告主的选取范围内
     private GridMark2 grid = null;
 
-    public RtbFlowControl(String nodeName){
+    private RtbFlowControl(){
+        MDC.put("sift","rtb");
+        nodeName = Constants.getInstance().getConf("HOST");
         this.nodeName = nodeName;
         mapAd = new ConcurrentHashMap<>();
         mapTask = new ConcurrentHashMap<>();
@@ -82,6 +91,10 @@ public class RtbFlowControl {
     public void trigger(){
         // 5 s
         pullAndUpdateTask();
+
+        // 10分钟拉取一次最新的广告内容
+        pullTenMinutes();
+
         // 1 hour
         refreshAdStatus();
     }
@@ -111,22 +124,26 @@ public class RtbFlowControl {
 
                 mapAd.put(uid,adBean);
                 AudienceBean audience =  adBean.getAudience();
-                //将 经纬度坐标装载到 MAP 中，便于快速查找
-                ArrayList<GpsBean> gpsList = audience.getGeoList();
-                for(GpsBean gps : gpsList){
-                    gps.setPayload(uid);
-                }
-                gpsAll.addAll(gpsList);
+                if(audience != null){
+                    //将 经纬度坐标装载到 MAP 中，便于快速查找
+                    ArrayList<GpsBean> gpsList = audience.getGeoList();
+                    for(GpsBean gps : gpsList){
+                        gps.setPayload(uid);
+                    }
+                    gpsAll.addAll(gpsList);
 
-                //将 省、地级、县级装载到 MAP 中，便于快速查找
-                List<AreaBean> areaList = audience.getCityList();
-                for(AreaBean area: areaList){
-                    if(area.getCountyId() == 0){
-                        //当县级选项为 0 的时候，则认为是匹配全地级市
-                        areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
-                    }else
-                        areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId(),adBean.getAdUid());
+                    //将 省、地级、县级装载到 MAP 中，便于快速查找
+                    List<AreaBean> areaList = audience.getCityList();
+                    for(AreaBean area: areaList){
+                        if(area.getCountyId() == 0){
+                            //当县级选项为 0 的时候，则认为是匹配全地级市
+                            areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
+                        }else
+                            areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId(),adBean.getAdUid());
 
+                    }
+                }else{
+                    myLog.error(adBean.getAdUid() + "\t" + adBean.getName() + " 没有设置人群包..");
                 }
 
                 //广告内容的更新 ，按照素材的类型和尺寸
@@ -158,6 +175,9 @@ public class RtbFlowControl {
      */
     public void pullAndUpdateTask(){
         TaskBean task = MsgControlCenter.recvTask(nodeName);
+        if(task == null){
+            return;
+        }
         if(task != null){
             //把最新的任务更新到 MAP task 中
             mapTask.put(task.getAdUid(),task);

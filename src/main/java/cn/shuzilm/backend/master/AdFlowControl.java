@@ -427,7 +427,7 @@ public class AdFlowControl {
 
                 }
 
-
+                //广告组
                 String groupId = map.getString("group_uid");
                 ad.setGroupId(groupId);
                 String adverUid = map.getString("advertiser_uid");
@@ -440,6 +440,9 @@ public class AdFlowControl {
                 ad.setCpmDailyLimit(map.getInteger("cpm_daily"));
                 //每小时限制
                 ad.setCpmHourLimit(map.getInteger("cpm_hourly"));
+
+                //获得人群
+                taskService.queryAudienceByUpTime(ad.getAdUid());
 
                 String creativeUid = map.getString("creative_uid");
                 //根据 广告创意ID 获得广告创意
