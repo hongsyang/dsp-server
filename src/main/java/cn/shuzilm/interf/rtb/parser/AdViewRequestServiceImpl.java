@@ -72,6 +72,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
             pushRedis(targetDuFlowBean);//上传到redis服务器
+            log.debug("json计数");
             response = JSON.toJSONString(bidResponseBean);
             log.debug("没有过滤的bidResponseBean:{}", response);
         }
@@ -160,6 +161,7 @@ public class AdViewRequestServiceImpl implements RequestService {
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
+        log.debug("redis连接时间计数");
         Jedis jedis = JedisManager.getInstance().getResource();
         if (jedis != null) {
             log.debug("jedis：{}", jedis);
