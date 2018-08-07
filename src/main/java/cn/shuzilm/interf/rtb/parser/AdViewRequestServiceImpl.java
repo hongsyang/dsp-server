@@ -8,6 +8,7 @@ import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import cn.shuzilm.filter.FilterRule;
 import com.alibaba.fastjson.JSON;
@@ -42,45 +43,50 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     @Override
     public String parseRequest(String dataStr) {
-        this.configs = AppConfigs.getInstance(FILTER_CONFIG);
-        String response = "";
-        log.debug(" BidRequest参数入参：{}", dataStr);
-        Map msg = new HashMap();//过滤规则的返回结果
-        //请求报文解析
-        BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
-        //创建返回结果  bidRequest请求参数保持不变
-        DUFlowBean sourceDuFlowBean = new DUFlowBean();
-        sourceDuFlowBean.setRequestId(bidRequestBean.getId());
-        sourceDuFlowBean.setImpression(bidRequestBean.getImp());
-        sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
-        //初步过滤规则开关
-        if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
-            if (FilterRule.filterRuleBidRequest(bidRequestBean,true,msg,"adview")) {
+        String response = "空请求";
+        if (StringUtils.isNotBlank(dataStr)) {
+            this.configs = AppConfigs.getInstance(FILTER_CONFIG);
+            log.debug(" BidRequest参数入参：{}", dataStr);
+            Map msg = new HashMap();//过滤规则的返回结果
+            //请求报文解析
+            BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
+            //创建返回结果  bidRequest请求参数保持不变
+            DUFlowBean sourceDuFlowBean = new DUFlowBean();
+            sourceDuFlowBean.setRequestId(bidRequestBean.getId());
+            sourceDuFlowBean.setImpression(bidRequestBean.getImp());
+            sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
+            //初步过滤规则开关
+            if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
+                if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "adview")) {
+                    DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
+                    BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
+                    log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
+                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
+                    pushRedis(targetDuFlowBean);//上传到redis服务器
+                    response = JSON.toJSONString(bidResponseBean);
+                    log.debug("过滤通过的bidResponseBean:{}", response);
+                } else {
+                    response = JSON.toJSONString(msg);//过滤规则结果输出
+                }
+            } else {
                 DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
                 BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
-                log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
+                log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
                 pushRedis(targetDuFlowBean);//上传到redis服务器
+                log.debug("json计数");
                 response = JSON.toJSONString(bidResponseBean);
-                log.debug("过滤通过的bidResponseBean:{}", response);
-            } else {
-                response = JSON.toJSONString(msg);//过滤规则结果输出
+                log.debug("没有过滤的bidResponseBean:{}", response);
             }
+            return response;
         } else {
-            DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
-            BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
-            log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
-            pushRedis(targetDuFlowBean);//上传到redis服务器
-            log.debug("json计数");
-            response = JSON.toJSONString(bidResponseBean);
-            log.debug("没有过滤的bidResponseBean:{}", response);
+            return response;
         }
-        return response;
     }
 
     /**
      * 内部流转DUFlowBean  转换为  BidResponseBean 输出给 ADX服务器
+     *
      * @param duFlowBean
      * @return
      */
@@ -158,6 +164,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     /**
      * 把生成的内部流转DUFlowBean上传到redis服务器 设置5分钟失效
+     *
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
@@ -167,7 +174,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             log.debug("jedis：{}", jedis);
             String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
             Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
-            log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}",set,expire);
+            log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
         } else {
             log.debug("jedis为空：{}", jedis);
         }

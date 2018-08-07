@@ -8,6 +8,7 @@ import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.UrlParserUtil;
+import cn.shuzilm.util.aes.AES;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 
     private static final String PIXEL_CONFIG = "pixel.properties";
 
+    private AppConfigs configs = null;
+
     @Override
     public String parseUrl(String url)  {
-        AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
+       configs = AppConfigs.getInstance(PIXEL_CONFIG);
         MDC.put("sift", "LingJiExp");
         log.debug("LingJiExp曝光的nurl值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -51,7 +54,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 bean.setAdUid(element.getAdUid());
             }
             bean.setHost(configs.getString("HOST"));
-            bean.setMoney(Float.valueOf(urlRequest.get("price")));
+            String price = urlRequest.get("price");
+            String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
+            log.debug("price解析结果：{}",result);
+            String[] split = result.split("_");
+            bean.setMoney(Float.valueOf(split[0]));
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);

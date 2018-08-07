@@ -39,13 +39,13 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         configs = AppConfigs.getInstance(PIXEL_CONFIG);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "LingJiClick");
-        log.debug("LingJiClick曝光的curl值:{}", urlRequest);
+        log.debug("LingJiClick点击的curl值:{}", urlRequest);
         String requestId = urlRequest.get("id");
         Jedis jedis = JedisManager.getInstance().getResource();
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
         try {
-            log.debug("LingJiClick曝光的requestid:{},curl值:{}:[]", requestId, element);
+            log.debug("LingJiClick点击的requestid:{},curl值:{}:[]", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
