@@ -38,7 +38,6 @@ public class DUFlowBean implements Serializable {
     private String crid;//广告物料 ID
     private Integer admt;//广告类型
     private Integer adct;//广告点击行为类型，参考附录 9
-    private Integer price;//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
     private String infoId;//上报信息的唯一ID
     private String did;//数盟的设备id
     private String deviceId;//   唯一识别用户
@@ -51,13 +50,15 @@ public class DUFlowBean implements Serializable {
     private String creativeUid;//varchar(36)  创意ID
     private String province;//varchar(20)  省
     private String city;//varchar(20)  市
-    private String actualPrice ;//成本价(张迁需要)
-    private String actualPricePremium ;//溢价（张迁需要）
-    private String biddingPrice  ;//广告主出价（张迁需要）
+    private Double actualPrice ;//成本价(张迁需要)
+    private Double actualPricePremium ;//溢价（张迁需要）
+    private Double biddingPrice  ;//广告主出价（张迁需要）
     private String adxId  ;//广告商id
     private String appId  ;//应用id
     private String appPackageName  ;//应用包名称
     private String appVersion  ;//应用版本
     private String dealid  ;//私有交易id，判断是否属于私有交易
+    private Double premiumFactor;//溢价系数
+    private Long winNoticeTime;//1533628505531 对账时间戳
 
 }

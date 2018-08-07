@@ -146,7 +146,9 @@ public class AdViewRequestServiceImpl implements RequestService {
         List curls = new ArrayList();
         curls.add(curl);
         bid.setAdmt(duFlowBean.getAdmt());//广告类型
-        bid.setPrice(duFlowBean.getPrice());//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        Double biddingPrice = duFlowBean.getBiddingPrice()*1000;
+        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
+        bid.setPrice(price);//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
         bid.setCrid(duFlowBean.getCrid());//广告物料 ID
         bid.setAdm(duFlowBean.getAdm());// 广告物料数据

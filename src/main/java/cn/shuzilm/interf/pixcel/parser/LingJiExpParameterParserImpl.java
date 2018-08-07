@@ -36,8 +36,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
     private AppConfigs configs = null;
 
     @Override
-    public String parseUrl(String url)  {
-       configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    public String parseUrl(String url) {
+        configs = AppConfigs.getInstance(PIXEL_CONFIG);
         MDC.put("sift", "LingJiExp");
         log.debug("LingJiExp曝光的nurl值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -46,7 +46,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         Jedis jedis = JedisManager.getInstance().getResource();
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
-        try{
+        try {
             log.debug("LingJiExp曝光的requestid:{},nurl值:{}:[]", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
@@ -56,9 +56,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             bean.setHost(configs.getString("HOST"));
             String price = urlRequest.get("price");
             String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
-            log.debug("price解析结果：{}",result);
+            log.debug("price解析结果：{}", result);
             String[] split = result.split("_");
-            bean.setMoney(Float.valueOf(split[0]));
+            Double money = Double.valueOf(split[0]) * 100;
+            bean.setMoney(money);
+            bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
@@ -67,22 +69,28 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
+            element.setActualPrice(money);//成本价
+            element.setActualPricePremium(money * element.getPremiumFactor());//溢价
+            element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
+
             MDC.put("sift", "LingJiExp");
-            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAdvertiserUid(),
                     element.getAdvertiserUid(), element.getAgencyUid(),
                     element.getCreativeUid(), element.getProvince(),
-                    element.getCity(), element.getRequestId());
+                    element.getCity(), element.getRequestId(),
+                    element.getActualPrice(), element.getBiddingPrice(),
+                    element.getWinNoticeTime(), element.getPremiumFactor());
             boolean lingJiExp = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
-            if (lingJiExp){
-                log.debug("发送到Phoenix：{}",lingJiExp);
-            }else {
-                log.debug("发送到Phoenix：{}",lingJiExp);
+            if (lingJiExp) {
+                log.debug("发送到Phoenix：{}", lingJiExp);
+            } else {
+                log.debug("发送到Phoenix：{}", lingJiExp);
             }
 
-        }catch (Exception e){
-            log.error("redis获取失败或者超时 ，异常：{}",e);
+        } catch (Exception e) {
+            log.error("redis获取失败或者超时 ，异常：{}", e);
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);

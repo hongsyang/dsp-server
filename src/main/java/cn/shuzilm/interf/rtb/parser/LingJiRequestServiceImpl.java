@@ -109,9 +109,11 @@ public class LingJiRequestServiceImpl implements RequestService {
         Impression impression = imp.get(0);
         bid.setId(format);////DSP对该次出价分配的ID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-//        bid.setAdid(duFlowBean.getAdUid());//广告id，对应duFlowBean的AdUid；
         bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
-        bid.setPrice(6);//duFlowBean.getPrice() 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        //等待结果
+        Double biddingPrice = duFlowBean.getBiddingPrice()*100;
+        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
+        bid.setPrice(6);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCrid(configs.getString("CRID"));//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
         //曝光nurl
         String nurl = "http://101.200.56.200:8880/" + "lingjiexp?" +
@@ -126,7 +128,9 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppId() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
+                "&pf=" + duFlowBean.getPremiumFactor() +
                 "&pmp=" + duFlowBean.getDealid();
+
         bid.setNurl(nurl);
 
         String curl = "http://101.200.56.200:8880/" + "lingjiclick?" +

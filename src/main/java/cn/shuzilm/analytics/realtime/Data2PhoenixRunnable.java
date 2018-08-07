@@ -86,9 +86,9 @@ public class Data2PhoenixRunnable implements Runnable {
              String creativeUid = dUFlowBean.getCreativeUid();//varchar(36)  创意ID
              String province = dUFlowBean.getProvince();//varchar(20)  省
              String city = dUFlowBean.getCity();//varchar(20)  市
-             String actualPrice = dUFlowBean.getActualPrice();//成本价
-             String biddingPrice = dUFlowBean.getBiddingPrice();
-             String actualPricePremium = dUFlowBean.getActualPricePremium();
+             Double actualPrice = dUFlowBean.getActualPrice();//成本价
+             Double biddingPrice = dUFlowBean.getBiddingPrice();
+             Double actualPricePremium = dUFlowBean.getActualPricePremium();
          //  infoId varchar(36) not null ,hour char(10) , createTime BIGINT(20),actualCreateTime BIGINT(20), did varchar(50), deviceId varchar(50), adUid varchar(50), audienceuid varchar(50),agencyUid varchar(50),advertiserUid varchar(50), creativeUid varchar(50), province varchar(50), city varchar(50),actualPricePremium varchar(50),biddingPrice varchar(50),actualPrice varchar(50) CONSTRAINT pk PRIMARY KEY (infoId)
 
              String sql = "upsert into DU_TEST."+tableName+" (infoId,hour,createTime,actualCreateTime,did,deviceId,adUid,audienceuid,agencyUid,advertiserUid,creativeUid,province,city,actualPricePremium,biddingPrice,actualPrice) values ("+infoId+","+hour+","+createTime+","+actualCreateTime+","+did+","+deviceId+","+adUid+","+audienceuid+","+agencyUid+","+advertiserUid+","+creativeUid+","+province+","+city+","+actualPricePremium+","+actualPricePremium+","+biddingPrice+","+actualPrice+")";
