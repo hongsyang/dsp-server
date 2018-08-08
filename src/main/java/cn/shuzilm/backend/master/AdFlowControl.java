@@ -219,9 +219,9 @@ public class AdFlowControl {
             AdFlowStatus monitor = mapMonitorHour.get(auid);
             //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
             if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
-                String r1eason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + " ###";
-                pauseAd(auid, r1eason, true);
-                myLog.info(monitor.toString() + "\t" + r1eason);
+                String reason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + " ###";
+                pauseAd(auid, reason, true);
+                myLog.info(monitor.toString() + "\t" + reason);
             }
             if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
