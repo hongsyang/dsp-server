@@ -60,7 +60,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             }
             //初步过滤规则开关
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
-                if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "lingji")) {
+                if (FilterRule.filterRuleBidRequest(bidRequestBean,msg)) {
                     DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
                     BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
                     log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
@@ -111,8 +111,8 @@ public class LingJiRequestServiceImpl implements RequestService {
         bid.setImpid(impression.getId());//从bidRequestBean里面取
         bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
         //等待结果
-        Double biddingPrice = duFlowBean.getBiddingPrice()*100;
-        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
+//        Double biddingPrice = duFlowBean.getBiddingPrice()*100;
+//        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
         bid.setPrice(6);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCrid(configs.getString("CRID"));//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
         //曝光nurl

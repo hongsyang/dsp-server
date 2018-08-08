@@ -58,7 +58,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
             log.debug("price解析结果：{}", result);
             String[] split = result.split("_");
-            Double money = Double.valueOf(split[0]) * 100;
+            Double money = Double.valueOf(split[0]) / 100;
             bean.setMoney(money);
             bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             bean.setWinNoticeNums(1);
@@ -69,8 +69,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-            element.setActualPricePremium(money);//成本价
-            element.setActualPricePremium(money * element.getPremiumFactor());//溢价
+//            element.setActualPricePremium(money);//成本价
+//            element.setActualPricePremium(money * element.getPremiumFactor());//溢价
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
 
             MDC.put("sift", "LingJiExp");
@@ -80,7 +80,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     element.getAdvertiserUid(), element.getAgencyUid(),
                     element.getCreativeUid(), element.getProvince(),
                     element.getCity(), element.getRequestId(),
-            element.getActualPrice(), element.getBiddingPrice(),
+                    element.getActualPrice(), element.getBiddingPrice(),
                     element.getWinNoticeTime(), element.getPremiumFactor());
             boolean lingJiExp = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
             if (lingJiExp) {

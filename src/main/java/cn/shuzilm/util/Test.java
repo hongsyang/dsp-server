@@ -1,11 +1,8 @@
 package cn.shuzilm.util;
 
-import cn.shuzilm.bean.dmp.AudienceBean;
-import cn.shuzilm.bean.dmp.GpsBean;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
-import java.util.*;
+import cn.shuzilm.common.jedis.JedisManager;
+import redis.clients.jedis.Jedis;
 
 
 public class Test {
@@ -19,7 +16,7 @@ public class Test {
 //        System.out.println(jsonString);
 
 //        String test=" [[6,62,737],[4,45,0],[23,271,2504]]";
-        AudienceBean audienceBean = new AudienceBean();
+//        AudienceBean audienceBean = new AudienceBean();
 //        audienceBean.setCitys(test);
 //        List<AreaBean> areaBeans = audienceBean.getCityList();
 //        for (AreaBean areaBean : areaBeans) {
@@ -33,9 +30,9 @@ public class Test {
 //            System.out.println(gpsBean);
 //        }
 
-        String scheduleTime = "{\"1\":[3,4,19],\"2\":[3,4,9],\"3\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[4,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[5,4,9],\"6\":[6,4,9],\"7\":[7,4,9]}";
-        int[][] timeTxtToMatrix = TimeSchedulingUtil.timeTxtToMatrix(scheduleTime);
-        System.out.println(timeTxtToMatrix[6][7]);
+//        String scheduleTime = "{\"1\":[3,4,19],\"2\":[3,4,9],\"3\":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[4,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[5,4,9],\"6\":[6,4,9],\"7\":[7,4,9]}";
+//        int[][] timeTxtToMatrix = TimeSchedulingUtil.timeTxtToMatrix(scheduleTime);
+//        System.out.println(timeTxtToMatrix[6][7]);
 //        JSONObject parse = JSONObject.parseObject(scheduleTime);
 //        Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
 //        List<Map.Entry> list = new ArrayList<Map.Entry>();
@@ -58,7 +55,9 @@ public class Test {
 //
 //            System.out.println(object);
 //        }
-//        Jedis jedis = JedisManager.getInstance().getResource();
+        Jedis jedis = JedisManager.getInstance().getResource();
+        String set = jedis.set("6709ab4c82f8b453e803209355bd7bc892a2e97c", "1");
+        System.out.println(set);
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson  jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);

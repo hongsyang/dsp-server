@@ -145,15 +145,16 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&pmp=" + duFlowBean.getDealid();
         List curls = new ArrayList();
         curls.add(curl);
-        bid.setAdmt(duFlowBean.getAdmt());//广告类型
-        Double biddingPrice = duFlowBean.getBiddingPrice()*1000;
-        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
-        bid.setPrice(price);//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        bid.setAdmt(2);//duFlowBean.getAdmt()广告类型
+        //等待写入
+//        Double biddingPrice = duFlowBean.getBiddingPrice()*1000;
+//        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
+        bid.setPrice(3);//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
-        bid.setCrid(duFlowBean.getCrid());//广告物料 ID
-        bid.setAdm(duFlowBean.getAdm());// 广告物料数据
-        bid.setAdh(duFlowBean.getAdw());//广告物料高度
-        bid.setAdw(duFlowBean.getAdh());//广告物料宽度
+        bid.setCrid(configs.getString("CRID"));//duFlowBean.getCrid()广告物料 ID
+        bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
+        bid.setAdh(50);//duFlowBean.getAdw()广告物料高度
+        bid.setAdw(320);//duFlowBean.getAdh()广告物料宽度
         bid.setAdct(duFlowBean.getAdct());// 广告点击行为类型，参考附录 9
         bid.setCid(duFlowBean.getCreativeUid());//广告创意 ID，可用于去重
         //添加到list中
