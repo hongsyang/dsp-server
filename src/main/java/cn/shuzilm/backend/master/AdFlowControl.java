@@ -191,7 +191,6 @@ public class AdFlowControl {
 
         //从各个 RTB 节点，获得最新的 bids 个数，并更新至内存监控
         for (WorkNodeBean node : nodeList) {
-            String ceshi ="11";
             NodeStatusBean bean = MsgControlCenter.recvBidStatus(node.getName());
             if (bean == null)
                 continue;
@@ -220,9 +219,9 @@ public class AdFlowControl {
             AdFlowStatus monitor = mapMonitorHour.get(auid);
             //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
             if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
-                String reason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + " ###";
-                pauseAd(auid, reason, true);
-                myLog.info(monitor.toString() + "\t" + reason);
+                String r1eason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + " ###";
+                pauseAd(auid, r1eason, true);
+                myLog.info(monitor.toString() + "\t" + r1eason);
             }
             if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
