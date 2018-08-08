@@ -37,6 +37,9 @@ public class RtbFlowControl {
     }
 
     public static void main(String[] args) {
+        //从主控节点读取一些数据
+        AdFlowControl.getInstance().loadAdInterval(true);
+        //测试 RTB 引擎的
         RtbFlowControl.getInstance().trigger();
     }
 
@@ -83,6 +86,7 @@ public class RtbFlowControl {
         mapAd = new ConcurrentHashMap<>();
         mapTask = new ConcurrentHashMap<>();
         areaMap = new ConcurrentHashMap<>();
+        mapAdCreative = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
         grid = new GridMark2();
 
@@ -127,11 +131,12 @@ public class RtbFlowControl {
                 if(audience != null){
                     //将 经纬度坐标装载到 MAP 中，便于快速查找
                     ArrayList<GpsBean> gpsList = audience.getGeoList();
-                    for(GpsBean gps : gpsList){
-                        gps.setPayload(uid);
+                    if(gpsList != null){
+                        for(GpsBean gps : gpsList){
+                            gps.setPayload(uid);
+                        }
+                        gpsAll.addAll(gpsList);
                     }
-                    gpsAll.addAll(gpsList);
-
                     //将 省、地级、县级装载到 MAP 中，便于快速查找
                     List<AreaBean> areaList = audience.getCityList();
                     for(AreaBean area: areaList){
@@ -148,21 +153,23 @@ public class RtbFlowControl {
 
                 //广告内容的更新 ，按照素材的类型和尺寸
                 CreativeBean creative =  adBean.getCreativeList().get(0);
-                String creativeKey = creative.getType() + creative.getWidth() + creative.getHeight();
+                String creativeKey = creative.getType() +"_"+ creative.getWidth()+"_"+ + creative.getHeight();
 
                 if(!mapAdCreative.contains(creativeKey)){
-                    List<String> taskList = new ArrayList<String>();
-                    taskList.add(uid);
-                    mapAdCreative.put(creativeKey,taskList);
+                    List<String> uidList = new ArrayList<String>();
+                    uidList.add(uid);
+                    mapAdCreative.put(creativeKey,uidList);
                 }else{
-                    List<String> taskList = mapAdCreative.get(creativeKey);
-                    taskList.add(uid);
+                    List<String> uidList = mapAdCreative.get(creativeKey);
+                    uidList.add(uid);
                 }
             }
 
             //将 GPS 坐标加载到 栅格快速比对处理类中
             ArrayList<GpsGridBean> list = grid.reConvert(gpsAll);
             grid.init(list);
+            myLog.info("广告共计加载条目数 : " + adBeanList.size());
+            myLog.info("广告中的经纬度坐标共计条目数：" + list.size());
 
         }
 

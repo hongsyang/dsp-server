@@ -51,7 +51,9 @@ public class GridMark2 {
             double lngLeft = Double.parseDouble(arr[1].split(",")[0]);
             double latDown = Double.parseDouble(arr[1].split(",")[1]);
             GpsGridBean gridBean = new GpsGridBean();
+
             gridBean.setId(counter);
+            gridBean.setPayload(gps.getPayload());
             //变成了 右上角坐标
             gridBean.setLngLeft(lngLeft);
             gridBean.setLatDown(latDown);
@@ -64,8 +66,8 @@ public class GridMark2 {
 
             destList.add(gridBean);
 
-            System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
-            System.out.println("new BMap.Point(" + gridBean.getLngRight() + "," + gridBean.getLatUp() + ")");
+//            System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
+//            System.out.println("new BMap.Point(" + gridBean.getLngRight() + "," + gridBean.getLatUp() + ")");
             counter ++;
         }
         return destList;

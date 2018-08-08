@@ -27,9 +27,7 @@ public class TaskServicve extends Service {
         AudienceBean bean = new AudienceBean();
         Object[] arr = new Object[1];
         arr[0] = adUid;
-        String sql = "select c.* from ad join map_ad_audience b on ad.uid = b.ad_uid" +
-                " join audience c on b.ad_uid = c.uid" +
-                " where b.ad_uid = ?";
+        String sql = "SELECT c.* FROM ad JOIN map_ad_audience b ON ad.uid = b.ad_uid JOIN audience c ON b.audience_uid = c.uid WHERE b.ad_uid = ?";
         ResultList list =  select.select(sql,arr);
         if(list.size() >0 ){
             ResultMap rm = (ResultMap)list.get(0);
@@ -44,15 +42,15 @@ public class TaskServicve extends Service {
             //兴趣偏好标签
             bean.setAppPreferenceIds(rm.getString("ap_preference_ids"));
             bean.setBrandIds(rm.getString("brand_ids"));
-            bean.setCarrierId(rm.getInteger("carrier_id"));
+            bean.setCarrierId(rm.get("carrier_id")!=null ? rm.getInteger("carrier_id") : 0) ;
             //选定城市或者经纬度 工作地、居住地、活动地
-            bean.setMobilityType(rm.getInteger("location_type"));
+            bean.setMobilityType(rm.get("location_type")!=null ? rm.getInteger("location_type") : 0);
             bean.setCitys(rm.getString("location_city"));
-            bean.setGeos(rm.getString("location_map"));
-            bean.setIncomeLevel(rm.getInteger("income_level"));
-            bean.setNetworkId(rm.getInteger("network_id"));
-            bean.setPhonePriceLevel(rm.getInteger("phone_price_level"));
-            bean.setPlatformId(rm.getInteger("platform_id"));
+            bean.setGeos(rm.get("location_map")!= null ? rm.getString("location_map") : "");
+            bean.setIncomeLevel(rm.get("income_level")!=null ? rm.getInteger("income_level") : 0);
+            bean.setNetworkId(rm.get("network_id") != null ? rm.getInteger("network_id") : 0);
+            bean.setPhonePriceLevel(rm.get("phone_price_level")!=null ? rm.getInteger("phone_price_level") : 0);
+            bean.setPlatformId(rm.get("platform_id")!= null ? rm.getInteger("platform_id") : 0);
             //特定公司
             bean.setCompanyIds(rm.getString("company_ids"));
             bean.setCompanyNames(rm.getString("company_names"));

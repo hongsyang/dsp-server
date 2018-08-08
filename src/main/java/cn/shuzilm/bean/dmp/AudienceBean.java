@@ -95,6 +95,8 @@ public class AudienceBean implements ICommand {
     private ArrayList<AreaBean> convertToAreaBeanList(List<String> list) {
         ArrayList<AreaBean> cityList = new ArrayList<>();
         for (String city : list) {
+            if(city == null || city.equals(""))
+                continue;
             AreaBean areaBean = new AreaBean();
             String[] cityDetail = city.split(",");
             Integer provinceId = Integer.valueOf(cityDetail[0]);
@@ -114,6 +116,8 @@ public class AudienceBean implements ICommand {
     }
 
     public void setGeos(String geos) {
+        if(geos == null || geos.trim().equals(""))
+            return;
         this.geos = geos;
         //判断geos是否为空
         if (StringUtils.isNotBlank(geos)) {

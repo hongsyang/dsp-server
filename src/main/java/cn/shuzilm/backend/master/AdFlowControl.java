@@ -1,6 +1,7 @@
 package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.control.*;
+import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.TimeSchedulingUtil;
 import com.yao.util.db.bean.ResultList;
@@ -442,7 +443,8 @@ public class AdFlowControl {
                 ad.setCpmHourLimit(map.getInteger("cpm_hourly"));
 
                 //获得人群
-                taskService.queryAudienceByUpTime(ad.getAdUid());
+                AudienceBean audience = taskService.queryAudienceByUpTime(ad.getAdUid());
+                ad.setAudience(audience);
 
                 String creativeUid = map.getString("creative_uid");
                 //根据 广告创意ID 获得广告创意
