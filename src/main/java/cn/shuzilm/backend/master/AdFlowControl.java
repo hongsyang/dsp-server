@@ -191,6 +191,7 @@ public class AdFlowControl {
 
         //从各个 RTB 节点，获得最新的 bids 个数，并更新至内存监控
         for (WorkNodeBean node : nodeList) {
+            String ceshi ="11";
             NodeStatusBean bean = MsgControlCenter.recvBidStatus(node.getName());
             if (bean == null)
                 continue;
