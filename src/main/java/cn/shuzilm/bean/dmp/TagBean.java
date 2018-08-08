@@ -31,6 +31,14 @@ public class TagBean {
     private int networkId; //网络类型 LTE 3G
     private int carrierId; // 运营商
     private String appPreferenceId;// 应用偏好
+    /**
+     * 人群标签ID 白领，政府机构人士 。。。
+     */
+    private String tagIdList;
+    /**
+     * 所属公司标签 公司 ID
+     */
+    private String companyIdList;
 
 
     public static void main(String[] args) {

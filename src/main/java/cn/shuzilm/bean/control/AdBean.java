@@ -37,6 +37,12 @@ public class AdBean implements ICommand  {
     private float exposureRate;
 
     /**
+     * 该条广告的质量打分属性
+     */
+    private AdPropertyBean propertyBean;
+
+
+    /**
      * 该广告所属的广告主
      */
     @Setter

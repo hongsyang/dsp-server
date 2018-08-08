@@ -92,6 +92,8 @@ public class AudienceBean implements ICommand {
     private ArrayList<AreaBean> convertToAreaBeanList(List<String> list) {
         ArrayList<AreaBean> cityList = new ArrayList<>();
         for (String city : list) {
+            if(city == null || city.equals(""))
+                continue;
             AreaBean areaBean = new AreaBean();
             String[] cityDetail = city.split(",");
             Integer provinceId = Integer.valueOf(cityDetail[0]);
@@ -111,6 +113,8 @@ public class AudienceBean implements ICommand {
     }
 
     public void setGeos(String geos) {
+        if(geos == null || geos.trim().equals(""))
+            return;
         this.geos = geos;
         JSONObject parse = JSONObject.parseObject(geos);
         Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
