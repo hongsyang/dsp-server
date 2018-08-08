@@ -105,9 +105,9 @@ public class AdViewRequestServiceImpl implements RequestService {
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-        bid.setAdid(impression.getId());//duFlowBean.getAdUid()广告id，对应duFlowBean的AdUid；
+        bid.setAdid("1");//duFlowBean.getAdUid()广告id，对应duFlowBean的AdUid；
 
-        
+
         //曝光wurl
         String wurl = "http://101.200.56.200:8880/" + "adviewexp?" +
                 "id=" + duFlowBean.getRequestId() +
