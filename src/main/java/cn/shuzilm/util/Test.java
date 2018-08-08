@@ -56,7 +56,7 @@ public class Test {
 //            System.out.println(object);
 //        }
         Jedis jedis = JedisManager.getInstance().getResource();
-        String set = jedis.set("6709ab4c82f8b453e803209355bd7bc892a2e97c", "1");
+        String set = jedis.set("6f1de61b613c9b095ea1385eb18bf5a07de0413c", "1");
         System.out.println(set);
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson  jedis.get("LingJiExp");

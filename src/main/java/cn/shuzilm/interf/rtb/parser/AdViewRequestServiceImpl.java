@@ -105,7 +105,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-        bid.setAdid(duFlowBean.getAdUid());//广告id，对应duFlowBean的AdUid；
+        bid.setAdid(configs.getString("ADID"));//duFlowBean.getAdUid()广告id，对应duFlowBean的AdUid；
 
 
         //曝光wurl
@@ -113,7 +113,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-                "&price=" + duFlowBean.getActualPrice() +
+                "&price=" + 3 +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
@@ -124,14 +124,14 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&pmp=" + duFlowBean.getDealid();
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
-//        List<String> urls = new ArrayList<>();
-//        urls.add("http://dsp.example1.com");
+        List<String> urls = new ArrayList<>();
+        urls.add(wurl);
 //        urls.add("http://dsp.example2.com");
 //        urls.add("http://dsp.example3.com");
 //        urls.add("http://dsp.example4.com");
-//        Map nurlMap = new HashMap();
-//        nurlMap.put("0", urls);
-//        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送
+        Map nurlMap = new HashMap();
+        nurlMap.put("0", urls);
+        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送
         String curl = "http://101.200.56.200:8880/" + "adviewclick?" +
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
@@ -157,8 +157,8 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
         bid.setAdh(50);//duFlowBean.getAdw()广告物料高度
         bid.setAdw(320);//duFlowBean.getAdh()广告物料宽度
-        bid.setAdct(duFlowBean.getAdct());// 广告点击行为类型，参考附录 9
-        bid.setCid(duFlowBean.getCreativeUid());//广告创意 ID，可用于去重
+        bid.setAdct(0);//duFlowBean.getAdct() 广告点击行为类型，参考附录 9
+        bid.setCid(configs.getString("CID"));//duFlowBean.getCreativeUid()广告创意 ID，可用于去重
         //添加到list中
         bidList.add(bid);
         seatBid.setBid(bidList);
@@ -174,9 +174,10 @@ public class AdViewRequestServiceImpl implements RequestService {
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
         log.debug("redis连接时间计数");
+        JedisManager jedisManager = JedisManager.getInstance();
         Jedis jedis = JedisManager.getInstance().getResource();
         if (jedis != null) {
-            log.debug("jedis：{}", jedis);
+            log.debug("AdView_jedis：{}", jedis);
             String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
             Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
             log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
