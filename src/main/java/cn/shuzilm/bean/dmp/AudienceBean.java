@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Created by thunders on 2018/7/26.
  */
@@ -36,11 +38,14 @@ public class AudienceBean implements ICommand {
     private ArrayList<GpsBean> geoList;
     @Setter
     private int mobilityType; //地理位置-流动性 0 不限 1 居住地 2 工作地 3 活动地
-    @Setter
+    
     private String demographicTagId; //特定人群-标签选定项  例如： 大学生、家长、户外爱好者
-    @Setter
+    
+    private List<String> demographicTagIdList;
+    
     private String demographicCitys; //特定人群 - 城市范围选定列表 省份地级县级市
 
+    private List<AreaBean> demographicCityList;
 
     //属性筛选
     @Setter
@@ -154,5 +159,32 @@ public class AudienceBean implements ICommand {
         }
         return geoList;
     }
+    
+    public void setDemographicTagId(String demographicTagId) {
+		this.demographicTagId = demographicTagId;
+		if (StringUtils.isNotBlank(demographicTagId)) {
+            String[] split = demographicTagId.split(",");
+            List<String> list = new ArrayList<String>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                list.add(replace);
+            }
+            this.demographicTagIdList = list;
+        }
+	}
 
+	public void setDemographicCitys(String demographicCitys) {
+		this.demographicCitys = demographicCitys;
+		String[] split = citys.split("],");
+        List<String> list = new ArrayList();
+        String re = "[";
+        String ra = "]";
+        for (String s : split) {
+            String replace = s.replace(re, "").trim().replace(ra, "");
+            list.add(replace);
+        }
+        this.demographicCityList = convertToAreaBeanList(list);
+	}
 }

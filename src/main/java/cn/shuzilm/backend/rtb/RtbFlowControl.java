@@ -50,6 +50,10 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String,List<String>> getCreativeMap(){
         return mapAdCreative;
     }
+    
+    public ConcurrentHashMap<String,String> getAreaMap(){
+        return areaMap;
+    }
 
 
     private String nodeName ;
