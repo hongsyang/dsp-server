@@ -6,6 +6,7 @@ import cn.shuzilm.bean.adview.response.ResponseExt;
 import cn.shuzilm.bean.adview.response.ResponseVideo;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import java.util.Map;
 * @Version:        1.0
 */
 @Data
-public class LJBid  {
+public class LJBid implements Serializable {
 
     private String impid;//(T) 对应 Impression 的唯一标识
     private String dealid;//(F) 参考请求里的 deal.id，判断是否投标属于私有交易

@@ -2,11 +2,28 @@ package cn.shuzilm.util;
 
 
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.base64.AdViewDecodeUtil;
+import cn.shuzilm.util.base64.Base64;
+import cn.shuzilm.util.base64.Decrypter;
+import org.springframework.util.Base64Utils;
 import redis.clients.jedis.Jedis;
+
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.util.Arrays;
+import java.util.Date;
 
 
 public class Test {
     public static void main(String[] args) {
+//
+//        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
+//        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
+//        String price="Nq-SHGUBAABZR0NeS3B1IEFWntys7a6ayOIfBA";
+//
+//        Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
+//        System.out.println(Double.valueOf(aLong/10000));
 
 //        Map msg = new HashMap();
 //        msg.put("code",1001);
@@ -55,9 +72,10 @@ public class Test {
 //
 //            System.out.println(object);
 //        }
-        Jedis jedis = JedisManager.getInstance().getResource();
-        String set = jedis.set("6f1de61b613c9b095ea1385eb18bf5a07de0413c", "1");
-        System.out.println(set);
+//        Jedis jedis = JedisManager.getInstance().getResource();
+//        String set = jedis.set("6f1de61b613c9b095ea1385eb18bf5a07de0413c", "1");
+//        System.out.println(set);
+
 //        JedisQueueManager.getElementFromQueue("LingJiExp");
 //        String elementJson  jedis.get("LingJiExp");
 //        DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);
@@ -162,7 +180,27 @@ public class Test {
 //        String s = RequestServiceFactory.getRequestService(className).parseRequest(className);
     }
 
-    public String parseRequest(String dataStr) {
-        return this.getClass().getSimpleName();
+
+
+
+
+
+
+
+
+    /**
+     * 转化为安全Base64内容
+     * @param input
+     * @return
+     */
+    public static String WebSafeBase64Encode(byte[] input) {
+        String value = "";
+        try {
+            value = new String(Base64.encodeBase64(input), "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return value.replace('+', '-').replace('/', '_').replace("=", "");
     }
 }

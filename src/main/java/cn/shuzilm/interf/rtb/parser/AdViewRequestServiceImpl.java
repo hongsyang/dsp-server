@@ -113,7 +113,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-                "&price=" + 3 +
+                "&price=" + "%%WIN_PRICE%%" +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
@@ -125,13 +125,6 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
         List<String> urls = new ArrayList<>();
-        urls.add(wurl);
-//        urls.add("http://dsp.example2.com");
-//        urls.add("http://dsp.example3.com");
-//        urls.add("http://dsp.example4.com");
-        Map nurlMap = new HashMap();
-        nurlMap.put("0", urls);
-        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送
         String curl = "http://101.200.56.200:8880/" + "adviewclick?" +
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
@@ -145,16 +138,25 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
+        urls.add(curl);
+//        urls.add("http://dsp.example2.com");
+//        urls.add("http://dsp.example3.com");
+//        urls.add("http://dsp.example4.com");
+        Map nurlMap = new HashMap();
+        nurlMap.put("0", urls);
+        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送
         List curls = new ArrayList();
         curls.add(curl);
         bid.setAdmt(2);//duFlowBean.getAdmt()广告类型
         //等待写入
 //        Double biddingPrice = duFlowBean.getBiddingPrice()*1000;
 //        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
-        bid.setPrice(3);//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        bid.setPrice(Integer.valueOf(configs.getString("PRICE")));//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
         bid.setCrid(configs.getString("CRID"));//duFlowBean.getCrid()广告物料 ID
-        bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
+//        bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
+        bid.setAdi(configs.getString("ADM"));//图片路径
+        bid.setAdurl(configs.getString("ADURL"));//广告点击跳转落地页，可以支持重定向
         bid.setAdh(50);//duFlowBean.getAdw()广告物料高度
         bid.setAdw(320);//duFlowBean.getAdh()广告物料宽度
         bid.setAdct(0);//duFlowBean.getAdct() 广告点击行为类型，参考附录 9
