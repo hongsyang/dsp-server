@@ -67,8 +67,10 @@ public class AudienceBean implements ICommand {
     private int carrierId; // 运营商 不限 0 移动 1 电信 2 联通 3
 
     //公司定向
-    @Setter
+    
     private String companyIds; //公司 ID 列表 ，多个用 ，号隔开
+    
+    private List<String> companyIdList;
     @Setter
     private String companyNames;//公司全称 ，用","号隔开
 
@@ -84,6 +86,23 @@ public class AudienceBean implements ICommand {
         }
         this.demographicCityList = convertToAreaBeanList(list);
     }
+    
+    public void setCompanyIds(String companyIds) {
+		this.companyIds = companyIds;
+		String[] split = companyIds.split(",");
+		List<String> list = new ArrayList();
+		String re = "{";
+		String ra = "}";
+		for(String s : split){
+			String replace = s.replace(re, "").trim().replace(ra, "");
+			String[] nameAndId = replace.split(":");
+			if(nameAndId.length >1){
+				list.add(nameAndId[1]);
+			}
+		}
+		
+		this.companyIdList = list;
+	}
 
     public String getCitys() {
         return citys;
@@ -192,5 +211,6 @@ public class AudienceBean implements ICommand {
             this.demographicTagIdList = list;
         }
 	}
+
 
 }

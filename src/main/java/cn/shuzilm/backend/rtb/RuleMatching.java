@@ -13,6 +13,7 @@ import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.JsonTools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -107,17 +108,16 @@ public class RuleMatching {
 					}
 
 				} else {// 按照经纬度匹配
-					float[] geoArray = this.matchMobilityType(audience.getMobilityType(), tagBean);
-					if (geoArray.length > 1) {
-						ArrayList<String> uidList = rtbIns.checkInBound(geoArray[0], geoArray[1]);
-						if (uidList != null && uidList.size() > 0 && (commonMatch(tagBean, audience))) {
+					boolean isInBound = this.checkInBoudByType(audience.getMobilityType(), tagBean);
+						if (isInBound && (commonMatch(tagBean, audience))) {
 							LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
 							machedAdList.add(ad);
-						}
 					}
 				}
 			} else if (audience.getType().equals("demographic")) { // 特定人群
-				if (audience.getDemographicTagIdList().contains(tagBean.getTagIdList())) {// tagBean标签中的特定人群为具体的某一种
+				String tagIdStr = tagBean.getTagIdList();
+				String tagIds [] = tagIdStr.split(",");			
+				if (audience.getDemographicTagIdList().containsAll(Arrays.asList(tagIds))) {
 					String key = null;
 					if (tagBean.getCountyId() == 0) {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
@@ -131,7 +131,9 @@ public class RuleMatching {
 				}
 
 			} else if (audience.getType().equals("company")) { // 具体公司
-				if (audience.getCompanyIds().contains(tagBean.getTagIdList()) && commonMatch(tagBean, audience)) {// 涉及到库中存储的数据样式和标签中的样式
+				String companyIdStr = tagBean.getCompanyIdList();
+				String companyIds [] = companyIdStr.split(",");
+				if (audience.getCompanyIdList().containsAll(Arrays.asList(companyIds)) && commonMatch(tagBean, audience)) {// 涉及到库中存储的数据样式和标签中的样式
 					LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
 					machedAdList.add(ad);
 				}
@@ -175,7 +177,7 @@ public class RuleMatching {
 			gradeOrderByPremiumStrategy(machedAdList);
 			gradeOrderOtherParaStrategy(machedAdList);
 
-			AdBean ad = machedAdList.get(0);// 排序完分数最高的
+			AdBean ad = gradeByRandom(machedAdList);
 			// 封装返回接口引擎数据
 			LOG.debug("ID["+ad.getAdUid()+"]通过排序获得竞价资格!");
 			targetDuFlowBean = packageDUFlowData(ad);
@@ -226,18 +228,25 @@ public class RuleMatching {
 	 * @param tagBean
 	 * @return
 	 */
-	public float[] matchMobilityType(int type, TagBean tagBean) {
+	public boolean checkInBoudByType(int type, TagBean tagBean) {
+		float[] residenceArray = tagBean.getResidence();
+		float[] workArray = tagBean.getWork();
+		float[] activityArray = tagBean.getActivity();
 		switch (type) {
-		case 0:
-			return tagBean.getResidence();// 不限制时使用居住地
+		case 0:			
+			if(rtbIns.checkInBound(residenceArray[0], residenceArray[1]).size()>0 ||
+					rtbIns.checkInBound(workArray[0], workArray[1]).size()>0 ||
+					rtbIns.checkInBound(activityArray[0], activityArray[1]).size()>0){
+				return true;
+			}
 		case 1:
-			return tagBean.getResidence();
+			return rtbIns.checkInBound(residenceArray[0], residenceArray[1]).size()>0;
 		case 2:
-			return tagBean.getWork();
+			return rtbIns.checkInBound(workArray[0], workArray[1]).size()>0;
 		case 3:
-			return tagBean.getActivity();
+			return rtbIns.checkInBound(activityArray[0], activityArray[1]).size()>0;
 		}
-		return null;
+		return false;
 	}
 
 	/**
@@ -305,6 +314,24 @@ public class RuleMatching {
 			}
 
 		});
+	}
+	
+	public AdBean gradeByRandom(List<AdBean> machedAdList){
+		AdBean ad = null;
+		int num = tagRandom.nextInt(100);
+		if(num < 70){
+			ad = machedAdList.get(0);//70%的概率直接获取第一个
+		}else{
+			int ra = 1;  
+			while(true){
+				ra = tagRandom.nextInt(machedAdList.size());
+				if(ra != 0) break;
+			}
+			
+			ad = machedAdList.get(ra);//获取从第二个到最后一个随机某个元素
+		}
+		
+		return ad;
 	}
 	
 	public DUFlowBean packageDUFlowData(AdBean ad){
