@@ -91,6 +91,7 @@ public class RuleMatching {
 			}
 
 			AdBean ad = rtbIns.getAdMap().get(adUid);
+			
 
 			AudienceBean audience = ad.getAudience();
 
@@ -98,12 +99,16 @@ public class RuleMatching {
 				if (audience.getGeos().equals("")) {
 					// 省市县的匹配
 					String key = null;
-					if (tagBean.getCountyId() == 0) {
+					if(tagBean.getProvinceId() == 0){
+						key = "china";
+					}else if(tagBean.getCityId() == 0){
+						key = tagBean.getProvinceId()+"";
+					}else if (tagBean.getCountyId() == 0) {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
 					} else {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
 					}
-					if (rtbIns.getAreaMap().containsKey(key) && (commonMatch(tagBean, audience))) {
+					if (rtbIns.getAreaMap().get(key).contains(ad.getAdUid()) && (commonMatch(tagBean, audience))) {
 						LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
 						machedAdList.add(ad);
 					}
@@ -120,12 +125,16 @@ public class RuleMatching {
 				String tagIds [] = tagIdStr.split(",");			
 				if (audience.getDemographicTagIdList().containsAll(Arrays.asList(tagIds))) {
 					String key = null;
-					if (tagBean.getCountyId() == 0) {
+					if(tagBean.getProvinceId() == 0){
+						key = "china";
+					}else if(tagBean.getCityId() == 0){
+						key = tagBean.getProvinceId()+"";
+					}else if (tagBean.getCountyId() == 0) {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
 					} else {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
 					}
-					if (rtbIns.getDemographicMap().containsKey(key) && (commonMatch(tagBean, audience))) {
+					if (rtbIns.getDemographicMap().get(key).contains(ad.getAdUid()) && (commonMatch(tagBean, audience))) {
 						LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
 						machedAdList.add(ad);
 					}

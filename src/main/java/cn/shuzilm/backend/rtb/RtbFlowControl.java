@@ -51,11 +51,11 @@ public class RtbFlowControl {
         return mapAdCreative;
     }
     
-    public ConcurrentHashMap<String,String> getAreaMap(){
+    public ConcurrentHashMap<String,List<String>> getAreaMap(){
         return areaMap;
     }
     
-    public ConcurrentHashMap<String,String> getDemographicMap(){
+    public ConcurrentHashMap<String,List<String>> getDemographicMap(){
         return demographicMap;
     }
 
@@ -83,9 +83,9 @@ public class RtbFlowControl {
      * key: 北京市北京市海淀区  河北省廊坊地区广平县
      * value：aduid
      */
-    private static ConcurrentHashMap<String,String> areaMap = null;
+    private static ConcurrentHashMap<String,List<String>> areaMap = null;
 
-    private static ConcurrentHashMap<String,String> demographicMap = null;
+    private static ConcurrentHashMap<String,List<String>> demographicMap = null;
 
     // 判断标签坐标是否在 广告主的选取范围内
     private GridMark2 grid = null;
@@ -151,16 +151,39 @@ public class RtbFlowControl {
                     }
                     //将 省、地级、县级装载到 MAP 中，便于快速查找
                     List<AreaBean> areaList = audience.getCityList();
-                    for(AreaBean area: areaList){
-                        if(area.getCountyId() == 0){
-                            //当县级选项为 0 的时候，则认为是匹配全地级市
-                            areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
-                            demographicMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
+                    String key = null;
+                    for(AreaBean area: areaList){                   	
+                    	if(area.getProvinceId() == 0){
+                    		//当省选项为 0 的时候，则认为是匹配全国
+                    		key = "china";
+                    	}else if(area.getCityId() == 0){
+                    		//当市级选项为 0 的时候，则认为是匹配全省
+                    		key = area.getProvinceId()+"";
+                    	}else if(area.getCountyId() == 0){
+                            //当县级选项为 0 的时候，则认为是匹配全市
+                    		key = area.getProvinceId() + "_" +area.getCityId();
                         }else{
-                            areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId(),adBean.getAdUid());
-                            demographicMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
+                        	key = area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId();
                         }
-
+                    	
+                    	if(!areaMap.contains(key)){
+                    		List<String> adUidList = new ArrayList<String>();
+                    		adUidList.add(adBean.getAdUid());
+                    		areaMap.put(key, adUidList);
+                    	}else{
+                    		List<String> adUidList = areaMap.get(key);
+                    		adUidList.add(adBean.getAdUid());
+                    	}
+                    	
+                    	
+                    	if(!demographicMap.contains(key)){
+                    		List<String> adUidList = new ArrayList<String>();
+                    		adUidList.add(adBean.getAdUid());
+                    		demographicMap.put(key, adUidList);
+                    	}else{
+                    		List<String> adUidList = demographicMap.get(key);
+                    		adUidList.add(adBean.getAdUid());
+                    	}
                     }
                 }else{
                     myLog.error(adBean.getAdUid() + "\t" + adBean.getName() + " 没有设置人群包..");
