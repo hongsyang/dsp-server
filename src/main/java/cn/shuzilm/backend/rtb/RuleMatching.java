@@ -39,7 +39,7 @@ public class RuleMatching {
 
         //加载标签溢价比例
         //TODO
-    }
+}
 
     /**
      * 创意类型、尺寸匹配

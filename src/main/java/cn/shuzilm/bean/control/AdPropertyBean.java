@@ -8,7 +8,7 @@ import lombok.Setter;
  * 广告属性
  */
 @Data
-public class AdPropertyBean {
+public class AdPropertyBean implements ICommand {
 
     /**
      * 广告投放进度
