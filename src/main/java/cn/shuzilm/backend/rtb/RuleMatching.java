@@ -72,6 +72,7 @@ public class RuleMatching {
 		// 取出标签
 		String tagJson = redis.getAsync(deviceId);
 		TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
+		
 
 		// 开始匹配
 		String creativeKey = adType + "_" + width + "_" + height;

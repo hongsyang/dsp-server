@@ -42,7 +42,6 @@ public class DUFlowBean implements Serializable {
     private String did;//数盟的设备id
     private String deviceId;//   唯一识别用户
     private long createTime;// timestamp  该条信息的创建时间
-    private Integer infoType;//tinyint  0 imp 1 click 2 play 3 close 4 land
     private String adUid;// varchar(36)  广告ID
     private String audienceuid;//  varchar(36)  人群ID
     private String advertiserUid;//  varchar(36)  广告主ID
