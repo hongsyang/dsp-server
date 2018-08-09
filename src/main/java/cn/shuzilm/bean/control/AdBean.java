@@ -39,6 +39,7 @@ public class AdBean implements ICommand  {
     /**
      * 该条广告的质量打分属性
      */
+    @Setter
     private AdPropertyBean propertyBean;
 
 

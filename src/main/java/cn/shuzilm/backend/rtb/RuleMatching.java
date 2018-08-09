@@ -124,7 +124,7 @@ public class RuleMatching {
 					} else {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
 					}
-					if (rtbIns.getAreaMap().containsKey(key) && (commonMatch(tagBean, audience))) {
+					if (rtbIns.getDemographicMap().containsKey(key) && (commonMatch(tagBean, audience))) {
 						LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
 						machedAdList.add(ad);
 					}

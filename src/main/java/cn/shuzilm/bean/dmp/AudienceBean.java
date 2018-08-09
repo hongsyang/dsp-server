@@ -43,9 +43,10 @@ public class AudienceBean implements ICommand {
     
     private List<String> demographicTagIdList;
     
+    
     private String demographicCitys; //特定人群 - 城市范围选定列表 省份地级县级市
 
-    private List<AreaBean> demographicCityList;
+    private List<AreaBean> demographicCityList;//特定人群城市
 
     //属性筛选
     @Setter
@@ -70,6 +71,18 @@ public class AudienceBean implements ICommand {
     @Setter
     private String companyNames;//公司全称 ，用","号隔开
 
+    public void setDemographicCitys(String citys){
+        demographicCitys = citys;
+        String[] split = citys.split("],");
+        List<String> list = new ArrayList();
+        String re = "[";
+        String ra = "]";
+        for (String s : split) {
+            String replace = s.replace(re, "").trim().replace(ra, "");
+            list.add(replace);
+        }
+        this.demographicCityList = convertToAreaBeanList(list);
+    }
 
     public String getCitys() {
         return citys;
@@ -175,16 +188,4 @@ public class AudienceBean implements ICommand {
         }
 	}
 
-	public void setDemographicCitys(String demographicCitys) {
-		this.demographicCitys = demographicCitys;
-		String[] split = citys.split("],");
-        List<String> list = new ArrayList();
-        String re = "[";
-        String ra = "]";
-        for (String s : split) {
-            String replace = s.replace(re, "").trim().replace(ra, "");
-            list.add(replace);
-        }
-        this.demographicCityList = convertToAreaBeanList(list);
-	}
 }

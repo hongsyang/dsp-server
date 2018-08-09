@@ -54,6 +54,10 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String,String> getAreaMap(){
         return areaMap;
     }
+    
+    public ConcurrentHashMap<String,String> getDemographicMap(){
+        return demographicMap;
+    }
 
 
     private String nodeName ;
@@ -80,6 +84,9 @@ public class RtbFlowControl {
      * value：aduid
      */
     private static ConcurrentHashMap<String,String> areaMap = null;
+
+    private static ConcurrentHashMap<String,String> demographicMap = null;
+
     // 判断标签坐标是否在 广告主的选取范围内
     private GridMark2 grid = null;
 
@@ -90,6 +97,7 @@ public class RtbFlowControl {
         mapAd = new ConcurrentHashMap<>();
         mapTask = new ConcurrentHashMap<>();
         areaMap = new ConcurrentHashMap<>();
+        demographicMap = new ConcurrentHashMap<>();
         mapAdCreative = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
         grid = new GridMark2();
@@ -147,13 +155,17 @@ public class RtbFlowControl {
                         if(area.getCountyId() == 0){
                             //当县级选项为 0 的时候，则认为是匹配全地级市
                             areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
-                        }else
+                            demographicMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
+                        }else{
                             areaMap.put(area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId(),adBean.getAdUid());
+                            demographicMap.put(area.getProvinceId() + "_" +area.getCityId() + "_",adBean.getAdUid());
+                        }
 
                     }
                 }else{
                     myLog.error(adBean.getAdUid() + "\t" + adBean.getName() + " 没有设置人群包..");
                 }
+
 
                 //广告内容的更新 ，按照素材的类型和尺寸
                 CreativeBean creative =  adBean.getCreativeList().get(0);
