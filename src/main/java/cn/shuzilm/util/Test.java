@@ -24,7 +24,7 @@ public class Test {
 
         Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
         System.out.println(aLong);
-        System.out.println(Double.valueOf(aLong));
+        System.out.println(Double.valueOf(aLong)/10000);
 
 //        Map msg = new HashMap();
 //        msg.put("code",1001);

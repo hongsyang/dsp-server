@@ -149,9 +149,9 @@ public class LingJiRequestServiceImpl implements RequestService {
         List curls = new ArrayList();
         curls.add(curl);
         LJResponseExt ljResponseExt = new LJResponseExt();
-        ljResponseExt.setLdp(curl);
-        ljResponseExt.setCm(curls);
-        ljResponseExt.setPm(curls);
+        ljResponseExt.setLdp("https://www.shuzilm.cn/");//点击目标URL。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
+        ljResponseExt.setCm(curls);// 曝光监测URL，监测数组支持的曝光条数和广告展现时是否会发物料上绑定的monitor地址，参见
+        ljResponseExt.setPm(curls);// 点击监测URL，监测数组支持的点击监测条数，参见
         bid.setExt(ljResponseExt);
 
         //添加到list中
