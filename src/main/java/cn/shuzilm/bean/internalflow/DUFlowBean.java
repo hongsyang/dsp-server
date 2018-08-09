@@ -1,18 +1,10 @@
 package cn.shuzilm.bean.internalflow;
 
 import cn.shuzilm.bean.adview.request.Impression;
-import cn.shuzilm.util.HttpClientUtil;
-import cn.shuzilm.util.HttpRequestUtil;
 import lombok.Data;
-import sun.net.www.http.HttpClient;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @Description: DUFlowBean 数盟流转Bean
@@ -42,7 +34,6 @@ public class DUFlowBean implements Serializable {
     private String did;//数盟的设备id
     private String deviceId;//   唯一识别用户
     private long createTime;// timestamp  该条信息的创建时间
-    private Integer infoType;//tinyint  0 imp 1 click 2 play 3 close 4 land
     private String adUid;// varchar(36)  广告ID
     private String audienceuid;//  varchar(36)  人群ID
     private String advertiserUid;//  varchar(36)  广告主ID
@@ -60,5 +51,6 @@ public class DUFlowBean implements Serializable {
     private String dealid  ;//私有交易id，判断是否属于私有交易
     private Double premiumFactor;//溢价系数
     private Long winNoticeTime;//1533628505531 对账时间戳
+    private String landingUrl;//点击广告之后的跳转url
 
 }

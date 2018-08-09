@@ -18,12 +18,13 @@ import java.util.Date;
 public class Test {
     public static void main(String[] args) {
 //
-//        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
-//        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
-//        String price="Nq-SHGUBAABZR0NeS3B1IEFWntys7a6ayOIfBA";
-//
-//        Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
-//        System.out.println(Double.valueOf(aLong/10000));
+        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
+        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
+        String price="-DeoHWUBAABecRQOcCgIOHv03XBETdgjMHHbSA";
+
+        Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
+        System.out.println(aLong);
+        System.out.println(Double.valueOf(aLong));
 
 //        Map msg = new HashMap();
 //        msg.put("code",1001);

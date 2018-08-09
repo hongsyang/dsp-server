@@ -113,7 +113,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         //等待结果
 //        Double biddingPrice = duFlowBean.getBiddingPrice()*100;
 //        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
-        bid.setPrice(6);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        bid.setPrice(6.0f);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCrid(configs.getString("CRID"));//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
         //曝光nurl
         String nurl = "http://101.200.56.200:8880/" + "lingjiexp?" +

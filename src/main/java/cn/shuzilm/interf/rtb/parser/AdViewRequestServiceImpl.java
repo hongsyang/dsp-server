@@ -129,7 +129,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-                "&price=" + duFlowBean.getActualPrice() +
+                "&price=" + 6.0 +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
