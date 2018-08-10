@@ -8,6 +8,8 @@ import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.UrlParserUtil;
+import cn.shuzilm.util.base64.AdViewDecodeUtil;
+import cn.shuzilm.util.base64.Decrypter;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +54,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 bean.setAdUid(element.getAdUid());
             }
             bean.setHost(configs.getString("HOST"));
-            bean.setMoney(Float.valueOf(urlRequest.get("price")));
+            String price = urlRequest.get("price");
+            Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
+            bean.setMoney(Double.valueOf(priceLong/10000));
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);

@@ -23,7 +23,6 @@ public class AdViewFilterServiceImpl extends AbstractFilter implements ADXFilter
 
     private static final Logger log = LoggerFactory.getLogger(AdViewFilterServiceImpl.class);
 
-    private Jedis jedis = null;
 
     /**
      * 根据ADX服务商做过滤规则，快友用IMEI的sha1，灵集用MAC的MD5值
@@ -35,8 +34,8 @@ public class AdViewFilterServiceImpl extends AbstractFilter implements ADXFilter
      */
     @Override
     public Boolean filterDeviceParameter(Device userDevice, Boolean flag, Map message) {
-        jedis = JedisManager.getInstance().getResource();
-        log.debug("jedis 是否为空：{}", jedis);
+        Jedis jedis = JedisManager.getInstance().getResource();
+        log.debug("filter_jedis 是否为空：{}", jedis);
         if (flag) {
             return isShuZiLianMengData(userDevice, message);
         } else {
@@ -60,6 +59,7 @@ public class AdViewFilterServiceImpl extends AbstractFilter implements ADXFilter
      * @return
      */
     public Boolean isShuZiLianMengData(Device userDevice, Map message) {
+        Jedis jedis = JedisManager.getInstance().getResource();
         if (StringUtils.isBlank(userDevice.getDidsha1())) {//判断设备 IMEI 的 sha1 值
             log.debug("设备 IMEI 的 sha1 值为空,userDevice参数入参：{}", userDevice);
             message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备 IMEI 的 sha1 值为空");

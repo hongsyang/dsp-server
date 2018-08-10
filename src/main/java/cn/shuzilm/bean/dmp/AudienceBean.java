@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -85,15 +86,17 @@ public class AudienceBean implements ICommand {
 
     public void setCitys(String citys) {
         this.citys = citys;
-        String[] split = citys.split("],");
-        List<String> list = new ArrayList();
-        String re = "[";
-        String ra = "]";
-        for (String s : split) {
-            String replace = s.replace(re, "").trim().replace(ra, "");
-            list.add(replace);
+        if (StringUtils.isNotBlank(citys)) {
+            String[] split = citys.split("],");
+            List<String> list = new ArrayList();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                list.add(replace);
+            }
+            this.cityList = convertToAreaBeanList(list);
         }
-        this.cityList = convertToAreaBeanList(list);
     }
 
     /**
@@ -129,15 +132,17 @@ public class AudienceBean implements ICommand {
         if(geos == null || geos.trim().equals(""))
             return;
         this.geos = geos;
-        JSONObject parse = JSONObject.parseObject(geos);
-        Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
-        List<Map.Entry> list = new ArrayList<Map.Entry>();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> entry = iterator.next();
-//            System.out.println(entry.getKey() + ":" + entry.getValue());
-            list.add(entry);
+        //判断geos是否为空
+        if (StringUtils.isNotBlank(geos)) {
+            JSONObject parse = JSONObject.parseObject(geos);
+            Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
+            List<Map.Entry> list = new ArrayList<Map.Entry>();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Object> entry = iterator.next();
+                list.add(entry);
+            }
+            this.geoList = convertToGpsBeanList(list);
         }
-        this.geoList = convertToGpsBeanList(list);
     }
 
     /**
