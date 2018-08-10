@@ -1,7 +1,10 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
+import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.TaskBean;
 import cn.shuzilm.bean.dmp.AreaBean;
 import cn.shuzilm.bean.dmp.GpsBean;
@@ -11,6 +14,7 @@ import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.JsonTools;
+import cn.shuzilm.util.MathTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +25,7 @@ import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Created by thunders on 2018/7/17.
@@ -44,6 +49,7 @@ public class RuleMatching {
 	private Random adRandom;
 
 	public RuleMatching(String[] nodes) {
+		MDC.put("sift", "rtb");
 		redis = new AsyncRedisClient(nodes);
 		rtbIns = RtbFlowControl.getInstance();
 		tagRandom = new Random();
@@ -55,43 +61,92 @@ public class RuleMatching {
 	}
 
 	/**
-	 * 创意类型、尺寸匹配
+	 * @param width
+	 *            广告位宽度
+	 * @param height
+	 *            广告位高度
+	 * @param adWidth
+	 *            素材宽度
+	 * @param adHeight
+	 *            素材高度
+	 * @param isResolutionRatio
+	 *            是否要求分辨率
+	 * @param widthDeviation
+	 *            宽度误差
+	 * @param heightDeviation
+	 *            高度误差 创意类型、尺寸匹配
 	 */
-	public void filter(String type, int width, int height) {
-
+	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
+			int widthDeviation, int heightDeviation) {
+		if (isResolutionRatio) {
+			if (adWidth >= width && adHeight >= height) {
+				return true;
+			}
+		} else {
+			if ((width + widthDeviation <= adWidth || width - widthDeviation >= adWidth)
+					&& (height + heightDeviation <= adHeight || height - heightDeviation >= adHeight)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
 	 * 
-	 * @param deviceId
+	 * @param tagBean
+	 *            标签
+	 * @param adType
+	 *            广告类型
+	 * @param width
+	 *            素材宽
+	 * @param height
+	 *            素材高
+	 * @param isResolutionRatio
+	 *            是否要求分辨率
+	 * @param widthDeviation
+	 *            宽度误差
+	 * @param heightDeviation
+	 *            高度误差
 	 */
-	public DUFlowBean match(String deviceId, String adType, int width, int height) {
-
+	public DUFlowBean match(TagBean tagBean, String adType, int width, int height, boolean isResolutionRatio,
+			int widthDeviation, int heightDeviation) {
 		DUFlowBean targetDuFlowBean = null;
 		// 取出标签
-		String tagJson = redis.getAsync(deviceId);
-		TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
-		
+		// String tagJson = redis.getAsync(deviceId);
+		// TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
+
+		if (tagBean == null) {
+			LOG.error("标签为空!");
+			return null;
+		}
 
 		// 开始匹配
-		String creativeKey = adType + "_" + width + "_" + height;
-		List<String> auidList = rtbIns.getCreativeMap().get(creativeKey);
+		int divisor = MathTools.division(width, height);
+		String creativeKey = adType + "_" + width / divisor + "/" + height / divisor;
+		List<String> auidList = rtbIns.getCreativeRatioMap().get(creativeKey);
+
+		// String creativeKey = adType + "_" + width + "_" + height;
+		// List<String> auidList = rtbIns.getCreativeMap().get(creativeKey);
 
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 
 		// 开始遍历符合广告素材尺寸的广告
 		for (String adUid : auidList) {
 
-			boolean isAvaliable = rtbIns.checkAvalable(adUid);
-			// 是否投当前的广告
-			if (!isAvaliable){
-				LOG.debug("ID["+adUid+"]广告不参与投放!");
+			AdBean ad = rtbIns.getAdMap().get(adUid);
+			CreativeBean creative = ad.getCreativeList().get(0);
+			if (!filter(width, height, creative.getWidth(), creative.getHeight(), isResolutionRatio, widthDeviation,
+					heightDeviation)) {
 				continue;
 			}
 
-			AdBean ad = rtbIns.getAdMap().get(adUid);
-			
+			boolean isAvaliable = rtbIns.checkAvalable(adUid);
+			// 是否投当前的广告
+			if (!isAvaliable) {
+				LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				continue;
+			}
 
 			AudienceBean audience = ad.getAudience();
 
@@ -99,58 +154,60 @@ public class RuleMatching {
 				if (audience.getGeos().equals("")) {
 					// 省市县的匹配
 					String key = null;
-					if(tagBean.getProvinceId() == 0){
+					if (tagBean.getProvinceId() == 0) {
 						key = "china";
-					}else if(tagBean.getCityId() == 0){
-						key = tagBean.getProvinceId()+"";
-					}else if (tagBean.getCountyId() == 0) {
+					} else if (tagBean.getCityId() == 0) {
+						key = tagBean.getProvinceId() + "";
+					} else if (tagBean.getCountyId() == 0) {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
 					} else {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
 					}
 					if (rtbIns.getAreaMap().get(key).contains(ad.getAdUid()) && (commonMatch(tagBean, audience))) {
-						LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
+						LOG.debug("ID[" + ad.getAdUid() + "]通过匹配，参与排序");
 						machedAdList.add(ad);
 					}
 
 				} else {// 按照经纬度匹配
 					boolean isInBound = this.checkInBoudByType(audience.getMobilityType(), tagBean);
-						if (isInBound && (commonMatch(tagBean, audience))) {
-							LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
-							machedAdList.add(ad);
+					if (isInBound && (commonMatch(tagBean, audience))) {
+						LOG.debug("ID[" + ad.getAdUid() + "]通过匹配，参与排序");
+						machedAdList.add(ad);
 					}
 				}
 			} else if (audience.getType().equals("demographic")) { // 特定人群
 				String tagIdStr = tagBean.getTagIdList();
-				String tagIds [] = tagIdStr.split(",");			
+				String tagIds[] = tagIdStr.split(",");
 				if (audience.getDemographicTagIdList().containsAll(Arrays.asList(tagIds))) {
 					String key = null;
-					if(tagBean.getProvinceId() == 0){
+					if (tagBean.getProvinceId() == 0) {
 						key = "china";
-					}else if(tagBean.getCityId() == 0){
-						key = tagBean.getProvinceId()+"";
-					}else if (tagBean.getCountyId() == 0) {
+					} else if (tagBean.getCityId() == 0) {
+						key = tagBean.getProvinceId() + "";
+					} else if (tagBean.getCountyId() == 0) {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
 					} else {
 						key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
 					}
-					if (rtbIns.getDemographicMap().get(key).contains(ad.getAdUid()) && (commonMatch(tagBean, audience))) {
-						LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
+					if (rtbIns.getDemographicMap().get(key).contains(ad.getAdUid())
+							&& (commonMatch(tagBean, audience))) {
+						LOG.debug("ID[" + ad.getAdUid() + "]通过匹配，参与排序");
 						machedAdList.add(ad);
 					}
 				}
 
 			} else if (audience.getType().equals("company")) { // 具体公司
 				String companyIdStr = tagBean.getCompanyIdList();
-				String companyIds [] = companyIdStr.split(",");
-				if (audience.getCompanyIdList().containsAll(Arrays.asList(companyIds)) && commonMatch(tagBean, audience)) {// 涉及到库中存储的数据样式和标签中的样式
-					LOG.debug("ID["+ad.getAdUid()+"]通过匹配，参与排序");
+				String companyIds[] = companyIdStr.split(",");
+				if (audience.getCompanyIdList().containsAll(Arrays.asList(companyIds))
+						&& commonMatch(tagBean, audience)) {// 涉及到库中存储的数据样式和标签中的样式
+					LOG.debug("ID[" + ad.getAdUid() + "]通过匹配，参与排序");
 					machedAdList.add(ad);
 				}
 			}
 
 		}
-		
+
 		// 排序
 		targetDuFlowBean = order(machedAdList);
 
@@ -181,7 +238,7 @@ public class RuleMatching {
 		if (ungradeList.size() > 0) {
 			AdBean ad = ungradeList.get(0);// 暂时获取第一个
 			// 封装返回接口引擎数据
-			LOG.debug("ID["+ad.getAdUid()+"]通过排序获得竞价资格!");
+			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
 			targetDuFlowBean = packageDUFlowData(ad);
 		} else {
 			gradeOrderByPremiumStrategy(machedAdList);
@@ -189,7 +246,7 @@ public class RuleMatching {
 
 			AdBean ad = gradeByRandom(machedAdList);
 			// 封装返回接口引擎数据
-			LOG.debug("ID["+ad.getAdUid()+"]通过排序获得竞价资格!");
+			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
 			targetDuFlowBean = packageDUFlowData(ad);
 		}
 
@@ -243,18 +300,18 @@ public class RuleMatching {
 		float[] workArray = tagBean.getWork();
 		float[] activityArray = tagBean.getActivity();
 		switch (type) {
-		case 0:			
-			if(rtbIns.checkInBound(residenceArray[0], residenceArray[1]).size()>0 ||
-					rtbIns.checkInBound(workArray[0], workArray[1]).size()>0 ||
-					rtbIns.checkInBound(activityArray[0], activityArray[1]).size()>0){
+		case 0:
+			if (rtbIns.checkInBound(residenceArray[0], residenceArray[1]).size() > 0
+					|| rtbIns.checkInBound(workArray[0], workArray[1]).size() > 0
+					|| rtbIns.checkInBound(activityArray[0], activityArray[1]).size() > 0) {
 				return true;
 			}
 		case 1:
-			return rtbIns.checkInBound(residenceArray[0], residenceArray[1]).size()>0;
+			return rtbIns.checkInBound(residenceArray[0], residenceArray[1]).size() > 0;
 		case 2:
-			return rtbIns.checkInBound(workArray[0], workArray[1]).size()>0;
+			return rtbIns.checkInBound(workArray[0], workArray[1]).size() > 0;
 		case 3:
-			return rtbIns.checkInBound(activityArray[0], activityArray[1]).size()>0;
+			return rtbIns.checkInBound(activityArray[0], activityArray[1]).size() > 0;
 		}
 		return false;
 	}
@@ -325,28 +382,35 @@ public class RuleMatching {
 
 		});
 	}
-	
-	public AdBean gradeByRandom(List<AdBean> machedAdList){
+
+	public AdBean gradeByRandom(List<AdBean> machedAdList) {
 		AdBean ad = null;
 		int num = tagRandom.nextInt(100);
-		if(num < 70){
-			ad = machedAdList.get(0);//70%的概率直接获取第一个
-		}else{
-			int ra = 1;  
-			while(true){
+		if (num < 70) {
+			ad = machedAdList.get(0);// 70%的概率直接获取第一个
+		} else {
+			int ra = 1;
+			while (true) {
 				ra = tagRandom.nextInt(machedAdList.size());
-				if(ra != 0) break;
+				if (ra != 0)
+					break;
 			}
-			
-			ad = machedAdList.get(ra);//获取从第二个到最后一个随机某个元素
+
+			ad = machedAdList.get(ra);// 获取从第二个到最后一个随机某个元素
 		}
-		
+
 		return ad;
 	}
-	
-	public DUFlowBean packageDUFlowData(AdBean ad){
+
+	public DUFlowBean packageDUFlowData(AdBean ad) {
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
-		
+		List<CreativeBean> creativeList = ad.getCreativeList();
+		targetDuFlowBean.setBidid("广告竞价ID");
+		targetDuFlowBean.setAdm("广告素材");
+		targetDuFlowBean.setAdw(1);
+		targetDuFlowBean.setAdh(1);
+
 		return targetDuFlowBean;
 	}
+
 }

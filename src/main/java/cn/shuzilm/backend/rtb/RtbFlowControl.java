@@ -3,6 +3,7 @@ package cn.shuzilm.backend.rtb;
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
+import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.TaskBean;
 import cn.shuzilm.bean.dmp.AreaBean;
@@ -10,6 +11,7 @@ import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.common.Constants;
+import cn.shuzilm.util.MathTools;
 import cn.shuzilm.util.geo.GeoHash;
 import cn.shuzilm.util.geo.GridMark;
 import cn.shuzilm.util.geo.GridMark2;
@@ -41,6 +43,7 @@ public class RtbFlowControl {
         AdFlowControl.getInstance().loadAdInterval(true);
         //测试 RTB 引擎的
         RtbFlowControl.getInstance().trigger();
+    	
     }
 
     public ConcurrentHashMap<String,AdBean> getAdMap(){
@@ -49,6 +52,10 @@ public class RtbFlowControl {
 
     public ConcurrentHashMap<String,List<String>> getCreativeMap(){
         return mapAdCreative;
+    }
+    
+    public ConcurrentHashMap<String,List<String>> getCreativeRatioMap(){
+        return mapAdCreativeRatio;
     }
     
     public ConcurrentHashMap<String,List<String>> getAreaMap(){
@@ -77,6 +84,13 @@ public class RtbFlowControl {
      * value: list<aduid>
      */
     private static ConcurrentHashMap<String,List<String>> mapAdCreative = null;
+    
+    /**
+     * 广告资源的倒置
+     * key: 广告类型  + (广告宽/广告高)
+     * value: list<aduid>
+     */   
+    private static ConcurrentHashMap<String,List<String>> mapAdCreativeRatio = null;
 
     /**
      * 省级、地级、县级 map
@@ -99,6 +113,7 @@ public class RtbFlowControl {
         areaMap = new ConcurrentHashMap<>();
         demographicMap = new ConcurrentHashMap<>();
         mapAdCreative = new ConcurrentHashMap<>();
+        mapAdCreativeRatio = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
         grid = new GridMark2();
 
@@ -192,7 +207,11 @@ public class RtbFlowControl {
 
                 //广告内容的更新 ，按照素材的类型和尺寸
                 CreativeBean creative =  adBean.getCreativeList().get(0);
-                String creativeKey = creative.getType() +"_"+ creative.getWidth()+"_"+ + creative.getHeight();
+                int width = creative.getWidth();
+                int height = creative.getHeight();
+                int divisor = MathTools.division(width, height);
+                String creativeKey = creative.getType() +"_"+ width+"_"+ + height;
+                String creativeRatioKey = creative.getType() +"_"+ width/divisor+"/"+height/divisor;
 
                 if(!mapAdCreative.contains(creativeKey)){
                     List<String> uidList = new ArrayList<String>();
@@ -200,6 +219,15 @@ public class RtbFlowControl {
                     mapAdCreative.put(creativeKey,uidList);
                 }else{
                     List<String> uidList = mapAdCreative.get(creativeKey);
+                    uidList.add(uid);
+                }
+                
+                if(!mapAdCreativeRatio.contains(creativeRatioKey)){
+                    List<String> uidList = new ArrayList<String>();
+                    uidList.add(uid);
+                    mapAdCreativeRatio.put(creativeRatioKey,uidList);
+                }else{
+                    List<String> uidList = mapAdCreativeRatio.get(creativeRatioKey);
                     uidList.add(uid);
                 }
             }
