@@ -404,11 +404,11 @@ public class RuleMatching {
 
 	public DUFlowBean packageDUFlowData(AdBean ad) {
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
-		List<CreativeBean> creativeList = ad.getCreativeList();
-		targetDuFlowBean.setBidid("广告竞价ID");
-		targetDuFlowBean.setAdm("广告素材");
-		targetDuFlowBean.setAdw(1);
-		targetDuFlowBean.setAdh(1);
+//		List<CreativeBean> creativeList = ad.getCreativeList();
+//		targetDuFlowBean.setBidid("广告竞价ID");
+//		targetDuFlowBean.setAdm("广告素材");
+//		targetDuFlowBean.setAdw(1);
+//		targetDuFlowBean.setAdh(1);
 
 		return targetDuFlowBean;
 	}
