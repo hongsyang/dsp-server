@@ -28,7 +28,7 @@ public class DUFlowBean implements Serializable {
     private Integer adw;//(F/admt=1|2|3|4) 广告物料宽度
     private Integer adh;//(F/admt=1|2|3|4) 广告物料高度
     private String crid;//广告物料 ID
-    private Integer admt;//广告类型
+    private String admt;//广告类型
     private Integer adct;//广告点击行为类型，参考附录 9
     private String infoId;//上报信息的唯一ID
     private String did;//数盟的设备id
@@ -52,5 +52,7 @@ public class DUFlowBean implements Serializable {
     private Double premiumFactor;//溢价系数
     private Long winNoticeTime;//1533628505531 对账时间戳
     private String landingUrl;//点击广告之后的跳转url
+    private String linkUrl;//点击目标链接
+    private String tracking;//曝光监测链接
 
 }
