@@ -1,5 +1,7 @@
 package cn.shuzilm.bean.control;
 
+import lombok.Setter;
+
 /**
  * Created by thunders on 2018/7/10.
  * 关联创意
@@ -23,6 +25,21 @@ public class CreativeBean implements ICommand {
 
     private String brand;
     private String domain;
+    
+    /**
+     * 点击目标链接（含协议头）
+     */
+    private String link;
+    
+    /**
+     * 落地页链接（含协议头）
+     */
+    private String landing;
+    
+    /**
+     * 曝光监测链接（null为无曝光监测）
+     */
+    private String tracking;
 
     public String getUid() {
         return uid;
@@ -135,4 +152,29 @@ public class CreativeBean implements ICommand {
     public void setDomain(String domain) {
         this.domain = domain;
     }
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public String getLanding() {
+		return landing;
+	}
+
+	public void setLanding(String landing) {
+		this.landing = landing;
+	}
+
+	public String getTracking() {
+		return tracking;
+	}
+
+	public void setTracking(String tracking) {
+		this.tracking = tracking;
+	}
+    
 }

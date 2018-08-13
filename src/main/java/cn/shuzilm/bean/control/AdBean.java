@@ -140,22 +140,5 @@ public class AdBean implements ICommand  {
     @Setter
     private long timestamp;
     
-    /**
-     * 点击目标链接（含协议头）
-     */
-    @Setter
-    private String link;
-    
-    /**
-     * 落地页链接（含协议头）
-     */
-    @Setter
-    private String landing;
-    
-    /**
-     * 曝光监测链接（null为无曝光监测）
-     */
-    @Setter
-    private String tracking;
 
 }
