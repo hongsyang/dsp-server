@@ -27,6 +27,10 @@ public class AdBean implements ICommand  {
 //    广告单价：加密格式，需要根据来源ADX进行解密
 //    Refer/Bundle ID：如果存在，直接记录。
 //    ext附加参数：参数传递宏
+
+    /**
+     * 人群包列表，支持一个广告对应多个人群包
+     */
     @Setter
     private List<AudienceBean> audienceList;
     /**
