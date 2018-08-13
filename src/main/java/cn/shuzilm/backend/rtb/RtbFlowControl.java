@@ -25,7 +25,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -67,11 +69,11 @@ public class RtbFlowControl {
         return mapAdCreativeRatio;
     }
     
-    public ConcurrentHashMap<String,List<String>> getAreaMap(){
+    public ConcurrentHashMap<String,Set<String>> getAreaMap(){
         return areaMap;
     }
     
-    public ConcurrentHashMap<String,List<String>> getDemographicMap(){
+    public ConcurrentHashMap<String,Set<String>> getDemographicMap(){
         return demographicMap;
     }
 
@@ -106,9 +108,9 @@ public class RtbFlowControl {
      * key: 北京市北京市海淀区  河北省廊坊地区广平县
      * value：aduid
      */
-    private static ConcurrentHashMap<String,List<String>> areaMap = null;
+    private static ConcurrentHashMap<String,Set<String>> areaMap = null;
 
-    private static ConcurrentHashMap<String,List<String>> demographicMap = null;
+    private static ConcurrentHashMap<String,Set<String>> demographicMap = null;
 
     // 判断标签坐标是否在 广告主的选取范围内
     private GridMark2 grid = null;
@@ -163,7 +165,7 @@ public class RtbFlowControl {
                 String uid = adBean.getAdUid();
 
                 mapAd.put(uid,adBean);
-                AudienceBean audience =  adBean.getAudience();
+                AudienceBean audience =  adBean.getAudienceList().get(0);
                 if(audience != null){
                     //将 经纬度坐标装载到 MAP 中，便于快速查找
                     ArrayList<GpsBean> gpsList = audience.getGeoList();
@@ -191,22 +193,22 @@ public class RtbFlowControl {
                         }
                     	
                     	if(!areaMap.containsKey(key)){
-                    		List<String> adUidList = new ArrayList<String>();
-                    		adUidList.add(adBean.getAdUid());
-                    		areaMap.put(key, adUidList);
+                    		Set<String> set = new HashSet<String>();
+                    		set.add(adBean.getAdUid());
+                    		areaMap.put(key, set);
                     	}else{
-                    		List<String> adUidList = areaMap.get(key);
-                    		adUidList.add(adBean.getAdUid());
+                    		Set<String> set = areaMap.get(key);
+                    		set.add(adBean.getAdUid());
                     	}
                     	
                     	
                     	if(!demographicMap.containsKey(key)){
-                    		List<String> adUidList = new ArrayList<String>();
-                    		adUidList.add(adBean.getAdUid());
-                    		demographicMap.put(key, adUidList);
+                    		Set<String> set = new HashSet<String>();
+                    		set.add(adBean.getAdUid());
+                    		demographicMap.put(key, set);
                     	}else{
-                    		List<String> adUidList = demographicMap.get(key);
-                    		adUidList.add(adBean.getAdUid());
+                    		Set<String> set = demographicMap.get(key);
+                    		set.add(adBean.getAdUid());
                     	}
                     }
                 }else{
