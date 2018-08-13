@@ -4,6 +4,7 @@ import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
+import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.TaskBean;
 import cn.shuzilm.bean.dmp.AreaBean;
@@ -12,6 +13,7 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.MathTools;
+import cn.shuzilm.util.TimeUtil;
 import cn.shuzilm.util.geo.GeoHash;
 import cn.shuzilm.util.geo.GridMark;
 import cn.shuzilm.util.geo.GridMark2;
@@ -19,7 +21,9 @@ import com.jcraft.jsch.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RtbFlowControl {
     private static final org.slf4j.Logger myLog = LoggerFactory.getLogger(AdFlowControl.class);
     private static RtbFlowControl rtb = null;
+    
+    private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_hh");
 
     public static RtbFlowControl getInstance(){
         if(rtb == null){
@@ -43,6 +49,9 @@ public class RtbFlowControl {
         AdFlowControl.getInstance().loadAdInterval(true);
         //测试 RTB 引擎的
         RtbFlowControl.getInstance().trigger();
+    	
+    	
+    	
     	
     }
 
@@ -181,7 +190,7 @@ public class RtbFlowControl {
                         	key = area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId();
                         }
                     	
-                    	if(!areaMap.contains(key)){
+                    	if(!areaMap.containsKey(key)){
                     		List<String> adUidList = new ArrayList<String>();
                     		adUidList.add(adBean.getAdUid());
                     		areaMap.put(key, adUidList);
@@ -191,7 +200,7 @@ public class RtbFlowControl {
                     	}
                     	
                     	
-                    	if(!demographicMap.contains(key)){
+                    	if(!demographicMap.containsKey(key)){
                     		List<String> adUidList = new ArrayList<String>();
                     		adUidList.add(adBean.getAdUid());
                     		demographicMap.put(key, adUidList);
@@ -213,7 +222,7 @@ public class RtbFlowControl {
                 String creativeKey = creative.getType() +"_"+ width+"_"+ + height;
                 String creativeRatioKey = creative.getType() +"_"+ width/divisor+"/"+height/divisor;
 
-                if(!mapAdCreative.contains(creativeKey)){
+                if(!mapAdCreative.containsKey(creativeKey)){
                     List<String> uidList = new ArrayList<String>();
                     uidList.add(uid);
                     mapAdCreative.put(creativeKey,uidList);
@@ -222,7 +231,7 @@ public class RtbFlowControl {
                     uidList.add(uid);
                 }
                 
-                if(!mapAdCreativeRatio.contains(creativeRatioKey)){
+                if(!mapAdCreativeRatio.containsKey(creativeRatioKey)){
                     List<String> uidList = new ArrayList<String>();
                     uidList.add(uid);
                     mapAdCreativeRatio.put(creativeRatioKey,uidList);
@@ -280,21 +289,49 @@ public class RtbFlowControl {
      */
     public boolean checkAvalable(String auid){
         TaskBean bean = mapTask.get(auid);
-        int commandCode = bean.getCommand();
-//        int scope = bean.getScope();
-//        public static final int TASK_STATE_READY = 0;
-//        public static final int TASK_STATE_RUNNING = 1;
-//        public static final int TASK_STATE_FINISHED = 2;
-//        public static final int TASK_STATE_PAUSED = 3;
-//        public static final int TASK_STATE_STOPED = 4;
-        switch(commandCode){
-            case TaskBean.COMMAND_PAUSE:
-                return false;
-            case TaskBean.COMMAND_STOP:
-                return false;
-            default:
-                break;
+        if(bean != null){
+        	 int commandCode = bean.getCommand();
+//           int scope = bean.getScope();
+//           public static final int TASK_STATE_READY = 0;
+//           public static final int TASK_STATE_RUNNING = 1;
+//           public static final int TASK_STATE_FINISHED = 2;
+//           public static final int TASK_STATE_PAUSED = 3;
+//           public static final int TASK_STATE_STOPED = 4;
+           switch(commandCode){
+               case TaskBean.COMMAND_PAUSE:
+                   return false;
+               case TaskBean.COMMAND_STOP:
+                   return false;
+               default:
+                   break;
+           }
         }
+        
+        //匹配广告投放时间窗
+       AdBean adBean = mapAd.get(auid);
+       if(adBean != null){
+       int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
+       Date date=new Date();
+       String time = dateFm.format(date);
+	   String splitTime[] = time.split("_");
+	   int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
+	   int dayNum = Integer.parseInt(splitTime[1]);
+	   if(dayNum == 24)
+		   dayNum =0;
+	   for(int i=0;i<timeSchedulingArr.length;i++){
+		   if(weekNum != i)
+			   continue;
+		   for(int j=0;j<timeSchedulingArr[i].length;j++){
+			   if(dayNum == j){
+				   if(timeSchedulingArr[i][j] == 1){
+					   return true;
+				   }else{
+					   return false;
+				   }
+			   }
+		   }
+	   }
+       }
         return true;
     }
 }
