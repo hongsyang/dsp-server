@@ -16,17 +16,17 @@ public class AdPropertyBean implements ICommand {
     private int impProcess;
 
     /**
-     * 素材质量打分
+     * 素材质量打分逻辑 暂时失效
      */
     private int creativeQuality;
 
     /**
-     * 广告资金剩余打分
+     * 广告资金剩余额度打分
      */
     private int moneyLeft;
 
     /**
-     * 广告主打分
+     * 广告主打分  暂时失效
      */
     private int advertiserScore;
     /**
