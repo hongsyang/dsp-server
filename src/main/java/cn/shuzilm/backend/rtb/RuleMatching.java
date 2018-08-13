@@ -1,14 +1,9 @@
 package cn.shuzilm.backend.rtb;
 
-import cn.shuzilm.bean.adview.request.BidRequestBean;
-import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
-import cn.shuzilm.bean.control.TaskBean;
-import cn.shuzilm.bean.dmp.AreaBean;
-import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
@@ -24,7 +19,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.commons.io.TaggedIOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -85,8 +79,8 @@ public class RuleMatching {
 				return true;
 			}
 		} else {
-			if ((width + widthDeviation <= adWidth || width - widthDeviation >= adWidth)
-					&& (height + heightDeviation <= adHeight || height - heightDeviation >= adHeight)) {
+			if ((width + widthDeviation >= adWidth || width - widthDeviation <= adWidth)
+					&& (height + heightDeviation >= adHeight || height - heightDeviation <= adHeight)) {
 				return true;
 			}
 		}
@@ -114,14 +108,28 @@ public class RuleMatching {
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
 			int widthDeviation, int heightDeviation) {
 		DUFlowBean targetDuFlowBean = null;
+		if(deviceId == null || deviceId.trim().equals("")){
+			LOG.warn("deviceId["+deviceId+"]为空!");
+			return null;
+		}
 		// 取出标签
 		 String tagJson = redis.getAsync(deviceId);
 		 TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
+		
+		if(tagBean == null){
+			LOG.warn("TAGBEAN["+tagBean+"]为空!");
+			return null;
+		}
 
 		// 开始匹配
 		int divisor = MathTools.division(width, height);
 		String creativeKey = adType + "_" + width / divisor + "/" + height / divisor;
 		List<String> auidList = rtbIns.getCreativeRatioMap().get(creativeKey);
+		
+		if(auidList == null){
+			LOG.warn("根据["+creativeKey+"]未找到广告!");
+			return null;
+		}
 
 		// String creativeKey = adType + "_" + width + "_" + height;
 		// List<String> auidList = rtbIns.getCreativeMap().get(creativeKey);
@@ -130,6 +138,13 @@ public class RuleMatching {
 
 		// 开始遍历符合广告素材尺寸的广告
 		for (String adUid : auidList) {
+			
+			boolean isAvaliable = rtbIns.checkAvalable(adUid);
+			// 是否投当前的广告
+			if (!isAvaliable) {
+				LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				continue;
+			}
 
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
@@ -138,17 +153,12 @@ public class RuleMatching {
 				continue;
 			}
 
-			boolean isAvaliable = rtbIns.checkAvalable(adUid);
-			// 是否投当前的广告
-			if (!isAvaliable) {
-				LOG.debug("ID[" + adUid + "]广告不参与投放!");
-				continue;
-			}
+			
 
 			AudienceBean audience = ad.getAudience();
 
 			if (audience.getType().equals("location")) {// 地理位置
-				if (audience.getGeos().equals("")) {
+				if (audience.getGeos() == null || audience.getGeos().trim().equals("")) {
 					// 省市县的匹配
 					String key = null;
 					if (tagBean.getProvinceId() == 0) {
@@ -206,6 +216,7 @@ public class RuleMatching {
 		}
 
 		// 排序
+		if(machedAdList.size()>0)
 		targetDuFlowBean = order(deviceId,machedAdList,tagBean);
 
 		return targetDuFlowBean;
@@ -420,7 +431,6 @@ public class RuleMatching {
 		targetDuFlowBean.setProvince("省");//省
 		targetDuFlowBean.setCity("市");//市
 		targetDuFlowBean.setActualPrice(1.0);//成本价
-		
 		String type = audience.getType().toUpperCase();
 		double premiumRatio = Double.parseDouble(constant.getConf(type));
 		targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价
