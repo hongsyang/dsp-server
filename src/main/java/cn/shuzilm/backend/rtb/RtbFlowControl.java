@@ -163,55 +163,59 @@ public class RtbFlowControl {
                 String uid = adBean.getAdUid();
 
                 mapAd.put(uid,adBean);
-                AudienceBean audience =  adBean.getAudience();
-                if(audience != null){
-                    //将 经纬度坐标装载到 MAP 中，便于快速查找
-                    ArrayList<GpsBean> gpsList = audience.getGeoList();
-                    if(gpsList != null){
-                        for(GpsBean gps : gpsList){
-                            gps.setPayload(uid);
-                        }
-                        gpsAll.addAll(gpsList);
-                    }
-                    //将 省、地级、县级装载到 MAP 中，便于快速查找
-                    List<AreaBean> areaList = audience.getCityList();
-                    String key = null;
-                    for(AreaBean area: areaList){                   	
-                    	if(area.getProvinceId() == 0){
-                    		//当省选项为 0 的时候，则认为是匹配全国
-                    		key = "china";
-                    	}else if(area.getCityId() == 0){
-                    		//当市级选项为 0 的时候，则认为是匹配全省
-                    		key = area.getProvinceId()+"";
-                    	}else if(area.getCountyId() == 0){
-                            //当县级选项为 0 的时候，则认为是匹配全市
-                    		key = area.getProvinceId() + "_" +area.getCityId();
-                        }else{
-                        	key = area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId();
-                        }
-                    	
-                    	if(!areaMap.containsKey(key)){
-                    		List<String> adUidList = new ArrayList<String>();
-                    		adUidList.add(adBean.getAdUid());
-                    		areaMap.put(key, adUidList);
-                    	}else{
-                    		List<String> adUidList = areaMap.get(key);
-                    		adUidList.add(adBean.getAdUid());
-                    	}
-                    	
-                    	
-                    	if(!demographicMap.containsKey(key)){
-                    		List<String> adUidList = new ArrayList<String>();
-                    		adUidList.add(adBean.getAdUid());
-                    		demographicMap.put(key, adUidList);
-                    	}else{
-                    		List<String> adUidList = demographicMap.get(key);
-                    		adUidList.add(adBean.getAdUid());
-                    	}
-                    }
-                }else{
+                List<AudienceBean> audienceList =  adBean.getAudienceList();
+                if(audienceList.size() == 0){
                     myLog.error(adBean.getAdUid() + "\t" + adBean.getName() + " 没有设置人群包..");
                 }
+                for(AudienceBean audience : audienceList){
+                    if(audience != null){
+                        //将 经纬度坐标装载到 MAP 中，便于快速查找
+                        ArrayList<GpsBean> gpsList = audience.getGeoList();
+                        if(gpsList != null){
+                            for(GpsBean gps : gpsList){
+                                gps.setPayload(uid);
+                            }
+                            gpsAll.addAll(gpsList);
+                        }
+                        //将 省、地级、县级装载到 MAP 中，便于快速查找
+                        List<AreaBean> areaList = audience.getCityList();
+                        String key = null;
+                        for(AreaBean area: areaList){
+                            if(area.getProvinceId() == 0){
+                                //当省选项为 0 的时候，则认为是匹配全国
+                                key = "china";
+                            }else if(area.getCityId() == 0){
+                                //当市级选项为 0 的时候，则认为是匹配全省
+                                key = area.getProvinceId()+"";
+                            }else if(area.getCountyId() == 0){
+                                //当县级选项为 0 的时候，则认为是匹配全市
+                                key = area.getProvinceId() + "_" +area.getCityId();
+                            }else{
+                                key = area.getProvinceId() + "_" +area.getCityId() + "_" + area.getCountyId();
+                            }
+
+                            if(!areaMap.containsKey(key)){
+                                List<String> adUidList = new ArrayList<String>();
+                                adUidList.add(adBean.getAdUid());
+                                areaMap.put(key, adUidList);
+                            }else{
+                                List<String> adUidList = areaMap.get(key);
+                                adUidList.add(adBean.getAdUid());
+                            }
+
+
+                            if(!demographicMap.containsKey(key)){
+                                List<String> adUidList = new ArrayList<String>();
+                                adUidList.add(adBean.getAdUid());
+                                demographicMap.put(key, adUidList);
+                            }else{
+                                List<String> adUidList = demographicMap.get(key);
+                                adUidList.add(adBean.getAdUid());
+                            }
+                        }
+                    }
+                }
+
 
 
                 //广告内容的更新 ，按照素材的类型和尺寸

@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * 广告流量控制
@@ -443,8 +444,8 @@ public class AdFlowControl {
                 ad.setCpmHourLimit(map.getInteger("cpm_hourly"));
 
                 //获得人群
-                AudienceBean audience = taskService.queryAudienceByUpTime(ad.getAdUid());
-                ad.setAudience(audience);
+                List<AudienceBean> audience = taskService.queryAudienceByUpTime(ad.getAdUid());
+                ad.setAudienceList(audience);
 
                 String creativeUid = map.getString("creative_uid");
                 //根据 广告创意ID 获得广告创意
