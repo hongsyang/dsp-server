@@ -28,7 +28,7 @@ public class AdBean implements ICommand  {
 //    Refer/Bundle ID：如果存在，直接记录。
 //    ext附加参数：参数传递宏
     @Setter
-    private AudienceBean audience;
+    private List<AudienceBean> audienceList;
     /**
      * 曝光率<br>
      * wins / bids 的比值，是动态变化的，并由流量控制中心更新变化
