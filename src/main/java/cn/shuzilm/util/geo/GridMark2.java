@@ -4,9 +4,25 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.util.InvokePython;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.*;
 
+/**
+ * 将前端页面提交的中心原点+半径形式 转换为 左下 + 右上 坐标的表示形式，因为 JAVA 没有没有找到可用的转换类，
+ * 因此通过调用 PYTHON 实现。
+ * 使用前说明：
+ * 需要 安装PYTHON 2.7  或者 3.0 环境
+ * 需要安装 pyproj 坐标转换工具集
+ */
 public class GridMark2 {
+    /**
+     * 将次改为对应的class目录
+     */
+    private static final String dir = "E:\\工作源码\\数盟网络\\dsp-server\\target\\classes\\";
+
+    private static final String pythonEnvDir = "python.exe";
 
     /**
      * gps 坐标内部ID 与 广告UID 对应
@@ -25,8 +41,6 @@ public class GridMark2 {
 
 
 
-    private static final String pythonFile = "E:\\工作源码\\数盟网络\\es-api\\util\\geo_transfer.py";
-    private static final String dir  = "E:\\工作源码\\数盟网络\\es-api\\util\\";
     /**
      * 将当前的中心坐标和半径转换为 该算法可以识别的矩形坐标
      * 通过 python 的 fwd 函数实现
@@ -37,10 +51,20 @@ public class GridMark2 {
     public ArrayList<GpsGridBean> reConvert(ArrayList<GpsBean> coords){
         ArrayList<GpsGridBean> destList = new ArrayList<>();
         int counter = 0;
+//        String currWorkPath = this.getClass().getClassLoader().getResource(".").getPath();
+//        try {
+//            currWorkPath = URLDecoder.decode(currWorkPath,"utf-8");
+//            currWorkPath = currWorkPath.substring(1,currWorkPath.length() - 1);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//        String dir = currWorkPath + File.separator  + "geo_transfer.py";
+
+        String currWorkPath = dir + "geo_transfer.py";
         for(GpsBean gps : coords){
             String[] args = new String[]{
-                    "E:\\python_2.7_64\\python",
-                    pythonFile,
+                    pythonEnvDir,
+                    currWorkPath,
                     String.valueOf(gps.getLng()),
                     String.valueOf(gps.getLat()),
                     String.valueOf(gps.getRadius()),
