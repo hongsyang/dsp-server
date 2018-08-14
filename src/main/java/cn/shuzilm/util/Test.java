@@ -28,17 +28,13 @@ public class Test {
 //        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
 //        String price="-DeoHWUBAABecRQOcCgIOHv03XBETdgjMHHbSA";
 //
-//        Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
-//        System.out.println(aLong);
-//        System.out.println(Double.valueOf(aLong));
-//        
-    	List<String> list = new ArrayList<String>();
-        myLog.debug("start");
-        for(int i =0;i<10000;i++){
-        	if(i <5000)
-        	 list.add(i+"");
-        }
-        myLog.debug("end");
+        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
+        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
+        String price="-DeoHWUBAABecRQOcCgIOHv03XBETdgjMHHbSA";
+
+        Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
+        System.out.println(aLong);
+        System.out.println(Double.valueOf(aLong)/10000);
 
 //        Map msg = new HashMap();
 //        msg.put("code",1001);

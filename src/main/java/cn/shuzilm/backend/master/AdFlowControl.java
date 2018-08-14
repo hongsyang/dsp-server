@@ -184,6 +184,7 @@ public class AdFlowControl {
 
     /**
      * 每隔 5 秒钟从消息中心获得所有节点的当前任务，并与当前两个 MAP monitor 进行更新
+     * TODO 点击率的计算未实现
      */
     public void pullAndUpdateTask() {
         //分发任务

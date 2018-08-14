@@ -23,6 +23,7 @@ public class DUFlowBean implements Serializable {
     private String requestId;//对应Bid Request中的id
     private List<Impression> impression;//广告位信息
     private String bidid;//DSP给出的该次竞价的ID
+    private String dspid;//DSP对该次出价分配的ID
     private String seat;//SeatBid 的标识,由 DSP 生成
     private String adm;//广告材料数据
     private Integer adw;//(F/admt=1|2|3|4) 广告物料宽度
@@ -54,7 +55,6 @@ public class DUFlowBean implements Serializable {
     private String landingUrl;//点击广告之后的跳转url
     private String linkUrl;//点击目标链接
     private String tracking;//曝光监测链接
-    private String dspid;//DSP对该次出价分配的ID
-
+    private String adxSource;//ADX服务商渠道
 
 }
