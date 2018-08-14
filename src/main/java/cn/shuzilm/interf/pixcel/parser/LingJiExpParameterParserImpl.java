@@ -69,10 +69,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-//            element.setActualPricePremium(money);//成本价
-//            element.setActualPricePremium(money * element.getPremiumFactor());//溢价
+            element.setActualPricePremium(money);//成本价
+            element.setActualPricePremium(money * element.getPremiumFactor());//溢价
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
-
+            element.setAdxSource("LingJi");
             MDC.put("sift", "LingJiExp");
             log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
                     element.getDid(), element.getDeviceId(),
@@ -82,7 +82,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     element.getCity(), element.getRequestId(),
                     element.getActualPrice(), element.getBiddingPrice(),
                     element.getWinNoticeTime(), element.getPremiumFactor());
-            boolean lingJiExp = JedisQueueManager.putElementToQueue("LingJiExp", element, Priority.MAX_PRIORITY);
+            boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiExp) {
                 log.debug("发送到Phoenix：{}", lingJiExp);
             } else {
