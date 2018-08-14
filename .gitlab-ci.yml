@@ -4,6 +4,6 @@ stages:
 Git PUSH:
   stage: deploy
   script:
-   - git push  --tags -f  git@bitbucket.org:dataunionda/dsp-server.git HEAD:refs/heads/$CI_BUILD_REF_NAME
+   - git push  --tags -f  git@bitbucket.org:du-da/dsp-server.git HEAD:refs/heads/$CI_BUILD_REF_NAME
   only:
    - branches
