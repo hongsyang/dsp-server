@@ -20,7 +20,7 @@ public class GridMark2 {
     /**
      * 将次改为对应的class目录
      */
-    private static final String dir = "E:\\工作源码\\数盟网络\\dsp-server\\target\\classes\\";
+    private static final String dir = "D:\\program\\mygit\\dsp-server\\bin\\src\\main\\";
 
     private static final String pythonEnvDir = "python.exe";
 

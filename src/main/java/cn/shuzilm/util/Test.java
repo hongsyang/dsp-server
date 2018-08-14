@@ -1,22 +1,32 @@
 package cn.shuzilm.util;
 
 
+import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.base64.Base64;
 import cn.shuzilm.util.base64.Decrypter;
+
+import org.slf4j.LoggerFactory;
 import org.springframework.util.Base64Utils;
 import redis.clients.jedis.Jedis;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 
 public class Test {
+	
+	 private static final org.slf4j.Logger myLog = LoggerFactory.getLogger(Test.class);
     public static void main(String[] args) {
+//        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
+//        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
+//        String price="-DeoHWUBAABecRQOcCgIOHv03XBETdgjMHHbSA";
 //
         String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
         String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
