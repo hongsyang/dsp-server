@@ -52,7 +52,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                 bean.setAdUid(element.getAdUid());
             }
             bean.setHost(configs.getString("HOST"));
-            bean.setMoney(Double.valueOf(urlRequest.get("price")));
+//            bean.setMoney(Double.valueOf(urlRequest.get("price")));
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiClickBean：{}", bean);
@@ -61,6 +61,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
+            element.setAdxSource("LingJi");
             MDC.put("sift", "LingJiClick");
             log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
                     element.getDid(), element.getDeviceId(),
@@ -68,7 +69,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                     element.getAdvertiserUid(), element.getAgencyUid(),
                     element.getCreativeUid(), element.getProvince(),
                     element.getCity(), element.getRequestId());
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("LingJiClick", element, Priority.MAX_PRIORITY);
+            boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送到Phoenix：{}", lingJiClick);
             } else {
