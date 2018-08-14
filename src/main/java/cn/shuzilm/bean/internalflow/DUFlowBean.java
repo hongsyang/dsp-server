@@ -54,5 +54,7 @@ public class DUFlowBean implements Serializable {
     private String landingUrl;//点击广告之后的跳转url
     private String linkUrl;//点击目标链接
     private String tracking;//曝光监测链接
+    private String dspid;//DSP对该次出价分配的ID
+
 
 }

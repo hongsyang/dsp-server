@@ -124,7 +124,7 @@ public class RtbFlowControl {
 		pullAndUpdateTask();
 
 		// 10分钟拉取一次最新的广告内容
-		pullTenMinutes();
+		pullTenMinutes(null);
 
 		// 1 hour
 		refreshAdStatus();
@@ -145,9 +145,9 @@ public class RtbFlowControl {
 	/**
 	 * 每隔 10 分钟更新一次广告素材或者人群包
 	 */
-	public void pullTenMinutes() {
+	public void pullTenMinutes(ArrayList<AdBean> adBeanList) {
 		// 从 10 分钟的队列中获得广告素材和人群包
-		ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
+		//ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
 		ArrayList<GpsBean> gpsAll = new ArrayList<>();
 		if (adBeanList != null) {
 			for (AdBean adBean : adBeanList) {
@@ -300,30 +300,30 @@ public class RtbFlowControl {
 		}
 
 		// 匹配广告投放时间窗
-		AdBean adBean = mapAd.get(auid);
-		if (adBean != null) {
-			int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
-			Date date = new Date();
-			String time = dateFm.format(date);
-			String splitTime[] = time.split("_");
-			int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
-			int dayNum = Integer.parseInt(splitTime[1]);
-			if (dayNum == 24)
-				dayNum = 0;
-			for (int i = 0; i < timeSchedulingArr.length; i++) {
-				if (weekNum != i)
-					continue;
-				for (int j = 0; j < timeSchedulingArr[i].length; j++) {
-					if (dayNum == j) {
-						if (timeSchedulingArr[i][j] == 1) {
-							return true;
-						} else {
-							return false;
-						}
-					}
-				}
-			}
-		}
+//		AdBean adBean = mapAd.get(auid);
+//		if (adBean != null) {
+//			int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
+//			Date date = new Date();
+//			String time = dateFm.format(date);
+//			String splitTime[] = time.split("_");
+//			int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
+//			int dayNum = Integer.parseInt(splitTime[1]);
+//			if (dayNum == 24)
+//				dayNum = 0;
+//			for (int i = 0; i < timeSchedulingArr.length; i++) {
+//				if (weekNum != i)
+//					continue;
+//				for (int j = 0; j < timeSchedulingArr[i].length; j++) {
+//					if (dayNum == j) {
+//						if (timeSchedulingArr[i][j] == 1) {
+//							return true;
+//						} else {
+//							return false;
+//						}
+//					}
+//				}
+//			}
+//		}
 		return true;
 	}
 }
