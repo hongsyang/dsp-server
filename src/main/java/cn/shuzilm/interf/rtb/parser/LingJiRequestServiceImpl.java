@@ -99,22 +99,22 @@ public class LingJiRequestServiceImpl implements RequestService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String format = LocalDateTime.now().format(formatter);//时间戳
         bidResponseBean.setId(duFlowBean.getRequestId());//从bidRequestBean里面取 bidRequest的id
-        bidResponseBean.setBidid(duFlowBean.getBidid() + format);//BidResponse 的唯一标识,由 DSP生成
+        bidResponseBean.setBidid(duFlowBean.getBidid());//BidResponse 的唯一标识,由 DSP生成
         List<SeatBid> seatBidList = new ArrayList<SeatBid>();//注意第一层数组  DSP出价 目前仅支持一个
         List<LJBid> bidList = new ArrayList<LJBid>();//注意第二层数组 针对单次曝光的出价
         SeatBid seatBid = new SeatBid();
-        seatBid.setSeat(duFlowBean.getSeat());//SeatBid 的标识,由 DSP 生成
+        seatBid.setSeat(duFlowBean.getSeat());//SeatBid 的标识,由 DSP 生成 //TODO 等待确认
         LJBid bid = new LJBid();
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
-        bid.setId(format);////DSP对该次出价分配的ID
+        bid.setId(duFlowBean.getDspid());////DSP对该次出价分配的ID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-        bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
+        bid.setAdm(duFlowBean.getAdm());//duFlowBean.getAdm() 广告物料数据
         //等待结果
-//        Double biddingPrice = duFlowBean.getBiddingPrice()*100;
-//        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
-        bid.setPrice(6.0f);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
-        bid.setCrid(configs.getString("CRID"));//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
+        Double biddingPrice = duFlowBean.getBiddingPrice()*100;
+        Float price = Float.valueOf(String.valueOf(biddingPrice));
+        bid.setPrice(price);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        bid.setCrid(duFlowBean.getCreativeUid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
         //曝光nurl
         String nurl = "http://101.200.56.200:8880/" + "lingjiexp?" +
                 "id=" + "${AUCTION_ID}" +
@@ -137,7 +137,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-                "&price=" + 6 +
+//                "&price=" + 6 +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
@@ -146,12 +146,17 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
+        LJResponseExt ljResponseExt = new LJResponseExt();
+        ljResponseExt.setLdp(duFlowBean.getLandingUrl());//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
+        //曝光监测数组
+        List pm = new ArrayList();
+        pm.add(duFlowBean.getTracking());
+        ljResponseExt.setPm(pm);//注意曝光监测url是数组
+        //点击监测数组
         List curls = new ArrayList();
         curls.add(curl);
-        LJResponseExt ljResponseExt = new LJResponseExt();
-        ljResponseExt.setLdp(curl);
-        ljResponseExt.setCm(curls);
-        ljResponseExt.setPm(curls);
+        curls.add(duFlowBean.getLinkUrl());
+        ljResponseExt.setCm(curls);//注意点击监测url是数组
         bid.setExt(ljResponseExt);
 
         //添加到list中
