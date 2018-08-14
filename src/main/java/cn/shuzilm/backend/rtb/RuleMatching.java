@@ -30,6 +30,8 @@ import org.springframework.beans.BeanUtils;
 public class RuleMatching {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RuleMatching.class);
+	
+	private static RuleMatching rule = null;
 
 	private AsyncRedisClient redis;
 
@@ -44,6 +46,13 @@ public class RuleMatching {
 	 * 随机数控制广告进度等顺序，雨露均沾
 	 */
 	private Random adRandom;
+	
+	public static RuleMatching getInstance(String[] nodes){
+		if(rule == null){
+			rule = new RuleMatching(nodes);
+		}
+		return rule;
+	}
 
 	public RuleMatching(String[] nodes) {
 		MDC.put("sift", "rtb");
