@@ -1,6 +1,8 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.adview.request.Device;
 import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
@@ -52,22 +54,40 @@ public class LingJiRequestServiceImpl implements RequestService {
             //请求报文解析
             BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
             //创建返回结果  bidRequest请求参数保持不变
+            //初步过滤规则开关
             DUFlowBean sourceDuFlowBean = new DUFlowBean();
             if (bidRequestBean != null) {
                 sourceDuFlowBean.setRequestId(bidRequestBean.getId());
                 sourceDuFlowBean.setImpression(bidRequestBean.getImp());
                 sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
             }
-            //初步过滤规则开关
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
                 if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "lingji")) {
-                    DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
-                    BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
-                    log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
-                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
-                    pushRedis(targetDuFlowBean);//上传到redis服务器
-                    log.debug("json计数");
-                    response = JSON.toJSONString(bidResponseBean);
+                    String[] strings ={"127.0.0.1,6379"};
+                    Device userDevice = bidRequestBean.getDevice();//设备信息
+                    Impression userImpression = bidRequestBean.getImp().get(0);
+                    Integer showtype = userImpression.getExt().getShowtype();
+                    String  adType=null;
+                    if (showtype==14){
+                        adType="banner";
+                        log.debug("广告类型adType:{}",adType);
+                        DUFlowBean targetDuFlowBean = RuleMatching.getInstance(strings).match(
+                                userDevice.getExt().getMac(),//设备mac的MD5
+                                adType,//广告类型
+                                userImpression.getBanner().getW(),//广告位的宽
+                                userImpression.getBanner().getH(),//广告位的高
+                                true,// 是否要求分辨率
+                                5,//宽误差值
+                                5);// 高误差值;
+//                        BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
+                        targetDuFlowBean.setRequestId(bidRequestBean.getId());
+                        targetDuFlowBean.setImpression(bidRequestBean.getImp());
+                        log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
+                        BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
+                        pushRedis(targetDuFlowBean);//上传到redis服务器
+                        log.debug("json计数");
+                        response = JSON.toJSONString(bidResponseBean);
+                    }
                     log.debug("过滤通过的bidResponseBean:{}", response);
                 } else {
                     response = JSON.toJSONString(msg);//过滤规则结果输出

@@ -8,6 +8,7 @@ import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.Constants;
+import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.JsonTools;
 import cn.shuzilm.util.MathTools;
@@ -19,10 +20,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
+import redis.clients.jedis.Jedis;
 
 /**
  * Created by thunders on 2018/7/17.
@@ -33,7 +36,8 @@ public class RuleMatching {
 	
 	private static RuleMatching rule = null;
 
-	private AsyncRedisClient redis;
+	//private AsyncRedisClient redis;
+	private Jedis redis;
 
 	private RtbFlowControl rtbIns;
 
@@ -56,8 +60,9 @@ public class RuleMatching {
 
 	public RuleMatching(String[] nodes) {
 		MDC.put("sift", "rtb");
-		redis = new AsyncRedisClient(nodes);
-		
+		//redis = new AsyncRedisClient(nodes);
+//		JedisManager jedisManager = JedisManager.getInstance();
+		 redis = JedisManager.getInstance().getResource();
 		AdBean ad1 = new AdBean();
     	AudienceBean au1 = new AudienceBean();
     	String curl = "http://101.200.56.200:8880/" + "lingjiclick?" +"id=" + "1213" +"&price=" + 6 +"&pmp=" + "2222";
@@ -110,8 +115,8 @@ public class RuleMatching {
     	creative.setName("广告素材A");
     	creative.setType("banner");
     	creative.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-    	creative.setWidth(800);
-    	creative.setHeight(600);
+    	creative.setWidth(320);
+    	creative.setHeight(50);
     	List<CreativeBean> creativeList = new ArrayList<CreativeBean>();
     	creativeList.add(creative);
     	
@@ -176,8 +181,8 @@ public class RuleMatching {
     	creative2.setName("广告素材A");
     	creative2.setType("banner");
     	creative2.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-    	creative2.setWidth(800);
-    	creative2.setHeight(600);
+    	creative2.setWidth(320);
+    	creative2.setHeight(50);
     	List<CreativeBean> creativeList2 = new ArrayList<CreativeBean>();
     	creativeList2.add(creative2);
     	
@@ -272,9 +277,10 @@ public class RuleMatching {
 			return null;
 		}
 		// 取出标签
-		 String tagJson = redis.getAsync(deviceId);
-		 TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
-		
+		 //String tagJson = redis.getAsync(deviceId);
+		String tagJson = redis.get(deviceId);
+//		 TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
+        TagBean tagBean= JSON.parseObject(tagJson,TagBean.class);
 		if(tagBean == null){
 			LOG.warn("TAGBEAN["+tagBean+"]为空!");
 			return null;

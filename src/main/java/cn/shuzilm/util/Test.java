@@ -1,10 +1,12 @@
 package cn.shuzilm.util;
 
 
+import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.base64.Base64;
 import cn.shuzilm.util.base64.Decrypter;
+import com.alibaba.fastjson.JSON;
 import org.springframework.util.Base64Utils;
 import redis.clients.jedis.Jedis;
 
@@ -18,14 +20,45 @@ import java.util.Date;
 public class Test {
     public static void main(String[] args) {
 //
-        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
-        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
-        String price="-DeoHWUBAABecRQOcCgIOHv03XBETdgjMHHbSA";
+//        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
+//        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
+//        String price="-DeoHWUBAABecRQOcCgIOHv03XBETdgjMHHbSA";
+//
+//        Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
+//        System.out.println(aLong);
+//        System.out.println(Double.valueOf(aLong)/10000);
+        TagBean tagBean = new TagBean();
+        tagBean.setTagId(123);
+        float[] work = { 11.11f, 22.22f };
+        float[] residence = { 33.11f, 44.22f };
+        float[] activity = { 55.11f, 66.22f };
+        tagBean.setWork(work);
+        tagBean.setResidence(residence);
+        tagBean.setActivity(activity);
 
-        Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
-        System.out.println(aLong);
-        System.out.println(Double.valueOf(aLong)/10000);
+        tagBean.setProvinceId(6);
+        tagBean.setCityId(62);
+        tagBean.setCountyId(737);
 
+        tagBean.setIncomeId(2);
+        tagBean.setAppPreferenceIds("eat food");
+        tagBean.setPlatformId(1);
+        tagBean.setBrand("nike");
+        tagBean.setPhonePrice(3);
+        tagBean.setNetworkId(2);
+        tagBean.setCarrierId(4);
+        tagBean.setAppPreferenceId("app");
+        tagBean.setTagIdList("222220,333320");
+        tagBean.setCompanyIdList("123,321,222");
+
+        Jedis jedis = JedisManager.getInstance().getResource();
+
+
+        String set = jedis.set("3D8A278F33E4F97181DF1EAEFE500D05", JsonTools.toJsonString(tagBean));
+
+        System.out.println(set);
+        String s = jedis.get("3D8A278F33E4F97181DF1EAEFE500D05");
+        System.out.println(s);
 //        Map msg = new HashMap();
 //        msg.put("code",1001);
 //        msg.put("message","参数异常");

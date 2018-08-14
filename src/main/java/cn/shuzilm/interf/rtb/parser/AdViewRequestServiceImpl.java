@@ -176,7 +176,6 @@ public class AdViewRequestServiceImpl implements RequestService {
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
         log.debug("redis连接时间计数");
-        JedisManager jedisManager = JedisManager.getInstance();
         Jedis jedis = JedisManager.getInstance().getResource();
         if (jedis != null) {
             log.debug("AdView_jedis：{}", jedis);
