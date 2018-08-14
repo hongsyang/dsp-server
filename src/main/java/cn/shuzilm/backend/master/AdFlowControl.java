@@ -72,6 +72,7 @@ public class AdFlowControl {
      * 广告每小时的指标监控
      */
     private static HashMap<String, AdFlowStatus> mapMonitorHour = null;
+
     /**
      * 数据库中设定的设计流控指标（天 最高限）
      */
@@ -134,15 +135,22 @@ public class AdFlowControl {
      * @param addWinNoticeNums
      * @param addMoney
      * @param type             0 hour  1 daily  2 total -1 全部都更新
+     * @param clickNums 点击次数
+     * @param pixelType pixcel 类型，曝光 0 和 点击 1
      */
-    private void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type) {
+    private void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type , long clickNums, int pixelType) {
         switch (type) {
             case 0:
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
                 if (statusHour == null)
                     break;
-                statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
-                statusHour.setMoney(statusHour.getMoney() + addMoney);
+                if(pixelType == 0){
+                    statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
+                    statusHour.setMoney(statusHour.getMoney() + addMoney);
+                }else if(pixelType == 1){
+                    statusHour.setClickNums(statusHour.getClickNums() +  clickNums);
+                }
+
                 break;
             case 1:
                 AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
@@ -184,7 +192,7 @@ public class AdFlowControl {
 
     /**
      * 每隔 5 秒钟从消息中心获得所有节点的当前任务，并与当前两个 MAP monitor 进行更新
-     * TODO 点击率的计算未实现
+     *
      */
     public void pullAndUpdateTask() {
         //分发任务
@@ -193,26 +201,28 @@ public class AdFlowControl {
 
         //从各个 RTB 节点，获得最新的 bids 个数，并更新至内存监控
         for (WorkNodeBean node : nodeList) {
-            NodeStatusBean bean = MsgControlCenter.recvBidStatus(node.getName());
-            if (bean == null)
-                continue;
-            ArrayList<AdBidBean> bidList = bean.getBidList();
-            for (AdBidBean bid : bidList) {
-                updateBids(bid.getUid(), bid.getBidNums());
+            //持续不断的从队列中获得 RTB 信息
+            while(true){
+                NodeStatusBean bean = MsgControlCenter.recvBidStatus(node.getName());
+                if (bean == null)
+                    break;
+                ArrayList<AdBidBean> bidList = bean.getBidList();
+                for (AdBidBean bid : bidList) {
+                    updateBids(bid.getUid(), bid.getBidNums());
+                }
             }
+
         }
 
         //从各个 PIXCEL 节点获得最新 wins 和 金额消费情况， 并更新至内存监控
         for (WorkNodeBean node : nodeList) {
-            NodeStatusBean bean = MsgControlCenter.recvPixelStatus(node.getName());
-            if (bean == null)
-                continue;
-            ArrayList<AdPixelBean> pixelList = bean.getPixelList();
-            for (AdPixelBean pix : pixelList) {
-                //更新全部监视器
-                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getMoney().toString()), -1);
+            //持续不断的从队列中获得 pixcel 信息
+            while(true){
+                AdPixelBean pix = MsgControlCenter.recvPixelStatus(node.getName());
+                if (pix == null)
+                    break;
+                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getMoney().toString()), -1,pix.getClickNums(),pix.getType());
             }
-
         }
 
         //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
@@ -223,13 +233,13 @@ public class AdFlowControl {
             if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
                 String reason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + " ###";
                 pauseAd(auid, reason, true);
-                myLog.info(monitor.toString() + "\t" + reason);
+                myLog.error(monitor.toString() + "\t" + reason);
             }
             if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                 String reason = "#### 金额 超限，参考指标：" + threshold.getMoney() + " ###";
                 pauseAd(auid, reason, true);
-                myLog.info(monitor.toString() + "\t" + reason);
+                myLog.error(monitor.toString() + "\t" + reason);
 
             }
         }
@@ -401,7 +411,8 @@ public class AdFlowControl {
                         ReportBean report = reportMapHour.get(ad.getAdUid());
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 0);
+
+                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 0,0,0);
                         }
 
                     }
@@ -412,7 +423,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapDaily.get(ad.getAdUid());
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 1);
+                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 1,0,0);
                         }
                     }
 
@@ -422,7 +433,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapTotal.get(ad.getAdUid());
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 2);
+                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 2,0,0);
                         }
 
                     }
@@ -499,6 +510,13 @@ public class AdFlowControl {
             //对任务进行拆解
             TaskBean task = new TaskBean(adUid);
             AdBean ad = mapAd.get(adUid);
+
+            //从小时监控中取出曝光量、点击次数 、点击金额
+            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
+            task.setClickNums(statusHour.getClickNums());
+            task.setExposureNums(statusHour.getWinNums());
+            task.setMoney(statusHour.getMoney());
+
             //给每一个节点分配自己的 曝光 额度
             task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
             task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);

@@ -39,6 +39,10 @@ public class GridMark2 {
 
     private TreeMap<Double,Integer> tmDownlat = null;
 
+    public GridMark2(ArrayList<GpsBean> coords){
+        ArrayList<GpsGridBean> list = reConvert(coords);
+        init(list);
+    }
 
 
     /**
@@ -48,7 +52,7 @@ public class GridMark2 {
      * 输出参数转换完成左下角坐标
      * @param coords
      */
-    public ArrayList<GpsGridBean> reConvert(ArrayList<GpsBean> coords){
+    private ArrayList<GpsGridBean> reConvert(ArrayList<GpsBean> coords){
         ArrayList<GpsGridBean> destList = new ArrayList<>();
         int counter = 0;
 //        String currWorkPath = this.getClass().getClassLoader().getResource(".").getPath();
@@ -197,7 +201,8 @@ public class GridMark2 {
                 "113.4324432,37.43242342",
 
         };
-        GridMark2 m = new GridMark2();
+
+        GridMark2 m = null;
         try {
             ArrayList<GpsBean> list = new ArrayList<>();
             int counter = 0;
@@ -209,8 +214,7 @@ public class GridMark2 {
                 list.add(bean);
                 counter ++;
             }
-            ArrayList<GpsGridBean> list2 = m.reConvert(list);
-            m.init(list2);
+            m = new GridMark2(list);
         } catch (Exception e) {
             e.printStackTrace();
         }
