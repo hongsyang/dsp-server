@@ -9,6 +9,11 @@ import lombok.Data;
  */
 @Data
 public class AdPixelBean implements ICommand {
+    /**
+     * type = 0 : 曝光
+     * type = 1 : 点击
+     */
+    private int type;
     private String host;//根据配置文件获取
     private String adUid;//广告id
     private String adName;//可以留空
@@ -21,6 +26,15 @@ public class AdPixelBean implements ICommand {
      * 实际耗费的量
      */
     private long winNoticeNums;
+    /**
+     * 点击时间戳
+     */
+    private long clickTime;
+    /**
+     * 点击次数
+     */
+    private long clickNums;
+
 
 
 }
