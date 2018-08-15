@@ -28,8 +28,28 @@ public class TaskBean implements ICommand {
      * 操作说明，一般指原因
      */
     private String commandMemo;
+    /**
+     * 曝光每小时限额
+     */
     private long exposureLimitPerHour;
+    /**
+     * 曝光每天限额
+     */
     private long exposureLimitPerDay;
+
+    /**
+     * 点击次数
+     */
+    private long clickNums;
+
+    /**
+     * 曝光次数
+     */
+    private long exposureNums;
+    /**
+     * 金钱
+     */
+    private float money;
 
     public static final long serialVersionUID = 1123223132123L;
 
