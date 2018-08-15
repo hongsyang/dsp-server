@@ -230,7 +230,7 @@ public class RuleMatching {
 	 *            高度误差 创意类型、尺寸匹配
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
-						  int widthDeviation, int heightDeviation) {
+			int widthDeviation, int heightDeviation) {
 		if (isResolutionRatio) {
 			if (adWidth >= width && adHeight >= height) {
 				return true;
@@ -246,7 +246,7 @@ public class RuleMatching {
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
-	 *
+	 * 
 	 * @param tagBean
 	 *            标签
 	 * @param adType
@@ -263,7 +263,7 @@ public class RuleMatching {
 	 *            高度误差
 	 */
 	public DUFlowBean match(TagBean tagBean, String deviceId, String adType, int width, int height,
-							boolean isResolutionRatio, int widthDeviation, int heightDeviation) {
+			boolean isResolutionRatio, int widthDeviation, int heightDeviation) {
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
@@ -442,7 +442,7 @@ public class RuleMatching {
 
 	/**
 	 * 需要确认标签中的值和人群中的值
-	 *
+	 * 
 	 * @param tagBean
 	 * @param audience
 	 * @return
@@ -479,7 +479,7 @@ public class RuleMatching {
 
 	/**
 	 * 根据出价*溢价比排序
-	 *
+	 * 
 	 * @param machedAdList
 	 */
 	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList) {
@@ -510,7 +510,7 @@ public class RuleMatching {
 
 	/**
 	 * 根据广告投放进度、素材质量、剩余资金池金额、广告主打分、广告组点击率排序
-	 *
+	 * 
 	 * @param machedAdList
 	 */
 	public void gradeOrderOtherParaStrategy(List<AdBean> machedAdList) {
