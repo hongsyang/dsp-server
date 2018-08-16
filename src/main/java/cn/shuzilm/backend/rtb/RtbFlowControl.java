@@ -59,12 +59,12 @@ public class RtbFlowControl {
         return mapAd;
     }
 
-    public ConcurrentHashMap<String, List<String>> getCreativeMap() {
-        return mapAdCreative;
+    public ConcurrentHashMap<String, List<String>> getMaterialMap() {
+        return mapAdMaterial;
     }
 
-    public ConcurrentHashMap<String, List<String>> getCreativeRatioMap() {
-        return mapAdCreativeRatio;
+    public ConcurrentHashMap<String, List<String>> getMaterialRatioMap() {
+        return mapAdMaterialRatio;
     }
 
     public ConcurrentHashMap<String, Set<String>> getAreaMap() {
@@ -88,12 +88,12 @@ public class RtbFlowControl {
     /**
      * 广告资源的倒置 key: 广告类型 + 广告宽 + 广告高 value: list<aduid>
      */
-    private static ConcurrentHashMap<String, List<String>> mapAdCreative = null;
+    private static ConcurrentHashMap<String, List<String>> mapAdMaterial = null;
 
     /**
      * 广告资源的倒置 key: 广告类型 + (广告宽/广告高) value: list<aduid>
      */
-    private static ConcurrentHashMap<String, List<String>> mapAdCreativeRatio = null;
+    private static ConcurrentHashMap<String, List<String>> mapAdMaterialRatio = null;
 
     /**
      * 省级、地级、县级 map key: 北京市北京市海淀区 河北省廊坊地区广平县 value：aduid
@@ -113,8 +113,8 @@ public class RtbFlowControl {
         mapTask = new ConcurrentHashMap<>();
         areaMap = new ConcurrentHashMap<>();
         demographicMap = new ConcurrentHashMap<>();
-        mapAdCreative = new ConcurrentHashMap<>();
-        mapAdCreativeRatio = new ConcurrentHashMap<>();
+        mapAdMaterial = new ConcurrentHashMap<>();
+        mapAdMaterialRatio = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
         gridMap = new HashMap<>();
 
@@ -125,7 +125,7 @@ public class RtbFlowControl {
         pullAndUpdateTask();
 
         // 10分钟拉取一次最新的广告内容
-        pullTenMinutes(null);
+        pullTenMinutes();
 
         // 1 hour
         refreshAdStatus();
@@ -134,9 +134,9 @@ public class RtbFlowControl {
     /**
      * 检查设备的标签所带的居住地、工作地、活动地坐标
      *
-     * @param lng 0 居住地 1 工作地 2 活动地
-     * @param lat 0 居住地 1 工作地 2 活动地
-     * @return HashSet<aduid>
+     * @param lng 0 不限 1 居住地 2 工作地 3 活动地
+     * @param lat 0 不限 1 居住地 2 工作地 3 活动地
+     * @return
      */
     public HashSet<String> checkInBound(double[] lng, double[] lat) {
         HashSet<String> allUidSet = new HashSet<>();
@@ -153,9 +153,9 @@ public class RtbFlowControl {
     /**
      * 每隔 10 分钟更新一次广告素材或者人群包
      */
-    public void pullTenMinutes(ArrayList<AdBean> adBeanList) {
+    public void pullTenMinutes() {
         // 从 10 分钟的队列中获得广告素材和人群包
-        //ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
+        ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
         ArrayList<GpsBean> gpsAll = new ArrayList<>();
         ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
         ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
@@ -197,85 +197,89 @@ public class RtbFlowControl {
                                     break;
                                 default:
                                     break;
-
                             }
 
+                            // 将 省、地级、县级装载到 MAP 中，便于快速查找
+                            List<AreaBean> areaList = audience.getCityList();
+                            String key = null;
+                            for (AreaBean area : areaList) {
+                                if (area.getProvinceId() == 0) {
+                                    // 当省选项为 0 的时候，则认为是匹配全国
+                                    key = "china";
+                                } else if (area.getCityId() == 0) {
+                                    // 当市级选项为 0 的时候，则认为是匹配全省
+                                    key = area.getProvinceId() + "";
+                                } else if (area.getCountyId() == 0) {
+                                    // 当县级选项为 0 的时候，则认为是匹配全市
+                                    key = area.getProvinceId() + "_" + area.getCityId();
+                                } else {
+                                    key = area.getProvinceId() + "_" + area.getCityId() + "_" + area.getCountyId();
+                                }
+
+                                if (!areaMap.containsKey(key)) {
+                                    Set<String> set = new HashSet<String>();
+                                    set.add(adBean.getAdUid());
+                                    areaMap.put(key, set);
+                                } else {
+                                    Set<String> set = areaMap.get(key);
+                                    set.add(adBean.getAdUid());
+                                }
+
+                                if (!demographicMap.containsKey(key)) {
+                                    Set<String> set = new HashSet<String>();
+                                    set.add(adBean.getAdUid());
+                                    demographicMap.put(key, set);
+                                } else {
+                                    Set<String> set = demographicMap.get(key);
+                                    set.add(adBean.getAdUid());
+                                }
+                            }
+                        }
+                    }
+                    // 广告内容的更新 ，按照素材的类型和尺寸
+                    CreativeBean creative = adBean.getCreativeList().get(0);
+                    List<Material> materialList = creative.getMaterialList();
+                    for (Material material : materialList) {
+                        int width = material.getWidth();
+                        int height = material.getHeight();
+                        int divisor = MathTools.division(width, height);
+                        String materialKey = material.getType() + "_" + width + "_" + +height;
+                        String materialRatioKey = material.getType() + "_" + width / divisor + "/" + height / divisor;
+
+                        if (!mapAdMaterial.containsKey(materialKey)) {
+                            List<String> uidList = new ArrayList<String>();
+                            uidList.add(uid);
+                            mapAdMaterial.put(materialKey, uidList);
+                        } else {
+                            List<String> uidList = mapAdMaterial.get(materialKey);
+                            if (!uidList.contains(uid)) {
+                                uidList.add(uid);
+                            }
                         }
 
-
-                        // 将 省、地级、县级装载到 MAP 中，便于快速查找
-                        List<AreaBean> areaList = audience.getCityList();
-                        String key = null;
-                        for (AreaBean area : areaList) {
-                            if (area.getProvinceId() == 0) {
-                                // 当省选项为 0 的时候，则认为是匹配全国
-                                key = "china";
-                            } else if (area.getCityId() == 0) {
-                                // 当市级选项为 0 的时候，则认为是匹配全省
-                                key = area.getProvinceId() + "";
-                            } else if (area.getCountyId() == 0) {
-                                // 当县级选项为 0 的时候，则认为是匹配全市
-                                key = area.getProvinceId() + "_" + area.getCityId();
-                            } else {
-                                key = area.getProvinceId() + "_" + area.getCityId() + "_" + area.getCountyId();
-                            }
-
-                            if (!areaMap.containsKey(key)) {
-                                Set<String> set = new HashSet<String>();
-                                set.add(adBean.getAdUid());
-                                areaMap.put(key, set);
-                            } else {
-                                Set<String> set = areaMap.get(key);
-                                set.add(adBean.getAdUid());
-                            }
-
-                            if (!demographicMap.containsKey(key)) {
-                                Set<String> set = new HashSet<String>();
-                                set.add(adBean.getAdUid());
-                                demographicMap.put(key, set);
-                            } else {
-                                Set<String> set = demographicMap.get(key);
-                                set.add(adBean.getAdUid());
+                        if (!mapAdMaterialRatio.containsKey(materialRatioKey)) {
+                            List<String> uidList = new ArrayList<String>();
+                            uidList.add(uid);
+                            mapAdMaterialRatio.put(materialRatioKey, uidList);
+                        } else {
+                            List<String> uidList = mapAdMaterialRatio.get(materialRatioKey);
+                            if (!uidList.contains(uid)) {
+                                uidList.add(uid);
                             }
                         }
                     }
                 }
-                // 广告内容的更新 ，按照素材的类型和尺寸
-                CreativeBean creative = adBean.getCreativeList().get(0);
-                int width = creative.getWidth();
-                int height = creative.getHeight();
-                int divisor = MathTools.division(width, height);
-                String creativeKey = creative.getType() + "_" + width + "_" + +height;
-                String creativeRatioKey = creative.getType() + "_" + width / divisor + "/" + height / divisor;
 
-                if (!mapAdCreative.containsKey(creativeKey)) {
-                    List<String> uidList = new ArrayList<String>();
-                    uidList.add(uid);
-                    mapAdCreative.put(creativeKey, uidList);
-                } else {
-                    List<String> uidList = mapAdCreative.get(creativeKey);
-                    uidList.add(uid);
-                }
+                gridMap.clear();
+                // 将 GPS 坐标加载到 栅格快速比对处理类中
+                gridMap.put(0, new GridMark2(gpsResidenceList));
+                gridMap.put(1, new GridMark2(gpsWorkList));
+                gridMap.put(2, new GridMark2(gpsActiveList));
 
-                if (!mapAdCreativeRatio.containsKey(creativeRatioKey)) {
-                    List<String> uidList = new ArrayList<String>();
-                    uidList.add(uid);
-                    mapAdCreativeRatio.put(creativeRatioKey, uidList);
-                } else {
-                    List<String> uidList = mapAdCreativeRatio.get(creativeRatioKey);
-                    uidList.add(uid);
-                }
+                myLog.info("广告共计加载条目数 : " + adBeanList.size());
+                myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
+
             }
-
-            gridMap.clear();
-            // 将 GPS 坐标加载到 栅格快速比对处理类中
-            gridMap.put(0, new GridMark2(gpsResidenceList));
-            gridMap.put(1, new GridMark2(gpsWorkList));
-            gridMap.put(2, new GridMark2(gpsActiveList));
-
-            myLog.info("广告共计加载条目数 : " + adBeanList.size());
-            myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
-
         }
 
     }
@@ -340,30 +344,30 @@ public class RtbFlowControl {
         }
 
         // 匹配广告投放时间窗
-//		AdBean adBean = mapAd.get(auid);
-//		if (adBean != null) {
-//			int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
-//			Date date = new Date();
-//			String time = dateFm.format(date);
-//			String splitTime[] = time.split("_");
-//			int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
-//			int dayNum = Integer.parseInt(splitTime[1]);
-//			if (dayNum == 24)
-//				dayNum = 0;
-//			for (int i = 0; i < timeSchedulingArr.length; i++) {
-//				if (weekNum != i)
-//					continue;
-//				for (int j = 0; j < timeSchedulingArr[i].length; j++) {
-//					if (dayNum == j) {
-//						if (timeSchedulingArr[i][j] == 1) {
-//							return true;
-//						} else {
-//							return false;
-//						}
-//					}
-//				}
-//			}
-//		}
+        AdBean adBean = mapAd.get(auid);
+        if (adBean != null) {
+            int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
+            Date date = new Date();
+            String time = dateFm.format(date);
+            String splitTime[] = time.split("_");
+            int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
+            int dayNum = Integer.parseInt(splitTime[1]);
+            if (dayNum == 24)
+                dayNum = 0;
+            for (int i = 0; i < timeSchedulingArr.length; i++) {
+                if (weekNum != i)
+                    continue;
+                for (int j = 0; j < timeSchedulingArr[i].length; j++) {
+                    if (dayNum == j) {
+                        if (timeSchedulingArr[i][j] == 1) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
         return true;
     }
 }
