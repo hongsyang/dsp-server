@@ -154,9 +154,6 @@ public class RuleMatching {
 			return null;
 		}
 
-		// String creativeKey = adType + "_" + width + "_" + height;
-		// List<String> auidList = rtbIns.getCreativeMap().get(creativeKey);
-
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		List<AdBean> geoAdList = new ArrayList<AdBean>();// 符合经纬度的广告资源列表
 		Map<String,Material> metrialMap = new HashMap<String,Material>();
