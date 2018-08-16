@@ -4,19 +4,25 @@ import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
+import cn.shuzilm.bean.control.Material;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.Constants;
+import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.JsonTools;
 import cn.shuzilm.util.MathTools;
+import redis.clients.jedis.Jedis;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
@@ -24,6 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * Created by thunders on 2018/7/17.
@@ -35,6 +43,8 @@ public class RuleMatching {
 	private static RuleMatching rule = null;
 
 	private AsyncRedisClient redis;
+	
+	private Jedis jedis;
 
 	private RtbFlowControl rtbIns;
 
@@ -57,7 +67,8 @@ public class RuleMatching {
 
 	public RuleMatching(String[] nodes) {
 		MDC.put("sift", "rtb");
-		// redis = new AsyncRedisClient(nodes);
+		 //redis = new AsyncRedisClient(nodes);
+		jedis = JedisManager.getInstance().getResource();
 
 		AdBean ad1 = new AdBean();
 		AudienceBean au1 = new AudienceBean();
@@ -69,8 +80,8 @@ public class RuleMatching {
 		au1.setRemark("remark");
 		au1.setType("location");
 		au1.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		au1.setGeos(
-				"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
+		//au1.setGeos(
+		//		"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
 		au1.setMobilityType(0);
 		au1.setDemographicTagId("[111120,222220,333320,444420]");
 		au1.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
@@ -110,10 +121,34 @@ public class RuleMatching {
 		CreativeBean creative = new CreativeBean();
 		creative.setUid("567890");
 		creative.setName("广告素材A");
-		creative.setType("banner");
-		creative.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		creative.setWidth(800);
-		creative.setHeight(600);
+		
+		Material material = new Material();
+		material.setType("banner");
+		material.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material.setWidth(820);
+		material.setHeight(620);
+		Material material01 = new Material();
+		material01.setType("banner");
+		material01.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material01.setWidth(800);
+		material01.setHeight(600);
+		Material material02 = new Material();
+		material02.setType("banner");
+		material02.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material02.setWidth(830);
+		material02.setHeight(630);
+		Material material03 = new Material();
+		material03.setType("banner");
+		material03.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material03.setWidth(840);
+		material03.setHeight(640);
+		
+		List<Material> materialList = new ArrayList<Material>();
+		materialList.add(material);
+		materialList.add(material01);
+		materialList.add(material02);
+		materialList.add(material03);
+		creative.setMaterialList(materialList);
 		List<CreativeBean> creativeList = new ArrayList<CreativeBean>();
 		creativeList.add(creative);
 
@@ -132,8 +167,8 @@ public class RuleMatching {
 		au2.setRemark("remark");
 		au2.setType("location");
 		au2.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		au2.setGeos(
-				"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
+		//au2.setGeos(
+		//		"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
 		au2.setMobilityType(0);
 		au2.setDemographicTagId("[111120,222220,333320,444420]");
 		au2.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
@@ -173,10 +208,33 @@ public class RuleMatching {
 		CreativeBean creative2 = new CreativeBean();
 		creative2.setUid("567890");
 		creative2.setName("广告素材A");
-		creative2.setType("banner");
-		creative2.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		creative2.setWidth(800);
-		creative2.setHeight(600);
+		Material material2 = new Material();
+		material2.setType("banner");
+		material2.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material2.setWidth(820);
+		material2.setHeight(630);
+		Material material21 = new Material();
+		material21.setType("banner");
+		material21.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material21.setWidth(830);
+		material21.setHeight(640);
+		Material material22 = new Material();
+		material22.setType("banner");
+		material22.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material22.setWidth(850);
+		material22.setHeight(660);
+		Material material23 = new Material();
+		material23.setType("banner");
+		material23.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material23.setWidth(800);
+		material23.setHeight(600);
+		
+		List<Material> materialList2 = new ArrayList<Material>();
+		materialList2.add(material2);
+		materialList2.add(material21);
+		materialList2.add(material22);
+		materialList2.add(material23);
+		creative2.setMaterialList(materialList2);
 		List<CreativeBean> creativeList2 = new ArrayList<CreativeBean>();
 		creativeList2.add(creative2);
 
@@ -262,7 +320,7 @@ public class RuleMatching {
 	 * @param heightDeviation
 	 *            高度误差
 	 */
-	public DUFlowBean match(TagBean tagBean, String deviceId, String adType, int width, int height,
+	public DUFlowBean match(String deviceId, String adType, int width, int height,
 			boolean isResolutionRatio, int widthDeviation, int heightDeviation) {
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
@@ -270,8 +328,10 @@ public class RuleMatching {
 			return null;
 		}
 		// 取出标签
-		// String tagJson = redis.getAsync(deviceId);
-		// TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
+		 //String tagJson = redis.getAsync(deviceId);
+		String tagJson = jedis.get(deviceId);
+		TagBean tagBean = JSON.parseObject(tagJson,TagBean.class);
+		 //TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
 
 		if (tagBean == null) {
 			LOG.warn("TAGBEAN[" + tagBean + "]为空!");
@@ -280,11 +340,10 @@ public class RuleMatching {
 
 		// 开始匹配
 		int divisor = MathTools.division(width, height);
-		String creativeKey = adType + "_" + width / divisor + "/" + height / divisor;
-		List<String> auidList = rtbIns.getCreativeRatioMap().get(creativeKey);
-
+		String materialRatioKey = adType + "_" + width / divisor + "/" + height / divisor;
+		List<String> auidList = rtbIns.getMaterialRatioMap().get(materialRatioKey);
 		if (auidList == null) {
-			LOG.warn("根据[" + creativeKey + "]未找到广告!");
+			LOG.warn("根据[" + materialRatioKey + "]未找到广告!");
 			return null;
 		}
 
@@ -293,6 +352,7 @@ public class RuleMatching {
 
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		List<AdBean> geoAdList = new ArrayList<AdBean>();// 符合经纬度的广告资源列表
+		Map<String,Material> metrialMap = new HashMap<String,Material>();
 
 		String tagIdStr = tagBean.getTagIdList();
 		String tagIds[] = tagIdStr.split(",");
@@ -311,10 +371,20 @@ public class RuleMatching {
 			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
-			if (!filter(width, height, creative.getWidth(), creative.getHeight(), isResolutionRatio, widthDeviation,
+			List<Material> materialList = creative.getMaterialList();
+			boolean filterFlag = false;
+			for(Material material:materialList){
+			if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
 					heightDeviation)) {
+				metrialMap.put(ad.getAdUid(), material);
+				filterFlag = true;
+				break;
+			}
+			}
+			if(!filterFlag){
 				continue;
 			}
+				
 			AudienceBean audience = ad.getAudienceList().get(0);
 
 			if (audience.getType().equals("location")) {// 地理位置
@@ -393,7 +463,7 @@ public class RuleMatching {
 		LOG.info("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
 		// 排序
 		if (machedAdList.size() > 0)
-			targetDuFlowBean = order(deviceId, machedAdList, tagBean);
+			targetDuFlowBean = order(metrialMap,deviceId, machedAdList, tagBean);
 
 		return targetDuFlowBean;
 	}
@@ -401,7 +471,7 @@ public class RuleMatching {
 	/**
 	 * 对匹配的广告按照规则进行排序
 	 */
-	public DUFlowBean order(String deviceId, List<AdBean> machedAdList, TagBean tagBean) {
+	public DUFlowBean order(Map<String,Material> metrialMap,String deviceId, List<AdBean> machedAdList, TagBean tagBean) {
 
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -423,8 +493,10 @@ public class RuleMatching {
 			AdBean ad = ungradeList.get(0);// 暂时获取第一个
 			// 封装返回接口引擎数据
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
-			targetDuFlowBean = packageDUFlowData(deviceId, ad, tagBean);
+			Material material = metrialMap.get(ad.getAdUid());
+			targetDuFlowBean = packageDUFlowData(material,deviceId, ad, tagBean);
 		} else {
+			System.out.println("machedAdlist="+machedAdList.size());
 			long startOrder = System.currentTimeMillis();
 			gradeOrderByPremiumStrategy(machedAdList);
 
@@ -434,7 +506,8 @@ public class RuleMatching {
 			AdBean ad = gradeByRandom(machedAdList);
 			// 封装返回接口引擎数据
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
-			targetDuFlowBean = packageDUFlowData(deviceId, ad, tagBean);
+			Material material = metrialMap.get(ad.getAdUid());
+			targetDuFlowBean = packageDUFlowData(material,deviceId, ad, tagBean);
 		}
 
 		return targetDuFlowBean;
@@ -563,17 +636,17 @@ public class RuleMatching {
 		return ad;
 	}
 
-	public DUFlowBean packageDUFlowData(String deviceId, AdBean ad, TagBean tagBean) {
+	public DUFlowBean packageDUFlowData(Material material,String deviceId, AdBean ad, TagBean tagBean) {
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = ad.getAudienceList().get(0);
 		AdvertiserBean advertiser = ad.getAdvertiser();
 		targetDuFlowBean.setBidid("123");// 广告竞价ID
-		targetDuFlowBean.setAdm(creative.getFileName());// 广告素材
-		targetDuFlowBean.setAdw(creative.getWidth());
-		targetDuFlowBean.setAdh(creative.getHeight());
+		targetDuFlowBean.setAdm(material.getFileName());// 广告素材
+		targetDuFlowBean.setAdw(material.getWidth());
+		targetDuFlowBean.setAdh(material.getHeight());
 		targetDuFlowBean.setCrid(creative.getUid());
-		targetDuFlowBean.setAdmt(creative.getType());
+		targetDuFlowBean.setAdmt(material.getType());
 		targetDuFlowBean.setAdct(1);// 点击广告行为
 		targetDuFlowBean.setAdUid(ad.getAdUid());
 		targetDuFlowBean.setDid(deviceId);
@@ -599,35 +672,35 @@ public class RuleMatching {
 		return targetDuFlowBean;
 	}
 
-	public static void main(String[] args) {
-
-		TagBean tagBean = new TagBean();
-		tagBean.setTagId(123);
-		float[] work = { 11.11f, 22.22f };
-		float[] residence = { 33.11f, 44.22f };
-		float[] activity = { 55.11f, 66.22f };
-		tagBean.setWork(work);
-		tagBean.setResidence(residence);
-		tagBean.setActivity(activity);
-
-		tagBean.setProvinceId(6);
-		tagBean.setCityId(62);
-		tagBean.setCountyId(737);
-
-		tagBean.setIncomeId(2);
-		tagBean.setAppPreferenceIds("eat food");
-		tagBean.setPlatformId(1);
-		tagBean.setBrand("nike");
-		tagBean.setPhonePrice(3);
-		tagBean.setNetworkId(2);
-		tagBean.setCarrierId(4);
-		tagBean.setAppPreferenceId("app");
-		tagBean.setTagIdList("222220,333320");
-		tagBean.setCompanyIdList("123,321,222");
-
-		RuleMatching r = new RuleMatching(null);
-		long startTime = System.currentTimeMillis();
-		r.match(tagBean, "123", "banner", 800, 600, false, 5, 5);
-		System.out.println(System.currentTimeMillis() - startTime);
-	}
+//	public static void main(String[] args) {
+//
+//		TagBean tagBean = new TagBean();
+//		tagBean.setTagId(123);
+//		float[] work = { 11.11f, 22.22f };
+//		float[] residence = { 33.11f, 44.22f };
+//		float[] activity = { 55.11f, 66.22f };
+//		tagBean.setWork(work);
+//		tagBean.setResidence(residence);
+//		tagBean.setActivity(activity);
+//
+//		tagBean.setProvinceId(6);
+//		tagBean.setCityId(62);
+//		tagBean.setCountyId(737);
+//
+//		tagBean.setIncomeId(2);
+//		tagBean.setAppPreferenceIds("eat food");
+//		tagBean.setPlatformId(1);
+//		tagBean.setBrand("nike");
+//		tagBean.setPhonePrice(3);
+//		tagBean.setNetworkId(2);
+//		tagBean.setCarrierId(4);
+//		tagBean.setAppPreferenceId("app");
+//		tagBean.setTagIdList("222220,333320");
+//		tagBean.setCompanyIdList("123,321,222");
+//
+//		RuleMatching r = new RuleMatching(null);
+//		long startTime = System.currentTimeMillis();
+//		r.match(tagBean, "123", "banner", 800, 600, false, 5, 5);
+//		System.out.println(System.currentTimeMillis() - startTime);
+//	}
 }

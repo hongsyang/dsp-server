@@ -1,5 +1,8 @@
 package cn.shuzilm.bean.control;
 
+import java.util.List;
+import java.util.Set;
+
 import lombok.Setter;
 
 /**
@@ -9,13 +12,6 @@ import lombok.Setter;
 public class CreativeBean implements ICommand {
     private String uid;
     private String name;
-    /**
-     * 创意类型： banner interstitial 插屏<br> fullscreen 全屏广告<br> feed 信息流 <br> text 文字链
-     */
-    private String type;
-    private String fileName;
-    private int width;
-    private int height;
     private String title;
     private String titleShort;
     private String titleLong;
@@ -25,6 +21,13 @@ public class CreativeBean implements ICommand {
 
     private String brand;
     private String domain;
+    
+    private List<Material> materialList;//物料集合
+    
+    /**
+     * 点击动作：0未确认/1打开网页/2下载应用/3播放视频/4打开应用/5打开Deeplink目标/6打开地图/7拨打电话/8发送短信/9其它
+     */
+    private int link_type;
     
     /**
      * 点击目标链接（含协议头）
@@ -55,38 +58,6 @@ public class CreativeBean implements ICommand {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
     }
 
     public String getTitle() {
@@ -175,6 +146,22 @@ public class CreativeBean implements ICommand {
 
 	public void setTracking(String tracking) {
 		this.tracking = tracking;
+	}
+
+	public int getLink_type() {
+		return link_type;
+	}
+
+	public void setLink_type(int link_type) {
+		this.link_type = link_type;
+	}
+
+	public List<Material> getMaterialList() {
+		return materialList;
+	}
+
+	public void setMaterialList(List<Material> materialList) {
+		this.materialList = materialList;
 	}
     
 }
