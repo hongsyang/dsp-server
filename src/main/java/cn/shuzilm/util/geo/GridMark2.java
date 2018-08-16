@@ -2,6 +2,7 @@ package cn.shuzilm.util.geo;
 
 import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
+import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.InvokePython;
 
 import java.io.File;
@@ -20,7 +21,9 @@ public class GridMark2 {
     /**
      * 将次改为对应的class目录
      */
-    private static final String dir = "D:\\program\\mygit\\dsp-server\\bin\\src\\main\\";
+//    private static final String dir = Constants.getInstance().getConf("PYTHON_GEO_TRANSFER_DIR");
+
+    private static final String dir = "d:\\";
 
     private static final String pythonEnvDir = "python.exe";
 

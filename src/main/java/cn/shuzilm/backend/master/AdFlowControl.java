@@ -45,6 +45,18 @@ public class AdFlowControl {
 //     */
 //    private static HashMap<String,ArrayList<String>> adviserMap = null;
 
+    public HashMap<String, AdBean> getMapAd(){
+        return mapAd;
+    }
+
+    public HashMap<String, AdFlowStatus> getMapMonitorHour(){
+        return mapMonitorHour;
+    }
+
+    public HashMap<String, ReportBean> getReportMapTotal(){
+        return reportMapTotal;
+    }
+
     /**
      * 广告资源管理
      */
@@ -54,6 +66,8 @@ public class AdFlowControl {
      * 广告任务管理
      */
     private static HashMap<String, TaskBean> mapTask = null;
+
+    private static HashMap<String, ReportBean> reportMapTotal = null;
 
     /**
      * 广告组与广告的对应关系
@@ -100,6 +114,7 @@ public class AdFlowControl {
         mapThresholdHour = new HashMap<>();
         mapAdGroup = new HashMap<>();
         mapMonitorTotal = new HashMap<>();
+
 //        adviserMap = new HashMap<>();
     }
 
@@ -255,7 +270,7 @@ public class AdFlowControl {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                 String reason = "#### 每日金额 超限，参考指标：" + threshold.getMoney() + " ###";
                 stopAd(auid, reason, false);
-                myLog.info(monitor.toString() + "\t" + reason);
+                myLog.error(monitor.toString() + "\t" + reason);
             }
         }
 
@@ -377,6 +392,10 @@ public class AdFlowControl {
      * 从数据库中加载所有的广告,广告主、广告素材和广告配额
      */
     public void loadAdInterval(boolean isInitial) {
+        HashMap<String, ReportBean> reportMapHour = null;
+        HashMap<String, ReportBean> reportMapDaily = null;
+
+
         long timeNow = System.currentTimeMillis();
         long timeBefore = timeNow - INTERVAL;
         //取出所有的广告，并取出变动的部分，如果是配额和金额发生变化，则需要重新分配任务
@@ -400,13 +419,19 @@ public class AdFlowControl {
             //更新监视器阀值信息
             updateIndicator(rl);
             int counter = 0;
+            if (isInitial) {
+                //加载 小时 历史消费金额
+                reportMapHour = taskService.statAdCostHour();
+                //加载 天 历史消费金额
+                reportMapDaily = taskService.statAdCostDaily();
+                //加载 总 历史消费金额
+                reportMapTotal = taskService.statAdCostTotal();
+            }
             for (ResultMap map : rl) {
                 AdBean ad = new AdBean();
                 ad.setAdUid(map.getString("uid"));
 
                 if (isInitial) {
-                    //加载 小时 历史消费金额
-                    HashMap<String, ReportBean> reportMapHour = taskService.statAdCostHour();
                     if (reportMapHour.size() > 0) {
                         ReportBean report = reportMapHour.get(ad.getAdUid());
                         if (report != null) {
@@ -417,8 +442,7 @@ public class AdFlowControl {
 
                     }
 
-                    //加载 天 历史消费金额
-                    HashMap<String, ReportBean> reportMapDaily = taskService.statAdCostDaily();
+
                     if (reportMapDaily.size() > 0) {
                         ReportBean report = reportMapDaily.get(ad.getAdUid());
                         if (report != null) {
@@ -427,8 +451,7 @@ public class AdFlowControl {
                         }
                     }
 
-                    //加载 总 历史消费金额
-                    HashMap<String, ReportBean> reportMapTotal = taskService.statAdCostTotal();
+
                     if (reportMapTotal.size() > 0) {
                         ReportBean report = reportMapTotal.get(ad.getAdUid());
                         if (report != null) {

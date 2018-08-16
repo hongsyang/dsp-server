@@ -51,7 +51,7 @@ public class AdPropertyHandler {
             ReportBean report = reportMapTotal.get(adUid);
             property.setImpProcess(report.getCost().doubleValue() / ad.getQuotaAmount().doubleValue());
             //计算广告剩余金额因子
-            property.setMoneyLeft();
+//            property.setMoneyLeft();
 
             map.put(adUid,property);
         }
