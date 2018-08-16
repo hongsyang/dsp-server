@@ -28,6 +28,7 @@ public class InvokePython {
             pr.waitFor();
             String error = readFromStream(pr.getErrorStream());
             String info = readFromStream(pr.getInputStream());
+            System.out.println("异常: " + error);
             return  info;
         }catch(Exception ex){
             ex.printStackTrace();
