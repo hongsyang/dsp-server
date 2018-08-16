@@ -349,7 +349,6 @@ public class RuleMatching {
 		}
 
 		// 扩展
-
 		return true;
 	}
 
