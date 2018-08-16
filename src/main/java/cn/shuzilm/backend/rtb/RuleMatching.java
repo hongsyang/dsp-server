@@ -69,200 +69,7 @@ public class RuleMatching {
 		MDC.put("sift", "rtb");
 		 //redis = new AsyncRedisClient(nodes);
 		jedis = JedisManager.getInstance().getResource();
-
-		AdBean ad1 = new AdBean();
-		AudienceBean au1 = new AudienceBean();
-		String curl = "http://101.200.56.200:8880/" + "lingjiclick?" + "id=" + "1213" + "&price=" + 6 + "&pmp="
-				+ "2222";
-		au1.setAdUid("12345678");
-		au1.setAdviserId("123456");
-		au1.setName("大学生");
-		au1.setRemark("remark");
-		au1.setType("location");
-		au1.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		//au1.setGeos(
-		//		"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
-		au1.setMobilityType(0);
-		au1.setDemographicTagId("[111120,222220,333320,444420]");
-		au1.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		au1.setIncomeLevel(2);
-		au1.setAppPreferenceIds("eat food");
-		au1.setPlatformId(1);
-		au1.setBrandIds("nike");
-		au1.setPhonePriceLevel(3);
-		au1.setNetworkId(2);
-		au1.setCarrierId(4);
-		au1.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
-		au1.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
-
-		List<AudienceBean> au1List = new ArrayList<AudienceBean>();
-		au1List.add(au1);
-		ad1.setAudienceList(au1List);
-
-		AdPropertyBean propertyBean = new AdPropertyBean();
-		propertyBean.setImpProcess(3);
-		propertyBean.setCreativeQuality(2);
-		propertyBean.setMoneyLeft(4);
-		propertyBean.setAdvertiserScore(5);
-		propertyBean.setCtrScore(2);
-
-		ad1.setPropertyBean(propertyBean);
-
-		AdvertiserBean advertiser = new AdvertiserBean();
-		advertiser.setUid("7777777");
-		advertiser.setName("广告主A");
-		advertiser.setGrade(1);
-
-		ad1.setAdvertiser(advertiser);
-
-		ad1.setAdUid("23455555");
-		ad1.setName("广告名称A");
-
-		CreativeBean creative = new CreativeBean();
-		creative.setUid("567890");
-		creative.setName("广告素材A");
-		
-		Material material = new Material();
-		material.setType("banner");
-		material.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material.setWidth(820);
-		material.setHeight(620);
-		Material material01 = new Material();
-		material01.setType("banner");
-		material01.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material01.setWidth(800);
-		material01.setHeight(600);
-		Material material02 = new Material();
-		material02.setType("banner");
-		material02.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material02.setWidth(830);
-		material02.setHeight(630);
-		Material material03 = new Material();
-		material03.setType("banner");
-		material03.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material03.setWidth(840);
-		material03.setHeight(640);
-		
-		List<Material> materialList = new ArrayList<Material>();
-		materialList.add(material);
-		materialList.add(material01);
-		materialList.add(material02);
-		materialList.add(material03);
-		creative.setMaterialList(materialList);
-		List<CreativeBean> creativeList = new ArrayList<CreativeBean>();
-		creativeList.add(creative);
-
-		ad1.setCreativeList(creativeList);
-
-		ad1.setPrice(100);
-		creative.setLink(curl);
-		creative.setTracking("https://www.shuzilm.cn/");
-		creative.setLanding("https://www.shuzilm.cn/");
-
-		AdBean ad2 = new AdBean();
-		AudienceBean au2 = new AudienceBean();
-		au2.setAdUid("12345678");
-		au2.setAdviserId("123456");
-		au2.setName("大学生");
-		au2.setRemark("remark");
-		au2.setType("location");
-		au2.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		//au2.setGeos(
-		//		"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
-		au2.setMobilityType(0);
-		au2.setDemographicTagId("[111120,222220,333320,444420]");
-		au2.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		au2.setIncomeLevel(2);
-		au2.setAppPreferenceIds("eat food");
-		au2.setPlatformId(1);
-		au2.setBrandIds("nike");
-		au2.setPhonePriceLevel(3);
-		au2.setNetworkId(2);
-		au2.setCarrierId(4);
-		au2.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
-		au2.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
-
-		List<AudienceBean> au2List = new ArrayList<AudienceBean>();
-		au2List.add(au2);
-		ad2.setAudienceList(au2List);
-
-		AdPropertyBean propertyBean2 = new AdPropertyBean();
-		propertyBean2.setImpProcess(4);
-		propertyBean2.setCreativeQuality(3);
-		propertyBean2.setMoneyLeft(4);
-		propertyBean2.setAdvertiserScore(5);
-		propertyBean2.setCtrScore(5);
-
-		ad2.setPropertyBean(propertyBean2);
-
-		AdvertiserBean advertiser2 = new AdvertiserBean();
-		advertiser2.setUid("7777777");
-		advertiser2.setName("广告主A");
-		advertiser2.setGrade(1);
-
-		ad2.setAdvertiser(advertiser2);
-
-		ad2.setAdUid("23455556");
-		ad2.setName("广告名称A");
-
-		CreativeBean creative2 = new CreativeBean();
-		creative2.setUid("567890");
-		creative2.setName("广告素材A");
-		Material material2 = new Material();
-		material2.setType("banner");
-		material2.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material2.setWidth(820);
-		material2.setHeight(630);
-		Material material21 = new Material();
-		material21.setType("banner");
-		material21.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material21.setWidth(830);
-		material21.setHeight(640);
-		Material material22 = new Material();
-		material22.setType("banner");
-		material22.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material22.setWidth(850);
-		material22.setHeight(660);
-		Material material23 = new Material();
-		material23.setType("banner");
-		material23.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material23.setWidth(800);
-		material23.setHeight(600);
-		
-		List<Material> materialList2 = new ArrayList<Material>();
-		materialList2.add(material2);
-		materialList2.add(material21);
-		materialList2.add(material22);
-		materialList2.add(material23);
-		creative2.setMaterialList(materialList2);
-		List<CreativeBean> creativeList2 = new ArrayList<CreativeBean>();
-		creativeList2.add(creative2);
-
-		ad2.setCreativeList(creativeList2);
-
-		ad2.setPrice(100);
-
-		creative2.setLink(curl);
-		creative2.setTracking("https://www.shuzilm.cn/");
-		creative2.setLanding("https://www.shuzilm.cn/");
-
-		ArrayList<AdBean> adList = new ArrayList<AdBean>();
-		adList.add(ad1);
-		adList.add(ad2);
-
-		for (int i = 0; i < 10000; i++) {
-			AdBean ad = new AdBean();
-			BeanUtils.copyProperties(ad2, ad);
-			ad.setAdUid("aaa" + i);
-			adList.add(ad);
-		}
-
-		// RtbFlowControl rtb = new RtbFlowControl();
-		System.out.println(adList.size());
-
-		rtbIns = RtbFlowControl.getInstance();
-
-		rtbIns.pullTenMinutes(adList);
+		rtbIns = RtbFlowControl.getInstance();		
 		tagRandom = new Random();
 		adRandom = new Random();
 
@@ -346,9 +153,6 @@ public class RuleMatching {
 			LOG.warn("根据[" + materialRatioKey + "]未找到广告!");
 			return null;
 		}
-
-		// String creativeKey = adType + "_" + width + "_" + height;
-		// List<String> auidList = rtbIns.getCreativeMap().get(creativeKey);
 
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		List<AdBean> geoAdList = new ArrayList<AdBean>();// 符合经纬度的广告资源列表
@@ -545,7 +349,6 @@ public class RuleMatching {
 		}
 
 		// 扩展
-
 		return true;
 	}
 
@@ -647,7 +450,7 @@ public class RuleMatching {
 		targetDuFlowBean.setAdh(material.getHeight());
 		targetDuFlowBean.setCrid(creative.getUid());
 		targetDuFlowBean.setAdmt(material.getType());
-		targetDuFlowBean.setAdct(1);// 点击广告行为
+		targetDuFlowBean.setAdct(creative.getLink_type());// 点击广告行为
 		targetDuFlowBean.setAdUid(ad.getAdUid());
 		targetDuFlowBean.setDid(deviceId);
 		targetDuFlowBean.setDeviceId(deviceId);
@@ -672,35 +475,4 @@ public class RuleMatching {
 		return targetDuFlowBean;
 	}
 
-//	public static void main(String[] args) {
-//
-//		TagBean tagBean = new TagBean();
-//		tagBean.setTagId(123);
-//		float[] work = { 11.11f, 22.22f };
-//		float[] residence = { 33.11f, 44.22f };
-//		float[] activity = { 55.11f, 66.22f };
-//		tagBean.setWork(work);
-//		tagBean.setResidence(residence);
-//		tagBean.setActivity(activity);
-//
-//		tagBean.setProvinceId(6);
-//		tagBean.setCityId(62);
-//		tagBean.setCountyId(737);
-//
-//		tagBean.setIncomeId(2);
-//		tagBean.setAppPreferenceIds("eat food");
-//		tagBean.setPlatformId(1);
-//		tagBean.setBrand("nike");
-//		tagBean.setPhonePrice(3);
-//		tagBean.setNetworkId(2);
-//		tagBean.setCarrierId(4);
-//		tagBean.setAppPreferenceId("app");
-//		tagBean.setTagIdList("222220,333320");
-//		tagBean.setCompanyIdList("123,321,222");
-//
-//		RuleMatching r = new RuleMatching(null);
-//		long startTime = System.currentTimeMillis();
-//		r.match(tagBean, "123", "banner", 800, 600, false, 5, 5);
-//		System.out.println(System.currentTimeMillis() - startTime);
-//	}
 }

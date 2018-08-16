@@ -485,6 +485,9 @@ public class AdFlowControl {
                 String creativeUid = map.getString("creative_uid");
                 //根据 广告创意ID 获得广告创意
                 CreativeBean creativeBean = taskService.queryCreativeUidByAid(creativeUid);
+                //根据创意 ID 查询 物料
+                List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid);
+                creativeBean.setMaterialList(materialList);
                 ArrayList<CreativeBean> creaList = new ArrayList<>();
                 creaList.add(creativeBean);
                 ad.setCreativeList(creaList);
