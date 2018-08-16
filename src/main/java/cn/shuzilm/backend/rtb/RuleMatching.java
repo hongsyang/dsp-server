@@ -93,9 +93,17 @@ public class RuleMatching {
 	 *            宽度误差
 	 * @param heightDeviation
 	 *            高度误差 创意类型、尺寸匹配
+	 * @param adxName
+	 *         	  ADX名称
+	 * @param material
+	 * 			  物料         
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation) {
+			int widthDeviation, int heightDeviation,String adxName,Material material) {
+		//筛选审核通过的物料
+//		if(material.getApproved() !=1 || !material.getApproved_adx().contains(adxName)){
+//			return false;
+//		}
 		if (isResolutionRatio) {
 			if (adWidth >= width && adHeight >= height) {
 				return true;
@@ -128,7 +136,7 @@ public class RuleMatching {
 	 *            高度误差
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height,
-			boolean isResolutionRatio, int widthDeviation, int heightDeviation) {
+			boolean isResolutionRatio, int widthDeviation, int heightDeviation,String adxName) {
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
@@ -179,7 +187,7 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			for(Material material:materialList){
 			if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
-					heightDeviation)) {
+					heightDeviation,adxName,material)) {
 				metrialMap.put(ad.getAdUid(), material);
 				filterFlag = true;
 				break;
@@ -326,28 +334,37 @@ public class RuleMatching {
 	 */
 	public boolean commonMatch(TagBean tagBean, AudienceBean audience) {
 		// 匹配收入
-		if (tagBean.getIncomeId() != audience.getIncomeLevel()) {
+		if (audience.getIncomeLevel() != 0 && tagBean.getIncomeId() != audience.getIncomeLevel()) {
 			return false;
 		}
 		// 匹配兴趣
-		if (!tagBean.getAppPreferenceIds().equals(audience.getAppPreferenceIds())) {
+		if (audience.getAppPreferenceIds() != null && !tagBean.getAppPreferenceIds().equals(audience.getAppPreferenceIds())) {
 			return false;
 		}
 		// 匹配平台
-		if (tagBean.getPlatformId() != audience.getPlatformId()) {
+		if (audience.getPlatformId() != 0 && tagBean.getPlatformId() != audience.getPlatformId()) {
 			return false;
 		}
 
 		// 匹配品牌
-		if (!tagBean.getBrand().equals(audience.getBrandIds())) {// 可以多选，不限是空值
+		if (audience.getBrandIds() != null && !tagBean.getBrand().equals(audience.getBrandIds())) {// 可以多选，不限是空值
 			return false;
 		}
 
 		// 匹配设备价格
-		if (tagBean.getPhonePrice() != audience.getPhonePriceLevel()) {
+		if (audience.getPhonePriceLevel() !=0 && tagBean.getPhonePrice() != audience.getPhonePriceLevel()) {
 			return false;
 		}
-
+		
+		//匹配网络类型
+		if(audience.getNetworkId() != 0 && tagBean.getNetworkId() != audience.getNetworkId()){
+			return false;
+		}
+		
+		//匹配运营商
+		if(audience.getCarrierId() != 0 && tagBean.getCarrierId() != audience.getCarrierId()){
+			return false;
+		}
 		// 扩展
 		return true;
 	}
@@ -444,7 +461,7 @@ public class RuleMatching {
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = ad.getAudienceList().get(0);
 		AdvertiserBean advertiser = ad.getAdvertiser();
-		targetDuFlowBean.setBidid("123");// 广告竞价ID
+		//targetDuFlowBean.setBidid("123");// 广告竞价ID
 		targetDuFlowBean.setAdm(material.getFileName());// 广告素材
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
@@ -455,7 +472,7 @@ public class RuleMatching {
 		targetDuFlowBean.setDid(deviceId);
 		targetDuFlowBean.setDeviceId(deviceId);
 		targetDuFlowBean.setAdxId(advertiser.getUid());
-		targetDuFlowBean.setSeat("222");// SeatBid 的标识,由 DSP 生成
+		//targetDuFlowBean.setSeat("222");// SeatBid 的标识,由 DSP 生成
 		// targetDuFlowBean.setAudienceuid("人群ID");
 		targetDuFlowBean.setAdvertiserUid(advertiser.getUid());
 		// targetDuFlowBean.setAgencyUid("代理商ID");
@@ -471,7 +488,7 @@ public class RuleMatching {
 		targetDuFlowBean.setLandingUrl(creative.getLanding());
 		targetDuFlowBean.setLinkUrl(creative.getLink());
 		targetDuFlowBean.setTracking(creative.getTracking());
-		targetDuFlowBean.setDspid("123");// DSP对该次出价分配的ID
+		//targetDuFlowBean.setDspid("123");// DSP对该次出价分配的ID
 		return targetDuFlowBean;
 	}
 
