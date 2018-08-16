@@ -479,35 +479,4 @@ public class RuleMatching {
 		return targetDuFlowBean;
 	}
 
-//	public static void main(String[] args) {
-//
-//		TagBean tagBean = new TagBean();
-//		tagBean.setTagId(123);
-//		float[] work = { 11.11f, 22.22f };
-//		float[] residence = { 33.11f, 44.22f };
-//		float[] activity = { 55.11f, 66.22f };
-//		tagBean.setWork(work);
-//		tagBean.setResidence(residence);
-//		tagBean.setActivity(activity);
-//
-//		tagBean.setProvinceId(6);
-//		tagBean.setCityId(62);
-//		tagBean.setCountyId(737);
-//
-//		tagBean.setIncomeId(2);
-//		tagBean.setAppPreferenceIds("eat food");
-//		tagBean.setPlatformId(1);
-//		tagBean.setBrand("nike");
-//		tagBean.setPhonePrice(3);
-//		tagBean.setNetworkId(2);
-//		tagBean.setCarrierId(4);
-//		tagBean.setAppPreferenceId("app");
-//		tagBean.setTagIdList("222220,333320");
-//		tagBean.setCompanyIdList("123,321,222");
-//
-//		RuleMatching r = new RuleMatching(null);
-//		long startTime = System.currentTimeMillis();
-//		r.match(tagBean, "123", "banner", 800, 600, false, 5, 5);
-//		System.out.println(System.currentTimeMillis() - startTime);
-//	}
 }
