@@ -115,13 +115,13 @@ public class TaskServicve extends Service {
             creativeBean.setDescLong(cMap.getString("text_long"));
             creativeBean.setDescShort(cMap.getString("text_short"));
             creativeBean.setDomain(cMap.getString("brand_domain"));
-            creativeBean.setFileName(cMap.getString("filename"));
-            creativeBean.setHeight(cMap.getInteger("h"));
+            //creativeBean.setFileName(cMap.getString("filename"));
+            //creativeBean.setHeight(cMap.getInteger("h"));
             creativeBean.setTitle(cMap.getString("title"));
             creativeBean.setTitleLong(cMap.getString("title_long"));
             creativeBean.setTitleShort(cMap.getString("title_short"));
-            creativeBean.setType(cMap.getString("type"));
-            creativeBean.setWidth(cMap.getInteger("w"));
+            //creativeBean.setType(cMap.getString("type"));
+            //creativeBean.setWidth(cMap.getInteger("w"));
 
             return creativeBean;
         } catch (SQLException e) {

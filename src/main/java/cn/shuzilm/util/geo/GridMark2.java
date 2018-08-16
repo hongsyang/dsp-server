@@ -20,9 +20,9 @@ public class GridMark2 {
     /**
      * 将次改为对应的class目录
      */
-    private static final String dir = "D:\\program\\mygit\\dsp-server\\bin\\src\\main\\";
+    private static final String dir = "./";
 
-    private static final String pythonEnvDir = "python.exe";
+    private static final String pythonEnvDir = "D:\\Python27\\python.exe";
 
     /**
      * gps 坐标内部ID 与 广告UID 对应
