@@ -157,7 +157,7 @@ public class RtbFlowControl {
 	 */
 	public void pullTenMinutes(ArrayList<AdBean> adBeanList) {
 		// 从 10 分钟的队列中获得广告素材和人群包
-		// ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
+		 //ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
 		ArrayList<GpsBean> gpsAll = new ArrayList<>();
 		ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
 		ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
