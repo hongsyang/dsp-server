@@ -24,6 +24,9 @@ public class CreativeBean implements ICommand {
     
     private List<Material> materialList;//物料集合
     
+    private int approved;//是否通过审批（0:待审批/1:通过/-1:拒绝）
+	private String approved_adx;//适用平台
+    
     /**
      * 点击动作：0未确认/1打开网页/2下载应用/3播放视频/4打开应用/5打开Deeplink目标/6打开地图/7拨打电话/8发送短信/9其它
      */
@@ -162,6 +165,22 @@ public class CreativeBean implements ICommand {
 
 	public void setMaterialList(List<Material> materialList) {
 		this.materialList = materialList;
+	}
+
+	public int getApproved() {
+		return approved;
+	}
+
+	public void setApproved(int approved) {
+		this.approved = approved;
+	}
+
+	public String getApproved_adx() {
+		return approved_adx;
+	}
+
+	public void setApproved_adx(String approved_adx) {
+		this.approved_adx = approved_adx;
 	}
     
 }
