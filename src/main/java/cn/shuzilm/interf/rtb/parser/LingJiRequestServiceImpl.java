@@ -224,16 +224,16 @@ public class LingJiRequestServiceImpl implements RequestService {
     private String convertAdType(Integer showtype) {
         String adType = "";
         if (showtype == 14 || showtype == 11) {
-            adType = "banner";
+            adType = "banner";//横幅
             log.debug("广告类型adType:{}", adType);
         } else if (showtype == 13 || showtype == 20 || showtype == 19) {
-            adType = "banner";
+            adType = "feed";//信息流
             log.debug("广告类型adType:{}", adType);
         } else if (showtype == 15 || showtype == 12 || showtype == 17) {
-            adType = "banner";
+            adType = "banner";//开屏
             log.debug("广告类型adType:{}", adType);
         } else if (showtype == 16 || showtype == 18) {
-            adType = "banner";
+            adType = "interstitial";//插屏
             log.debug("广告类型adType:{}", adType);
         } else {
             adType = null;

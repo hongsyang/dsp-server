@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
+import java.text.NumberFormat;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,12 +66,13 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
             PixelFlowControl.getInstance().sendStatus(bean);
-
+            NumberFormat numberFormat = NumberFormat.getNumberInstance();
+            numberFormat.setMaximumFractionDigits(5);
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-            element.setActualPricePremium(money);//成本价
-            element.setActualPricePremium(money * element.getPremiumFactor());//溢价
+            element.setActualPrice(money);//成本价
+            element.setActualPricePremium(Double.valueOf(numberFormat.format(money * element.getPremiumFactor())));//溢价
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             element.setAdxSource("LingJi");
             MDC.put("sift", "LingJiExp");
