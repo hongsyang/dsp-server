@@ -122,6 +122,8 @@ public class TaskServicve extends Service {
             creativeBean.setLink(cMap.getString("link_uri"));
             creativeBean.setLanding(cMap.getString("landing_uri"));
             creativeBean.setTracking(cMap.getString("tracking_uri"));
+            creativeBean.setApproved(cMap.getInteger("approved"));
+            creativeBean.setApproved_adx(cMap.getString("approved_adx"));
             return creativeBean;
         } catch (SQLException e) {
             e.printStackTrace();

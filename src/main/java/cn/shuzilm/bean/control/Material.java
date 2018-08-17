@@ -21,7 +21,7 @@ public class Material {
 	private long updatedAt;//更新时间
 	private String updatedBy;//更新者
 	private int approved;//是否通过审批（0:待审批/1:通过/-1:拒绝）
-	private String approved_adx;//使用平台
+	private String approved_adx;//适用平台
 
 	public String getUid() {
 		return uid;
