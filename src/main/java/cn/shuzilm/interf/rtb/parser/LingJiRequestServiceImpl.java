@@ -52,19 +52,23 @@ public class LingJiRequestServiceImpl implements RequestService {
             BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
             //创建返回结果  bidRequest请求参数保持不变
             Device userDevice = bidRequestBean.getDevice();//设备信息
-            Impression userImpression = bidRequestBean.getImp().get(0);
-            Integer showtype = userImpression.getExt().getShowtype();
-            String adType = null;//广告类型
+            Impression userImpression = bidRequestBean.getImp().get(0);//曝光信息
+            Integer showtype = userImpression.getExt().getShowtype();//广告类型
+            String adType = convertAdType(showtype); //对应内部 广告类型
+            if (StringUtils.isBlank(adType)) {
+                response = "没有对应的广告类型";
+                return response;
+            }
 
+            String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
+            Set<String> stringSet = new HashSet<>();
+            for (String mime : mimes) {
+                stringSet.add(mime);
+            }
             //初步过滤规则开关
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
                 if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, ADX_NAME)) {
                     String[] strings = {"127.0.0.1,6379"};
-                    adType = convertAdType(showtype);
-                    if (StringUtils.isBlank(adType)) {
-                        response = "没有对应的广告类型";
-                        return response;
-                    }
                     DUFlowBean targetDuFlowBean = RuleMatching.getInstance(strings).match(
                             userDevice.getExt().getMac(),//设备mac的MD5
                             adType,//广告类型
@@ -72,11 +76,14 @@ public class LingJiRequestServiceImpl implements RequestService {
                             userImpression.getBanner().getH(),//广告位的高
                             true,// 是否要求分辨率
                             5,//宽误差值
-                            5);// 高误差值;
+                            5,// 高误差值;
+                            ADX_NAME,//ADX 服务商名称
+                            stringSet//文件扩展名
+                    );
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());
                     targetDuFlowBean.setImpression(bidRequestBean.getImp());
                     log.debug("过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
-                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
+                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType);
                     pushRedis(targetDuFlowBean);//上传到redis服务器
                     log.debug("json计数");
                     response = JSON.toJSONString(bidResponseBean);
@@ -84,13 +91,9 @@ public class LingJiRequestServiceImpl implements RequestService {
                 } else {
                     response = JSON.toJSONString(msg);//过滤规则结果输出
                 }
+
             } else {
                 String[] strings = {"127.0.0.1,6379"};
-                adType = convertAdType(showtype);
-                if (StringUtils.isBlank(adType)) {
-                    response = "没有对应的广告类型";
-                    return response;
-                }
                 DUFlowBean targetDuFlowBean = RuleMatching.getInstance(strings).match(
                         userDevice.getExt().getMac(),//设备mac的MD5
                         adType,//广告类型
@@ -98,9 +101,12 @@ public class LingJiRequestServiceImpl implements RequestService {
                         userImpression.getBanner().getH(),//广告位的高
                         true,// 是否要求分辨率
                         5,//宽误差值
-                        5);// 高误差值;
+                        5,// 高误差值;
+                        ADX_NAME,//ADX 服务商名称
+                        stringSet//文件扩展名
+                );
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean);
+                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType);
                 pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
@@ -117,7 +123,7 @@ public class LingJiRequestServiceImpl implements RequestService {
      * @param duFlowBean
      * @return
      */
-    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean) {
+    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
