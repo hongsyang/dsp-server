@@ -38,7 +38,7 @@ public class TaskServicve extends Service {
             bean.setDemographicCitys(rm.getString("demographic_city"));
             bean.setDemographicTagId(rm.getString("demographic_tag"));
             //兴趣偏好标签
-            bean.setAppPreferenceIds(rm.getString("ap_preference_ids"));
+            bean.setAppPreferenceIds(rm.getString("app_preference_ids"));
             bean.setBrandIds(rm.getString("brand_ids"));
             bean.setCarrierId(rm.get("carrier_id") != null ? rm.getInteger("carrier_id") : 0);
             //选定城市或者经纬度 工作地、居住地、活动地
@@ -51,7 +51,6 @@ public class TaskServicve extends Service {
             bean.setPlatformId(rm.get("platform_id") != null ? rm.getInteger("platform_id") : 0);
             //特定公司
             bean.setCompanyIds(rm.getString("company_ids"));
-            bean.setCompanyNames(rm.getString("company_names"));
             aList.add(bean);
 
         }
@@ -115,19 +114,48 @@ public class TaskServicve extends Service {
             creativeBean.setDescLong(cMap.getString("text_long"));
             creativeBean.setDescShort(cMap.getString("text_short"));
             creativeBean.setDomain(cMap.getString("brand_domain"));
-            creativeBean.setFileName(cMap.getString("filename"));
-            creativeBean.setHeight(cMap.getInteger("h"));
             creativeBean.setTitle(cMap.getString("title"));
             creativeBean.setTitleLong(cMap.getString("title_long"));
             creativeBean.setTitleShort(cMap.getString("title_short"));
-            creativeBean.setType(cMap.getString("type"));
-            creativeBean.setWidth(cMap.getInteger("w"));
-
+            creativeBean.setLink_type(Integer.parseInt(cMap.getString("link_type")));
+            creativeBean.setLink(cMap.getString("link_uri"));
+            creativeBean.setLanding(cMap.getString("landing_uri"));
+            creativeBean.setTracking(cMap.getString("tracking_uri"));
             return creativeBean;
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    /**
+     * 根据创意 ID 查询 物料
+     * @return
+     */
+    public ArrayList<Material> queryMaterialByCreativeId(String creativeUid){
+        String sql = "select * from material where creative_uid = '"+ creativeUid +"'";
+        ResultList rl = null;
+        try {
+            rl = select.select(sql);
+            ArrayList<Material> list = new ArrayList<>();
+            for(ResultMap rm : rl){
+                Material material = new Material();
+                material.setUid(rm.getString("uid"));
+                material.setNid(rm.getString("nid"));
+                material.setCreativeUid(creativeUid);
+                material.setType(rm.getString("type"));
+                material.setFileName(rm.getString("filename"));
+                material.setExt(rm.getString("ext"));
+                material.setSize(rm.getInteger("size"));
+                material.setWidth(rm.getInteger("w"));
+                material.setHeight(rm.getInteger("h"));
+                list.add(material);
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**

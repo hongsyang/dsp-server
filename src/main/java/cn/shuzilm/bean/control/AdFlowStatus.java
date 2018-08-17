@@ -9,12 +9,21 @@ public class AdFlowStatus implements ICommand{
     private String name;
     private float money;
     private long winNums;
+    private long clickNums;
     private long bidNums;
 
     public void reset(){
         money = 0;
         winNums = 0;
         bidNums = 0;
+    }
+
+    public long getClickNums() {
+        return clickNums;
+    }
+
+    public void setClickNums(long clickNums) {
+        this.clickNums = clickNums;
     }
 
     public long getWinNums() {

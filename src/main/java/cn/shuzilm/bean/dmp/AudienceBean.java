@@ -8,9 +8,11 @@ import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -42,12 +44,12 @@ public class AudienceBean implements ICommand {
     
     private String demographicTagId; //特定人群-标签选定项  例如： 大学生、家长、户外爱好者
     
-    private List<String> demographicTagIdList;
+    private Set<String> demographicTagIdSet;
     
     
     private String demographicCitys; //特定人群 - 城市范围选定列表 省份地级县级市
 
-    private List<AreaBean> demographicCityList;//特定人群城市
+    private Set<AreaBean> demographicCitySet;//特定人群城市
 
     //属性筛选
     @Setter
@@ -70,38 +72,40 @@ public class AudienceBean implements ICommand {
     
     private String companyIds; //公司 ID 列表 ，多个用 ，号隔开
     
-    private List<String> companyIdList;
+    private Set<String> companyIdSet;
     @Setter
     private String companyNames;//公司全称 ，用","号隔开
 
     public void setDemographicCitys(String citys){
+        if(citys == null)
+            return;
         demographicCitys = citys;
         String[] split = citys.split("],");
-        List<String> list = new ArrayList();
+        Set<String> set = new HashSet();
         String re = "[";
         String ra = "]";
         for (String s : split) {
             String replace = s.replace(re, "").trim().replace(ra, "");
-            list.add(replace);
+            set.add(replace);
         }
-        this.demographicCityList = convertToAreaBeanList(list);
+        this.demographicCitySet = convertToAreaBeanSet(set);
     }
     
     public void setCompanyIds(String companyIds) {
 		this.companyIds = companyIds;
 		String[] split = companyIds.split(",");
-		List<String> list = new ArrayList();
+		Set<String> set = new HashSet();
 		String re = "{";
 		String ra = "}";
 		for(String s : split){
 			String replace = s.replace(re, "").trim().replace(ra, "");
 			String[] nameAndId = replace.split(":");
 			if(nameAndId.length >1){
-				list.add(nameAndId[1]);
+				set.add(nameAndId[1]);
 			}
 		}
 		
-		this.companyIdList = list;
+		this.companyIdSet = set;
 	}
 
     public String getCitys() {
@@ -145,6 +149,30 @@ public class AudienceBean implements ICommand {
             cityList.add(areaBean);
         }
         return cityList;
+    }
+    
+    /**
+     * 转换省市区 编码
+     *
+     * @param set
+     * @return
+     */
+    private Set<AreaBean> convertToAreaBeanSet(Set<String> set) {
+        HashSet<AreaBean> citySet = new HashSet<>();
+        for (String city : set) {
+            if(city == null || city.equals(""))
+                continue;
+            AreaBean areaBean = new AreaBean();
+            String[] cityDetail = city.split(",");
+            Integer provinceId = Integer.valueOf(cityDetail[0]);
+            areaBean.setProvinceId(provinceId);
+            Integer cityId = Integer.valueOf(cityDetail[1]);
+            areaBean.setCityId(cityId);
+            Integer countyId = Integer.valueOf(cityDetail[2]);
+            areaBean.setCountyId(countyId);
+            citySet.add(areaBean);
+        }
+        return citySet;
     }
 
 
@@ -201,14 +229,14 @@ public class AudienceBean implements ICommand {
 		this.demographicTagId = demographicTagId;
 		if (StringUtils.isNotBlank(demographicTagId)) {
             String[] split = demographicTagId.split(",");
-            List<String> list = new ArrayList<String>();
+            Set<String> set = new HashSet<String>();
             String re = "[";
             String ra = "]";
             for (String s : split) {
                 String replace = s.replace(re, "").trim().replace(ra, "");
-                list.add(replace);
+                set.add(replace);
             }
-            this.demographicTagIdList = list;
+            this.demographicTagIdSet = set;
         }
 	}
 

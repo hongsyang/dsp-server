@@ -2,6 +2,7 @@ package cn.shuzilm.util.geo;
 
 import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
+import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.InvokePython;
 
 import java.io.File;
@@ -20,7 +21,9 @@ public class GridMark2 {
     /**
      * 将次改为对应的class目录
      */
-    private static final String dir = "F:\\workhome\\dsp-server\\src\\main\\python\\";
+//    private static final String dir = Constants.getInstance().getConf("PYTHON_GEO_TRANSFER_DIR");
+
+    private static final String dir = "d:\\";
 
     private static final String pythonEnvDir = "python.exe";
 
@@ -39,6 +42,10 @@ public class GridMark2 {
 
     private TreeMap<Double,Integer> tmDownlat = null;
 
+    public GridMark2(ArrayList<GpsBean> coords){
+        ArrayList<GpsGridBean> list = reConvert(coords);
+        init(list);
+    }
 
 
     /**
@@ -48,7 +55,7 @@ public class GridMark2 {
      * 输出参数转换完成左下角坐标
      * @param coords
      */
-    public ArrayList<GpsGridBean> reConvert(ArrayList<GpsBean> coords){
+    private ArrayList<GpsGridBean> reConvert(ArrayList<GpsBean> coords){
         ArrayList<GpsGridBean> destList = new ArrayList<>();
         int counter = 0;
 //        String currWorkPath = this.getClass().getClassLoader().getResource(".").getPath();
@@ -197,7 +204,8 @@ public class GridMark2 {
                 "113.4324432,37.43242342",
 
         };
-        GridMark2 m = new GridMark2();
+
+        GridMark2 m = null;
         try {
             ArrayList<GpsBean> list = new ArrayList<>();
             int counter = 0;
@@ -209,8 +217,7 @@ public class GridMark2 {
                 list.add(bean);
                 counter ++;
             }
-            ArrayList<GpsGridBean> list2 = m.reConvert(list);
-            m.init(list2);
+            m = new GridMark2(list);
         } catch (Exception e) {
             e.printStackTrace();
         }

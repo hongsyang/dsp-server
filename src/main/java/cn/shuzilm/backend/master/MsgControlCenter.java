@@ -92,10 +92,10 @@ public class MsgControlCenter {
      * @param nodeId
      * @return
      */
-    public static NodeStatusBean recvPixelStatus(String nodeId){
+    public static AdPixelBean recvPixelStatus(String nodeId){
         Object obj =  JedisQueueManager.getElementFromQueue(nodeId + PIXEL_STATUS);
         if(obj!=null)
-            return (NodeStatusBean)obj;
+            return (AdPixelBean)obj;
         else
             return null;
     }
