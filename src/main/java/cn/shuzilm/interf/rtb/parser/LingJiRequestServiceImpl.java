@@ -13,19 +13,14 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
 import com.alibaba.fastjson.JSON;
-import com.yao.util.bean.BeanUtil;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import redis.clients.jedis.Jedis;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description: LingjiParser 灵集post参数解析
@@ -85,7 +80,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                     pushRedis(targetDuFlowBean);//上传到redis服务器
                     log.debug("json计数");
                     response = JSON.toJSONString(bidResponseBean);
-
                     log.debug("过滤通过的bidResponseBean:{}", response);
                 } else {
                     response = JSON.toJSONString(msg);//过滤规则结果输出
@@ -129,18 +123,17 @@ public class LingJiRequestServiceImpl implements RequestService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String format = LocalDateTime.now().format(formatter);//时间戳
         bidResponseBean.setId(duFlowBean.getRequestId());//从bidRequestBean里面取 bidRequest的id
-        bidResponseBean.setBidid(duFlowBean.getBidid());//BidResponse 的唯一标识,由 DSP生成
+        bidResponseBean.setBidid(duFlowBean.getBidid());//duFlowBean.getBidid() BidResponse 的唯一标识,由 DSP生成  时间戳+UUID
         List<SeatBid> seatBidList = new ArrayList<SeatBid>();//注意第一层数组  DSP出价 目前仅支持一个
         List<LJBid> bidList = new ArrayList<LJBid>();//注意第二层数组 针对单次曝光的出价
         SeatBid seatBid = new SeatBid();
-        seatBid.setSeat(duFlowBean.getSeat());//SeatBid 的标识,由 DSP 生成 //TODO 等待确认
+        seatBid.setSeat(duFlowBean.getSeat());//SeatBid 的标识,由 DSP 生成
         LJBid bid = new LJBid();
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
-        bid.setId(duFlowBean.getDspid());////DSP对该次出价分配的ID
+        bid.setId(format + UUID.randomUUID());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
         bid.setAdm(duFlowBean.getAdm());//duFlowBean.getAdm() 广告物料数据
-        //等待结果
         Double biddingPrice = duFlowBean.getBiddingPrice() * 100;
         Float price = Float.valueOf(String.valueOf(biddingPrice));
         bid.setPrice(price);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
@@ -167,7 +160,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-//                "&price=" + 6 +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
@@ -230,7 +222,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             adType = "feed";//信息流
             log.debug("广告类型adType:{}", adType);
         } else if (showtype == 15 || showtype == 12 || showtype == 17) {
-            adType = "banner";//开屏
+            adType = "fullscreen";//开屏
             log.debug("广告类型adType:{}", adType);
         } else if (showtype == 16 || showtype == 18) {
             adType = "interstitial";//插屏
