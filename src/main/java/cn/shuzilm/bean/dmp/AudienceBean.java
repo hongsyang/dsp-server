@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 @Getter
 public class AudienceBean implements ICommand {
 
+	private static final long serialVersionUID = -5959105878383063302l;
     //基本信息
     @Setter
     private String adUid; // 广告id
@@ -54,13 +55,17 @@ public class AudienceBean implements ICommand {
     //属性筛选
     @Setter
     private int incomeLevel; //收入水平  0 不限 1 超高 2 高 3 中  4 低
-    @Setter
+    
     private String appPreferenceIds;//兴趣
+    
+    private Set<String> appPreferenceIdSet;//兴趣列表
 
     @Setter
     private int platformId; //平台 安卓  或 IOS  0 不限 1 安卓 2 ios
-    @Setter
+    
     private String brandIds; //品牌
+    
+    private Set<String> brandIdSet;//品牌列表
     @Setter
     private int phonePriceLevel;//设备价格 分档  0 不限 1 1000 元内 2 1000-4000 3 4000- 10000  4 10000 以上
     @Setter
@@ -239,6 +244,36 @@ public class AudienceBean implements ICommand {
             this.demographicTagIdSet = set;
         }
 	}
+    
+    public void setAppPreferenceIds(String appPreferenceIds) {
+    	this.appPreferenceIds = appPreferenceIds;
+		if (StringUtils.isNotBlank(appPreferenceIds)) {
+            String[] split = appPreferenceIds.split(",");
+            Set<String> set = new HashSet<String>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(replace);
+            }
+            this.appPreferenceIdSet = set;
+        }
+	}
 
-
+	public void setBrandIds(String brandIds) {
+		this.brandIds = brandIds;
+		if (StringUtils.isNotBlank(brandIds)) {
+            String[] split = brandIds.split(",");
+            Set<String> set = new HashSet<String>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(replace);
+            }
+            this.brandIdSet = set;
+        }
+	}
+    
+    
 }

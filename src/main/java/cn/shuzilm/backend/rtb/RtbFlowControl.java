@@ -202,6 +202,9 @@ public class RtbFlowControl {
                             // 将 省、地级、县级装载到 MAP 中，便于快速查找
                             List<AreaBean> areaList = audience.getCityList();
                             String key = null;
+                            if(areaList == null){
+                            	continue;
+                            }
                             for (AreaBean area : areaList) {
                                 if (area.getProvinceId() == 0) {
                                     // 当省选项为 0 的时候，则认为是匹配全国
@@ -269,7 +272,7 @@ public class RtbFlowControl {
                         }
                     }
                 }
-
+            }
                 gridMap.clear();
                 // 将 GPS 坐标加载到 栅格快速比对处理类中
                 gridMap.put(0, new GridMark2(gpsResidenceList));
@@ -279,7 +282,6 @@ public class RtbFlowControl {
                 myLog.info("广告共计加载条目数 : " + adBeanList.size());
                 myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
 
-            }
         }
 
     }

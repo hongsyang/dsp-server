@@ -21,6 +21,14 @@ public class DUFlowBean implements Serializable {
     private static final long serialVersionUID = -6743567631108323096L;
 
     private String requestId;//对应Bid Request中的id
+    
+    private String adTypeId;//广告大类型ID
+    private String adxAdTypeId;//广告小类对应ADX服务商的ID
+    private String widthHeightRatio;//  Width/Height 宽高比
+    private String platform;//不同平台 dsp传
+    private String demographicTagId;//不同人群  dsp传 用逗号隔开
+    private Integer hour;// winNotice返回的小时数 （ 统计需求 价格随时段变化 ）
+
     private List<Impression> impression;//广告位信息
     private String bidid;//DSP给出的该次竞价的ID
     private String dspid;//DSP对该次出价分配的ID
@@ -56,5 +64,11 @@ public class DUFlowBean implements Serializable {
     private String linkUrl;//点击目标链接
     private String tracking;//曝光监测链接
     private String adxSource;//ADX服务商渠道
+    private String title;//信息流标题
+    private String titleShort;//信息流短标题
+    private String titleLong;//信息流长标题
+    private String desc;//信息流标题
+    private String descShort;//信息流短标题
+    private String descLong;//信息流长标题
 
 }
