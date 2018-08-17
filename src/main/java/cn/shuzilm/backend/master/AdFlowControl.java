@@ -23,10 +23,12 @@ import java.util.List;
  */
 public class AdFlowControl {
     private static AdFlowControl control;
+    private static AdPropertyHandler adProperty;
 
     public static AdFlowControl getInstance() {
         if (control == null) {
             control = new AdFlowControl();
+            adProperty = new AdPropertyHandler(control);
         }
         return control;
     }
@@ -53,8 +55,8 @@ public class AdFlowControl {
         return mapMonitorHour;
     }
 
-    public HashMap<String, ReportBean> getReportMapTotal(){
-        return reportMapTotal;
+    public HashMap<String, ReportBean> getReportMapHour(){
+        return reportMapHour;
     }
 
     /**
@@ -68,6 +70,7 @@ public class AdFlowControl {
     private static HashMap<String, TaskBean> mapTask = null;
 
     private static HashMap<String, ReportBean> reportMapTotal = null;
+    private static HashMap<String, ReportBean> reportMapHour = null;
 
     /**
      * 广告组与广告的对应关系
@@ -104,6 +107,7 @@ public class AdFlowControl {
 
     public AdFlowControl() {
         MDC.put("sift", "control");
+
         mapAd = new HashMap<>();
         mapTask = new HashMap<>();
 
@@ -114,8 +118,9 @@ public class AdFlowControl {
         mapThresholdHour = new HashMap<>();
         mapAdGroup = new HashMap<>();
         mapMonitorTotal = new HashMap<>();
-
 //        adviserMap = new HashMap<>();
+
+
     }
 
     public void trigger(int type) {
@@ -333,20 +338,26 @@ public class AdFlowControl {
     /**
      * 每隔 10 分钟更新一次天和小时的阀值
      */
-    private void updateIndicator(ResultList rl) {
+    private void updateIndicator(ResultList adList) {
         try {
-            for (ResultMap map : rl) {
+            for (ResultMap map : adList) {
                 String auid = map.getString("uid");
                 String name = map.getString("name");
                 String adviserId = map.getString("advertiser_uid");
                 ResultMap balanceMap = taskService.queryAdviserAccountById(adviserId);
+                //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
+                //广告主账户的每日限额
                 BigDecimal quotaMoneyPerDay = balanceMap.getBigDecimal("quota_amount");
+
+
 
                 int winNumsHour = map.getInteger("cpm_hourly");
                 int winNumsDaily = map.getInteger("cpm_daily");
+                // 当前广告表中的针对广告的限额
                 BigDecimal money = map.getBigDecimal("quota_amount");
 
+                // 如果广告主中的每日限额比广告的还小，以小的为准
                 if (quotaMoneyPerDay.floatValue() != 0 && quotaMoneyPerDay.floatValue() <= money.floatValue()) {
                     money = quotaMoneyPerDay;
                 }
@@ -372,6 +383,17 @@ public class AdFlowControl {
                 status4.setMoney(money.floatValue());
                 mapThresholdHour.put(auid, status4);
 
+                //写入广告主每日限额
+                ReportBean report = reportMapHour.get(auid);
+                if(report != null){
+                    report.setBalance(balance);
+
+                    // 如果当前广告设定限额为 0 ，则以该账户的每日限额为准， 如果该账户每日限额为 0 ， 则以余额为准
+                    if(quotaMoneyPerDay.doubleValue() > 0)
+                        report.setMoneyQuota(quotaMoneyPerDay);
+                    else
+                        report.setMoneyQuota(balance);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -392,7 +414,7 @@ public class AdFlowControl {
      * 从数据库中加载所有的广告,广告主、广告素材和广告配额
      */
     public void loadAdInterval(boolean isInitial) {
-        HashMap<String, ReportBean> reportMapHour = null;
+
         HashMap<String, ReportBean> reportMapDaily = null;
 
 
@@ -415,53 +437,49 @@ public class AdFlowControl {
                 }
             }
             //加载广告信息
-            ResultList rl = taskService.queryAdByUpTime(timeBefore);
+            ResultList adList = taskService.queryAdByUpTime(timeBefore);
+
+            //加载 小时 历史消费金额
+            reportMapHour = taskService.statAdCostHour();
+            //加载 天 历史消费金额
+            reportMapDaily = taskService.statAdCostDaily();
+            //加载 总 历史消费金额
+            reportMapTotal = taskService.statAdCostTotal();
+
             //更新监视器阀值信息
-            updateIndicator(rl);
+            updateIndicator(adList);
+
             int counter = 0;
-            if (isInitial) {
-                //加载 小时 历史消费金额
-                reportMapHour = taskService.statAdCostHour();
-                //加载 天 历史消费金额
-                reportMapDaily = taskService.statAdCostDaily();
-                //加载 总 历史消费金额
-                reportMapTotal = taskService.statAdCostTotal();
-            }
-            for (ResultMap map : rl) {
+
+
+            for (ResultMap map : adList) {
                 AdBean ad = new AdBean();
                 ad.setAdUid(map.getString("uid"));
-
+                String adUid = ad.getAdUid();
                 if (isInitial) {
                     if (reportMapHour.size() > 0) {
-                        ReportBean report = reportMapHour.get(ad.getAdUid());
+                        ReportBean report = reportMapHour.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-
-                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 0,0,0);
+                            this.updatePixel(adUid, 0, expense.floatValue(), 0,0,0);
                         }
-
                     }
-
 
                     if (reportMapDaily.size() > 0) {
-                        ReportBean report = reportMapDaily.get(ad.getAdUid());
+                        ReportBean report = reportMapDaily.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 1,0,0);
+                            this.updatePixel(adUid, 0, expense.floatValue(), 1,0,0);
                         }
                     }
-
 
                     if (reportMapTotal.size() > 0) {
-                        ReportBean report = reportMapTotal.get(ad.getAdUid());
+                        ReportBean report = reportMapTotal.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(ad.getAdUid(), 0, expense.floatValue(), 2,0,0);
+                            this.updatePixel(adUid, 0, expense.floatValue(), 2,0,0);
                         }
-
                     }
-
-
                 }
 
                 //广告组
@@ -479,7 +497,7 @@ public class AdFlowControl {
                 ad.setCpmHourLimit(map.getInteger("cpm_hourly"));
 
                 //获得人群
-                List<AudienceBean> audience = taskService.queryAudienceByUpTime(ad.getAdUid());
+                List<AudienceBean> audience = taskService.queryAudienceByUpTime(adUid);
                 ad.setAudienceList(audience);
 
                 String creativeUid = map.getString("creative_uid");
@@ -488,6 +506,7 @@ public class AdFlowControl {
                 //根据创意 ID 查询 物料
                 List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid);
                 creativeBean.setMaterialList(materialList);
+
                 ArrayList<CreativeBean> creaList = new ArrayList<>();
                 creaList.add(creativeBean);
                 ad.setCreativeList(creaList);
@@ -497,7 +516,13 @@ public class AdFlowControl {
                 ad.setPrice(map.getBigDecimal("price").floatValue());
                 ad.setPriority(map.getInteger("priority"));
                 //限额
-                ad.setQuotaAmount(map.getBigDecimal("quota_amount"));
+                // 如果当前广告设定限额为 0 ，则以该账户的每日限额为准，
+                BigDecimal quotaAmount = map.getBigDecimal("quota_amount");
+                if(quotaAmount.doubleValue() <= 0 ){
+                    ad.setQuotaAmount(reportMapHour.get(adUid).getMoneyQuota());
+                }else{
+                    ad.setQuotaAmount(quotaAmount);
+                }
                 ad.setSpeedMode(map.getInteger("speed"));
                 ad.setStartTime(new Date(map.getInteger("s")));
                 String timeScheTxt = map.getString("time");
@@ -508,14 +533,20 @@ public class AdFlowControl {
 
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
-                mapAd.put(ad.getAdUid(), ad);
-                mapTask.put(ad.getAdUid(), new TaskBean(ad.getAdUid()));
+                mapAd.put(adUid, ad);
+                mapTask.put(adUid, new TaskBean(adUid));
                 counter++;
 
             }
 
+            //计算权重因子
+            adProperty.handle();
+
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-            dispatchTask();
+            for (int i = 0; i < 10000 ; i++) {
+                dispatchTask();
+            }
+
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 分发完毕。。。");
             myLog.info("主控： 共有 " + mapAd.keySet().size() + " 个广告在运行");
         } catch (SQLException e) {

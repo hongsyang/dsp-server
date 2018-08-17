@@ -38,7 +38,7 @@ public class TaskServicve extends Service {
             bean.setDemographicCitys(rm.getString("demographic_city"));
             bean.setDemographicTagId(rm.getString("demographic_tag"));
             //兴趣偏好标签
-            bean.setAppPreferenceIds(rm.getString("ap_preference_ids"));
+            bean.setAppPreferenceIds(rm.getString("app_preference_ids"));
             bean.setBrandIds(rm.getString("brand_ids"));
             bean.setCarrierId(rm.get("carrier_id") != null ? rm.getInteger("carrier_id") : 0);
             //选定城市或者经纬度 工作地、居住地、活动地
@@ -51,7 +51,6 @@ public class TaskServicve extends Service {
             bean.setPlatformId(rm.get("platform_id") != null ? rm.getInteger("platform_id") : 0);
             //特定公司
             bean.setCompanyIds(rm.getString("company_ids"));
-            bean.setCompanyNames(rm.getString("company_names"));
             aList.add(bean);
 
         }

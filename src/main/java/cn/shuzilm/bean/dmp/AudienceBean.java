@@ -77,6 +77,8 @@ public class AudienceBean implements ICommand {
     private String companyNames;//公司全称 ，用","号隔开
 
     public void setDemographicCitys(String citys){
+        if(citys == null)
+            return;
         demographicCitys = citys;
         String[] split = citys.split("],");
         Set<String> set = new HashSet();
