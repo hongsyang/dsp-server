@@ -38,7 +38,7 @@ public class RtbFlowControl {
     private static final org.slf4j.Logger myLog = LoggerFactory.getLogger(AdFlowControl.class);
     private static RtbFlowControl rtb = null;
 
-    private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_hh");
+    private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
 
     public static RtbFlowControl getInstance() {
         if (rtb == null) {
@@ -198,7 +198,7 @@ public class RtbFlowControl {
                                 default:
                                     break;
                             }
-
+                        }
                             // 将 省、地级、县级装载到 MAP 中，便于快速查找
                             List<AreaBean> areaList = audience.getCityList();
                             String key = null;
@@ -238,7 +238,6 @@ public class RtbFlowControl {
                                 }
                             }
                         }
-                    }
                     // 广告内容的更新 ，按照素材的类型和尺寸
                     CreativeBean creative = adBean.getCreativeList().get(0);
                     List<Material> materialList = creative.getMaterialList();
@@ -351,6 +350,7 @@ public class RtbFlowControl {
             int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
             Date date = new Date();
             String time = dateFm.format(date);
+            System.out.println(time);
             String splitTime[] = time.split("_");
             int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
             int dayNum = Integer.parseInt(splitTime[1]);

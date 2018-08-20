@@ -152,6 +152,7 @@ public class TaskServicve extends Service {
                 material.setSize(rm.getInteger("size"));
                 material.setWidth(rm.getInteger("w"));
                 material.setHeight(rm.getInteger("h"));
+                material.setApproved_adx(rm.getString("approved_adx"));
                 list.add(material);
             }
             return list;
