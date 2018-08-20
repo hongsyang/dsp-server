@@ -50,6 +50,7 @@ public class DUFlowBean implements Serializable {
     private String creativeUid;//varchar(36)  创意ID
     private String province;//varchar(20)  省
     private String city;//varchar(20)  市
+    private String country;//varchar(20) 县
     private Double actualPrice ;//成本价(张迁需要)
     private Double actualPricePremium ;//溢价（张迁需要）
     private Double biddingPrice  ;//广告主出价（张迁需要）
