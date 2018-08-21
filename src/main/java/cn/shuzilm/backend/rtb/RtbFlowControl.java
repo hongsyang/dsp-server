@@ -1,4 +1,5 @@
-package cn.shuzilm.backend.rtb;
+
+        package cn.shuzilm.backend.rtb;
 
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.MsgControlCenter;
@@ -125,7 +126,7 @@ public class RtbFlowControl {
         pullAndUpdateTask();
 
         // 10分钟拉取一次最新的广告内容
-        pullTenMinutes();
+        pullTenMinutes(null);
 
         // 1 hour
         refreshAdStatus();
@@ -153,9 +154,9 @@ public class RtbFlowControl {
     /**
      * 每隔 10 分钟更新一次广告素材或者人群包
      */
-    public void pullTenMinutes() {
+    public void pullTenMinutes(ArrayList<AdBean> adBeanList) {
         // 从 10 分钟的队列中获得广告素材和人群包
-        ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
+        //ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
         ArrayList<GpsBean> gpsAll = new ArrayList<>();
         ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
         ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
@@ -198,44 +199,43 @@ public class RtbFlowControl {
                                 default:
                                     break;
                             }
-
-                            // 将 省、地级、县级装载到 MAP 中，便于快速查找
-                            List<AreaBean> areaList = audience.getCityList();
-                            String key = null;
-                            if(areaList == null){
-                            	continue;
+                        }
+                        // 将 省、地级、县级装载到 MAP 中，便于快速查找
+                        List<AreaBean> areaList = audience.getCityList();
+                        String key = null;
+                        if(areaList == null){
+                            continue;
+                        }
+                        for (AreaBean area : areaList) {
+                            if (area.getProvinceId() == 0) {
+                                // 当省选项为 0 的时候，则认为是匹配全国
+                                key = "china";
+                            } else if (area.getCityId() == 0) {
+                                // 当市级选项为 0 的时候，则认为是匹配全省
+                                key = area.getProvinceId() + "";
+                            } else if (area.getCountyId() == 0) {
+                                // 当县级选项为 0 的时候，则认为是匹配全市
+                                key = area.getProvinceId() + "_" + area.getCityId();
+                            } else {
+                                key = area.getProvinceId() + "_" + area.getCityId() + "_" + area.getCountyId();
                             }
-                            for (AreaBean area : areaList) {
-                                if (area.getProvinceId() == 0) {
-                                    // 当省选项为 0 的时候，则认为是匹配全国
-                                    key = "china";
-                                } else if (area.getCityId() == 0) {
-                                    // 当市级选项为 0 的时候，则认为是匹配全省
-                                    key = area.getProvinceId() + "";
-                                } else if (area.getCountyId() == 0) {
-                                    // 当县级选项为 0 的时候，则认为是匹配全市
-                                    key = area.getProvinceId() + "_" + area.getCityId();
-                                } else {
-                                    key = area.getProvinceId() + "_" + area.getCityId() + "_" + area.getCountyId();
-                                }
 
-                                if (!areaMap.containsKey(key)) {
-                                    Set<String> set = new HashSet<String>();
-                                    set.add(adBean.getAdUid());
-                                    areaMap.put(key, set);
-                                } else {
-                                    Set<String> set = areaMap.get(key);
-                                    set.add(adBean.getAdUid());
-                                }
+                            if (!areaMap.containsKey(key)) {
+                                Set<String> set = new HashSet<String>();
+                                set.add(adBean.getAdUid());
+                                areaMap.put(key, set);
+                            } else {
+                                Set<String> set = areaMap.get(key);
+                                set.add(adBean.getAdUid());
+                            }
 
-                                if (!demographicMap.containsKey(key)) {
-                                    Set<String> set = new HashSet<String>();
-                                    set.add(adBean.getAdUid());
-                                    demographicMap.put(key, set);
-                                } else {
-                                    Set<String> set = demographicMap.get(key);
-                                    set.add(adBean.getAdUid());
-                                }
+                            if (!demographicMap.containsKey(key)) {
+                                Set<String> set = new HashSet<String>();
+                                set.add(adBean.getAdUid());
+                                demographicMap.put(key, set);
+                            } else {
+                                Set<String> set = demographicMap.get(key);
+                                set.add(adBean.getAdUid());
                             }
                         }
                     }
@@ -273,14 +273,14 @@ public class RtbFlowControl {
                     }
                 }
             }
-                gridMap.clear();
-                // 将 GPS 坐标加载到 栅格快速比对处理类中
-                gridMap.put(0, new GridMark2(gpsResidenceList));
-                gridMap.put(1, new GridMark2(gpsWorkList));
-                gridMap.put(2, new GridMark2(gpsActiveList));
+            gridMap.clear();
+            // 将 GPS 坐标加载到 栅格快速比对处理类中
+            gridMap.put(0, new GridMark2(gpsResidenceList));
+            gridMap.put(1, new GridMark2(gpsWorkList));
+            gridMap.put(2, new GridMark2(gpsActiveList));
 
-                myLog.info("广告共计加载条目数 : " + adBeanList.size());
-                myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
+            myLog.info("广告共计加载条目数 : " + adBeanList.size());
+            myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
 
         }
 

@@ -118,7 +118,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + duFlowBean.getAppId() +
+                "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
@@ -134,14 +134,11 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + duFlowBean.getAppId() +
+                "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
         urls.add(curl);
-//        urls.add("http://dsp.example2.com");
-//        urls.add("http://dsp.example3.com");
-//        urls.add("http://dsp.example4.com");
         Map nurlMap = new HashMap();
         nurlMap.put("0", urls);
         bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送

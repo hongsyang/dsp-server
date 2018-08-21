@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.SynchronousQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ public class RuleMatching {
 	private static RuleMatching rule = null;
 
 	private AsyncRedisClient redis;
-	
+
 	private Jedis jedis;
 
 	private RtbFlowControl rtbIns;
@@ -68,14 +69,250 @@ public class RuleMatching {
 
 	public RuleMatching(String[] nodes) {
 		MDC.put("sift", "rtb");
-		 //redis = new AsyncRedisClient(nodes);
+		redis = new AsyncRedisClient(nodes);
 		jedis = JedisManager.getInstance().getResource();
-		rtbIns = RtbFlowControl.getInstance();	
+
+		AdBean ad1 = new AdBean();
+		AudienceBean au1 = new AudienceBean();
+		String curl = "http://101.200.56.200:8880/" + "lingjiclick?" + "id=" + "1213" + "&price=" + 6 + "&pmp="
+				+ "2222";
+		au1.setAdUid("12345678");
+		au1.setAdviserId("123456");
+		au1.setName("大学生");
+		au1.setRemark("remark");
+		au1.setType("location");
+		au1.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		//au1.setGeos(
+		//		"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
+		au1.setMobilityType(0);
+		au1.setDemographicTagId("[111120,222220,333320,444420]");
+		au1.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		au1.setIncomeLevel(2);
+		au1.setAppPreferenceIds("eat food");
+		au1.setPlatformId(1);
+		au1.setBrandIds("nike");
+		au1.setPhonePriceLevel(3);
+		au1.setNetworkId(2);
+		au1.setCarrierId(4);
+		au1.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
+		au1.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
+
+		List<AudienceBean> au1List = new ArrayList<AudienceBean>();
+		au1List.add(au1);
+		ad1.setAudienceList(au1List);
+
+		AdPropertyBean propertyBean = new AdPropertyBean();
+		propertyBean.setImpProcess(3);
+		propertyBean.setCreativeQuality(2);
+		propertyBean.setMoneyLeft(4);
+		propertyBean.setAdvertiserScore(5);
+		propertyBean.setCtrScore(2);
+
+		ad1.setPropertyBean(propertyBean);
+
+		AdvertiserBean advertiser = new AdvertiserBean();
+		advertiser.setUid("7777777");
+		advertiser.setName("广告主A");
+		advertiser.setGrade(1);
+
+		ad1.setAdvertiser(advertiser);
+
+		ad1.setAdUid("23455555");
+		ad1.setName("广告名称A");
+
+		CreativeBean creative = new CreativeBean();
+		creative.setUid("567890");
+		creative.setName("广告素材A");
+
+		Material material = new Material();
+		material.setUid("1");
+		material.setType("banner");
+		material.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material.setWidth(340);
+		material.setHeight(70);
+		Material material01 = new Material();
+		material01.setUid("01");
+		material01.setType("banner");
+		material01.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material01.setWidth(320);
+		material01.setHeight(50);
+		Material material02 = new Material();
+		material02.setUid("02");
+		material02.setType("banner");
+		material02.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material02.setWidth(350);
+		material02.setHeight(80);
+		Material material03 = new Material();
+		material03.setUid("03");
+		material03.setType("banner");
+		material03.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material03.setWidth(360);
+		material03.setHeight(90);
+
+		List<Material> materialList = new ArrayList<Material>();
+		materialList.add(material);
+		materialList.add(material01);
+		materialList.add(material02);
+		materialList.add(material03);
+		creative.setMaterialList(materialList);
+		List<CreativeBean> creativeList = new ArrayList<CreativeBean>();
+		creativeList.add(creative);
+
+		ad1.setCreativeList(creativeList);
+
+		ad1.setPrice(100);
+		int[][]timeSchedulingArr = {{0,11},{0,12},{0,13},{0,14}};
+		ad1.setTimeSchedulingArr(timeSchedulingArr);
+		creative.setLink(curl);
+		creative.setTracking("https://www.shuzilm.cn/");
+		creative.setLanding("https://www.shuzilm.cn/");
+
+		AdBean ad2 = new AdBean();
+		AudienceBean au2 = new AudienceBean();
+		au2.setAdUid("12345678");
+		au2.setAdviserId("123456");
+		au2.setName("大学生");
+		au2.setRemark("remark");
+		au2.setType("location");
+		au2.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		//au2.setGeos(
+		//		"{\"北京师范大学附近，约5KM\":[116.374293,39.968458,5000],\"北京工人体育场附近，约3KM\":[116.455356,39.935271,3000],\"北海公园附近，约50M\":[116.395565,39.933501,50]}");
+		au2.setMobilityType(0);
+		au2.setDemographicTagId("[111120,222220,333320,444420]");
+		au2.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		au2.setIncomeLevel(2);
+		au2.setAppPreferenceIds("eat food");
+		au2.setPlatformId(1);
+		au2.setBrandIds("nike");
+		au2.setPhonePriceLevel(3);
+		au2.setNetworkId(2);
+		au2.setCarrierId(4);
+		au2.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
+		au2.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
+
+		List<AudienceBean> au2List = new ArrayList<AudienceBean>();
+		au2List.add(au2);
+		ad2.setAudienceList(au2List);
+
+		AdPropertyBean propertyBean2 = new AdPropertyBean();
+		propertyBean2.setImpProcess(4);
+		propertyBean2.setCreativeQuality(3);
+		propertyBean2.setMoneyLeft(4);
+		propertyBean2.setAdvertiserScore(5);
+		propertyBean2.setCtrScore(5);
+
+		ad2.setPropertyBean(propertyBean2);
+
+		AdvertiserBean advertiser2 = new AdvertiserBean();
+		advertiser2.setUid("7777777");
+		advertiser2.setName("广告主A");
+		advertiser2.setGrade(1);
+
+		ad2.setAdvertiser(advertiser2);
+
+		ad2.setAdUid("23455556");
+		ad2.setName("广告名称A");
+
+		CreativeBean creative2 = new CreativeBean();
+		creative2.setUid("567890");
+		creative2.setName("广告素材A");
+		Material material2 = new Material();
+		material2.setUid("2");
+		material2.setType("banner");
+		material2.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material2.setWidth(820);
+		material2.setHeight(630);
+		Material material21 = new Material();
+		material21.setUid("21");
+		material21.setType("banner");
+		material21.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material21.setWidth(390);
+		material21.setHeight(100);
+		Material material22 = new Material();
+		material22.setUid("22");
+		material22.setType("banner");
+		material22.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material22.setWidth(360);
+		material22.setHeight(70);
+		Material material23 = new Material();
+		material23.setUid("23");
+		material23.setType("banner");
+		material23.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material23.setWidth(320);
+		material23.setHeight(50);
+
+		List<Material> materialList2 = new ArrayList<Material>();
+		materialList2.add(material2);
+		materialList2.add(material21);
+		materialList2.add(material22);
+		materialList2.add(material23);
+		creative2.setMaterialList(materialList2);
+		List<CreativeBean> creativeList2 = new ArrayList<CreativeBean>();
+		creativeList2.add(creative2);
+
+		ad2.setCreativeList(creativeList2);
+
+		ad2.setPrice(100);
+		int[][]timeSchedulingArr2 = {{0,11},{0,12},{0,13},{0,14}};
+		ad2.setTimeSchedulingArr(timeSchedulingArr2);
+		creative2.setLink(curl);
+		creative2.setTracking("https://www.shuzilm.cn/");
+		creative2.setLanding("https://www.shuzilm.cn/");
+
+		ArrayList<AdBean> adList = new ArrayList<AdBean>();
+		adList.add(ad1);
+		adList.add(ad2);
+
+		for (int i = 0; i < 10000; i++) {
+			AdBean ad = new AdBean();
+			BeanUtils.copyProperties(ad2, ad);
+			ad.setAdUid("aaa" + i);
+			List<CreativeBean> list = ad.getCreativeList();
+			List<CreativeBean> list1 = new ArrayList<CreativeBean>();
+			CreativeBean c = list.get(0);
+			CreativeBean c1 = new CreativeBean();
+			BeanUtils.copyProperties(c, c1);
+			List<Material> materialList1 = c.getMaterialList();
+			List<Material> materialList3 = new ArrayList<Material>();
+			int k = 0;
+			for(int q=0;q<materialList1.size();q++){
+				Material m = new Material();
+				m.setUid(Math.random()+"");
+				m.setType("banner");
+				m.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+
+				m.setWidth(320+k);
+				m.setHeight(50+k);
+				k =k+10;
+				materialList3.add(m);
+			}
+			c1.setMaterialList(materialList3);
+			list1.add(c1);
+			ad.setCreativeList(list1);
+//			for(Material m:materialList1){
+//				Material m1 = new Material();
+//				BeanUtils.copyProperties(m1, m);
+//				m.setUid(Math.random()+"");
+//				m.setType("banner");
+//				m.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+//
+//				material22.setWidth(800+k);
+//				material22.setHeight(600+k);
+//				k =k+10;
+//			}
+			adList.add(ad);
+		}
+
+		System.out.println(adList.size());
+
+		rtbIns = RtbFlowControl.getInstance();
+
+		rtbIns.pullTenMinutes(adList);
 		tagRandom = new Random();
 		adRandom = new Random();
 
 		// 加载标签溢价比和权重
-		constant = RtbConstants.getInstance();	
+		constant = RtbConstants.getInstance();
 	}
 
 	/**
@@ -96,19 +333,19 @@ public class RuleMatching {
 	 * @param adxName
 	 *         	  ADX名称
 	 * @param material
-	 * 			  物料   
+	 * 			  物料
 	 * @param extSet
-	 * 			 广告位支持的文件扩展名列表      
+	 * 			 广告位支持的文件扩展名列表
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation,String adxName,Material material,Set<String> extSet) {
+						  int widthDeviation, int heightDeviation,String adxName,Material material,Set<String> extSet) {
 		//筛选审核通过的物料
 //		if(material.getApproved() !=1 || !material.getApproved_adx().contains(adxName)){
 //			return false;
 //		}
-		if(!extSet.contains(material.getApproved_adx())){
-			return false;
-		}
+//		if(!extSet.contains(material.getApproved_adx())){
+//			return false;
+//		}
 		if (isResolutionRatio) {
 			if (adWidth >= width && adHeight >= height) {
 				return true;
@@ -124,7 +361,7 @@ public class RuleMatching {
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
-	 * 
+	 *
 	 * @param tagBean
 	 *            标签
 	 * @param adType
@@ -141,17 +378,17 @@ public class RuleMatching {
 	 *            高度误差
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height,
-			boolean isResolutionRatio, int widthDeviation, int heightDeviation,String adxName,Set<String> extSet) {
+							boolean isResolutionRatio, int widthDeviation, int heightDeviation,String adxName,Set<String> extSet) {
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
 			return null;
 		}
 		// 取出标签
-		 //String tagJson = redis.getAsync(deviceId);
-		String tagJson = jedis.get(deviceId);
+		String tagJson = redis.getAsync(deviceId);
+		//String tagJson = jedis.get(deviceId);
 		TagBean tagBean = JSON.parseObject(tagJson,TagBean.class);
-		 //TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
+		//TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
 
 		if (tagBean == null) {
 			LOG.warn("TAGBEAN[" + tagBean + "]为空!");
@@ -171,7 +408,6 @@ public class RuleMatching {
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		List<AdBean> geoAdList = new ArrayList<AdBean>();// 符合经纬度的广告资源列表
 		Map<String,Material> metrialMap = new HashMap<String,Material>();
-
 		String tagIdStr = tagBean.getTagIdList();
 		String tagIds[] = tagIdStr.split(";");
 		List<String> tagIdList = Arrays.asList(tagIds);
@@ -179,11 +415,11 @@ public class RuleMatching {
 		String companyIdStr = tagBean.getCompanyIdList();
 		String companyIds[] = companyIdStr.split(";");
 		List<String> companyIdList = Arrays.asList(companyIds);
-		
+
 		String appPreferenceIdStr = tagBean.getAppPreferenceIds();
 		String appPreferenceIds[] = appPreferenceIdStr.split(";");
 		List<String> appPreferenceIdList = Arrays.asList(appPreferenceIds);
-		
+
 		String brandStr = tagBean.getBrand();
 		String brands[] = brandStr.split(";");
 		List<String> brandList = Arrays.asList(brands);
@@ -191,34 +427,34 @@ public class RuleMatching {
 		// 开始遍历符合广告素材尺寸的广告
 		long startOrder = System.currentTimeMillis();
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid);
+			boolean isAvaliable = true;
 			// 是否投当前的广告
 			if (!isAvaliable) {
-				LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				//LOG.debug("ID[" + adUid + "]广告不参与投放!");
 				continue;
 			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
-			
-			if(creative.getApproved() != 1 || !creative.getApproved_adx().contains(adxName)){
-				LOG.debug("广告ID[" + adUid + "]创意未在ADX["+adxName+"]通过,不参与投放!");
-				continue;
-			}
-								
+
+//			if(creative.getApproved() != 1 || !creative.getApproved_adx().contains(adxName)){
+//				//LOG.debug("广告ID[" + adUid + "]创意未在ADX["+adxName+"]通过,不参与投放!");
+//				continue;
+//			}
+
 			List<Material> materialList = creative.getMaterialList();
 			boolean filterFlag = false;
 			for(Material material:materialList){
-			if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
-					heightDeviation,adxName,material,extSet)) {
-				metrialMap.put(ad.getAdUid(), material);
-				filterFlag = true;
-				break;
-			}
+				if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
+						heightDeviation,adxName,material,extSet)) {
+					metrialMap.put(ad.getAdUid(), material);
+					filterFlag = true;
+					break;
+				}
 			}
 			if(!filterFlag){
 				continue;
 			}
-				
+
 			AudienceBean audience = ad.getAudienceList().get(0);
 
 			if (audience.getType().equals("location")) {// 地理位置
@@ -349,7 +585,7 @@ public class RuleMatching {
 
 	/**
 	 * 需要确认标签中的值和人群中的值
-	 * 
+	 *
 	 * @param tagBean
 	 * @param audience
 	 * @return
@@ -377,12 +613,12 @@ public class RuleMatching {
 		if (audience.getPhonePriceLevel() !=0 && tagBean.getPhonePrice() != audience.getPhonePriceLevel()) {
 			return false;
 		}
-		
+
 		//匹配网络类型
 		if(audience.getNetworkId() != 0 && tagBean.getNetworkId() != audience.getNetworkId()){
 			return false;
 		}
-		
+
 		//匹配运营商
 		if(audience.getCarrierId() != 0 && tagBean.getCarrierId() != audience.getCarrierId()){
 			return false;
@@ -394,7 +630,7 @@ public class RuleMatching {
 
 	/**
 	 * 根据出价*溢价比排序
-	 * 
+	 *
 	 * @param machedAdList
 	 */
 	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList) {
@@ -425,7 +661,7 @@ public class RuleMatching {
 
 	/**
 	 * 根据广告投放进度、素材质量、剩余资金池金额、广告主打分、广告组点击率排序
-	 * 
+	 *
 	 * @param machedAdList
 	 */
 	public void gradeOrderOtherParaStrategy(List<AdBean> machedAdList) {
@@ -523,7 +759,7 @@ public class RuleMatching {
 		targetDuFlowBean.setDescLong(creative.getDescLong());
 		return targetDuFlowBean;
 	}
-	
+
 	public String getPlatformById(int platformId){
 		String platform = "android";
 		if(platformId == 1){
@@ -533,5 +769,6 @@ public class RuleMatching {
 		}
 		return platform;
 	}
-	
+
 }
+
