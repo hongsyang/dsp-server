@@ -88,6 +88,11 @@ public class AdFlowControl {
     private static HashMap<String, AdFlowStatus> mapMonitorHour = null;
 
     /**
+     * 广告组的监视器
+     */
+    private static HashMap<String, AdFlowStatus> mapMonitorAdGroupTotal = null;
+
+    /**
      * 数据库中设定的设计流控指标（天 最高限）
      */
     private static HashMap<String, AdFlowStatus> mapThresholdDaily = null;
@@ -116,6 +121,7 @@ public class AdFlowControl {
         mapAdGroup = new HashMap<>();
         mapMonitorTotal = new HashMap<>();
         reportMapHour = new HashMap<>();
+        mapMonitorAdGroupTotal = new HashMap<>();
 //        adviserMap = new HashMap<>();
 
 
@@ -162,10 +168,13 @@ public class AdFlowControl {
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
                 if (statusHour == null)
                     break;
+                //只计算和统计计小时点击率就可以
                 if(pixelType == 0){
+                    statusHour.setUid(adUid);
                     statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
                     statusHour.setMoney(statusHour.getMoney() + addMoney);
                 }else if(pixelType == 1){
+                    statusHour.setUid(adUid);
                     statusHour.setClickNums(statusHour.getClickNums() +  clickNums);
                 }
 
@@ -174,34 +183,49 @@ public class AdFlowControl {
                 AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
                 if (statusDaily == null)
                     break;
+                statusDaily.setUid(adUid);
                 statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
                 statusDaily.setMoney(statusDaily.getMoney() + addMoney);
                 break;
             case 2:
+                //更新历史全部状态
                 AdFlowStatus statusAll = mapMonitorTotal.get(adUid);
                 if (statusAll == null)
                     break;
+                statusAll.setUid(adUid);
                 statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
                 statusAll.setMoney(statusAll.getMoney() + addMoney);
+                //更新广告组金额状态
+                String groupId = mapAd.get(adUid).getGroupId();
+                AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
+                statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
                 break;
             case -1:
                 statusHour = mapMonitorHour.get(adUid);
                 if (statusHour != null) {
+                    statusHour.setUid(adUid);
                     statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
                     statusHour.setMoney(statusHour.getMoney() + addMoney);
                 }
 
                 statusDaily = mapMonitorDaily.get(adUid);
                 if (statusDaily != null) {
+                    statusDaily.setUid(adUid);
                     statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
                     statusDaily.setMoney(statusDaily.getMoney() + addMoney);
                 }
 
                 statusAll = mapMonitorTotal.get(adUid);
                 if (statusAll != null) {
+                    statusAll.setUid(adUid);
                     statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
                     statusAll.setMoney(statusAll.getMoney() + addMoney);
                 }
+
+                //更新广告组金额状态
+                groupId = mapAd.get(adUid).getGroupId();
+                statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
+                statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
 
                 break;
         }
@@ -249,17 +273,28 @@ public class AdFlowControl {
             AdFlowStatus monitor = mapMonitorHour.get(auid);
             //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
             if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
-                String reason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
+                String reason = "#### 小时 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
                 pauseAd(auid, reason, true);
                 myLog.error(monitor.toString() + "\t" + reason);
             }
             if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
-                String reason = "#### 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
+                String reason = "#### 小时 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
                 pauseAd(auid, reason, true);
                 myLog.error(monitor.toString() + "\t" + reason);
 
             }
+
+            String groupId = mapAd.get(auid).getGroupId();
+            AdFlowStatus monitorAdGroup = mapMonitorAdGroupTotal.get(groupId);
+            double thresholdGroupMoney = mapAdGroup.get(groupId).getQuotaMoney().doubleValue();
+            if(thresholdGroupMoney != 0 && monitorAdGroup.getMoney() >= thresholdGroupMoney){
+                //广告组金额超限，则发送停止命令，终止该广告投放
+                String reason = "#### 广告组 金额 超限，参考指标：" + thresholdGroupMoney + "\t" + monitorAdGroup.getMoney() + " ###";
+                stopAd(auid, reason, true);
+                myLog.error(auid + "\t" + reason);
+            }
+
         }
 
         //账户的余额和每日的限额都在这里做适配，以最低的为准，
@@ -454,6 +489,7 @@ public class AdFlowControl {
             //加载 总 历史消费金额
             reportMapTotal = taskService.statAdCostTotal();
 
+
             //更新监视器阀值信息
             HashSet<String> lowBalanceAdList = updateIndicator(adList);
 
@@ -463,6 +499,9 @@ public class AdFlowControl {
             for (ResultMap map : adList) {
                 AdBean ad = new AdBean();
                 ad.setAdUid(map.getString("uid"));
+                //广告组
+                String groupId = map.getString("group_uid");
+                ad.setGroupId(groupId);
                 String adUid = ad.getAdUid();
                 if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
                     myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
@@ -476,6 +515,8 @@ public class AdFlowControl {
                     mapMonitorDaily.put(adUid,statusDay);
                     AdFlowStatus statusAll = new AdFlowStatus();
                     mapMonitorTotal.put(adUid,statusAll);
+                    AdFlowStatus statusAdGroup = new AdFlowStatus();
+                    mapMonitorAdGroupTotal.put(groupId,statusAdGroup);
 
                     if (reportMapHour.size() > 0) {
                         ReportBean report = reportMapHour.get(adUid);
@@ -502,9 +543,7 @@ public class AdFlowControl {
                     }
                 }
 
-                //广告组
-                String groupId = map.getString("group_uid");
-                ad.setGroupId(groupId);
+
                 String adverUid = map.getString("advertiser_uid");
 
                 //根据 广告主ID 获得 广告主

@@ -10,9 +10,9 @@ import java.util.HashMap;
 /**
  * Created by thunders on 2018/8/21.
  */
-public class FLowControl {
+public class FLowControlTest {
     public static void main(String[] args) {
-        FLowControl.testAverageMode();
+        FLowControlTest.testAverageMode();
     }
 
     public static void testAverageMode(){
@@ -23,8 +23,8 @@ public class FLowControl {
         HashMap<String, AdBean> adMap = adIns.getMapAd();
         //模拟曝光请求超过了允许的范围
         AdPixelBean pixel = new AdPixelBean();
-        pixel.setWinNoticeNums(60000);
-        pixel.setMoney(1000d);
+        pixel.setWinNoticeNums(1);
+        pixel.setMoney(5000d);
         pixel.setAdUid(adUid);
         pixel.setType(0);
         pixel.setHost("rtb-001");
