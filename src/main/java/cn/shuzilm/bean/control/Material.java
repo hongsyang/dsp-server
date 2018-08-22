@@ -1,6 +1,6 @@
 package cn.shuzilm.bean.control;
 
-public class Material {
+public class Material implements ICommand {
 	
 	private String uid;
 	private String nid;

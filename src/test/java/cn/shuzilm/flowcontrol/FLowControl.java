@@ -1,14 +1,38 @@
 package cn.shuzilm.flowcontrol;
 
+import cn.shuzilm.backend.master.AdFlowControl;
+import cn.shuzilm.backend.pixel.PixelFlowControl;
+import cn.shuzilm.bean.control.AdBean;
+import cn.shuzilm.bean.control.AdPixelBean;
+
+import java.util.HashMap;
+
 /**
  * Created by thunders on 2018/8/21.
  */
 public class FLowControl {
     public static void main(String[] args) {
-
+        FLowControl.testAverageMode();
     }
 
-    public void testAverageMode(){
+    public static void testAverageMode(){
+        //uid : 7635434a-7ff2-45f6-9806-09b6d4908e2d
+        String adUid = "7635434a-7ff2-45f6-9806-09b6d4908e2d";
+        AdFlowControl adIns = AdFlowControl.getInstance();
+        adIns.loadAdInterval(true);
+        HashMap<String, AdBean> adMap = adIns.getMapAd();
+        //模拟曝光请求超过了允许的范围
+        AdPixelBean pixel = new AdPixelBean();
+        pixel.setWinNoticeNums(60000);
+        pixel.setMoney(1000d);
+        pixel.setAdUid(adUid);
+        pixel.setType(0);
+        pixel.setHost("rtb-001");
+
+        PixelFlowControl.getInstance().sendStatus(pixel);
+//        while(true){
+            AdFlowControl.getInstance().pullAndUpdateTask();
+//        }
 
     }
 

@@ -112,11 +112,11 @@ public class TaskServicve extends Service {
             creativeBean.setBrand(cMap.getString("brand"));
             creativeBean.setDesc(cMap.getString("text"));
             creativeBean.setDescLong(cMap.getString("text_long"));
-            creativeBean.setDescShort(cMap.getString("text_short"));
+//            creativeBean.setDescShort(cMap.getString("text_short"));
             creativeBean.setDomain(cMap.getString("brand_domain"));
             creativeBean.setTitle(cMap.getString("title"));
             creativeBean.setTitleLong(cMap.getString("title_long"));
-            creativeBean.setTitleShort(cMap.getString("title_short"));
+//            creativeBean.setTitleShort(cMap.getString("title_short"));
             creativeBean.setLink_type(Integer.parseInt(cMap.getString("link_type")));
             creativeBean.setLink(cMap.getString("link_uri"));
             creativeBean.setLanding(cMap.getString("landing_uri"));

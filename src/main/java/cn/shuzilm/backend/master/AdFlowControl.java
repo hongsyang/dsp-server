@@ -249,13 +249,13 @@ public class AdFlowControl {
             AdFlowStatus monitor = mapMonitorHour.get(auid);
             //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
             if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
-                String reason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + " ###";
+                String reason = "#### CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
                 pauseAd(auid, reason, true);
                 myLog.error(monitor.toString() + "\t" + reason);
             }
             if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
-                String reason = "#### 金额 超限，参考指标：" + threshold.getMoney() + " ###";
+                String reason = "#### 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
                 pauseAd(auid, reason, true);
                 myLog.error(monitor.toString() + "\t" + reason);
 
@@ -271,7 +271,7 @@ public class AdFlowControl {
             AdFlowStatus monitor = mapMonitorDaily.get(auid);
             if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
-                String reason = "#### 每日金额 超限，参考指标：" + threshold.getMoney() + " ###";
+                String reason = "#### 每日金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
                 stopAd(auid, reason, false);
                 myLog.error(monitor.toString() + "\t" + reason);
             }
@@ -345,6 +345,8 @@ public class AdFlowControl {
                 String name = map.getString("name");
                 String adviserId = map.getString("advertiser_uid");
                 ResultMap balanceMap = taskService.queryAdviserAccountById(adviserId);
+                if(balanceMap == null)
+                    continue;
                 //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
                 //如果余额小于 10 块钱，则不进行广告投放
@@ -467,6 +469,14 @@ public class AdFlowControl {
                     continue;
                 }
                 if (isInitial) {
+                    //初始化所有的监控
+                    AdFlowStatus statusHour = new AdFlowStatus();
+                    mapMonitorHour.put(adUid,statusHour);
+                    AdFlowStatus statusDay = new AdFlowStatus();
+                    mapMonitorDaily.put(adUid,statusDay);
+                    AdFlowStatus statusAll = new AdFlowStatus();
+                    mapMonitorTotal.put(adUid,statusAll);
+
                     if (reportMapHour.size() > 0) {
                         ReportBean report = reportMapHour.get(adUid);
                         if (report != null) {
@@ -506,6 +516,7 @@ public class AdFlowControl {
                 //每小时限制
                 ad.setCpmHourLimit(map.getInteger("cpm_hourly"));
 
+
                 //获得人群
                 List<AudienceBean> audience = taskService.queryAudienceByUpTime(adUid);
                 ad.setAudienceList(audience);
@@ -524,6 +535,8 @@ public class AdFlowControl {
                 ad.setFrqDaily(map.getInteger("frq_daily"));
                 ad.setFrqHour(map.getInteger("frq_hourly"));
                 ad.setPrice(map.getBigDecimal("price").floatValue());
+                ad.setMode(map.getString("mode"));
+                ad.setMoneyArrears(map.getInteger("money_arrears"));
                 ad.setPriority(map.getInteger("priority"));
                 //限额
                 // 如果当前广告设定限额为 0 ，则以该账户的每日限额为准，
