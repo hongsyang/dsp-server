@@ -504,6 +504,9 @@ public class AdFlowControl {
                 int[][] timeScheduling = TimeSchedulingUtil.timeTxtToMatrix(timeScheTxt);
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
+                
+                //出价模式
+                ad.setMode(map.getString("mode"));
 
 
                 //如果是价格和配额发生了变化，直接通知

@@ -324,7 +324,7 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid) {
+    public boolean checkAvalable(String auid,int weekNum,int dayNum) {
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
             int commandCode = bean.getCommand();
@@ -348,14 +348,7 @@ public class RtbFlowControl {
         AdBean adBean = mapAd.get(auid);
         if (adBean != null) {
             int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
-            Date date = new Date();
-            String time = dateFm.format(date);
-            System.out.println(time);
-            String splitTime[] = time.split("_");
-            int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
-            int dayNum = Integer.parseInt(splitTime[1]);
-            if (dayNum == 24)
-                dayNum = 0;
+            
             for (int i = 0; i < timeSchedulingArr.length; i++) {
                 if (weekNum != i)
                     continue;

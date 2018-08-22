@@ -143,6 +143,11 @@ public class AdBean implements ICommand  {
      */
     @Setter
     private long timestamp;
-    
+
+    /**
+     * 出价模式
+     */
+    @Setter
+    private String mode;    
 
 }
