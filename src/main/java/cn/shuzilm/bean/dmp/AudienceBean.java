@@ -2,7 +2,6 @@ package cn.shuzilm.bean.dmp;
 
 import cn.shuzilm.bean.control.ICommand;
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;

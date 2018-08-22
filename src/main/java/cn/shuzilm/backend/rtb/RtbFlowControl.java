@@ -19,7 +19,6 @@ import cn.shuzilm.util.TimeUtil;
 import cn.shuzilm.util.geo.GeoHash;
 import cn.shuzilm.util.geo.GridMark;
 import cn.shuzilm.util.geo.GridMark2;
-import com.jcraft.jsch.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 

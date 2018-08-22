@@ -84,7 +84,7 @@ public class AsyncRedisClient {
         RedisFuture<String> future1 = commands.get(deviceId);
         String value = null;
         try {
-            value = future1.get(1000, TimeUnit.MILLISECONDS );
+            value = future1.get(10000, TimeUnit.MILLISECONDS );
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {

@@ -87,7 +87,7 @@ public class JedisManager {
         Jedis jedis = null;
         try {
             jedis = jedisPool.getResource();
-//            jedis.auth(configs.getString("REDIS_PASSWORD"));
+            jedis.auth(configs.getString("REDIS_PASSWORD"));
 //            jedis.select(configs.getInt("REDIS_DBNUM"));
         } catch (Exception e) {
             e.printStackTrace();

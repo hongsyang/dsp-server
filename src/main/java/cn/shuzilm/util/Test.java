@@ -11,7 +11,6 @@ import com.alibaba.fastjson.JSON;
 import com.yao.util.bean.BeanUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
-import org.mortbay.util.UrlEncoded;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.Base64Utils;
 import redis.clients.jedis.Jedis;

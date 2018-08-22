@@ -1,25 +1,25 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
-import cn.shuzilm.bean.adview.request.App;
-import cn.shuzilm.bean.adview.request.BidRequestBean;
-import cn.shuzilm.bean.adview.request.Device;
-import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.bean.adview.request.*;
 import cn.shuzilm.bean.adview.response.BidResponseBean;
 import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.bean.lj.request.LJAssets;
-import cn.shuzilm.bean.lj.response.LJBid;
-import cn.shuzilm.bean.lj.response.LJResponseExt;
+import cn.shuzilm.bean.lj.request.*;
+import cn.shuzilm.bean.lj.response.*;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
+import java.net.URL;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -57,10 +57,14 @@ public class LingJiRequestServiceImpl implements RequestService {
             Impression userImpression = bidRequestBean.getImp().get(0);//曝光信息
             App app = bidRequestBean.getApp();//应用信息
 
+            Integer width = null;//广告位的宽
+            Integer height = null;//广告位的高
+
 
             Integer showtype = userImpression.getExt().getShowtype();//广告类型
             String adType = convertAdType(showtype); //对应内部 广告类型
-            
+
+
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
                 return response;
@@ -69,11 +73,15 @@ public class LingJiRequestServiceImpl implements RequestService {
             //文件扩展名列表
             Set<String> stringSet = new HashSet<>();
             if ("banner".equals(adType)) {
+                width = userImpression.getBanner().getW();
+                height = userImpression.getBanner().getH();
                 String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
                 for (String mime : mimes) {
                     stringSet.add(mime);
                 }
             } else if ("fullscreen".equals(adType)) {
+                width = userImpression.getVideo().getW();
+                height = userImpression.getVideo().getH();
                 String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
                 for (String mime : mimes) {
                     stringSet.add(mime);
@@ -82,10 +90,14 @@ public class LingJiRequestServiceImpl implements RequestService {
                 List<LJAssets> assets = userImpression.getNativead().getAssets();
                 for (LJAssets asset : assets) {
                     if (asset.getImg() != null && asset.getRequired().equals(true)) {
+                        width = asset.getImg().getW();
+                        height = asset.getImg().getH();
                         for (String mime : asset.getImg().getMimes()) {
                             stringSet.add(mime);
                         }
                     } else if (asset.getVideo() != null && asset.getRequired().equals(true)) {
+                        width = asset.getVideo().getW();
+                        height = asset.getVideo().getH();
                         for (String mime : asset.getVideo().getMimes()) {
                             stringSet.add(mime);
                         }
@@ -100,14 +112,15 @@ public class LingJiRequestServiceImpl implements RequestService {
                     DUFlowBean targetDuFlowBean = RuleMatching.getInstance(nodes).match(
                             userDevice.getExt().getMac(),//设备mac的MD5
                             adType,//广告类型
-                            userImpression.getBanner().getW(),//广告位的宽
-                            userImpression.getBanner().getH(),//广告位的高
+                            width,//广告位的宽
+                            height,//广告位的高
                             true,// 是否要求分辨率
                             5,//宽误差值
                             5,// 高误差值;
                             ADX_NAME,//ADX 服务商名称
                             stringSet//文件扩展名
                     );
+
                     //需要添加到Phoenix中的数据
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                     targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -136,8 +149,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 DUFlowBean targetDuFlowBean = RuleMatching.getInstance(nodes).match(
                         userDevice.getExt().getMac(),//设备mac的MD5
                         adType,//广告类型
-                        userImpression.getBanner().getW(),//广告位的宽
-                        userImpression.getBanner().getH(),//广告位的高
+                        320,//广告位的宽
+                        50,//广告位的高
                         true,// 是否要求分辨率
                         5,//宽误差值
                         5,// 高误差值;
@@ -190,13 +203,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         Impression impression = imp.get(0);
         bid.setId(format + UUID.randomUUID());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-        if ("banner".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdm());// 广告物料数据
-        }
-        Double biddingPrice = duFlowBean.getBiddingPrice() * 100;
-        Float price = Float.valueOf(String.valueOf(biddingPrice));
-        bid.setPrice(price);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
-        bid.setCrid(duFlowBean.getCreativeUid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
+
         //曝光nurl
         String nurl = "http://101.200.56.200:8880/" + "lingjiexp?" +
                 "id=" + "${AUCTION_ID}" +
@@ -212,7 +219,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pf=" + duFlowBean.getPremiumFactor() +
                 "&pmp=" + duFlowBean.getDealid();
-
         bid.setNurl(nurl);
 
         String curl = "http://101.200.56.200:8880/" + "lingjiclick?" +
@@ -227,6 +233,75 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
+
+        if ("banner".equals(adType)) {
+            bid.setAdm(duFlowBean.getAdm());// 广告物料数据
+        } else if ("fullscreen".equals(adType)) {
+            bid.setAdm(duFlowBean.getAdm());// 广告物料数据
+        } else if ("feed".equals(adType)) {
+            LJNativeResponse ljNativeResponse =new LJNativeResponse();
+
+            NativeAD nativeAD =new NativeAD();
+            List urls =new ArrayList();
+            urls.add(nurl);
+            urls.add(curl);
+            nativeAD.setImptrackers(urls);// 展示曝光URL数组
+
+            LJLink ljLink =new LJLink();//	点击跳转URL地址(落地页)
+            ljLink.setUrl("https://www.shuzilm.cn/");//落地页
+            ljLink.setClicktrackers(urls);
+            ljLink.setAction(2);
+            nativeAD.setLink(ljLink);
+
+            List<LJEvent> ljEvents= new ArrayList<>();
+            LJEvent event =new LJEvent();
+            event.setV("0");
+            event.setVm(urls);
+            ljEvents.add(event);
+            nativeAD.setEvent(ljEvents);
+
+            List<LJAssets> ljAssetsList =new ArrayList<>();
+            LJAssets assetsTitle =new LJAssets();
+            assetsTitle.setId(1);
+            LJNativeTitle ljNativeTitle = new LJNativeTitle();
+            ljNativeTitle.setText("数盟测试");
+            assetsTitle.setTitle(ljNativeTitle);
+            ljAssetsList.add(assetsTitle);
+
+
+            LJAssets assetsData =new LJAssets();
+            LJNativeData  ljNativeData= new LJNativeData();
+            assetsData.setId(2);
+            ljNativeData.setValue("数盟测试报文不知道对不对");
+            assetsData.setData(ljNativeData);
+            ljAssetsList.add(assetsData);
+
+
+
+            LJAssets assetsImg =new LJAssets();
+            LJNativeImg  ljNativeImg= new LJNativeImg();
+            String imgUrl ="http://dp.test.zhiheworld.com/m/mrdf_320x50.jpg";
+            List<String> imgUrls =new ArrayList<>();
+            imgUrls.add(imgUrl);
+            ljNativeImg.setUrls(imgUrls);
+            assetsImg.setId(5);
+            assetsImg.setImg(ljNativeImg);
+            ljAssetsList.add(assetsImg);
+            nativeAD.setAssets(ljAssetsList);
+
+            ljNativeResponse.setNativead(nativeAD);
+            String nativeADJsonString = JSON.toJSONString(ljNativeResponse);
+            log.debug("nativeADJsonString:{}",nativeADJsonString);
+            String encodeString = URLEncoder.encode(nativeADJsonString.trim());
+            log.debug("encodeString:{}",encodeString);
+            bid.setAdm(encodeString);// 广告物料数据
+        }
+        Double biddingPrice = duFlowBean.getBiddingPrice() * 100;
+        Float price = Float.valueOf(String.valueOf(biddingPrice));
+        bid.setPrice(price);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        bid.setCrid(duFlowBean.getCreativeUid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
+
+
         LJResponseExt ljResponseExt = new LJResponseExt();
         ljResponseExt.setLdp(duFlowBean.getLandingUrl());//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
         //曝光监测数组

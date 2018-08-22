@@ -1,3 +1,4 @@
+
 package cn.shuzilm.backend.rtb;
 
 import cn.shuzilm.bean.control.AdBean;
@@ -69,7 +70,7 @@ public class RuleMatching {
 
 	public RuleMatching(String[] nodes) {
 		MDC.put("sift", "rtb");
-		redis = new AsyncRedisClient(nodes);
+		//redis = new AsyncRedisClient(nodes);
 		jedis = JedisManager.getInstance().getResource();
 
 		AdBean ad1 = new AdBean();
@@ -126,7 +127,7 @@ public class RuleMatching {
 
 		Material material = new Material();
 		material.setUid("1");
-		material.setType("banner");
+		material.setType("feed");
 		material.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
 		material.setWidth(340);
 		material.setHeight(70);
@@ -138,16 +139,16 @@ public class RuleMatching {
 		material01.setHeight(50);
 		Material material02 = new Material();
 		material02.setUid("02");
-		material02.setType("banner");
+		material02.setType("fullscreen");
 		material02.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material02.setWidth(350);
-		material02.setHeight(80);
+		material02.setWidth(320);
+		material02.setHeight(50);
 		Material material03 = new Material();
 		material03.setUid("03");
-		material03.setType("banner");
+		material03.setType("interstitial");
 		material03.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
-		material03.setWidth(360);
-		material03.setHeight(90);
+		material03.setWidth(320);
+		material03.setHeight(50);
 
 		List<Material> materialList = new ArrayList<Material>();
 		materialList.add(material);
@@ -160,7 +161,7 @@ public class RuleMatching {
 
 		ad1.setCreativeList(creativeList);
 
-		ad1.setPrice(100);
+		ad1.setPrice(10);
 		int[][]timeSchedulingArr = {{0,11},{0,12},{0,13},{0,14}};
 		ad1.setTimeSchedulingArr(timeSchedulingArr);
 		creative.setLink(curl);
@@ -218,25 +219,25 @@ public class RuleMatching {
 		creative2.setName("广告素材A");
 		Material material2 = new Material();
 		material2.setUid("2");
-		material2.setType("banner");
+		material2.setType("feed");
 		material2.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
 		material2.setWidth(820);
 		material2.setHeight(630);
 		Material material21 = new Material();
 		material21.setUid("21");
-		material21.setType("banner");
+		material21.setType("feed");
 		material21.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
 		material21.setWidth(390);
 		material21.setHeight(100);
 		Material material22 = new Material();
 		material22.setUid("22");
-		material22.setType("banner");
+		material22.setType("feed");
 		material22.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
 		material22.setWidth(360);
 		material22.setHeight(70);
 		Material material23 = new Material();
 		material23.setUid("23");
-		material23.setType("banner");
+		material23.setType("feed");
 		material23.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
 		material23.setWidth(320);
 		material23.setHeight(50);
@@ -278,7 +279,7 @@ public class RuleMatching {
 			for(int q=0;q<materialList1.size();q++){
 				Material m = new Material();
 				m.setUid(Math.random()+"");
-				m.setType("banner");
+				m.setType("feed");
 				m.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
 
 				m.setWidth(320+k);
@@ -293,7 +294,7 @@ public class RuleMatching {
 //				Material m1 = new Material();
 //				BeanUtils.copyProperties(m1, m);
 //				m.setUid(Math.random()+"");
-//				m.setType("banner");
+//				m.setType("feed");
 //				m.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
 //
 //				material22.setWidth(800+k);
@@ -362,7 +363,6 @@ public class RuleMatching {
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
 	 *
-	 * @param tagBean
 	 *            标签
 	 * @param adType
 	 *            广告类型
@@ -385,8 +385,8 @@ public class RuleMatching {
 			return null;
 		}
 		// 取出标签
-		String tagJson = redis.getAsync(deviceId);
-		//String tagJson = jedis.get(deviceId);
+		//String tagJson = redis.getAsync(deviceId);
+		String tagJson = jedis.get(deviceId);
 		TagBean tagBean = JSON.parseObject(tagJson,TagBean.class);
 		//TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
 
@@ -566,18 +566,21 @@ public class RuleMatching {
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material,deviceId, ad, tagBean,widthHeightRatio);
 		} else {
-			System.out.println("machedAdlist="+machedAdList.size());
+			System.out.println("machedAdlist=" + machedAdList.size());
 			long startOrder = System.currentTimeMillis();
-			gradeOrderByPremiumStrategy(machedAdList);
-
-			gradeOrderOtherParaStrategy(machedAdList);
-			LOG.info("排序花费时间:" + (System.currentTimeMillis() - startOrder));
-
-			AdBean ad = gradeByRandom(machedAdList);
-			// 封装返回接口引擎数据
+			AdBean ad = null;
+			if (machedAdList.size() == 1) {
+				ad = machedAdList.get(0);
+			} else {
+				gradeOrderByPremiumStrategy(machedAdList);
+				gradeOrderOtherParaStrategy(machedAdList);
+				ad = gradeByRandom(machedAdList);
+			}
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
+			LOG.info("排序花费时间:" + (System.currentTimeMillis() - startOrder));
+			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
-			targetDuFlowBean = packageDUFlowData(material,deviceId, ad, tagBean,widthHeightRatio);
+			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio);
 		}
 
 		return targetDuFlowBean;
@@ -771,4 +774,5 @@ public class RuleMatching {
 	}
 
 }
+
 

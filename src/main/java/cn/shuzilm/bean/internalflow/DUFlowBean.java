@@ -60,7 +60,7 @@ public class DUFlowBean implements Serializable {
     private String appPackageName;//应用包名称（统计需求  媒体）
     private String appVersion;//应用版本
     private String dealid;//私有交易id，判断是否属于私有交易
-    private Long winNoticeTime;//1533628505531 对账时间戳
+    private Long   winNoticeTime;//1533628505531 对账时间戳
     private String landingUrl;//点击广告之后的跳转url
     private String linkUrl;//点击目标链接
     private String tracking;//曝光监测链接
