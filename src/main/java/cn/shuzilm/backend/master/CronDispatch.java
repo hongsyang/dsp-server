@@ -50,7 +50,7 @@ public class CronDispatch {
         AdFlowControl.getInstance().resetHourMonitor();
         //  每天触发
         AdFlowControl.getInstance().resetDayMonitor();
-        //10 min 触发
+        //  10 min 触发
         AdFlowControl.getInstance().loadAdInterval(true);
 
 

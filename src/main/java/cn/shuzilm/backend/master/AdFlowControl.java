@@ -12,10 +12,7 @@ import org.slf4j.MDC;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * 广告流量控制
@@ -118,6 +115,7 @@ public class AdFlowControl {
         mapThresholdHour = new HashMap<>();
         mapAdGroup = new HashMap<>();
         mapMonitorTotal = new HashMap<>();
+        reportMapHour = new HashMap<>();
 //        adviserMap = new HashMap<>();
 
 
@@ -337,8 +335,10 @@ public class AdFlowControl {
 
     /**
      * 每隔 10 分钟更新一次天和小时的阀值
+     * 返回 余额为 0 的广告
      */
-    private void updateIndicator(ResultList adList) {
+    private HashSet<String> updateIndicator(ResultList adList) {
+        HashSet<String> lowBalanceAdSet = new HashSet<>();
         try {
             for (ResultMap map : adList) {
                 String auid = map.getString("uid");
@@ -347,6 +347,10 @@ public class AdFlowControl {
                 ResultMap balanceMap = taskService.queryAdviserAccountById(adviserId);
                 //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
+                //如果余额小于 10 块钱，则不进行广告投放
+                if(balance.doubleValue() < 10){
+                    lowBalanceAdSet.add(auid);
+                }
                 //广告主账户的每日限额
                 BigDecimal quotaMoneyPerDay = balanceMap.getBigDecimal("quota_amount");
 
@@ -395,8 +399,10 @@ public class AdFlowControl {
                         report.setMoneyQuota(balance);
                 }
             }
+            return lowBalanceAdSet;
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
 
     }
@@ -447,7 +453,7 @@ public class AdFlowControl {
             reportMapTotal = taskService.statAdCostTotal();
 
             //更新监视器阀值信息
-            updateIndicator(adList);
+            HashSet<String> lowBalanceAdList = updateIndicator(adList);
 
             int counter = 0;
 
@@ -456,6 +462,10 @@ public class AdFlowControl {
                 AdBean ad = new AdBean();
                 ad.setAdUid(map.getString("uid"));
                 String adUid = ad.getAdUid();
+                if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
+                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
+                    continue;
+                }
                 if (isInitial) {
                     if (reportMapHour.size() > 0) {
                         ReportBean report = reportMapHour.get(adUid);
@@ -543,9 +553,9 @@ public class AdFlowControl {
             adProperty.handle();
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-            for (int i = 0; i < 10000 ; i++) {
+//            for (int i = 0; i < 10000 ; i++) {
                 dispatchTask();
-            }
+//            }
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 分发完毕。。。");
             myLog.info("主控： 共有 " + mapAd.keySet().size() + " 个广告在运行");

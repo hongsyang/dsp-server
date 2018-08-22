@@ -44,17 +44,18 @@ public class AdPropertyHandler {
             AdFlowStatus statusHour = mapMonitorHour.get(adUid);
             // 计算点击率 通过小时反馈的曝光和点击情况计算而来
             // 点击率 = 点击次数  / 曝光次数
-            double clickRate = statusHour.getClickNums() * 1.0 / statusHour.getWinNums();
-            property.setCtrScore(clickRate);
-
+            if(statusHour.getWinNums() > 0 ){
+                double clickRate = statusHour.getClickNums() * 1.0 / statusHour.getWinNums();
+                property.setCtrScore(clickRate);
+            }
             //计算该广告消耗金额 根据 当前小时的耗费金额得来
             //曝光进度 = 当前实际耗费的金额 / 当前广告设定的限额 （如果当前广告设定限额为 0 ，则以该账户的每日限额为准， 如果每日限额为 0 ， 则以余额为准）
             ReportBean report = reportMapHour.get(adUid);
-            property.setImpProcess(report.getCost().doubleValue() / ad.getQuotaAmount().doubleValue());
-
-            //计算广告剩余金额因子 = 每小时的限额 - 当前小时耗费的金额
-            property.setMoneyLeft(ad.getQuotaAmount().doubleValue() - report.getCost().doubleValue());
-
+            if(report != null){
+                property.setImpProcess(report.getCost().doubleValue() / ad.getQuotaAmount().doubleValue());
+                //计算广告剩余金额因子 = 每小时的限额 - 当前小时耗费的金额
+                property.setMoneyLeft(ad.getQuotaAmount().doubleValue() - report.getCost().doubleValue());
+            }
             map.put(adUid,property);
             //将计算好的因子打分写入到当前广告对象中
             ad.setPropertyBean(property);

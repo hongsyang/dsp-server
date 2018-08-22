@@ -19,7 +19,7 @@ public class RtbConstants {
 	
 	
 	private static RtbConstants con;
-	private static ConcurrentHashMap<String, Float> rtbMap = null;
+	private static ConcurrentHashMap<String, Double> rtbMap = null;
 	private Constants constant;
 
     public static RtbConstants getInstance(){
@@ -33,18 +33,18 @@ public class RtbConstants {
     
     private RtbConstants(){
     	constant = Constants.getInstance();
-    	rtbMap = new ConcurrentHashMap<String, Float>();
-    	rtbMap.put(IMP_PROCESS, Float.parseFloat(constant.getConf(IMP_PROCESS)));
-    	rtbMap.put(CREATIVE_QUALITY, Float.parseFloat(constant.getConf(CREATIVE_QUALITY)));
-    	rtbMap.put(MONEY_LEFT, Float.parseFloat(constant.getConf(MONEY_LEFT)));
-    	rtbMap.put(ADVERTISER_SCORE, Float.parseFloat(constant.getConf(ADVERTISER_SCORE)));
-    	rtbMap.put(CTR_SCORE, Float.parseFloat(constant.getConf(CTR_SCORE)));
-    	rtbMap.put(LOCATION, Float.parseFloat(constant.getConf(LOCATION)));
-    	rtbMap.put(DEMOGRAPHIC, Float.parseFloat(constant.getConf(DEMOGRAPHIC)));
-    	rtbMap.put(COMPANY, Float.parseFloat(constant.getConf(COMPANY)));
+    	rtbMap = new ConcurrentHashMap<String, Double>();
+    	rtbMap.put(IMP_PROCESS, Double.parseDouble(constant.getConf(IMP_PROCESS)));
+    	rtbMap.put(CREATIVE_QUALITY, Double.parseDouble(constant.getConf(CREATIVE_QUALITY)));
+    	rtbMap.put(MONEY_LEFT, Double.parseDouble(constant.getConf(MONEY_LEFT)));
+    	rtbMap.put(ADVERTISER_SCORE, Double.parseDouble(constant.getConf(ADVERTISER_SCORE)));
+    	rtbMap.put(CTR_SCORE, Double.parseDouble(constant.getConf(CTR_SCORE)));
+    	rtbMap.put(LOCATION, Double.parseDouble(constant.getConf(LOCATION)));
+    	rtbMap.put(DEMOGRAPHIC, Double.parseDouble(constant.getConf(DEMOGRAPHIC)));
+    	rtbMap.put(COMPANY, Double.parseDouble(constant.getConf(COMPANY)));
     }
     
-    public float getRtbVar(String key){
+    public double getRtbVar(String key){
     	return rtbMap.get(key);
     }
 }

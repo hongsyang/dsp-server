@@ -14,19 +14,6 @@ import java.util.List;
  */
 @Getter
 public class AdBean implements ICommand  {
-    //Apache Log Config
-//日志版本||URL||参数||请求时间||IP地址||UID类型||UID值||模式MODE||ADX来源||广告位ID||广告ID||资源ID||创意ID||匹配标签||广告单价||附加参数||状态码||UserAgent/设备属性||受众/环境参数||Refer/bundle ID||服务器ID||响应时间（微秒）||返回字节数||排错信息
-//(LoadBalancer) LogFormat "1||%U||%q||%{%Y%m%d%H%M%S}t||%{x-forwarded-for}i||%{rec}n||%{uid}n||%{mode}n||%{adx}n||%{slot}n||%{ad}n||%{resource}n||%{material}n||%{tag}n||%{price_enc}n||%{ext}n||%>s||%{User-Agent}i||-||%{Referer}i||%{server}n||%D||%B||%{debug}n" combined
-//(Direct) LogFormat "1||%U||%q||%{%Y%m%d%H%M%S}t||%a||%{rec}n||%{uid}n||%{mode}n||%{adx}n||%{slot}n||%{ad}n||%{resource}n||%{material}n||%{tag}n||%{price_enc}n||%{ext}n||%>s||%{User-Agent}i||-||%{Referer}i||%{server}n||%D||%B||%{debug}n" combined
-
-
-//    URL：包含请求的exchange来源等关键标识字段，REST风格。区别（impression和click在此部分）
-//    参数：“?”后面的URL传参，包含变量宏，仅作原始记录
-//    UID类型：包含IMEI/MAC/IDFA/ADID/Cookie UID，仅记录一种UID
-//    广告位ID：ADX/SSP给出的广告位标识
-//    广告单价：加密格式，需要根据来源ADX进行解密
-//    Refer/Bundle ID：如果存在，直接记录。
-//    ext附加参数：参数传递宏
 
     /**
      * 人群包列表，支持一个广告对应多个人群包
