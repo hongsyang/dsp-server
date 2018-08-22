@@ -34,6 +34,7 @@ public class AsyncRedisClient {
         RedisClusterClient clusterClient = RedisClusterClient.create(nodeList);
         connection = clusterClient.connect();
 
+
     }
 
     public static void main(String[] args) {

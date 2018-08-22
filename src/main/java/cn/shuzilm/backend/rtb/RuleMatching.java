@@ -70,7 +70,7 @@ public class RuleMatching {
 
 	public RuleMatching(String[] nodes) {
 		MDC.put("sift", "rtb");
-		//redis = new AsyncRedisClient(nodes);
+		redis = new AsyncRedisClient(nodes);
 		jedis = JedisManager.getInstance().getResource();
 
 		AdBean ad1 = new AdBean();
@@ -646,10 +646,10 @@ public class RuleMatching {
 				String type1 = audience1.getType().toUpperCase();
 				String type2 = audience2.getType().toUpperCase();
 				// 得到溢价比
-				float premiumRatio1 = constant.getRtbVar(type1);
-				float premiumRatio2 = constant.getRtbVar(type2);
-				float realPrice1 = (premiumRatio1) * o1.getPrice();
-				float realPrice2 = (premiumRatio2) * o2.getPrice();
+				double premiumRatio1 = constant.getRtbVar(type1);
+				double premiumRatio2 = constant.getRtbVar(type2);
+				double realPrice1 = (premiumRatio1) * o1.getPrice();
+				double realPrice2 = (premiumRatio2) * o2.getPrice();
 				if (realPrice1 > realPrice2) {
 					return -1;
 				}
@@ -674,13 +674,13 @@ public class RuleMatching {
 			public int compare(AdBean o1, AdBean o2) {
 				AdPropertyBean property1 = o1.getPropertyBean();
 				AdPropertyBean property2 = o2.getPropertyBean();
-				float score1 = property1.getImpProcess() * constant.getRtbVar(RtbConstants.IMP_PROCESS)
+				double score1 = property1.getImpProcess() * constant.getRtbVar(RtbConstants.IMP_PROCESS)
 						+ property1.getCreativeQuality() * constant.getRtbVar(RtbConstants.CREATIVE_QUALITY)
 						+ property1.getMoneyLeft() * constant.getRtbVar(RtbConstants.MONEY_LEFT)
 						+ property1.getAdvertiserScore() * constant.getRtbVar(RtbConstants.ADVERTISER_SCORE)
 						+ property1.getCtrScore() * constant.getRtbVar(RtbConstants.CTR_SCORE);
 
-				float score2 = property2.getImpProcess() * constant.getRtbVar(RtbConstants.IMP_PROCESS)
+				double score2 = property2.getImpProcess() * constant.getRtbVar(RtbConstants.IMP_PROCESS)
 						+ property2.getCreativeQuality() * constant.getRtbVar(RtbConstants.CREATIVE_QUALITY)
 						+ property2.getMoneyLeft() * constant.getRtbVar(RtbConstants.MONEY_LEFT)
 						+ property2.getAdvertiserScore() * constant.getRtbVar(RtbConstants.ADVERTISER_SCORE)

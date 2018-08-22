@@ -1,16 +1,23 @@
-package cn.shuzilm.util;
+package cn.shuzilm;
 
 
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.base64.Base64;
 import cn.shuzilm.util.base64.Decrypter;
 import com.alibaba.fastjson.JSON;
 import com.yao.util.bean.BeanUtil;
 import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.cluster.RedisClusterClient;
+import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
+import io.lettuce.core.cluster.models.partitions.Partitions;
+import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
+import io.lettuce.core.resource.ClientResources;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.Base64Utils;
 import redis.clients.jedis.Jedis;
@@ -22,23 +29,42 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 
 public class Test {
+    private StatefulRedisClusterConnection<String, String> connection = null;
     public static void main(String[] args) {
 //        String adm="{\"nativead\":{\"imptrackers\":[\"http://test.xxx.com?id=${AUCTION_ID}&bidid=${AUCTION_BID_ID}&impid=${AUCTION_IMP_ID}&price=${AUCTION_PRICE}\",\"http://a.com/a\",\"http://b.com/b\"],\"link\":{\"url\":\"deeplink://deeplink/url/into/app\",\"clicktrackers\":[\"http://a.com/a\",\"http://b.com/b\"]},\"event\":[{\"vm\":[\"http://test1\",\"http://test2\"],\"v\":0}],\"assets\":[{\"id\":1,\"title\":{\"text\":\"InstallBOA\"}},{\"id\":2,\"data\":{\"value\":5}},{\"id\":3,\"img\":{\"url\":[\"http://cdn.mobad.com/ad.png\",\"http://img2.com\"],\"w\":1200,\"h\":627}},{\"id\":4,\"video\":{\"url\":\"http://video.com\",\"cover_img_url\":\"http://img.com\",\"w\":640,\"h\":480,\"duration\":15}},{\"id\":5,\"data\":{\"value\":\"Click\"}}]}}";
 //        String s = UrlEncoded.encodeString(adm);
 //        System.out.println(s);
+        String nodes[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
+        List<RedisURI> nodeList = new ArrayList<>();
+        for(String node : nodes){
+            String[] nodeArr = node.split(",");
+            RedisURI nodeUri = RedisURI.create(nodeArr[0], Integer.parseInt(nodeArr[1]));
+            nodeList.add(nodeUri);
+        }
+
+        RedisClusterClient clusterClient = RedisClusterClient.create(nodeList);
+        ClientResources clusterClientResources = clusterClient.getResources();
+        Partitions partitions = clusterClient.getPartitions();
+        List<RedisClusterNode> partitionsList = partitions.getPartitions();
+        for (RedisClusterNode partition : partitions) {
+            System.out.println(partition);
+        }
+        System.out.println(clusterClientResources);
 
 //      commands.hset("3D8A278F33E4F97181DF1EAEFE500D05", "temp", ss);
-        double f = 111231.4545;
-        NumberFormat nf = NumberFormat.getNumberInstance();
-        //digits 显示的数字位数 为格式化对象设定小数点后的显示的最多位,显示的最后位是舍入的
-        nf.setMaximumFractionDigits(2);
-        String format = nf.format(f);
-        System.out.println(nf.format(f));
+//        double f = 111231.4545;
+//        NumberFormat nf = NumberFormat.getNumberInstance();
+//        digits 显示的数字位数 为格式化对象设定小数点后的显示的最多位,显示的最后位是舍入的
+//        nf.setMaximumFractionDigits(2);
+//        String format = nf.format(f);
+//        System.out.println(nf.format(f));
 //        String ekey= "pkoI14zSBMgD8hK4yd4nQpgBa7Aiqqgg";
 //        String ikey= "PxHFG8iUh8cBAnuoU8eNOaovDIaXVMHy";
 //        String price="-DeoHWUBAABecRQOcCgIOHv03XBETdgjMHHbSA";

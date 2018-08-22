@@ -10,7 +10,9 @@ import cn.shuzilm.bean.lj.response.*;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
+import cn.shuzilm.util.AsyncRedisClient;
 import com.alibaba.fastjson.JSON;
+import io.lettuce.core.RedisClient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
@@ -59,8 +61,6 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             Integer width = null;//广告位的宽
             Integer height = null;//广告位的高
-
-
             Integer showtype = userImpression.getExt().getShowtype();//广告类型
             String adType = convertAdType(showtype); //对应内部 广告类型
 
@@ -106,6 +106,9 @@ public class LingJiRequestServiceImpl implements RequestService {
                 }
             }
             String nodes[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
+            AsyncRedisClient redisClient = new AsyncRedisClient(nodes);
+
+
             //初步过滤规则开关
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
                 if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, ADX_NAME)) {
