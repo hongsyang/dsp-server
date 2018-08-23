@@ -130,6 +130,12 @@ public class AdBean implements ICommand  {
      */
     @Setter
     private long timestamp;
-    
+
+    /**
+     *  广告的可拖欠额度
+     */
+    @Setter
+    private int moneyArrears;
+
 
 }
