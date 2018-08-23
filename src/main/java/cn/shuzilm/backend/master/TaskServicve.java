@@ -86,10 +86,34 @@ public class TaskServicve extends Service {
             if(rm == null)
                 return null;
             adver.setAgencyUid(rm.getString("agency_uid"));
+            AgencyBean agencyBean = queryAgencyByAdviserUid(adver.getAgencyUid());
+            adver.setAgencyBean(agencyBean);
             adver.setName(rm.getString("name"));
             adver.setUid(rm.getString("uid"));
             return adver;
         } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public AgencyBean queryAgencyByAdviserUid(String agencyUid){
+
+        String sql = "select * from agency where uid = '" + agencyUid +"'";
+        try{
+            AgencyBean bean = new AgencyBean();
+            ResultMap rm =  select.selectSingle(sql);
+            if(rm == null)
+                return null;
+            bean.setUid(rm.getString("uid"));
+            bean.setAbbr(rm.getString("abbr"));
+            bean.setCompany(rm.getString("company"));
+            bean.setName(rm.getString("name"));
+            bean.setRebate(rm.getFloat("rebate"));
+            bean.setRemark(rm.getString("remark"));
+            return bean;
+
+        }catch(SQLException e){
             e.printStackTrace();
             return null;
         }

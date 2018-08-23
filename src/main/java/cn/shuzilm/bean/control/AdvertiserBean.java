@@ -8,6 +8,8 @@ public class AdvertiserBean implements ICommand{
     private String uid;
     private String name;
 
+    private AgencyBean agencyBean;
+
     private String agencyUid;
     /**
      * 每天消耗金额总量
@@ -29,6 +31,14 @@ public class AdvertiserBean implements ICommand{
      * 广告主分级
      */
     private int grade;
+
+    public AgencyBean getAgencyBean() {
+        return agencyBean;
+    }
+
+    public void setAgencyBean(AgencyBean agencyBean) {
+        this.agencyBean = agencyBean;
+    }
 
     public int getGrade() {
         return grade;
