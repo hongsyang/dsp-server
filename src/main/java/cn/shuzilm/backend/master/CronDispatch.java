@@ -45,7 +45,7 @@ public class CronDispatch {
 //        CronDispatch.startTimer(0);
 //        System.out.println();
         //    // 5 s 触发
-//    pullAndUpdateTask();
+        AdFlowControl.getInstance().pullAndUpdateTask();
         //  每小时触发
         AdFlowControl.getInstance().resetHourMonitor();
         //  每天触发
