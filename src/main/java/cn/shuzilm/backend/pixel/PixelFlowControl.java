@@ -1,9 +1,6 @@
 package cn.shuzilm.backend.pixel;
 
-import java.util.ArrayList;
-
 import cn.shuzilm.backend.master.MsgControlCenter;
-import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.common.Constants;
 
@@ -12,19 +9,23 @@ import cn.shuzilm.common.Constants;
  */
 public class PixelFlowControl {
     private static PixelFlowControl pixcel = null;
+    private PixelFlowControl(){
+    }
 
     public static PixelFlowControl getInstance(){
-        if(pixcel == null)
-            pixcel = new PixelFlowControl();
+        if(pixcel == null){
+            String nodeName = Constants.getInstance().getConf("HOST");
+            pixcel = new PixelFlowControl(nodeName);
+        }
         return pixcel;
     }
     
     private String nodeName;
-    public PixelFlowControl(){
-        this.nodeName = Constants.getInstance().getConf("HOST");;
+    public PixelFlowControl(String nodeName){
+        this.nodeName = nodeName;
     }
 
-    public void sendStatus(AdPixelBean pixel){   	
+    public void sendStatus(AdPixelBean pixel){
         MsgControlCenter.sendPixelStatus(this.nodeName,pixel);
     }
 
@@ -33,13 +34,5 @@ public class PixelFlowControl {
         PixelFlowControl.getInstance().sendStatus(bean);
     }
 
-    /**
-     * 每隔 10 分钟更新一次广告素材或者人群包
-     */
-    public void pullTenMinutes() {
-    	// 从 10 分钟的队列中获得广告素材和人群包
-    	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
-    	
-    }
 
 }
