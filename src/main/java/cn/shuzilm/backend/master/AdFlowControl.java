@@ -384,8 +384,8 @@ public class AdFlowControl {
                     continue;
                 //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
-                //如果余额小于 10 块钱，则不进行广告投放
-                if(balance.doubleValue() < 10){
+                //如果余额小于 200 块钱，则不进行广告投放
+                if(balance.doubleValue() < 200){
                     lowBalanceAdSet.add(auid);
                 }
                 //广告主账户的每日限额
@@ -504,6 +504,7 @@ public class AdFlowControl {
                 ad.setGroupId(groupId);
                 String adUid = ad.getAdUid();
                 if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
+                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false);
                     myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
                     continue;
                 }
