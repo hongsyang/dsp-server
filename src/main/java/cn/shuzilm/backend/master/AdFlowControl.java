@@ -593,6 +593,8 @@ public class AdFlowControl {
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
 
+                // 设置广告的可拖欠的额度
+                ad.setMoneyArrears(map.getInteger("money_arrears"));
 
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
