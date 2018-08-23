@@ -141,6 +141,5 @@ public class AdBean implements ICommand  {
      */
     @Setter
     private long timestamp;
-    
 
 }
