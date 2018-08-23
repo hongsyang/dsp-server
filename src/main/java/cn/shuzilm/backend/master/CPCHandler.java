@@ -18,11 +18,11 @@ public class CPCHandler {
     /**
      * 广告永久的指标监控
      */
-    private static HashMap<String, AdFlowStatus> mapMonitorTotal = null;
+    private static HashMap<String, AdFlowStatus> mapMonitorTotal = new HashMap<>();
     /**
      * 数据库中设定的设计流控指标
      */
-    private static HashMap<String, AdFlowStatus> mapThresholdTotal = null;
+    private static HashMap<String, AdFlowStatus> mapThresholdTotal = new HashMap<>();
 
     /**
      * cpc试投放数量
@@ -126,27 +126,34 @@ public class CPCHandler {
             float price = adBean.getPrice();
             // 广告的可拖欠额度
             int moneyArrears = adBean.getMoneyArrears();
+            myLog.info("CPC结算广告流量控制：点击量：{}，曝光数量：{}，曝光花费：{}，报价：{}，额度： {}",
+                    clickNum, winNum, money, price, moneyArrears);
 
-            if(clickNum >= 0) {
+            if(clickNum > 0) {
                 // 有点击
                 // 每个点击平均产生的费用
                 float clickPrice = money / clickNum;
                 // 大于广告主单个CPC报价，则暂停广告发放
                 if(clickPrice >= price) {
+                    myLog.debug("出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放");
                     return false;
                 }else {
+                    myLog.debug("出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放");
                     return true;
                 }
             }else {
                 // 没有点击
                 // 如果投放完毕
                 if(winNum >= winTotalNums) {
+                    myLog.debug("没有点击，投放完毕，暂停发放");
                     return false;
                 }else {
                     // 超额，暂停广告发放
                     if(money >= moneyArrears) {
+                        myLog.debug("没有点击，未投放完毕，超额，暂停广告投放");
                         return false;
                     }else {
+                        myLog.debug("没有点击，未投放完毕，未超额，继续广告投放");
                         return true;
                     }
                 }
