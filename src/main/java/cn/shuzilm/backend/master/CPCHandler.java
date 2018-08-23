@@ -64,33 +64,26 @@ public class CPCHandler {
 
     /**
      * 更新阈值
-     * @param adList 广告列表
      * @return
      */
-    public boolean updateIndicator(ResultList adList){
-        String auid = "";
-        String name = "";
+    public boolean updateIndicator(){
         AdBean adBean = null;
-        for (ResultMap map : adList) {
+        for (String adUid : adMap.keySet()) {
             try{
-                auid = map.getString("uid");
-                name = map.getString("name");
-
-                adBean = adMap.get(auid);
+                adBean = adMap.get(adUid);
                 if(adBean == null){
-                    myLog.error("未找到广告信息："+auid);
+                    myLog.error("未找到广告信息："+adUid);
                     return false;
                 }
-
                 AdFlowStatus status = new AdFlowStatus();
                 status.reset();
-                status.setUid(auid);
-                status.setName(name);
+                status.setUid(adUid);
+                status.setName(adBean.getName());
                 status.setWinNums(winTotalNums);
                 status.setMoney(adBean.getMoneyArrears());
-                mapThresholdTotal.put(auid, status);
+                mapThresholdTotal.put(adUid, status);
             }catch (Exception e){
-                myLog.error("更新阈值失败，广告id: " + auid, e);
+                myLog.error("更新阈值失败，广告id: " + adUid, e);
                 return false;
             }
         }

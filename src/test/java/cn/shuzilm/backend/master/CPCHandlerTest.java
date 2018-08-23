@@ -21,7 +21,7 @@ public class CPCHandlerTest {
         //加载广告信息
         TaskServicve taskService = new TaskServicve();
         ResultList adList = taskService.queryAdByUpTime(0);
-        cpcHandler.updateIndicator(adList);// 初始化阈值
+        cpcHandler.updateIndicator();// 初始化阈值
         //cpcHandler.checkAvailable("7635434a-7ff2-45f6-9806-09b6d4908e2d");
 
         // case 3: 初始化monitor, 没有初始化阈值
