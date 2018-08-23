@@ -16,6 +16,7 @@ public class RtbConstants {
 	public static String LOCATION = "LOCATION";
 	public static String DEMOGRAPHIC = "DEMOGRAPHIC";
 	public static String COMPANY = "COMPANY";
+	public static String REDIS_CLUSTER_URI = "REDIS_CLUSTER_URI";
 	
 	
 	private static RtbConstants con;
@@ -46,5 +47,9 @@ public class RtbConstants {
     
     public double getRtbVar(String key){
     	return rtbMap.get(key);
+    }
+    
+    public String getRtbStrVar(String key){
+    	return constant.getConf(key);
     }
 }

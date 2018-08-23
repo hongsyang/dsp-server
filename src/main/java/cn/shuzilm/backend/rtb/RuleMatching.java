@@ -66,21 +66,24 @@ public class RuleMatching {
 
 	public static RuleMatching getInstance(String[] nodes) {
 		if (rule == null) {
-			rule = new RuleMatching(nodes);
+			rule = new RuleMatching();
 		}
 		return rule;
 	}
 
-	public RuleMatching(String[] nodes) {
+	public RuleMatching() {
 		MDC.put("sift", "rtb");
+		// 加载标签溢价比和权重
+		constant = RtbConstants.getInstance();
+		String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
+		String nodes [] = nodeStr.split(";");
 		redis = new AsyncRedisClient(nodes);
 		// jedis = JedisManager.getInstance().getResource();
 		rtbIns = RtbFlowControl.getInstance();
 		tagRandom = new Random();
 		adRandom = new Random();
 
-		// 加载标签溢价比和权重
-		constant = RtbConstants.getInstance();
+		
 	}
 
 	/**
@@ -179,19 +182,19 @@ public class RuleMatching {
 		Map<String, AudienceBean> audienceMap = new HashMap<String,AudienceBean>();
 
 		String tagIdStr = tagBean.getTagIdList();
-		String tagIds[] = tagIdStr.split(";");
+		String tagIds[] = tagIdStr.split(",");
 		List<String> tagIdList = Arrays.asList(tagIds);
 
 		String companyIdStr = tagBean.getCompanyIdList();
-		String companyIds[] = companyIdStr.split(";");
+		String companyIds[] = companyIdStr.split(",");
 		List<String> companyIdList = Arrays.asList(companyIds);
 
 		String appPreferenceIdStr = tagBean.getAppPreferenceIds();
-		String appPreferenceIds[] = appPreferenceIdStr.split(";");
+		String appPreferenceIds[] = appPreferenceIdStr.split(",");
 		List<String> appPreferenceIdList = Arrays.asList(appPreferenceIds);
 
 		String brandStr = tagBean.getBrand();
-		String brands[] = brandStr.split(";");
+		String brands[] = brandStr.split(",");
 		List<String> brandList = Arrays.asList(brands);
 		
 		Date date = new Date();
