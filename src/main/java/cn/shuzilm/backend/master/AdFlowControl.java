@@ -291,7 +291,7 @@ public class AdFlowControl {
             if(thresholdGroupMoney != 0 && monitorAdGroup.getMoney() >= thresholdGroupMoney){
                 //广告组金额超限，则发送停止命令，终止该广告投放
                 String reason = "#### 广告组 金额 超限，参考指标：" + thresholdGroupMoney + "\t" + monitorAdGroup.getMoney() + " ###";
-                stopAd(auid, reason, true);
+                stopAd(auid, reason, false);
                 myLog.error(auid + "\t" + reason);
             }
 
