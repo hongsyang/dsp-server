@@ -235,7 +235,7 @@ public class RuleMatching {
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
-			if (creative.getApproved() != 1 || !creative.getApproved_adx().contains(adxName)) {
+			if (creative.getApproved() != 1 || creative.getApproved_adx() == null ||!creative.getApproved_adx().contains(adxName)) {
 				// LOG.debug("广告ID[" + adUid +
 				// "]创意未在ADX["+adxName+"]通过,不参与投放!");
 				continue;
@@ -597,7 +597,7 @@ public class RuleMatching {
 		Set<String> set = new HashSet<String>();
 		set.add("jpg");
 		set.add("gif");
-		rule.match("3D8A278F33E4F97181DF1EAEFE500D05", "banner", 320, 50, true, 5, 5, "adview", set);
+		rule.match("3D8A278F33E4F97181DF1EAEFE500D06", "interstitial", 640, 960, true, 5, 5, "adview", set);
 	}
 
 }

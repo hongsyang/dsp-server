@@ -246,8 +246,8 @@ public class RtbFlowControl {
                         int width = material.getWidth();
                         int height = material.getHeight();
                         int divisor = MathTools.division(width, height);
-                        String materialKey = material.getType() + "_" + width + "_" + +height;
-                        String materialRatioKey = material.getType() + "_" + width / divisor + "/" + height / divisor;
+                        String materialKey = creative.getType() + "_" + width + "_" + +height;
+                        String materialRatioKey = creative.getType() + "_" + width / divisor + "/" + height / divisor;
 
                         if (!mapAdMaterial.containsKey(materialKey)) {
                             List<String> uidList = new ArrayList<String>();
@@ -348,7 +348,7 @@ public class RtbFlowControl {
         AdBean adBean = mapAd.get(auid);
         if (adBean != null) {
             int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
-            
+            if(timeSchedulingArr != null){
             for (int i = 0; i < timeSchedulingArr.length; i++) {
                 if (weekNum != i)
                     continue;
@@ -361,6 +361,7 @@ public class RtbFlowControl {
                         }
                     }
                 }
+            }
             }
         }
         return true;
