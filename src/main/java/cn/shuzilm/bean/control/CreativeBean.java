@@ -10,6 +10,7 @@ import lombok.Setter;
  * 关联创意
  */
 public class CreativeBean implements ICommand {
+	private static final long serialVersionUID = -8013476872835494892l;
     private String uid;
     private String name;
     private String title;
