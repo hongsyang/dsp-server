@@ -5,6 +5,7 @@ package cn.shuzilm.bean.control;
  * 广告主
  */
 public class AdvertiserBean implements ICommand{
+	private static final long serialVersionUID = 2551452311430172850l;
     private String uid;
     private String name;
 
