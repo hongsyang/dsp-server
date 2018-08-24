@@ -22,6 +22,8 @@ public class CreativeBean implements ICommand {
     private String brand;
     private String domain;
     
+    private String type;
+    
     private List<Material> materialList;//物料集合
     
     private int approved;//是否通过审批（0:待审批/1:通过/-1:拒绝）
@@ -181,6 +183,14 @@ public class CreativeBean implements ICommand {
 
 	public void setApproved_adx(String approved_adx) {
 		this.approved_adx = approved_adx;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
     
 }

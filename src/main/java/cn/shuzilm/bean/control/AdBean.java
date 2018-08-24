@@ -14,6 +14,11 @@ import java.util.List;
  */
 @Getter
 public class AdBean implements ICommand  {
+    /**
+     * 广告允许的最大拖欠额度，单位：元
+     */
+    @Setter
+    private int moneyArrears;
 
     /**
      * 人群包列表，支持一个广告对应多个人群包
@@ -76,6 +81,12 @@ public class AdBean implements ICommand  {
     private List<CreativeBean> creativeList;
 
     /**
+     * 出价模式（文本cpm/cpc）
+     */
+    @Setter
+    private String mode;
+
+    /**
      * 出价
      */
     @Setter
@@ -130,6 +141,5 @@ public class AdBean implements ICommand  {
      */
     @Setter
     private long timestamp;
-    
 
 }

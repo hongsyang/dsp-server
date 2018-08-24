@@ -86,10 +86,34 @@ public class TaskServicve extends Service {
             if(rm == null)
                 return null;
             adver.setAgencyUid(rm.getString("agency_uid"));
+            AgencyBean agencyBean = queryAgencyByAdviserUid(adver.getAgencyUid());
+            adver.setAgencyBean(agencyBean);
             adver.setName(rm.getString("name"));
             adver.setUid(rm.getString("uid"));
             return adver;
         } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public AgencyBean queryAgencyByAdviserUid(String agencyUid){
+
+        String sql = "select * from agency where uid = '" + agencyUid +"'";
+        try{
+            AgencyBean bean = new AgencyBean();
+            ResultMap rm =  select.selectSingle(sql);
+            if(rm == null)
+                return null;
+            bean.setUid(rm.getString("uid"));
+            bean.setAbbr(rm.getString("abbr"));
+            bean.setCompany(rm.getString("company"));
+            bean.setName(rm.getString("name"));
+            bean.setRebate(rm.getDouble("rebate"));
+            bean.setRemark(rm.getString("remark"));
+            return bean;
+
+        }catch(SQLException e){
             e.printStackTrace();
             return null;
         }
@@ -112,17 +136,18 @@ public class TaskServicve extends Service {
             creativeBean.setBrand(cMap.getString("brand"));
             creativeBean.setDesc(cMap.getString("text"));
             creativeBean.setDescLong(cMap.getString("text_long"));
-            creativeBean.setDescShort(cMap.getString("text_short"));
+//            creativeBean.setDescShort(cMap.getString("text_short"));
             creativeBean.setDomain(cMap.getString("brand_domain"));
             creativeBean.setTitle(cMap.getString("title"));
             creativeBean.setTitleLong(cMap.getString("title_long"));
-            creativeBean.setTitleShort(cMap.getString("title_short"));
+//            creativeBean.setTitleShort(cMap.getString("title_short"));
             creativeBean.setLink_type(Integer.parseInt(cMap.getString("link_type")));
             creativeBean.setLink(cMap.getString("link_uri"));
             creativeBean.setLanding(cMap.getString("landing_uri"));
             creativeBean.setTracking(cMap.getString("tracking_uri"));
             creativeBean.setApproved(Integer.parseInt(cMap.getString("approved")));
             creativeBean.setApproved_adx(cMap.getString("approved_adx"));
+            creativeBean.setType(cMap.getString("type"));
             return creativeBean;
         } catch (SQLException e) {
             e.printStackTrace();

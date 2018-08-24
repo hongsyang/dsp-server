@@ -20,8 +20,6 @@ import org.apache.commons.lang.StringUtils;
  */
 @Getter
 public class AudienceBean implements ICommand {
-
-	private static final long serialVersionUID = -5959105878383063302l;
     //基本信息
     @Setter
     private String adUid; // 广告id
