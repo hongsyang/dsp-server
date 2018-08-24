@@ -12,6 +12,6 @@ public class AgencyBean {
     private String remark;
     private String company;
     private String abbr; //简称
-    private float rebate;
+    private double rebate;
 
 }

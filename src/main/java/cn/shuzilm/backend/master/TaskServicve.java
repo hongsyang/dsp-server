@@ -109,7 +109,7 @@ public class TaskServicve extends Service {
             bean.setAbbr(rm.getString("abbr"));
             bean.setCompany(rm.getString("company"));
             bean.setName(rm.getString("name"));
-            bean.setRebate(rm.getFloat("rebate"));
+            bean.setRebate(rm.getDouble("rebate"));
             bean.setRemark(rm.getString("remark"));
             return bean;
 
