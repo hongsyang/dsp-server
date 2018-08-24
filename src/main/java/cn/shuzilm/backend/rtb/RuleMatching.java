@@ -110,12 +110,12 @@ public class RuleMatching {
 	 *            广告位支持的文件扩展名列表
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, Material material, Set<String> extSet) {
+			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr) {
 		// 筛选审核通过的物料
 		if (material.getApproved_adx() != null && !material.getApproved_adx().contains(adxName)) {
 			return false;
 		}
-		if (!extSet.contains(material.getExt())) {
+		if (!extStr.contains(material.getExt())) {
 			return false;
 		}
 		if (isResolutionRatio) {
@@ -150,7 +150,7 @@ public class RuleMatching {
 	 *            高度误差
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, Set<String> extSet) {
+			int widthDeviation, int heightDeviation, String adxName, String extStr) {
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
@@ -246,7 +246,7 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			for (Material material : materialList) {
 				if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
-						heightDeviation, adxName, material, extSet)) {
+						heightDeviation, adxName, material, extStr)) {
 					metrialMap.put(ad.getAdUid(), material);
 					filterFlag = true;
 					break;
@@ -595,10 +595,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		Set<String> set = new HashSet<String>();
-		set.add("jpg");
-		set.add("gif");
-		rule.match("3D8A278F33E4F97181DF1EAEFE500D06", "interstitial", 640, 960, true, 5, 5, "adview", set);
+		rule.match("3D8A278F33E4F97181DF1EAEFE500D06", "interstitial", 640, 960, true, 5, 5, "adview", "jpg");
 	}
 
 }
