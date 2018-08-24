@@ -80,8 +80,7 @@ public class RuleMatching {
 		redis = new AsyncRedisClient(nodes);
 		// jedis = JedisManager.getInstance().getResource();
 		rtbIns = RtbFlowControl.getInstance();
-		rtbIns.pullAndUpdateTask();
-		rtbIns.pullTenMinutes();
+		
 		tagRandom = new Random();
 		adRandom = new Random();
 
@@ -157,6 +156,8 @@ public class RuleMatching {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
 			return null;
 		}
+		rtbIns.pullAndUpdateTask();
+		rtbIns.pullTenMinutes();
 		// 取出标签
 		String tagJson = redis.getAsync(deviceId);
 		// String tagJson = jedis.get(deviceId);
