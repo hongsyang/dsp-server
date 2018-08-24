@@ -71,5 +71,6 @@ public class DUFlowBean implements Serializable {
     private String desc;//信息流标题
     private String descShort;//信息流短标题
     private String descLong;//信息流长标题
+    private String mode;//出价模式
 
 }

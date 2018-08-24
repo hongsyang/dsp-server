@@ -591,6 +591,9 @@ public class AdFlowControl {
                 int[][] timeScheduling = TimeSchedulingUtil.timeTxtToMatrix(timeScheTxt);
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
+                
+                //出价模式
+                ad.setMode(map.getString("mode"));
 
                 // 设置广告的可拖欠的额度
                 ad.setMoneyArrears(map.getInteger("money_arrears"));

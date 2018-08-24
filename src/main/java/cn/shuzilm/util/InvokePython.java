@@ -1,10 +1,13 @@
 package cn.shuzilm.util;
 import org.python.util.PythonInterpreter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 
 public class InvokePython {
 
+	private static final Logger LOG = LoggerFactory.getLogger(InvokePython.class);
     private static String readFromStream(InputStream stream){
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(stream));
@@ -28,7 +31,8 @@ public class InvokePython {
             pr.waitFor();
             String error = readFromStream(pr.getErrorStream());
             String info = readFromStream(pr.getInputStream());
-            System.out.println("异常: " + error);
+            if(error != null && !error.trim().equals(""))
+            	LOG.error("异常: " + error);
             return  info;
         }catch(Exception ex){
             ex.printStackTrace();

@@ -13,6 +13,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.alibaba.fastjson.JSON;
+
+import cn.shuzilm.bean.dmp.TagBean;
+
 /**
  * Created by thunders on 2018/7/24.
  * https://github.com/lettuce-io/lettuce-core
@@ -30,33 +34,66 @@ public class AsyncRedisClient {
             RedisURI nodeUri = RedisURI.create(nodeArr[0], Integer.parseInt(nodeArr[1]));
             nodeList.add(nodeUri);
         }
-
         RedisClusterClient clusterClient = RedisClusterClient.create(nodeList);
         connection = clusterClient.connect();
-
     }
+    
+    
 
     public static void main(String[] args) {
-        RedisClient client = RedisClient.create("redis://192.168.1.241");
-        RedisAsyncCommands<String, String> commands = client.connect().async();
-        commands.hset("AA","age","18");
-        commands.hset("AA","income","5000");
-
-        RedisFuture future = commands.get("AA");
-//        RedisFuture<String> futureSet =  commands.set("","");
-
-        String value = null;
-        try {
-
-            Object obj = future.get();
-            System.out.println(obj);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
+//        RedisClient client = RedisClient.create("redis://192.168.1.241");
+//        RedisAsyncCommands<String, String> commands = client.connect().async();
+//        commands.hset("AA","age","18");
+//        commands.hset("AA","income","5000");
+//
+//        RedisFuture future = commands.get("AA");
+////        RedisFuture<String> futureSet =  commands.set("","");
+//
+//        String value = null;
+//        try {
+//
+//            Object obj = future.get();
+//            System.out.println(obj);
+//
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+    	
+    	
+//    	TagBean tagBean = new TagBean();
+//		tagBean.setTagId(123);
+//		float[] work = { 11.11f, 22.22f };
+//		float[] residence = { 33.11f, 44.22f };
+//		float[] activity = { 55.11f, 66.22f };
+//		tagBean.setWork(work);
+//		tagBean.setResidence(residence);
+//		tagBean.setActivity(activity);
+//
+//		tagBean.setProvinceId(6);
+//		tagBean.setCityId(62);
+//		tagBean.setCountyId(737);
+//
+//		tagBean.setIncomeId(2);
+//		tagBean.setAppPreferenceIds("eat food");
+//		tagBean.setPlatformId(1);
+//		tagBean.setBrand("nike");
+//		tagBean.setPhonePrice(3);
+//		tagBean.setNetworkId(2);
+//		tagBean.setCarrierId(4);
+//		tagBean.setAppPreferenceId("app");
+//		tagBean.setTagIdList("222220,333320");
+//		tagBean.setCompanyIdList("123,321,222");
+//		
+//		String ss = JSON.toJSONString(tagBean);
+//    	AsyncRedisClient redis = new AsyncRedisClient(null);
+//    	RedisAdvancedClusterAsyncCommands<String, String> commands = redis.connection.async();
+//    	commands.hset("3D8A278F33E4F97181DF1EAEFE500D05", "temp", ss);
+    	
+//    	String s = redis.getAsync("3D8A278F33E4F97181DF1EAEFE500D05");
+//    	System.out.println(s);
+    	
        /* String[] urls = new String[]{"192.168.1.241","101.200.56.200"};
         AsyncRedisClient client = new AsyncRedisClient(urls,6379);
         String key1 = "180.212.6.151";
@@ -84,7 +121,7 @@ public class AsyncRedisClient {
         RedisFuture<String> future1 = commands.get(deviceId);
         String value = null;
         try {
-            value = future1.get(100, TimeUnit.MILLISECONDS );
+            value = future1.get(100000, TimeUnit.MILLISECONDS );//超时时间修改为100秒
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -94,7 +131,5 @@ public class AsyncRedisClient {
         }
         return value;
     }
-
-
 
 }
