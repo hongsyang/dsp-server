@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Getter
 public class AdBean implements ICommand  {
+	private static final long serialVersionUID = -8449282641404783746l;
     /**
      * 广告允许的最大拖欠额度，单位：元
      */

@@ -19,9 +19,9 @@ public class AdPixelBean implements ICommand {
     private String adName;//可以留空
     private Long winNoticeTime;//1533628505531 时间戳
     /**
-     * 实际耗费的金额
+     * 成本价
      */
-    private Double money;
+    private Double cost;
     /**
      * 实际耗费的量
      */
@@ -35,6 +35,14 @@ public class AdPixelBean implements ICommand {
      */
     private long clickNums;
 
-
+    /**
+     * 最终消耗价
+     */
+    private Double finalCost;
+    
+    /**
+     * 溢价系数
+     */
+    private Double premiumFactor;
 
 }

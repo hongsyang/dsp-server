@@ -10,6 +10,7 @@ import lombok.Setter;
  * 关联创意
  */
 public class CreativeBean implements ICommand {
+	private static final long serialVersionUID = -8013476872835494892l;
     private String uid;
     private String name;
     private String title;
@@ -21,6 +22,8 @@ public class CreativeBean implements ICommand {
 
     private String brand;
     private String domain;
+    
+    private String type;
     
     private List<Material> materialList;//物料集合
     
@@ -181,6 +184,14 @@ public class CreativeBean implements ICommand {
 
 	public void setApproved_adx(String approved_adx) {
 		this.approved_adx = approved_adx;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
     
 }

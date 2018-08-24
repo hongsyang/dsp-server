@@ -59,7 +59,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             log.debug("price解析结果：{}", result);
             String[] split = result.split("_");
             Double money = Double.valueOf(split[0]) / 100;
-            bean.setMoney(money);
+            bean.setCost(money);
             bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块

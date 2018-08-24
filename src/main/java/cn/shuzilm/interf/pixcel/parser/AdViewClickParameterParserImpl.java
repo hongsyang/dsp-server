@@ -52,7 +52,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                 bean.setAdUid(element.getAdUid());
             }
             bean.setHost(configs.getString("HOST"));
-            bean.setMoney(Double.valueOf(urlRequest.get("price")));
+            bean.setCost(Double.valueOf(urlRequest.get("price")));
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的AdViewClickBean：{}", bean);

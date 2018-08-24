@@ -238,6 +238,7 @@ public class RtbFlowControl {
                                 }
                             }
                         }
+                }
                     // 广告内容的更新 ，按照素材的类型和尺寸
                     CreativeBean creative = adBean.getCreativeList().get(0);
                     List<Material> materialList = creative.getMaterialList();
@@ -245,8 +246,8 @@ public class RtbFlowControl {
                         int width = material.getWidth();
                         int height = material.getHeight();
                         int divisor = MathTools.division(width, height);
-                        String materialKey = material.getType() + "_" + width + "_" + +height;
-                        String materialRatioKey = material.getType() + "_" + width / divisor + "/" + height / divisor;
+                        String materialKey = creative.getType() + "_" + width + "_" + +height;
+                        String materialRatioKey = creative.getType() + "_" + width / divisor + "/" + height / divisor;
 
                         if (!mapAdMaterial.containsKey(materialKey)) {
                             List<String> uidList = new ArrayList<String>();
@@ -270,7 +271,6 @@ public class RtbFlowControl {
                             }
                         }
                     }
-                }
             }
                 gridMap.clear();
                 // 将 GPS 坐标加载到 栅格快速比对处理类中
@@ -324,7 +324,7 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid) {
+    public boolean checkAvalable(String auid,int weekNum,int dayNum) {
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
             int commandCode = bean.getCommand();
@@ -348,14 +348,7 @@ public class RtbFlowControl {
         AdBean adBean = mapAd.get(auid);
         if (adBean != null) {
             int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
-            Date date = new Date();
-            String time = dateFm.format(date);
-            System.out.println(time);
-            String splitTime[] = time.split("_");
-            int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
-            int dayNum = Integer.parseInt(splitTime[1]);
-            if (dayNum == 24)
-                dayNum = 0;
+            if(timeSchedulingArr != null){
             for (int i = 0; i < timeSchedulingArr.length; i++) {
                 if (weekNum != i)
                     continue;
@@ -368,6 +361,7 @@ public class RtbFlowControl {
                         }
                     }
                 }
+            }
             }
         }
         return true;
