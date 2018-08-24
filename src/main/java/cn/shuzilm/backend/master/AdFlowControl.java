@@ -576,6 +576,7 @@ public class AdFlowControl {
                 ad.setFrqHour(map.getInteger("frq_hourly"));
                 ad.setPrice(map.getBigDecimal("price").floatValue());
                 ad.setMode(map.getString("mode"));
+                // 设置广告的可拖欠的额度
                 ad.setMoneyArrears(map.getInteger("money_arrears"));
                 ad.setPriority(map.getInteger("priority"));
                 //限额
@@ -592,10 +593,6 @@ public class AdFlowControl {
                 int[][] timeScheduling = TimeSchedulingUtil.timeTxtToMatrix(timeScheTxt);
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
-
-                // 设置广告的可拖欠的额度
-                ad.setMoneyArrears(map.getInteger("money_arrears"));
-
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
