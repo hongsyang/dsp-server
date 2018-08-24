@@ -1,6 +1,8 @@
 package cn.shuzilm.bean.adview.request;
 
+import cn.shuzilm.bean.adview.response.ResponseVideo;
 import lombok.Data;
+import org.geotools.data.FeatureLocking;
 
 import java.io.Serializable;
 /**
@@ -13,12 +15,14 @@ import java.io.Serializable;
 * @Version:        1.0
 */
 @Data
-public class NativeRequestVideo implements Serializable{
+public class NativeRequestVideo extends ResponseVideo implements Serializable {
     private Integer w;//(T)视频广告位宽
     private Integer h;//(T)视频广告位高
     private String[]  mimes;//(F）支持的视频格式。
     private Integer minduration;//(F)视频最短长度-秒数
     private Integer maxduration;//(F)视频最大长度-秒数
     private Integer[]  protocols;//(F)支持的视频广告投放协议，见《AdView移动广告交易平台RTB接口协议》附录6.12
-    private RequestExt ext;//(F) 扩展内容
+//    private RequestExt ext;//(F) 扩展内容
+
+
 }
