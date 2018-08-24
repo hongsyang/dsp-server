@@ -64,7 +64,7 @@ public class RuleMatching {
 	
 	private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
 
-	public static RuleMatching getInstance(String[] nodes) {
+	public static RuleMatching getInstance() {
 		if (rule == null) {
 			rule = new RuleMatching();
 		}
@@ -80,6 +80,8 @@ public class RuleMatching {
 		redis = new AsyncRedisClient(nodes);
 		// jedis = JedisManager.getInstance().getResource();
 		rtbIns = RtbFlowControl.getInstance();
+		rtbIns.pullAndUpdateTask();
+		rtbIns.pullTenMinutes();
 		tagRandom = new Random();
 		adRandom = new Random();
 
@@ -588,6 +590,14 @@ public class RuleMatching {
 			}
 		}
 		return false;
+	}
+	
+	public static void main(String[] args) {
+		RuleMatching rule = RuleMatching.getInstance();
+		Set<String> set = new HashSet<String>();
+		set.add("jpg");
+		set.add("gif");
+		rule.match("3D8A278F33E4F97181DF1EAEFE500D05", "banner", 320, 50, true, 5, 5, "adview", set);
 	}
 
 }

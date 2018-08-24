@@ -238,6 +238,7 @@ public class RtbFlowControl {
                                 }
                             }
                         }
+                }
                     // 广告内容的更新 ，按照素材的类型和尺寸
                     CreativeBean creative = adBean.getCreativeList().get(0);
                     List<Material> materialList = creative.getMaterialList();
@@ -270,7 +271,6 @@ public class RtbFlowControl {
                             }
                         }
                     }
-                }
             }
                 gridMap.clear();
                 // 将 GPS 坐标加载到 栅格快速比对处理类中
