@@ -110,12 +110,15 @@ public class RuleMatching {
 	 *            广告位支持的文件扩展名列表
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr) {
+			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,Set<String> materialSet) {
 		// 筛选审核通过的物料
 		if (material.getApproved_adx() != null && !material.getApproved_adx().contains(adxName)) {
 			return false;
 		}
 		if (!extStr.contains(material.getExt())) {
+			return false;
+		}
+		if(!materialSet.contains(material.getUid())){
 			return false;
 		}
 		if (isResolutionRatio) {
@@ -174,6 +177,7 @@ public class RuleMatching {
 		String widthHeightRatio = width / divisor + "/" + height / divisor;
 		String materialRatioKey = adType + "_" + widthHeightRatio;
 		List<String> auidList = rtbIns.getMaterialRatioMap().get(materialRatioKey);
+		Set<String> materialSet = rtbIns.getMaterialByRatioMap().get(materialRatioKey);
 		if (auidList == null) {
 			LOG.warn("根据[" + materialRatioKey + "]未找到广告!");
 			return null;
@@ -252,7 +256,7 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			for (Material material : materialList) {
 				if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
-						heightDeviation, adxName, material, extStr)) {
+						heightDeviation, adxName, material, extStr,materialSet)) {
 					metrialMap.put(ad.getAdUid(), material);
 					filterFlag = true;
 					break;
@@ -605,7 +609,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "banner", 1280, 720, true, 5, 5, "1", "jpg,gif");
+		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "feed", 320, 50, true, 5, 5, "1", "jpg,gif");
 	}
 
 }

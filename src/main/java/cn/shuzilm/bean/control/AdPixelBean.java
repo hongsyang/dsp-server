@@ -44,5 +44,20 @@ public class AdPixelBean implements ICommand {
      * 溢价系数
      */
     private Double premiumFactor;
+    
+    /**
+     * true 表示允许继续投放 false 表示竞价价格过低，要求提升报价
+     */
+    private boolean isLower;
+    
+    /**
+     * dsp利润
+     */
+    private Double dspProfit;
+    
+    /**
+     * 代理商利润
+     */
+    private Double rebateProfit;
 
 }

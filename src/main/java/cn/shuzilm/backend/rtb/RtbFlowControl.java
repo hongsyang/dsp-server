@@ -66,6 +66,10 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String, List<String>> getMaterialRatioMap() {
         return mapAdMaterialRatio;
     }
+    
+    public ConcurrentHashMap<String, Set<String>> getMaterialByRatioMap() {
+        return mapMaterialRatio;
+    }
 
     public ConcurrentHashMap<String, Set<String>> getAreaMap() {
         return areaMap;
@@ -94,6 +98,11 @@ public class RtbFlowControl {
      * 广告资源的倒置 key: 广告类型 + (广告宽/广告高) value: list<aduid>
      */
     private static ConcurrentHashMap<String, List<String>> mapAdMaterialRatio = null;
+    
+    /**
+     * 广告资源的倒置 key: 广告类型 + (广告宽/广告高) value: set<String>
+     */
+    private static ConcurrentHashMap<String, Set<String>> mapMaterialRatio = null;
 
     /**
      * 省级、地级、县级 map key: 北京市北京市海淀区 河北省廊坊地区广平县 value：aduid
@@ -115,6 +124,7 @@ public class RtbFlowControl {
         demographicMap = new ConcurrentHashMap<>();
         mapAdMaterial = new ConcurrentHashMap<>();
         mapAdMaterialRatio = new ConcurrentHashMap<>();
+        mapMaterialRatio = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
         gridMap = new HashMap<>();
 
@@ -245,6 +255,7 @@ public class RtbFlowControl {
                     for (Material material : materialList) {
                         int width = material.getWidth();
                         int height = material.getHeight();
+                        String materialUid = material.getUid();
                         int divisor = MathTools.division(width, height);
                         String materialKey = creative.getType() + "_" + width + "_" + +height;
                         String materialRatioKey = creative.getType() + "_" + width / divisor + "/" + height / divisor;
@@ -268,6 +279,17 @@ public class RtbFlowControl {
                             List<String> uidList = mapAdMaterialRatio.get(materialRatioKey);
                             if (!uidList.contains(uid)) {
                                 uidList.add(uid);
+                            }
+                        }
+                        
+                        if (!mapMaterialRatio.containsKey(materialRatioKey)) {
+                            Set<String> uidSet = new HashSet<String>();
+                            uidSet.add(materialUid);
+                            mapMaterialRatio.put(materialRatioKey, uidSet);
+                        } else {
+                            Set<String> uidSet = mapMaterialRatio.get(materialRatioKey);
+                            if (!uidSet.contains(materialUid)) {
+                            	uidSet.add(materialUid);
                             }
                         }
                     }
