@@ -15,7 +15,7 @@ public class PixelFlowControlTest {
             bean.setAdUid("7635434a-7ff2-45f6-9806-09b6d4908e2d");
             bean.setType(0);
             bean.setWinNoticeNums(1);
-            bean.setMoney(5.0D);
+            bean.setCost(5.0D);
             PixelFlowControl.getInstance().sendStatus(bean);
         }
         System.out.println("+++++++++++++++++++++++++++++++++++++++");
@@ -27,7 +27,7 @@ public class PixelFlowControlTest {
             bean.setAdUid("a3caf623-bd65-4eec-8ac1-46a4a6c44689");
             bean.setType(0);
             bean.setWinNoticeNums(500);
-            bean.setMoney(4.0D);
+            bean.setCost(4.0D);
             PixelFlowControl.getInstance().sendStatus(bean);
         }
         System.out.println("+++++++++++++++++++++++++++++++++++++++");
@@ -39,7 +39,7 @@ public class PixelFlowControlTest {
             bean.setAdUid("f2cb2fda-caf3-4c24-8bdd-940ac2c74485");
             bean.setType(0);
             bean.setWinNoticeNums(1);
-            bean.setMoney(5.0D);
+            bean.setCost(5.0D);
             PixelFlowControl.getInstance().sendStatus(bean);
         }
 
@@ -58,7 +58,7 @@ public class PixelFlowControlTest {
             bean.setAdUid("f2cb2fda-caf3-4c24-8bdd-940ac2c74485");
             bean.setType(0);
             bean.setWinNoticeNums(1);
-            bean.setMoney(5.0D);
+            bean.setCost(5.0D);
             PixelFlowControl.getInstance().sendStatus(bean);
         }
     }

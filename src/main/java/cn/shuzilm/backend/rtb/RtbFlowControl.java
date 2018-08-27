@@ -47,13 +47,7 @@ public class RtbFlowControl {
         return rtb;
     }
 
-    public static void main(String[] args) {
-        // 从主控节点读取一些数据
-        AdFlowControl.getInstance().loadAdInterval(true);
-        // 测试 RTB 引擎的
-        RtbFlowControl.getInstance().trigger();
 
-    }
 
     public ConcurrentHashMap<String, AdBean> getAdMap() {
         return mapAd;

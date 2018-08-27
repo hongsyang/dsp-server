@@ -1,6 +1,7 @@
-package cn.shuzilm.backend.timing.master;
+package cn.shuzilm.backend.timing.rtb;
 
 import cn.shuzilm.backend.master.AdFlowControl;
+import cn.shuzilm.backend.rtb.RtbFlowControl;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -8,10 +9,10 @@ import org.quartz.JobExecutionException;
 /**
  * Created by thunders on 2018/7/23.
  */
-public class TenMinuteTask implements Job {
+public class RtbTenMinuteTask implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        AdFlowControl.getInstance().loadAdInterval(false);
+        RtbFlowControl.getInstance().pullTenMinutes();
 
     }
 }

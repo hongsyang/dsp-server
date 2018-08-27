@@ -8,10 +8,10 @@ import org.quartz.JobExecutionException;
 /**
  * Created by thunders on 2018/7/23.
  */
-public class TenMinuteTask implements Job {
+public  class RealTask   implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        AdFlowControl.getInstance().loadAdInterval(false);
-
+        AdFlowControl.getInstance().pullAndUpdateTask();
+//        System.out.println("bb");
     }
 }

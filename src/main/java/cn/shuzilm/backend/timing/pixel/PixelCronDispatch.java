@@ -1,4 +1,4 @@
-package cn.shuzilm.backend.timing.master;
+package cn.shuzilm.backend.timing.pixel;
 
 import cn.shuzilm.backend.master.AdFlowControl;
 import org.quartz.*;
@@ -7,12 +7,8 @@ import org.quartz.impl.StdSchedulerFactory;
 /**
  * Created by thunders on 2018/7/23.
  */
-public class CronDispatch {
+public class PixelCronDispatch {
     private static AdFlowControl control = new AdFlowControl();
-
-    public  CronDispatch(){
-
-    }
 
     public static void dispatch(Class<? extends Job> myClass , String cronTime){
         try {
@@ -23,7 +19,7 @@ public class CronDispatch {
             JobDetail jobDetail = JobBuilder.
                     newJob(myClass).
 //                    withIdentity("cronTriggerDetail", "cronTriggerDetailGrounp").
-                    build();
+        build();
             //定义当前具体作业对象的参数
 //            JobDataMap jobDataMap = jobDetail.getJobDataMap();
 //            jobDataMap.put("name", "cronTriggerMap");
@@ -33,7 +29,7 @@ public class CronDispatch {
             CronTrigger cronTrigger = TriggerBuilder.//和之前的 SimpleTrigger 类似，现在的 CronTrigger 也是一个接口，通过 Tribuilder 的 build()方法来实例化
                     newTrigger().
 //                    withIdentity("cronTrigger", "cronTrigger").
-                    withSchedule(CronScheduleBuilder.cronSchedule(cronTime)). //在任务调度器中，使用任务调度器的 CronScheduleBuilder 来生成一个具体的 CronTrigger 对象
+        withSchedule(CronScheduleBuilder.cronSchedule(cronTime)). //在任务调度器中，使用任务调度器的 CronScheduleBuilder 来生成一个具体的 CronTrigger 对象
                     build();
             //注册作业和触发器
             scheduler.scheduleJob(jobDetail, cronTrigger);
@@ -45,22 +41,13 @@ public class CronDispatch {
         }
     }
 
-
+    /**
+     * PIXEL 服务器启动类
+     * @param args
+     */
     public static void main(String[] args) {
-        //程序初始化 加载程序
-        AdFlowControl.getInstance().loadAdInterval(true);
-        //    // 5 s 触发
-        CronDispatch.startTimer(0);
-//        AdFlowControl.getInstance().pullAndUpdateTask();
-//        //  每小时触发
-        CronDispatch.startTimer(2);
-//        AdFlowControl.getInstance().resetHourMonitor();
-//        //  每天触发
-        CronDispatch.startTimer(3);
-//        AdFlowControl.getInstance().resetDayMonitor();
-//        //  10 min 触发
-        CronDispatch.startTimer(1);
-//        AdFlowControl.getInstance().loadAdInterval(true);
+        PixelCronDispatch.startTimer(1);
+
     }
 
     /**
@@ -75,16 +62,16 @@ public class CronDispatch {
     public static void  startTimer(int type){
        switch(type){
            case 0 :
-               dispatch(RealTask.class,"0/5 * * * * ?");
+//               dispatch(RealTask.class,"0/5 * * * * ?");
                break;
            case 1:
-               dispatch(TenMinuteTask.class,"0 0/10 * * * ?");
+               dispatch(PixelTenMinuteTask.class,"0 0/10 * * * ?");
                break;
            case 2:
-               dispatch(HourTask.class,"0 * * * * ?");
+//               dispatch(HourTask.class,"0 * * * * ?");
                break;
            case 3:
-               dispatch(DailyTask.class,"0 0 * * * ?");
+//               dispatch(DailyTask.class,"0 0 * * * ?");
                break;
            default:
                break;

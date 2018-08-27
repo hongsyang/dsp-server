@@ -263,7 +263,7 @@ public class AdFlowControl {
                 AdPixelBean pix = MsgControlCenter.recvPixelStatus(node.getName());
                 if (pix == null)
                     break;
-                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getMoney().toString()), -1,pix.getClickNums(),pix.getType());
+                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getFinalCost().toString()), -1,pix.getClickNums(),pix.getType());
             }
         }
 
@@ -503,11 +503,7 @@ public class AdFlowControl {
                 String groupId = map.getString("group_uid");
                 ad.setGroupId(groupId);
                 String adUid = ad.getAdUid();
-                if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
-                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false);
-                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
-                    continue;
-                }
+
                 if (isInitial) {
                     //初始化所有的监控
                     AdFlowStatus statusHour = new AdFlowStatus();
@@ -578,6 +574,9 @@ public class AdFlowControl {
                 ad.setMode(map.getString("mode"));
                 // 设置广告的可拖欠的额度
                 ad.setMoneyArrears(map.getInteger("money_arrears"));
+                //出价模式
+                ad.setMode(map.getString("mode"));
+
                 ad.setPriority(map.getInteger("priority"));
                 //限额
                 // 如果当前广告设定限额为 0 ，则以该账户的每日限额为准，
@@ -598,6 +597,12 @@ public class AdFlowControl {
                 mapAd.put(adUid, ad);
                 mapTask.put(adUid, new TaskBean(adUid));
                 counter++;
+
+                if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
+                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false);
+                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
+                    continue;
+                }
 
             }
 
