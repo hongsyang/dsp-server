@@ -263,7 +263,7 @@ public class AdFlowControl {
                 AdPixelBean pix = MsgControlCenter.recvPixelStatus(node.getName());
                 if (pix == null)
                     break;
-                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getMoney().toString()), -1,pix.getClickNums(),pix.getType());
+                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getFinalCost().toString()), -1,pix.getClickNums(),pix.getType());
             }
         }
 

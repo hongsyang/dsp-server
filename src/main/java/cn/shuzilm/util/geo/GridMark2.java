@@ -4,6 +4,8 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.InvokePython;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
@@ -26,6 +28,8 @@ public class GridMark2 {
     private static final String dir = "d:\\";
 
     private static final String pythonEnvDir = "python.exe";
+
+    private static final Logger LOG = LoggerFactory.getLogger(GridMark2.class);
 
     /**
      * gps 坐标内部ID 与 广告UID 对应
@@ -69,6 +73,7 @@ public class GridMark2 {
 
         String currWorkPath = dir + "geo_transfer.py";
         for(GpsBean gps : coords){
+            try{
             String[] args = new String[]{
                     pythonEnvDir,
                     currWorkPath,
@@ -100,6 +105,10 @@ public class GridMark2 {
 //            System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
 //            System.out.println("new BMap.Point(" + gridBean.getLngRight() + "," + gridBean.getLatUp() + ")");
             counter ++;
+            }catch(Exception e){
+                LOG.error("经纬度加载异常:"+e.getMessage());
+                continue;
+            }
         }
         return destList;
 

@@ -3,28 +3,20 @@ package cn.shuzilm.backend.rtb;
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
-import cn.shuzilm.bean.control.AdPropertyBean;
-import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.Material;
 import cn.shuzilm.bean.control.TaskBean;
 import cn.shuzilm.bean.dmp.AreaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
-import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.MathTools;
-import cn.shuzilm.util.TimeUtil;
-import cn.shuzilm.util.geo.GeoHash;
-import cn.shuzilm.util.geo.GridMark;
 import cn.shuzilm.util.geo.GridMark2;
-import com.jcraft.jsch.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -346,24 +338,23 @@ public class RtbFlowControl {
 
         // 匹配广告投放时间窗
         AdBean adBean = mapAd.get(auid);
-        if (adBean != null) {
-            int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
-            if(timeSchedulingArr != null){
-            for (int i = 0; i < timeSchedulingArr.length; i++) {
-                if (weekNum != i)
-                    continue;
-                for (int j = 0; j < timeSchedulingArr[i].length; j++) {
-                    if (dayNum == j) {
-                        if (timeSchedulingArr[i][j] == 1) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                }
-            }
-            }
-        }
+//        if (adBean != null) {
+//            int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
+//            if(timeSchedulingArr != null){
+//            for (int i = 0; i < timeSchedulingArr.length; i++) {
+//                if (weekNum != i)
+//                    continue;
+//                for (int j = 0; j < timeSchedulingArr[i].length; j++) {
+//                    if (dayNum == j) {
+//                        if (timeSchedulingArr[i][j] == 1) {
+//                            return true;
+//                        } else {
+//                            return false;
+//                        }
+//                    }
+//                }
+//            }
+//        }
         return true;
     }
 }

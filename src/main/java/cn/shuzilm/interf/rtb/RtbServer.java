@@ -46,7 +46,7 @@ public class RtbServer {
         appKeyIdMap = new HashMap<String, String>();
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
-//        ruleMatching=RuleMatching.getInstance(nodes);
+        ruleMatching=RuleMatching.getInstance();
         RtbServer server = new RtbServer();
         server.start(8780);
     }

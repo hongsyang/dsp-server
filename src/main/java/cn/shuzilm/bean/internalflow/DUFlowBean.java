@@ -23,7 +23,7 @@ public class DUFlowBean implements Serializable {
     private String requestId;//对应Bid Request中的id
     
     private String adTypeId;//广告大类型ID
-    private String adxAdTypeId;//广告小类对应ADX服务商的ID
+    private Integer adxAdTypeId;//广告小类对应ADX服务商的ID
     private String widthHeightRatio;//  Width/Height 宽高比
     private String platform;//不同平台 dsp传
     private String demographicTagId;//不同人群  dsp传 用逗号隔开
@@ -55,7 +55,7 @@ public class DUFlowBean implements Serializable {
     private Double actualPricePremium ;//溢价（张迁需要）
     private Double biddingPrice  ;//广告主出价（张迁需要）
     private String adxId  ;//广告商id
-    private String appId  ;//应用id
+    private String appName  ;//应用名称
     private String appPackageName  ;//应用包名称
     private String appVersion  ;//应用版本
     private String dealid  ;//私有交易id，判断是否属于私有交易

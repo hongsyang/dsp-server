@@ -43,14 +43,12 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static final String FILTER_CONFIG = "filter.properties";
 
-    private static final String ADX_NAME = "lingji";
+    private static final String ADX_NAME = "1";
 
     private static JedisManager instance = JedisManager.getInstance();
 
 
-    private static  String nodes[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
-
-    private static RuleMatching ruleMatching =  RuleMatching.getInstance(nodes);
+    private static RuleMatching ruleMatching =  RuleMatching.getInstance();
 
 
 
@@ -82,38 +80,32 @@ public class LingJiRequestServiceImpl implements RequestService {
             }
 
             //文件扩展名列表
-            Set<String> stringSet = new HashSet<>();
+          String stringSet = null;
             if ("banner".equals(adType)) {// banner 类型
                 width = userImpression.getBanner().getW();
                 height = userImpression.getBanner().getH();
                 String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                for (String mime : mimes) {
-                    stringSet.add(mime);
-                }
+                stringSet=Arrays.toString(mimes);
 
 
             } else if ("fullscreen".equals(adType)) { //开屏
                 width = userImpression.getVideo().getW();
                 height = userImpression.getVideo().getH();
                 String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
-                for (String mime : mimes) {
-                    stringSet.add(mime);
-                }
+                stringSet=Arrays.toString(mimes);
+
             } else if ("feed".equals(adType)) { //信息流
                 List<LJAssets> assets = userImpression.getNativead().getAssets();
                 for (LJAssets asset : assets) {
                     if (asset.getImg() != null && asset.getRequired().equals(true)) {
                         width = asset.getImg().getW();
                         height = asset.getImg().getH();
-                        for (String mime : asset.getImg().getMimes()) {
-                            stringSet.add(mime);
-                        }
+                        stringSet=Arrays.toString( asset.getImg().getMimes());
+
                     } else if (asset.getVideo() != null && asset.getRequired().equals(true)) {
                         width = asset.getVideo().getW();
                         height = asset.getVideo().getH();
-                        for (String mime : asset.getVideo().getMimes()) {
-                            stringSet.add(mime);
-                        }
+                        stringSet=  Arrays.toString( asset.getVideo().getMimes());
                     }
 
                 }
