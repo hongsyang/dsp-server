@@ -43,9 +43,11 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static final String FILTER_CONFIG = "filter.properties";
 
-    private static final String ADX_NAME = "1";
+    private static final String ADX_NAME = "LingJi";
 
-    private static JedisManager instance = JedisManager.getInstance();
+    private static final String ADX_ID = "1";
+
+    private static JedisManager jedisManager = JedisManager.getInstance();
 
 
     private static RuleMatching ruleMatching =  RuleMatching.getInstance();
@@ -73,13 +75,12 @@ public class LingJiRequestServiceImpl implements RequestService {
             Integer showtype = userImpression.getExt().getShowtype();//广告类型
             String adType = convertAdType(showtype); //对应内部 广告类型
 
-
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
                 return response;
             }
 
-            //文件扩展名列表
+            //TODO 广告类型对接代码优化
           String stringSet = null;
             if ("banner".equals(adType)) {// banner 类型
                 width = userImpression.getBanner().getW();
@@ -87,12 +88,30 @@ public class LingJiRequestServiceImpl implements RequestService {
                 String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
                 stringSet=Arrays.toString(mimes);
 
-
             } else if ("fullscreen".equals(adType)) { //开屏
-                width = userImpression.getVideo().getW();
-                height = userImpression.getVideo().getH();
-                String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
-                stringSet=Arrays.toString(mimes);
+                if (userImpression.getVideo()!=null){
+                    width = userImpression.getVideo().getW();
+                    height = userImpression.getVideo().getH();
+                    String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
+                    stringSet=Arrays.toString(mimes);
+                } else if(userImpression.getBanner()!=null){
+                    width = userImpression.getBanner().getW();
+                    height = userImpression.getBanner().getH();
+                    String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
+                    stringSet=Arrays.toString(mimes);
+                }
+            }else if ("interstitial".equals(adType)){//插屏
+                if (userImpression.getVideo()!=null){
+                    width = userImpression.getVideo().getW();
+                    height = userImpression.getVideo().getH();
+                    String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
+                    stringSet=Arrays.toString(mimes);
+                } else if(userImpression.getBanner()!=null){
+                    width = userImpression.getBanner().getW();
+                    height = userImpression.getBanner().getH();
+                    String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
+                    stringSet=Arrays.toString(mimes);
+                }
 
             } else if ("feed".equals(adType)) { //信息流
                 List<LJAssets> assets = userImpression.getNativead().getAssets();
@@ -101,7 +120,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                         width = asset.getImg().getW();
                         height = asset.getImg().getH();
                         stringSet=Arrays.toString( asset.getImg().getMimes());
-
                     } else if (asset.getVideo() != null && asset.getRequired().equals(true)) {
                         width = asset.getVideo().getW();
                         height = asset.getVideo().getH();
@@ -122,7 +140,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                             true,// 是否要求分辨率
                             5,//宽误差值
                             5,// 高误差值;
-                            ADX_NAME,//ADX 服务商名称
+                            ADX_ID,//ADX 服务商ID
                             stringSet//文件扩展名
                     );
 
@@ -132,7 +150,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
                     targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                     targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
-                    targetDuFlowBean.setAdxId("0001");//ADX广告商id
+                    targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
                     targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
                     targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                     targetDuFlowBean.setAppName(app.getName());//APP名称
@@ -160,7 +178,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                         true,// 是否要求分辨率
                         5,//宽误差值
                         5,// 高误差值;
-                        ADX_NAME,//ADX 服务商名称
+                        ADX_ID,//ADX 服务商ID
                         stringSet//文件扩展名
                 );
                 //需要添加到Phoenix中的数据
@@ -169,7 +187,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
                 targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                 targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
-                targetDuFlowBean.setAdxId("0001");//ADX广告商id
+                targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
                 targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
                 targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                 targetDuFlowBean.setAppName(app.getName());//APP名称
@@ -213,9 +231,9 @@ public class LingJiRequestServiceImpl implements RequestService {
         Impression impression = imp.get(0);
         bid.setId(format + UUID.randomUUID());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-
+        String serviceUrl = configs.getString("SERVICE_URL");
         //曝光nurl
-        String nurl = "http://101.200.56.200:8880/" + "lingjiexp?" +
+        String nurl = serviceUrl + "lingjiexp?" +
                 "id=" + "${AUCTION_ID}" +
                 "&bidid=" + "${AUCTION_BID_ID}" +
                 "&impid=" + "${AUCTION_IMP_ID}" +
@@ -231,7 +249,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&pmp=" + duFlowBean.getDealid();
         bid.setNurl(nurl);
 
-        String curl = "http://101.200.56.200:8880/" + "lingjiclick?" +
+        String curl = serviceUrl + "lingjiclick?" +
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
@@ -258,7 +276,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             nativeAD.setImptrackers(urls);// 展示曝光URL数组
 
             LJLink ljLink = new LJLink();//	点击跳转URL地址(落地页)
-            ljLink.setUrl("https://www.shuzilm.cn/");//落地页
+            ljLink.setUrl(duFlowBean.getLandingUrl());//落地页
             ljLink.setClicktrackers(urls);
             ljLink.setAction(2);
             nativeAD.setLink(ljLink);
@@ -274,7 +292,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             LJAssets assetsTitle = new LJAssets();
             assetsTitle.setId(1);
             LJNativeTitle ljNativeTitle = new LJNativeTitle();
-            ljNativeTitle.setText("数盟测试");
+            ljNativeTitle.setText(duFlowBean.getTitle());
             assetsTitle.setTitle(ljNativeTitle);
             ljAssetsList.add(assetsTitle);
 
@@ -282,14 +300,14 @@ public class LingJiRequestServiceImpl implements RequestService {
             LJAssets assetsData = new LJAssets();
             LJNativeData ljNativeData = new LJNativeData();
             assetsData.setId(2);
-            ljNativeData.setValue("数盟测试报文不知道对不对");
+            ljNativeData.setValue(duFlowBean.getDesc());
             assetsData.setData(ljNativeData);
             ljAssetsList.add(assetsData);
 
 
             LJAssets assetsImg = new LJAssets();
             LJNativeImg ljNativeImg = new LJNativeImg();
-            String imgUrl = "http://dp.test.zhiheworld.com/m/mrdf_320x50.jpg";
+            String imgUrl = duFlowBean.getAdm();
             List<String> imgUrls = new ArrayList<>();
             imgUrls.add(imgUrl);
             ljNativeImg.setUrls(imgUrls);
@@ -339,7 +357,7 @@ public class LingJiRequestServiceImpl implements RequestService {
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
         log.debug("redis计数");
-        Jedis jedis = instance.getResource();
+        Jedis jedis = jedisManager.getResource();
         if (jedis != null) {
             log.debug("jedis：{}", jedis);
             String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));

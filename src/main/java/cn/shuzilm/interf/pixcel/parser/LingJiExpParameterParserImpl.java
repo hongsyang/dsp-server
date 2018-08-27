@@ -33,6 +33,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
     private static final Logger log = LoggerFactory.getLogger(LingJiExpParameterParserImpl.class);
 
     private static final String PIXEL_CONFIG = "pixel.properties";
+    
+    
+    private static  PixelFlowControl pixelFlowControl =  PixelFlowControl.getInstance();
+    
 
     private AppConfigs configs = null;
 
@@ -63,19 +67,21 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             bean.setCost(money);
             bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             bean.setWinNoticeNums(1);
+            bean.setPremiumFactor(element.getPremiumFactor());
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            double premium = pixelFlowControl.sendStatus(bean);//最终价格
             NumberFormat numberFormat = NumberFormat.getNumberInstance();
             numberFormat.setMaximumFractionDigits(5);
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
             element.setActualPrice(money);//成本价
-            element.setActualPricePremium(Double.valueOf(numberFormat.format(money * element.getPremiumFactor())));//溢价
+            element.setActualPricePremium(premium);//溢价
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             element.setAdxSource("LingJi");
             MDC.put("sift", "LingJiExp");
+            log.debug("发送到Phoenix的DUFlowBean:{}", element);
             log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAdvertiserUid(),

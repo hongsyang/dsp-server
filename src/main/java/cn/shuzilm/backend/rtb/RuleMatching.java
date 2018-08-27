@@ -159,9 +159,11 @@ public class RuleMatching {
 		rtbIns.pullAndUpdateTask();
 		rtbIns.pullTenMinutes();
 		// 取出标签
+		LOG.debug("redis开始");
 		String tagJson = redis.getAsync(deviceId);
 		// String tagJson = jedis.get(deviceId);
 		TagBean tagBean = JSON.parseObject(tagJson, TagBean.class);
+		LOG.debug("redis结束");
 		// TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
 
 		if (tagBean == null) {
