@@ -94,9 +94,9 @@ public class AsyncRedisClient {
     	AsyncRedisClient redis = new AsyncRedisClient(nodes);
     	RedisAdvancedClusterAsyncCommands<String, String> commands = redis.connection.async();
 //    	//commands.hset("3D8A278F33E4F97181DF1EAEFE500D06","test", ss);
-//    	commands.set("3D8A278F33E4F97181DF1EAEFE500D08", ss);
+    	commands.set("DC7D41E352D13D60765414D53F40BC25", ss);
     	
-    	String s = redis.getAsync("3D8A278F33E4F97181DF1EAEFE500D08");
+    	String s = redis.getAsync("DC7D41E352D13D60765414D53F40BC25");
     	System.out.println(s);
     	
        /* String[] urls = new String[]{"192.168.1.241","101.200.56.200"};
