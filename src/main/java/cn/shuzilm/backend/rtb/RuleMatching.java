@@ -235,10 +235,10 @@ public class RuleMatching {
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
-//			if (!isAvaliable) {
-//				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
-//				continue;
-//			}
+			if (!isAvaliable) {
+				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				continue;
+			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
@@ -374,7 +374,6 @@ public class RuleMatching {
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList, audienceMap);
 		} else {
-			System.out.println("machedAdlist=" + machedAdList.size());
 			long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
 			if (machedAdList.size() == 1) {
@@ -533,7 +532,12 @@ public class RuleMatching {
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
 		AdvertiserBean advertiser = ad.getAdvertiser();
 		// targetDuFlowBean.setBidid("123");// 广告竞价ID
-		targetDuFlowBean.setAdm(material.getFileName());// 广告素材
+		if(material.getFileName().contains("http")){
+			targetDuFlowBean.setAdm(material.getFileName());// 广告素材
+		}else{
+			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getFileName());
+			targetDuFlowBean.setAdm(url);// 广告素材
+		}			
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
 		targetDuFlowBean.setCrid(creative.getUid());
