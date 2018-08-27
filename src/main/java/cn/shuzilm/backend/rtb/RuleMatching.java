@@ -223,16 +223,22 @@ public class RuleMatching {
 		} else {
 			key = countryIdKey;
 		}
+		
+		if(extStr.contains("jpg")){
+			extStr = extStr.concat(",jpeg");
+		}else if(extStr.contains("jpeg")){
+			extStr = extStr.concat(",jpg");
+		}
 
 		// 开始遍历符合广告素材尺寸的广告
 		long startOrder = System.currentTimeMillis();
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
-			if (!isAvaliable) {
-				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
-				continue;
-			}
+//			if (!isAvaliable) {
+//				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
+//				continue;
+//			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
@@ -595,7 +601,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("3D8A278F33E4F97181DF1EAEFE500D06", "interstitial", 640, 960, true, 5, 5, "adview", "jpg");
+		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "banner", 1280, 720, true, 5, 5, "1", "jpg,gif");
 	}
 
 }
