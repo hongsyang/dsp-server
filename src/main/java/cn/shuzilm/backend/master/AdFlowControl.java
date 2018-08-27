@@ -21,7 +21,7 @@ import java.util.*;
 public class AdFlowControl {
     private static AdFlowControl control;
     private static AdPropertyHandler adProperty;
-    
+
 
     public static AdFlowControl getInstance() {
         if (control == null) {
