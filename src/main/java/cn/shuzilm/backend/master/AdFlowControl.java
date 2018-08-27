@@ -21,6 +21,7 @@ import java.util.*;
 public class AdFlowControl {
     private static AdFlowControl control;
     private static AdPropertyHandler adProperty;
+    
 
     public static AdFlowControl getInstance() {
         if (control == null) {
@@ -384,8 +385,8 @@ public class AdFlowControl {
                     continue;
                 //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
-                //如果余额小于 10 块钱，则不进行广告投放
-                if(balance.doubleValue() < 10){
+                //如果余额小于 200 块钱，则不进行广告投放
+                if(balance.doubleValue() < 200){
                     lowBalanceAdSet.add(auid);
                 }
                 //广告主账户的每日限额
@@ -503,10 +504,7 @@ public class AdFlowControl {
                 String groupId = map.getString("group_uid");
                 ad.setGroupId(groupId);
                 String adUid = ad.getAdUid();
-                if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
-                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
-                    continue;
-                }
+
                 if (isInitial) {
                     //初始化所有的监控
                     AdFlowStatus statusHour = new AdFlowStatus();
@@ -575,7 +573,11 @@ public class AdFlowControl {
                 ad.setFrqHour(map.getInteger("frq_hourly"));
                 ad.setPrice(map.getBigDecimal("price").floatValue());
                 ad.setMode(map.getString("mode"));
+                // 设置广告的可拖欠的额度
                 ad.setMoneyArrears(map.getInteger("money_arrears"));
+                //出价模式
+                ad.setMode(map.getString("mode"));
+
                 ad.setPriority(map.getInteger("priority"));
                 //限额
                 // 如果当前广告设定限额为 0 ，则以该账户的每日限额为准，
@@ -591,18 +593,17 @@ public class AdFlowControl {
                 int[][] timeScheduling = TimeSchedulingUtil.timeTxtToMatrix(timeScheTxt);
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
-                
-                //出价模式
-                ad.setMode(map.getString("mode"));
-
-                // 设置广告的可拖欠的额度
-                ad.setMoneyArrears(map.getInteger("money_arrears"));
-
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
                 mapTask.put(adUid, new TaskBean(adUid));
                 counter++;
+
+                if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
+                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false);
+                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
+                    continue;
+                }
 
             }
 
@@ -610,9 +611,9 @@ public class AdFlowControl {
             adProperty.handle();
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-           // for (int i = 0; i < 1000 ; i++) {
+//            for (int i = 0; i < 10000 ; i++) {
                 dispatchTask();
-           // }
+//            }
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 分发完毕。。。");
             myLog.info("主控： 共有 " + mapAd.keySet().size() + " 个广告在运行");
