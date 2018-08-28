@@ -23,6 +23,7 @@ public class AdFlowControl {
     private static AdPropertyHandler adProperty;
     private static CPCHandler cpcHandler;
 
+
     public static AdFlowControl getInstance() {
         if (control == null) {
             control = new AdFlowControl();
