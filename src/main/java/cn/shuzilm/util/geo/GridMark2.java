@@ -4,13 +4,14 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.InvokePython;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 将前端页面提交的中心原点+半径形式 转换为 左下 + 右上 坐标的表示形式，因为 JAVA 没有没有找到可用的转换类，
@@ -28,7 +29,7 @@ public class GridMark2 {
     private static final String dir = "d:\\";
 
     private static final String pythonEnvDir = "python.exe";
-
+    
     private static final Logger LOG = LoggerFactory.getLogger(GridMark2.class);
 
     /**
@@ -73,7 +74,7 @@ public class GridMark2 {
 
         String currWorkPath = dir + "geo_transfer.py";
         for(GpsBean gps : coords){
-            try{
+        	try{
             String[] args = new String[]{
                     pythonEnvDir,
                     currWorkPath,
@@ -105,10 +106,10 @@ public class GridMark2 {
 //            System.out.println("new BMap.Point(" + gridBean.getLngLeft() + "," + gridBean.getLatDown() + ")");
 //            System.out.println("new BMap.Point(" + gridBean.getLngRight() + "," + gridBean.getLatUp() + ")");
             counter ++;
-            }catch(Exception e){
-                LOG.error("经纬度加载异常:"+e.getMessage());
-                continue;
-            }
+        	}catch(Exception e){
+        		LOG.error("经纬度加载异常:"+e.getMessage());
+        		continue;
+        	}
         }
         return destList;
 

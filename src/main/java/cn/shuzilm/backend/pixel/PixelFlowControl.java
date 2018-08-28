@@ -16,6 +16,8 @@ public class PixelFlowControl {
     
     private double dspToleranceRatio = 0.3;
     
+    private double dspToleranceEqualRatio = 0.02;
+    
     private static ConcurrentHashMap<String,AdBean> mapAd = null;
     
     public ConcurrentHashMap<String, AdBean> getAdMap() {
@@ -42,29 +44,57 @@ public class PixelFlowControl {
     	double rebate = 0.0;
     	if(ad.getAdvertiser().getAgencyBean() != null)
     		rebate = ad.getAdvertiser().getAgencyBean().getRebate();//获取代理商返点比例
+    	double dspProfit = 0.0;
+    	double rebateProfit = 0.0;
     	double cost = pixel.getCost();
     	double premiumFactor = pixel.getPremiumFactor();
-    	double actualPricePremium = cost * premiumFactor;//DSP平台利润
-    	double agencyProfit = cost * rebate;//代理商利润
+    	double dspAndRebatePremiumFactor = premiumFactor + rebate;
     	double price = ad.getPrice();//广告出价
-    	double finalPrice = cost + agencyProfit + actualPricePremium;
+    	double finalPrice = cost / (1 - dspAndRebatePremiumFactor);
     	if(finalPrice > price){//最终消耗金额高于广告出价金额,适当调整DSP平台利润
-    		double tempPrice = price - agencyProfit - cost;
-    		if(tempPrice > 0){
-    			double tempRatio = tempPrice / actualPricePremium;
-    			if(tempRatio > dspToleranceRatio){
-    				finalPrice = cost + agencyProfit + actualPricePremium * tempRatio;
-    			}
+    		double dspAndRebatePremiumFactorTemp = dspToleranceRatio + rebate;//DSP保守利润率+代理商返点比例
+    		double tempPrice = cost / (1 - dspAndRebatePremiumFactorTemp);
+    		if(tempPrice == price){
+    			double dspAndRebatePremiumEqualFactor = dspToleranceRatio - dspToleranceEqualRatio + rebate;
+    			double tempFinalPrice = cost / (1 - dspAndRebatePremiumEqualFactor);
+    			finalPrice = tempFinalPrice;
+    			dspProfit = finalPrice * (dspToleranceRatio - dspToleranceEqualRatio);
+    			rebateProfit = finalPrice * rebate;
+    			pixel.setLower(true);
+    		}else if(tempPrice < price){
+    			finalPrice = tempPrice;
+    			dspProfit = finalPrice * dspToleranceRatio;
+    			rebateProfit = finalPrice * rebate;
+    			pixel.setLower(true);
+    		}else{
+    			dspProfit = finalPrice * premiumFactor;
+    			rebateProfit = finalPrice * rebate;
+    			pixel.setLower(false);
     		}
-    	}   
+    	}else if(finalPrice == price){
+    		double dspAndRebatePremiumEqualFactor = dspAndRebatePremiumFactor - dspToleranceEqualRatio;
+    		finalPrice = cost / (1 - dspAndRebatePremiumEqualFactor);
+    		dspProfit = finalPrice * (premiumFactor - dspToleranceEqualRatio);
+			rebateProfit = finalPrice * rebate;
+    		pixel.setLower(true);
+    	}else{
+    		dspProfit = finalPrice * premiumFactor;
+			rebateProfit = finalPrice * rebate;
+    		pixel.setLower(true);
+    	}
     	pixel.setFinalCost(finalPrice);
+    	pixel.setDspProfit(dspProfit);
+    	pixel.setRebateProfit(rebateProfit);
         MsgControlCenter.sendPixelStatus(this.nodeName,pixel);
         return finalPrice;
     }
 
     public static void main(String[] args) {
         AdPixelBean bean = new AdPixelBean();
-        PixelFlowControl.getInstance().sendStatus(bean);
+        bean.setCost(40.0);
+        bean.setPremiumFactor(0.5);
+        bean.setAdUid("123");
+        System.out.println(PixelFlowControl.getInstance().sendStatus(bean));
     }
 
     /**

@@ -106,11 +106,11 @@ public class RuleMatching {
 	 *            ADX名称
 	 * @param material
 	 *            物料
-	 * @param extStr
+	 * @param extSet
 	 *            广告位支持的文件扩展名列表
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,String widthHeightRatio) {
+			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,Set<String> materialSet) {
 		// 筛选审核通过的物料
 		if (material.getApproved_adx() != null && !material.getApproved_adx().contains(adxName)) {
 			return false;
@@ -118,9 +118,7 @@ public class RuleMatching {
 		if (!extStr.contains(material.getExt())) {
 			return false;
 		}
-		int divisor = MathTools.division(adWidth, adHeight);
-		String adWidthHeightRatio = adWidth / divisor + "/" + adHeight / divisor;
-		if(!widthHeightRatio.equals(adWidthHeightRatio)){
+		if(!materialSet.contains(material.getUid())){
 			return false;
 		}
 		if (isResolutionRatio) {
@@ -138,6 +136,9 @@ public class RuleMatching {
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
+	 * 
+	 * @param tagBean
+	 *            标签
 	 * @param adType
 	 *            广告类型
 	 * @param width
@@ -161,11 +162,9 @@ public class RuleMatching {
 		rtbIns.pullAndUpdateTask();
 		rtbIns.pullTenMinutes();
 		// 取出标签
-		LOG.debug("redis开始");
 		String tagJson = redis.getAsync(deviceId);
 		// String tagJson = jedis.get(deviceId);
 		TagBean tagBean = JSON.parseObject(tagJson, TagBean.class);
-		LOG.debug("redis结束");
 		// TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
 
 		if (tagBean == null) {
@@ -178,6 +177,7 @@ public class RuleMatching {
 		String widthHeightRatio = width / divisor + "/" + height / divisor;
 		String materialRatioKey = adType + "_" + widthHeightRatio;
 		List<String> auidList = rtbIns.getMaterialRatioMap().get(materialRatioKey);
+		Set<String> materialSet = rtbIns.getMaterialByRatioMap().get(materialRatioKey);
 		if (auidList == null) {
 			LOG.warn("根据[" + materialRatioKey + "]未找到广告!");
 			return null;
@@ -239,10 +239,10 @@ public class RuleMatching {
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
-//			if (!isAvaliable) {
-//				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
-//				continue;
-//			}
+			if (!isAvaliable) {
+				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				continue;
+			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
@@ -256,7 +256,7 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			for (Material material : materialList) {
 				if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
-						heightDeviation, adxName, material, extStr,widthHeightRatio)) {
+						heightDeviation, adxName, material, extStr,materialSet)) {
 					metrialMap.put(ad.getAdUid(), material);
 					filterFlag = true;
 					break;
@@ -378,7 +378,6 @@ public class RuleMatching {
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList, audienceMap);
 		} else {
-			System.out.println("machedAdlist=" + machedAdList.size());
 			long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
 			if (machedAdList.size() == 1) {
@@ -537,7 +536,12 @@ public class RuleMatching {
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
 		AdvertiserBean advertiser = ad.getAdvertiser();
 		// targetDuFlowBean.setBidid("123");// 广告竞价ID
-		targetDuFlowBean.setAdm(material.getFileName());// 广告素材
+		if(material.getFileName().contains("http")){
+			targetDuFlowBean.setAdm(material.getFileName());// 广告素材
+		}else{
+			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getFileName());
+			targetDuFlowBean.setAdm(url);// 广告素材
+		}			
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
 		targetDuFlowBean.setCrid(creative.getUid());
@@ -605,7 +609,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "banner", 1280, 720, true, 5, 5, "1", "jpg,gif");
+		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "feed", 320, 50, true, 5, 5, "1", "jpg,gif");
 	}
 
 }

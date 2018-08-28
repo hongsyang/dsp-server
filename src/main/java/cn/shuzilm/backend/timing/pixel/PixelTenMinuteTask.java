@@ -1,5 +1,7 @@
-package cn.shuzilm.backend.master;
+package cn.shuzilm.backend.timing.pixel;
 
+import cn.shuzilm.backend.master.AdFlowControl;
+import cn.shuzilm.backend.pixel.PixelFlowControl;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -7,10 +9,10 @@ import org.quartz.JobExecutionException;
 /**
  * Created by thunders on 2018/7/23.
  */
-public  class RealTask   implements Job {
+public class PixelTenMinuteTask implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        AdFlowControl.getInstance().pullAndUpdateTask();
-//        System.out.println("bb");
+        PixelFlowControl.getInstance().pullTenMinutes();
+
     }
 }
