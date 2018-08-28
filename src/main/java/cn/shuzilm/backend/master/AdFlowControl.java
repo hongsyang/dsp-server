@@ -278,8 +278,8 @@ public class AdFlowControl {
             //监测 CPC 类型的广告是否可以投放
             boolean isOk = cpcHandler.checkAvailable(auid);
             if(!isOk){
-                String reason = "### cpc 价格过高，停止广告投放 ###" + auid;
-                stopAd(auid, reason, true);
+                String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
+                stopAd(auid, reason, false);
             }
             AdFlowStatus threshold = mapThresholdHour.get(auid);
             AdFlowStatus monitor = mapMonitorHour.get(auid);
