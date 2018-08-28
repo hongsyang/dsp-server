@@ -82,7 +82,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             element.setAdxSource("LingJi");
             MDC.put("sift", "LingJiExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
-            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAdvertiserUid(),
                     element.getAdvertiserUid(), element.getAgencyUid(),
