@@ -21,11 +21,13 @@ import java.util.*;
 public class AdFlowControl {
     private static AdFlowControl control;
     private static AdPropertyHandler adProperty;
+    private static CPCHandler cpcHandler;
 
     public static AdFlowControl getInstance() {
         if (control == null) {
             control = new AdFlowControl();
             adProperty = new AdPropertyHandler(control);
+            cpcHandler = new CPCHandler(control);
         }
         return control;
     }
@@ -163,6 +165,9 @@ public class AdFlowControl {
      * @param pixelType pixcel 类型，曝光 0 和 点击 1
      */
     private void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type , long clickNums, int pixelType) {
+        //cpc 定价计算逻辑
+        cpcHandler.updatePixel(adUid,1,addMoney,clickNums,1);
+
         switch (type) {
             case 0:
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
@@ -269,6 +274,12 @@ public class AdFlowControl {
 
         //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
         for (String auid : mapThresholdHour.keySet()) {
+            //监测 CPC 类型的广告是否可以投放
+            boolean isOk = cpcHandler.checkAvailable(auid);
+            if(!isOk){
+                String reason = "### cpc 价格过高，停止广告投放 ###" + auid;
+                stopAd(auid, reason, true);
+            }
             AdFlowStatus threshold = mapThresholdHour.get(auid);
             AdFlowStatus monitor = mapMonitorHour.get(auid);
             //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
@@ -608,10 +619,12 @@ public class AdFlowControl {
 
             //计算权重因子
             adProperty.handle();
+            //定期 10 分钟更新 CPC 阀值
+            cpcHandler.updateIndicator();
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
 //            for (int i = 0; i < 10000 ; i++) {
-                dispatchTask();
+            dispatchTask();
 //            }
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 分发完毕。。。");
