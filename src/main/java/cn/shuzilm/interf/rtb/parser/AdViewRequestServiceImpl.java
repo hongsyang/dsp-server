@@ -130,9 +130,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             responseVideo.setWidth(Integer.valueOf(configs.getString("vw")));
             responseVideo.setHeight(Integer.valueOf(configs.getString("vh")));
             bid.setVideo(responseVideo);
-//        bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料数据
-//            bid.setAdw(1280);//duFlowBean.getAdh()广告物料宽度
-//            bid.setAdh(720);//duFlowBean.getAdw()广告物料高度
+
         }else if (instl==6){
             bid.setAdmt(8);//duFlowBean.getAdmt()广告类型
             NativeResponseBean nativeResponseBean =new NativeResponseBean();

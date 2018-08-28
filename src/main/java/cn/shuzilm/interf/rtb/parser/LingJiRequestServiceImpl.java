@@ -79,7 +79,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 response = "没有对应的广告类型";
                 return response;
             }
-
+            List<LJAssets> assets = new ArrayList<>();
             //TODO 广告类型对接代码优化
           String stringSet = null;
             if ("banner".equals(adType)) {// banner 类型
@@ -114,7 +114,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 }
 
             } else if ("feed".equals(adType)) { //信息流
-                List<LJAssets> assets = userImpression.getNativead().getAssets();
+                assets = userImpression.getNativead().getAssets();
                 for (LJAssets asset : assets) {
                     if (asset.getImg() != null && asset.getRequired().equals(true)) {
                         width = asset.getImg().getW();
@@ -128,6 +128,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                 }
             }
+
 
             //初步过滤规则开关
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
@@ -160,7 +161,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     }
 
                     log.debug("过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
-                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType);
+                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType,assets);
                     pushRedis(targetDuFlowBean);//上传到redis服务器
                     log.debug("json计数");
                     response = JSON.toJSONString(bidResponseBean);
@@ -198,7 +199,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType);
+                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType,assets);
                 pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
@@ -215,7 +216,7 @@ public class LingJiRequestServiceImpl implements RequestService {
      * @param duFlowBean
      * @return
      */
-    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType) {
+    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType, List<LJAssets> ljAssets) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -263,10 +264,12 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&pmp=" + duFlowBean.getDealid();
 
         if ("banner".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdm());// 广告物料数据
+            bid.setAdm(duFlowBean.getAdm());//  横幅
         } else if ("fullscreen".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdm());// 广告物料数据
-        } else if ("feed".equals(adType)) {
+            bid.setAdm(duFlowBean.getAdm());// 开屏
+        }else if("interstitial".equals(adType)){
+            bid.setAdm(duFlowBean.getAdm());// 插屏
+        } else if ("feed".equals(adType)) {//信息流
             LJNativeResponse ljNativeResponse = new LJNativeResponse();
 
             NativeAD nativeAD = new NativeAD();
@@ -290,8 +293,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             List<LJAssets> ljAssetsList = new ArrayList<>();
             LJAssets assetsTitle = new LJAssets();
-            assetsTitle.setId(1);
-            LJNativeTitle ljNativeTitle = new LJNativeTitle();
+
+            LJNativeTitle ljNativeTitle = new LJNativeTitle();//标题
             ljNativeTitle.setText(duFlowBean.getTitle());
             assetsTitle.setTitle(ljNativeTitle);
             ljAssetsList.add(assetsTitle);
@@ -299,23 +302,40 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             LJAssets assetsData = new LJAssets();
             LJNativeData ljNativeData = new LJNativeData();
-            assetsData.setId(2);
+
             ljNativeData.setValue(duFlowBean.getDesc());
             assetsData.setData(ljNativeData);
             ljAssetsList.add(assetsData);
 
 
-            LJAssets assetsImg = new LJAssets();
-            LJNativeImg ljNativeImg = new LJNativeImg();
-            String imgUrl = duFlowBean.getAdm();
-            List<String> imgUrls = new ArrayList<>();
-            imgUrls.add(imgUrl);
-            ljNativeImg.setUrls(imgUrls);
-            assetsImg.setId(5);
-            assetsImg.setImg(ljNativeImg);
-            ljAssetsList.add(assetsImg);
-            nativeAD.setAssets(ljAssetsList);
 
+            for (LJAssets ljAsset : ljAssets) {
+                if (ljAsset.getTitle()!=null&&ljAsset.getRequired().equals(true)){
+                    assetsTitle.setId(ljAsset.getId());
+                }else if (ljAsset.getData()!=null&&ljAsset.getRequired().equals(true)){
+                    assetsData.setId(ljAsset.getId());
+                }else if (ljAsset.getImg()!=null&&ljAsset.getRequired().equals(true)){
+                    LJAssets assetsImg = new LJAssets();
+                    LJNativeImg ljNativeImg = new LJNativeImg();
+                    String imgUrl = duFlowBean.getAdm();
+                    List<String> imgUrls = new ArrayList<>();
+                    imgUrls.add(imgUrl);
+                    ljNativeImg.setUrls(imgUrls);
+                    assetsImg.setImg(ljNativeImg);
+                    assetsImg.setId(ljAsset.getId());
+                    ljAssetsList.add(assetsImg);
+                }else if (ljAsset.getVideo()!=null&&ljAsset.getRequired().equals(true)){
+                    LJAssets assetsVideo = new LJAssets();
+                    LJNativeVideo ljNativeVideo = new LJNativeVideo();
+                    String videoUrl = duFlowBean.getAdm();
+                    ljNativeVideo.setUrl(videoUrl);
+                    assetsVideo.setVideo(ljNativeVideo);
+                    assetsVideo.setId(ljAsset.getId());
+                    ljAssetsList.add(assetsVideo);
+                }
+            }
+
+            nativeAD.setAssets(ljAssetsList);
             ljNativeResponse.setNativead(nativeAD);
             String nativeADJsonString = JSON.toJSONString(ljNativeResponse);
             log.debug("nativeADJsonString:{}", nativeADJsonString);
