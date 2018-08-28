@@ -17,6 +17,7 @@ public class RtbConstants {
 	public static String DEMOGRAPHIC = "DEMOGRAPHIC";
 	public static String COMPANY = "COMPANY";
 	public static String REDIS_CLUSTER_URI = "REDIS_CLUSTER_URI";
+	public static String MATERIAL_URL = "MATERIAL_URL";
 	
 	
 	private static RtbConstants con;
