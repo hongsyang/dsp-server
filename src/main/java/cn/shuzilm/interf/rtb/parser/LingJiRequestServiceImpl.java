@@ -50,10 +50,7 @@ public class LingJiRequestServiceImpl implements RequestService {
     private static JedisManager jedisManager = JedisManager.getInstance();
 
 
-    private static RuleMatching ruleMatching =  RuleMatching.getInstance();
-
-
-
+    private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
 
     @Override
@@ -74,43 +71,53 @@ public class LingJiRequestServiceImpl implements RequestService {
             Integer height = null;//广告位的高
             Integer showtype = userImpression.getExt().getShowtype();//广告类型
             String adType = convertAdType(showtype); //对应内部 广告类型
+            String stringSet = null;//文件类型列表
+            String deviceId = null;//设备号
+
 
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
                 return response;
             }
+            if (userDevice != null) {
+                if ("ios".equals(userDevice.getOs().toLowerCase())) {
+                    deviceId = userDevice.getExt().getIdfa();
+                } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
+                    deviceId = userDevice.getExt().getMac();
+                } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
+                    deviceId = userDevice.getExt().getMac();
+                }
+            }
             List<LJAssets> assets = new ArrayList<>();
-            //TODO 广告类型对接代码优化
-          String stringSet = null;
             if ("banner".equals(adType)) {// banner 类型
                 width = userImpression.getBanner().getW();
                 height = userImpression.getBanner().getH();
                 String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                stringSet=Arrays.toString(mimes);
+                stringSet = Arrays.toString(mimes);
 
             } else if ("fullscreen".equals(adType)) { //开屏
-                if (userImpression.getVideo()!=null){
+                if (userImpression.getVideo() != null) {
                     width = userImpression.getVideo().getW();
                     height = userImpression.getVideo().getH();
                     String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
-                    stringSet=Arrays.toString(mimes);
-                } else if(userImpression.getBanner()!=null){
+                    stringSet = Arrays.toString(mimes);
+                } else if (userImpression.getBanner() != null) {
                     width = userImpression.getBanner().getW();
                     height = userImpression.getBanner().getH();
                     String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                    stringSet=Arrays.toString(mimes);
+                    stringSet = Arrays.toString(mimes);
                 }
-            }else if ("interstitial".equals(adType)){//插屏
-                if (userImpression.getVideo()!=null){
+            } else if ("interstitial".equals(adType)) {//插屏
+                if (userImpression.getVideo() != null) {
                     width = userImpression.getVideo().getW();
                     height = userImpression.getVideo().getH();
                     String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
-                    stringSet=Arrays.toString(mimes);
-                } else if(userImpression.getBanner()!=null){
+                    stringSet = Arrays.toString(mimes);
+                } else if (userImpression.getBanner() != null) {
                     width = userImpression.getBanner().getW();
                     height = userImpression.getBanner().getH();
                     String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                    stringSet=Arrays.toString(mimes);
+                    stringSet = Arrays.toString(mimes);
                 }
 
             } else if ("feed".equals(adType)) { //信息流
@@ -119,11 +126,11 @@ public class LingJiRequestServiceImpl implements RequestService {
                     if (asset.getImg() != null && asset.getRequired().equals(true)) {
                         width = asset.getImg().getW();
                         height = asset.getImg().getH();
-                        stringSet=Arrays.toString( asset.getImg().getMimes());
+                        stringSet = Arrays.toString(asset.getImg().getMimes());
                     } else if (asset.getVideo() != null && asset.getRequired().equals(true)) {
                         width = asset.getVideo().getW();
                         height = asset.getVideo().getH();
-                        stringSet=  Arrays.toString( asset.getVideo().getMimes());
+                        stringSet = Arrays.toString(asset.getVideo().getMimes());
                     }
 
                 }
@@ -134,7 +141,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
                 if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, ADX_NAME)) {
                     DUFlowBean targetDuFlowBean = ruleMatching.match(
-                            userDevice.getExt().getMac(),//设备mac的MD5
+                            deviceId,//设备mac的MD5
                             adType,//广告类型
                             width,//广告位的宽
                             height,//广告位的高
@@ -161,7 +168,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     }
 
                     log.debug("过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
-                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType,assets);
+                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
                     pushRedis(targetDuFlowBean);//上传到redis服务器
                     log.debug("json计数");
                     response = JSON.toJSONString(bidResponseBean);
@@ -172,7 +179,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             } else {
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
-                        userDevice.getExt().getMac(),//设备mac的MD5
+                        deviceId,//设备mac的MD5
                         adType,//广告类型
                         width,//广告位的宽
                         height,//广告位的高
@@ -199,7 +206,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType,assets);
+                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
                 pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
@@ -267,7 +274,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             bid.setAdm(duFlowBean.getAdm());//  横幅
         } else if ("fullscreen".equals(adType)) {
             bid.setAdm(duFlowBean.getAdm());// 开屏
-        }else if("interstitial".equals(adType)){
+        } else if ("interstitial".equals(adType)) {
             bid.setAdm(duFlowBean.getAdm());// 插屏
         } else if ("feed".equals(adType)) {//信息流
             LJNativeResponse ljNativeResponse = new LJNativeResponse();
@@ -308,13 +315,12 @@ public class LingJiRequestServiceImpl implements RequestService {
             ljAssetsList.add(assetsData);
 
 
-
             for (LJAssets ljAsset : ljAssets) {
-                if (ljAsset.getTitle()!=null&&ljAsset.getRequired().equals(true)){
+                if (ljAsset.getTitle() != null && ljAsset.getRequired().equals(true)) {
                     assetsTitle.setId(ljAsset.getId());
-                }else if (ljAsset.getData()!=null&&ljAsset.getRequired().equals(true)){
+                } else if (ljAsset.getData() != null && ljAsset.getRequired().equals(true)) {
                     assetsData.setId(ljAsset.getId());
-                }else if (ljAsset.getImg()!=null&&ljAsset.getRequired().equals(true)){
+                } else if (ljAsset.getImg() != null && ljAsset.getRequired().equals(true)) {
                     LJAssets assetsImg = new LJAssets();
                     LJNativeImg ljNativeImg = new LJNativeImg();
                     String imgUrl = duFlowBean.getAdm();
@@ -324,7 +330,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     assetsImg.setImg(ljNativeImg);
                     assetsImg.setId(ljAsset.getId());
                     ljAssetsList.add(assetsImg);
-                }else if (ljAsset.getVideo()!=null&&ljAsset.getRequired().equals(true)){
+                } else if (ljAsset.getVideo() != null && ljAsset.getRequired().equals(true)) {
                     LJAssets assetsVideo = new LJAssets();
                     LJNativeVideo ljNativeVideo = new LJNativeVideo();
                     String videoUrl = duFlowBean.getAdm();

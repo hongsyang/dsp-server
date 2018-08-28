@@ -1,5 +1,6 @@
 package cn.shuzilm.interf.pixcel;
 
+import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -41,7 +42,7 @@ public class PixcelServer{
         appKeyIdMap = new HashMap<String, String>();
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
-
+        PixelCronDispatch.startPixelDispatch();
         PixcelServer server = new PixcelServer();
         server.start(8880);
     }

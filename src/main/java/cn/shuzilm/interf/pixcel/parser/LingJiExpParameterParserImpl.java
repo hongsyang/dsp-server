@@ -15,7 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
+import javax.xml.crypto.Data;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,10 +36,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
     private static final Logger log = LoggerFactory.getLogger(LingJiExpParameterParserImpl.class);
 
     private static final String PIXEL_CONFIG = "pixel.properties";
-    
-    
-    private static  PixelFlowControl pixelFlowControl =  PixelFlowControl.getInstance();
-    
+
+
+    private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
+
 
     private AppConfigs configs = null;
 
@@ -82,16 +85,26 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             element.setAdxSource("LingJi");
+            Date date = new Date(element.getWinNoticeTime());//时间小时数
+            element.setHour(date.getHours());
             MDC.put("sift", "LingJiExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+            MDC.put("phoenix", "app");
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                    element.getInfoId(), element.getHour(),
+                    element.getCreateTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
-                    element.getAdUid(), element.getAdvertiserUid(),
-                    element.getAdvertiserUid(), element.getAgencyUid(),
+                    element.getAdUid(), element.getAudienceuid(),
+                    element.getAgencyUid(), element.getAdvertiserUid(),
                     element.getCreativeUid(), element.getProvince(),
-                    element.getCity(), element.getRequestId(),
-                    element.getActualPrice(), element.getBiddingPrice(),
-                    element.getWinNoticeTime(), element.getPremiumFactor());
+                    element.getCity(), element.getActualPricePremium(),
+                    element.getBiddingPrice(), element.getActualPrice(),
+                    element.getAgencyProfit(), element.getOurProfit(),
+                    element.getAdxId(), element.getAppName(),
+                    element.getAppPackageName(), element.getAppVersion(),
+                    element.getRequestId(),element.getImpression(),element.getDealid() );
+            MDC.remove("phoenix");
+            MDC.put("sift", "LingJiExp");
             boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiExp) {
                 log.debug("发送到Phoenix：{}", lingJiExp);

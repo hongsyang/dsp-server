@@ -48,7 +48,6 @@ public class RtbServer {
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
         //初始化redis
-        PixelCronDispatch.startPixelDispatch();
         jedisManager=JedisManager.getInstance();
         ruleMatching=RuleMatching.getInstance();
         RtbServer server = new RtbServer();
