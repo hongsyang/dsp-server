@@ -1,5 +1,7 @@
 package cn.shuzilm.backend.pixel;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,42 +54,42 @@ public class PixelFlowControl {
     	double cost = pixel.getCost();
     	double premiumFactor = pixel.getPremiumFactor();
     	double dspAndRebatePremiumFactor = premiumFactor + rebate;
-    	double price = ad.getPrice();//广告出价
-    	double finalPrice = cost / (1 - dspAndRebatePremiumFactor);
+    	double price = ad.getPrice();
+    	double finalPrice = getResult(cost, getResult(1.0, dspAndRebatePremiumFactor, "-"),"/");
     	if(finalPrice > price){//最终消耗金额高于广告出价金额,适当调整DSP平台利润
     		double dspAndRebatePremiumFactorTemp = dspToleranceRatio + rebate;//DSP保守利润率+代理商返点比例
-    		double tempPrice = cost / (1 - dspAndRebatePremiumFactorTemp);
+    		double tempPrice = getResult(cost, (getResult(1.0, dspAndRebatePremiumFactorTemp, "-")),"/");
     		if(tempPrice == price){
     			double dspAndRebatePremiumEqualFactor = dspToleranceRatio - dspToleranceEqualRatio + rebate;
-    			double tempFinalPrice = cost / (1 - dspAndRebatePremiumEqualFactor);
+    			double tempFinalPrice = getResult(cost, (getResult(1.0, dspAndRebatePremiumEqualFactor, "-")),"/");
     			finalPrice = tempFinalPrice;
-    			dspProfit = finalPrice * (dspToleranceRatio - dspToleranceEqualRatio);
-    			rebateProfit = finalPrice * rebate;
+    			dspProfit = getResult(finalPrice, dspToleranceRatio - dspToleranceEqualRatio, "*");
+    			rebateProfit = getResult(finalPrice, rebate, "*");   			
     			pixel.setLower(true);
     		}else if(tempPrice < price){
     			finalPrice = tempPrice;
-    			dspProfit = finalPrice * dspToleranceRatio;
-    			rebateProfit = finalPrice * rebate;
+    			dspProfit = getResult(finalPrice, dspToleranceRatio, "*"); 			
+    			rebateProfit = getResult(finalPrice, rebate, "*");
     			pixel.setLower(true);
     		}else{
-    			dspProfit = finalPrice * premiumFactor;
-    			rebateProfit = finalPrice * rebate;
+    			dspProfit = getResult(finalPrice, premiumFactor, "*");
+    			rebateProfit = getResult(finalPrice, rebate, "*");   			
     			pixel.setLower(false);
     		}
     	}else if(finalPrice == price){
     		double dspAndRebatePremiumEqualFactor = dspAndRebatePremiumFactor - dspToleranceEqualRatio;
-    		finalPrice = cost / (1 - dspAndRebatePremiumEqualFactor);
-    		dspProfit = finalPrice * (premiumFactor - dspToleranceEqualRatio);
-			rebateProfit = finalPrice * rebate;
+    		finalPrice = getResult(cost, (getResult(1.0, dspAndRebatePremiumEqualFactor, "-")),"/");  		
+    		dspProfit = getResult(finalPrice, premiumFactor - dspToleranceEqualRatio, "*");   		
+			rebateProfit = getResult(finalPrice, rebate, "*"); 			
     		pixel.setLower(true);
     	}else{
-    		dspProfit = finalPrice * premiumFactor;
-			rebateProfit = finalPrice * rebate;
+    		dspProfit = getResult(finalPrice, premiumFactor, "*");   		 	
+			rebateProfit = getResult(finalPrice, rebate, "*");			   
     		pixel.setLower(true);
     	}
     	pixel.setFinalCost(finalPrice);
-    	pixel.setDspProfit(dspProfit);
-    	pixel.setRebateProfit(rebateProfit);
+    	pixel.setDspProfit(getResult(dspProfit, 1.0, "/"));
+    	pixel.setRebateProfit(getResult(rebateProfit, 1.0, "/"));
         MsgControlCenter.sendPixelStatus(this.nodeName,pixel);
         return pixel;
     }
@@ -97,7 +99,12 @@ public class PixelFlowControl {
         bean.setCost(40.0);
         bean.setPremiumFactor(0.5);
         bean.setAdUid("123");
-        System.out.println(PixelFlowControl.getInstance().sendStatus(bean));
+        AdPixelBean pixel = PixelFlowControl.getInstance().sendStatus(bean);
+        
+        System.out.println("dsp利润="+pixel.getDspProfit());
+        System.out.println("代理商利润="+pixel.getRebateProfit());
+        System.out.println("成本价="+pixel.getCost());
+        System.out.println("总消耗金额="+(pixel.getFinalCost()));
     }
 
     /**
@@ -112,5 +119,37 @@ public class PixelFlowControl {
         }
         }
     }
+    
+    /**
+	 * 
+	 * @param numA 数字A
+	 * @param numB 数字B
+	 * @param operate 运算符
+	 * @return
+	 */
+	public double getResult(double numA, double numB, String operate){
+		double res = 0;
+		BigDecimal bigA = new BigDecimal(Double.toString(numA));
+		BigDecimal bigB = new BigDecimal(Double.toString(numB));
+		switch (operate) {
+			
+			case "+":
+				res = bigA.add(bigB).doubleValue();
+				break;
+			case "-":
+				res = bigA.subtract(bigB).doubleValue();
+				break;
+			case "*":
+				res = bigA.multiply(bigB).doubleValue();
+				break;
+			case "/":
+				res = bigA.divide(bigB,5,RoundingMode.HALF_DOWN).doubleValue();
+				break;
+			default :
+				break;
+		}
+		return res;
+	}
+
 
 }
