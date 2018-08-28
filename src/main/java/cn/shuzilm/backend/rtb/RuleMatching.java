@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.backend.timing.rtb.RtbCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
@@ -79,6 +80,7 @@ public class RuleMatching {
 		String nodes [] = nodeStr.split(";");
 		redis = new AsyncRedisClient(nodes);
 		// jedis = JedisManager.getInstance().getResource();
+		RtbCronDispatch.startRtbDispatch();
 		rtbIns = RtbFlowControl.getInstance();
 		
 		tagRandom = new Random();
