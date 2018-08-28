@@ -54,6 +54,8 @@ public class DUFlowBean implements Serializable {
     private Double actualPrice ;//成本价(张迁需要)
     private Double actualPricePremium ;//溢价（张迁需要）
     private Double biddingPrice  ;//广告主出价（张迁需要）
+    private Double agencyProfit;//代理商利润
+    private Double ourProfit;//我们的利润
     private String adxId  ;//广告商id
     private String appName  ;//应用名称
     private String appPackageName  ;//应用包名称

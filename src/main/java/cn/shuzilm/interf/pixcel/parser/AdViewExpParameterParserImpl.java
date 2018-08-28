@@ -34,6 +34,8 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
     private AppConfigs configs = null;
 
+    private static  PixelFlowControl pixelFlowControl =  PixelFlowControl.getInstance();
+
     private static final String PIXEL_CONFIG = "pixel.properties";
 
     @Override
@@ -60,11 +62,15 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
 
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
+            element.setActualPrice(Double.valueOf(priceLong)/10000);//成本价
+            element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
+            element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
+            element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             MDC.put("sift", "AdViewExp");
             log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
                     element.getDid(), element.getDeviceId(),
