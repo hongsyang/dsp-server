@@ -55,6 +55,15 @@ public class PixelCronDispatch {
         
 
     }
+    
+    public static void startPixelDispatch(String[] args) {
+    	//第一次启动加载全部缓存
+    	PixelFlowControl.getInstance().pullTenMinutes();
+    	
+        PixelCronDispatch.startTimer(1);
+        
+
+    }
 
     /**
      * 按照指定的步调间隔周期调用
