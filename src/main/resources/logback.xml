@@ -25,6 +25,7 @@
             </appender>
         </sift>
     </appender>
+    <logger name="org.quartz" level="ERROR" />
     <!--设置日志输出为文件-->
    <!-- <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <File>logFile.log</File>
