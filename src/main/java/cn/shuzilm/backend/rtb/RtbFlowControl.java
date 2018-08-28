@@ -111,7 +111,6 @@ public class RtbFlowControl {
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
         nodeName = Constants.getInstance().getConf("HOST");
-        this.nodeName = nodeName;
         mapAd = new ConcurrentHashMap<>();
         mapTask = new ConcurrentHashMap<>();
         areaMap = new ConcurrentHashMap<>();
@@ -323,13 +322,14 @@ public class RtbFlowControl {
         for (String auid : mapTask.keySet()) {
             TaskBean bean = mapTask.get(auid);
             AdBean ad = mapAd.get(auid);
-
+            if(ad != null){
             ad.getPropertyBean();
 
             int scope = bean.getScope();
             int commandCode = bean.getCommand();
             if (scope == TaskBean.SCOPE_HOUR && commandCode == TaskBean.COMMAND_PAUSE) {
                 bean.setCommand(TaskBean.COMMAND_START);
+            }
             }
         }
     }

@@ -159,8 +159,6 @@ public class RuleMatching {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
 			return null;
 		}
-		rtbIns.pullAndUpdateTask();
-		rtbIns.pullTenMinutes();
 		// 取出标签
 		String tagJson = redis.getAsync(deviceId);
 		// String tagJson = jedis.get(deviceId);
@@ -240,15 +238,15 @@ public class RuleMatching {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
 			if (!isAvaliable) {
-				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				 LOG.debug("ID[" + adUid + "]广告不参与投放!");
 				continue;
 			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
 			if (creative.getApproved() != 1 || creative.getApproved_adx() == null ||!creative.getApproved_adx().contains(adxName)) {
-				// LOG.debug("广告ID[" + adUid +
-				// "]创意未在ADX["+adxName+"]通过,不参与投放!");
+				 LOG.debug("广告ID[" + adUid +
+				 "]创意未在ADX["+adxName+"]通过,不参与投放!");
 				continue;
 			}
 
@@ -263,6 +261,8 @@ public class RuleMatching {
 				}
 			}
 			if (!filterFlag) {
+				LOG.debug("广告ID[" + adUid +
+				 "]下未匹配到满足要求的物料,不参与投放!");
 				continue;
 			}
 

@@ -54,8 +54,13 @@ public class RtbCronDispatch {
 
     public static void main(String[] args) {
 
+    	//第一次启动加载全部缓存
+    	RtbFlowControl.getInstance().trigger();
+    	
         RtbCronDispatch.startTimer(0);
+        
         RtbCronDispatch.startTimer(1);
+        
         RtbCronDispatch.startTimer(2);
         // 测试 RTB 引擎的
 //        RtbFlowControl.getInstance().trigger();
