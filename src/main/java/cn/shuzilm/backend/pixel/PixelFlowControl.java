@@ -5,6 +5,9 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPixelBean;
@@ -14,6 +17,8 @@ import cn.shuzilm.common.Constants;
  * Created by thunders on 2018/7/17.
  */
 public class PixelFlowControl {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(PixelFlowControl.class);
     private static PixelFlowControl pixcel = null;
     
     private double dspToleranceRatio = 0.3;
@@ -86,10 +91,16 @@ public class PixelFlowControl {
     		dspProfit = getResult(finalPrice, premiumFactor, "*");   		 	
 			rebateProfit = getResult(finalPrice, rebate, "*");			   
     		pixel.setLower(true);
-    	}
+    	}    	
+    	
     	pixel.setFinalCost(finalPrice);
     	pixel.setDspProfit(getResult(dspProfit, 1.0, "/"));
     	pixel.setRebateProfit(getResult(rebateProfit, 1.0, "/"));
+    	
+    	LOG.info("dsp利润="+pixel.getDspProfit());
+    	LOG.info("代理商利润="+pixel.getRebateProfit());
+    	LOG.info("成本价="+pixel.getCost());
+    	LOG.info("总消耗金额="+(pixel.getFinalCost()));
         MsgControlCenter.sendPixelStatus(this.nodeName,pixel);
         return pixel;
     }
