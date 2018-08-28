@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
+import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
 import cn.shuzilm.common.jedis.JedisManager;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -47,6 +48,7 @@ public class RtbServer {
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
         //初始化redis
+        PixelCronDispatch.startPixelDispatch();
         jedisManager=JedisManager.getInstance();
         ruleMatching=RuleMatching.getInstance();
         RtbServer server = new RtbServer();
