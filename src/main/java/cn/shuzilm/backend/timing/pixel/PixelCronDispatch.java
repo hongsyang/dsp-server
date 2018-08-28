@@ -1,6 +1,4 @@
 package cn.shuzilm.backend.timing.pixel;
-
-import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.pixel.PixelFlowControl;
 
 import org.quartz.*;
@@ -10,7 +8,6 @@ import org.quartz.impl.StdSchedulerFactory;
  * Created by thunders on 2018/7/23.
  */
 public class PixelCronDispatch {
-    private static AdFlowControl control = new AdFlowControl();
 
     public static void dispatch(Class<? extends Job> myClass , String cronTime){
         try {
@@ -56,7 +53,7 @@ public class PixelCronDispatch {
 
     }
     
-    public static void startPixelDispatch(String[] args) {
+    public static void startPixelDispatch() {
     	//第一次启动加载全部缓存
     	PixelFlowControl.getInstance().pullTenMinutes();
     	
