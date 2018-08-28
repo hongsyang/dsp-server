@@ -42,6 +42,9 @@ public class PixelFlowControl {
     	String adUid = pixel.getAdUid();
     	AdBean ad = mapAd.get(adUid);
     	double rebate = 0.0;
+    	if(ad == null){
+    		return -1;
+    	}
     	if(ad.getAdvertiser().getAgencyBean() != null)
     		rebate = ad.getAdvertiser().getAgencyBean().getRebate();//获取代理商返点比例
     	double dspProfit = 0.0;

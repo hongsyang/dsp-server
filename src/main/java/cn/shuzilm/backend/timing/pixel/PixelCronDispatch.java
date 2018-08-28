@@ -1,6 +1,8 @@
 package cn.shuzilm.backend.timing.pixel;
 
 import cn.shuzilm.backend.master.AdFlowControl;
+import cn.shuzilm.backend.pixel.PixelFlowControl;
+
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -46,7 +48,20 @@ public class PixelCronDispatch {
      * @param args
      */
     public static void main(String[] args) {
+    	//第一次启动加载全部缓存
+    	PixelFlowControl.getInstance().pullTenMinutes();
+    	
         PixelCronDispatch.startTimer(1);
+        
+
+    }
+    
+    public static void startPixelDispatch(String[] args) {
+    	//第一次启动加载全部缓存
+    	PixelFlowControl.getInstance().pullTenMinutes();
+    	
+        PixelCronDispatch.startTimer(1);
+        
 
     }
 
