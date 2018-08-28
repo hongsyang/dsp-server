@@ -38,12 +38,12 @@ public class PixelFlowControl {
         mapAd = new ConcurrentHashMap<String,AdBean>();
     }
 
-    public double sendStatus(AdPixelBean pixel){
+    public AdPixelBean sendStatus(AdPixelBean pixel){
     	String adUid = pixel.getAdUid();
     	AdBean ad = mapAd.get(adUid);
     	double rebate = 0.0;
     	if(ad == null){
-    		return -1;
+    		return null;
     	}
     	if(ad.getAdvertiser().getAgencyBean() != null)
     		rebate = ad.getAdvertiser().getAgencyBean().getRebate();//获取代理商返点比例
@@ -89,7 +89,7 @@ public class PixelFlowControl {
     	pixel.setDspProfit(dspProfit);
     	pixel.setRebateProfit(rebateProfit);
         MsgControlCenter.sendPixelStatus(this.nodeName,pixel);
-        return finalPrice;
+        return pixel;
     }
 
     public static void main(String[] args) {
