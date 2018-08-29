@@ -106,16 +106,16 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
             MDC.remove("phoenix");
-            MDC.put("sift", "LingJiExp");
-            boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-            if (lingJiExp) {
-                log.debug("发送到Phoenix：{}", lingJiExp);
-            } else {
-                log.debug("发送到Phoenix：{}", lingJiExp);
-            }
 
         } catch (Exception e) {
-            log.error("redis获取失败或者超时 ，异常：{}", e);
+            log.error("adPixelBean获取失败或者超时 ，异常：{}", e);
+        }
+        boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+        MDC.put("sift", "LingJiExp");
+        if (lingJiExp) {
+            log.debug("发送到Phoenix：{}", lingJiExp);
+        } else {
+            log.debug("发送到Phoenix：{}", lingJiExp);
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
