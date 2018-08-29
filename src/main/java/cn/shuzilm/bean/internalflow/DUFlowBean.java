@@ -21,14 +21,13 @@ public class DUFlowBean implements Serializable {
     private static final long serialVersionUID = -6743567631108323096L;
 
     private String requestId;//对应Bid Request中的id
-
+    
     private String adTypeId;//广告大类型ID
     private Integer adxAdTypeId;//广告小类对应ADX服务商的ID
     private String widthHeightRatio;//  Width/Height 宽高比
     private String platform;//不同平台 dsp传
     private String demographicTagId;//不同人群  dsp传 用逗号隔开
     private Integer hour;// winNotice返回的小时数 （ 统计需求 价格随时段变化 ）
-
 
     private List<Impression> impression;//广告位信息
     private String bidid;//DSP给出的该次竞价的ID
@@ -43,7 +42,7 @@ public class DUFlowBean implements Serializable {
     private String infoId;//上报信息的唯一ID
     private String did;//数盟的设备id
     private String deviceId;//   唯一识别用户
-    private Long createTime;// timestamp  该条信息的创建时间
+    private long createTime;// timestamp  该条信息的创建时间
     private String adUid;// varchar(36)  广告ID
     private String audienceuid;//  varchar(36)  人群ID
     private String advertiserUid;//  varchar(36)  广告主ID
@@ -52,16 +51,18 @@ public class DUFlowBean implements Serializable {
     private String province;//varchar(20)  省
     private String city;//varchar(20)  市
     private String country;//varchar(20) 县
-    private Double actualPrice;//成本价(张迁需要)
+    private Double actualPrice ;//成本价(张迁需要)
+    private Double actualPricePremium ;//溢价（张迁需要）
+    private Double biddingPrice  ;//广告主出价（张迁需要）
+    private Double agencyProfit;//代理商利润
+    private Double ourProfit;//我们的利润
+    private String adxId  ;//广告商id
+    private String appName  ;//应用名称
+    private String appPackageName  ;//应用包名称
+    private String appVersion  ;//应用版本
+    private String dealid  ;//私有交易id，判断是否属于私有交易
     private Double premiumFactor;//溢价系数
-    private Double actualPricePremium;//溢价（张迁需要）
-    private Double biddingPrice;//广告主出价（张迁需要）
-    private String adxId;//ADX广告商id
-    private String appName;//应用id
-    private String appPackageName;//应用包名称（统计需求  媒体）
-    private String appVersion;//应用版本
-    private String dealid;//私有交易id，判断是否属于私有交易
-    private Long   winNoticeTime;//1533628505531 对账时间戳
+    private Long winNoticeTime;//1533628505531 对账时间戳
     private String landingUrl;//点击广告之后的跳转url
     private String linkUrl;//点击目标链接
     private String tracking;//曝光监测链接
@@ -69,9 +70,9 @@ public class DUFlowBean implements Serializable {
     private String title;//信息流标题
     private String titleShort;//信息流短标题
     private String titleLong;//信息流长标题
-    private String mode;//出价模式
     private String desc;//信息流描述
-    private String descShort;//信息流描述
-    private String descLong;//信息流描述
+    private String descShort;//信息流短描述
+    private String descLong;//信息流长描述
+    private String mode;//出价模式
 
 }

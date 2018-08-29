@@ -42,21 +42,23 @@ public class Test {
 //        String s = UrlEncoded.encodeString(adm);
 //        System.out.println(s);
         String nodes[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
-        List<RedisURI> nodeList = new ArrayList<>();
-        for(String node : nodes){
-            String[] nodeArr = node.split(",");
-            RedisURI nodeUri = RedisURI.create(nodeArr[0], Integer.parseInt(nodeArr[1]));
-            nodeList.add(nodeUri);
-        }
-
-        RedisClusterClient clusterClient = RedisClusterClient.create(nodeList);
-        ClientResources clusterClientResources = clusterClient.getResources();
-        Partitions partitions = clusterClient.getPartitions();
-        List<RedisClusterNode> partitionsList = partitions.getPartitions();
-        for (RedisClusterNode partition : partitions) {
-            System.out.println(partition);
-        }
-        System.out.println(clusterClientResources);
+        String s = Arrays.toString(nodes);
+        System.out.println(s);
+//        List<RedisURI> nodeList = new ArrayList<>();
+//        for(String node : nodes){
+//            String[] nodeArr = node.split(",");
+//            RedisURI nodeUri = RedisURI.create(nodeArr[0], Integer.parseInt(nodeArr[1]));
+//            nodeList.add(nodeUri);
+//        }
+//
+//        RedisClusterClient clusterClient = RedisClusterClient.create(nodeList);
+//        ClientResources clusterClientResources = clusterClient.getResources();
+//        Partitions partitions = clusterClient.getPartitions();
+//        List<RedisClusterNode> partitionsList = partitions.getPartitions();
+//        for (RedisClusterNode partition : partitions) {
+//            System.out.println(partition);
+//        }
+//        System.out.println(clusterClientResources);
 
 //      commands.hset("3D8A278F33E4F97181DF1EAEFE500D05", "temp", ss);
 //        double f = 111231.4545;

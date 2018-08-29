@@ -4,7 +4,8 @@
     <!--设置日志输出为控制台-->
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n</pattern>
+            <pattern> %m%n</pattern>
+            <!--<pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n</pattern>-->
         </encoder>
     </appender>
     <!--根据业务类型输出日志-->
@@ -21,6 +22,23 @@
                 </rollingPolicy>
                 <layout class="ch.qos.logback.classic.PatternLayout">
                     <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %m%n</Pattern>
+                </layout>
+            </appender>
+        </sift>
+    </appender>
+    <appender name="PHOENIX" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator>
+            <Key>phoenix</Key>
+            <DefaultValue>phoenix</DefaultValue>
+        </discriminator>
+        <sift>
+            <appender name="FILE-${control}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <File>logs/${phoenix}/${phoenix}.log</File>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <FileNamePattern>logs/${phoenix}/${phoenix}.%d{yyyyMMddHH}.log</FileNamePattern>
+                </rollingPolicy>
+                <layout class="ch.qos.logback.classic.PatternLayout">
+                    <Pattern>%m%n</Pattern>
                 </layout>
             </appender>
         </sift>
@@ -42,6 +60,7 @@
         <level value="DEBUG"/>
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="SIFT"/>
+        <appender-ref ref="PHOENIX"/>
     </root>
 
 

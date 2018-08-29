@@ -1,6 +1,8 @@
 package cn.shuzilm.interf.rtb;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
+import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
+import cn.shuzilm.common.jedis.JedisManager;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -30,10 +32,9 @@ public class RtbServer {
 
     public static HashMap<String, String> appKeyIdMap;
 
+    private static RuleMatching ruleMatching;
 
-    private static String nodes[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
-
-    private static RuleMatching ruleMatching = null;
+    private static JedisManager jedisManager ;
 
     /**
      * 创建数据库连接
@@ -46,7 +47,9 @@ public class RtbServer {
         appKeyIdMap = new HashMap<String, String>();
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
-//        ruleMatching=RuleMatching.getInstance(nodes);
+        //初始化redis
+        jedisManager=JedisManager.getInstance();
+        ruleMatching=RuleMatching.getInstance();
         RtbServer server = new RtbServer();
         server.start(8780);
     }
