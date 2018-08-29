@@ -78,7 +78,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             MDC.put("sift", "AdViewExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "app");
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            log.debug(       "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
                     element.getCreateTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -90,7 +92,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(),element.getImpression(),element.getDealid() );
+                    element.getRequestId(),element.getImpression().get(0).getId(),element.getDealid() );
             MDC.remove("phoenix");
             MDC.put("sift", "AdViewExp");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
