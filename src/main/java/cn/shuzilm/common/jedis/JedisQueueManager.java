@@ -332,5 +332,6 @@ public class JedisQueueManager {
     
 //    public static void main(String[] args) {
 //    	removeAll("rtb-001ad");
+//    	removeAll("rtb-001_pixel");
 //	}
 }

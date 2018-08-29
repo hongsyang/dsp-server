@@ -1,6 +1,8 @@
 package cn.shuzilm.bean.dmp;
 
 import cn.shuzilm.bean.control.ICommand;
+
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
@@ -189,14 +191,19 @@ public class AudienceBean implements ICommand {
         this.geos = geos;
         //判断geos是否为空
         if (StringUtils.isNotBlank(geos)) {
-            JSONObject parse = JSONObject.parseObject(geos);
-            Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();
-            List<Map.Entry> list = new ArrayList<Map.Entry>();
-            while (iterator.hasNext()) {
-                Map.Entry<String, Object> entry = iterator.next();
-                list.add(entry);
-            }
+        	JSONArray array = JSONArray.parseArray(geos);
+        	if(array != null && array.size()>0){
+        		List<Map.Entry> list = new ArrayList<Map.Entry>();
+        		for(int i =0;i<array.size();i++){
+        			JSONObject parse = array.getJSONObject(i);
+        			Iterator<Map.Entry<String, Object>> iterator = parse.entrySet().iterator();        			
+        			while (iterator.hasNext()) {
+        				Map.Entry<String, Object> entry = iterator.next();
+        				list.add(entry);
+        			}
+        		}
             this.geoList = convertToGpsBeanList(list);
+        	}
         }
     }
 
@@ -215,7 +222,7 @@ public class AudienceBean implements ICommand {
             gpsBean.setPayload((String) entry.getKey());
             Object gpsValue = entry.getValue();
             String value = gpsValue.toString();
-            String[] gpsDetail = value.replace(re, "").trim().replace(ra, "").split(",");
+            String[] gpsDetail = value.replace(re, "").trim().replace(ra, "").replace("\"", "").split(",");
             Double provinceId = Double.valueOf(gpsDetail[0]);
             gpsBean.setLng(provinceId);
             Double cityId = Double.valueOf(gpsDetail[1]);

@@ -224,6 +224,7 @@ public class AdFlowControl {
                 }
 
                 //更新广告组金额状态
+                System.out.println(adUid);
                 groupId = mapAd.get(adUid).getGroupId();
                 statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
                 statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);

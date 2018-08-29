@@ -539,7 +539,7 @@ public class RuleMatching {
 		if(material.getFileName().contains("http")){
 			targetDuFlowBean.setAdm(material.getFileName());// 广告素材
 		}else{
-			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getFileName());
+			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getUid()).concat(".").concat(material.getExt());
 			targetDuFlowBean.setAdm(url);// 广告素材
 		}			
 		targetDuFlowBean.setAdw(material.getWidth());
@@ -609,7 +609,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "feed", 320, 50, true, 5, 5, "1", "jpg,gif");
+		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "feed", 720, 400, true, 5, 5, "1", "jpg,gif,mp4");
 	}
 
 }
