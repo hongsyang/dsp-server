@@ -220,19 +220,6 @@
             <artifactId>spring-beans</artifactId>
             <version>5.0.5.RELEASE</version>
         </dependency>
-        <!--org.apache.phoenix 依赖-->
-        <dependency>
-            <groupId>org.apache.phoenix</groupId>
-            <artifactId>phoenix-core</artifactId>
-            <version>4.13.2-cdh5.11.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
 
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
@@ -240,20 +227,35 @@
             <version>2.3.0</version>
         </dependency>
 
+        <!--    &lt;!&ndash;org.apache.phoenix 依赖&ndash;&gt;
+            <dependency>
+                <groupId>org.apache.phoenix</groupId>
+                <artifactId>phoenix-core</artifactId>
+                <version>4.13.2-cdh5.11.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
 
-        <dependency>
-            <groupId>org.apache.phoenix</groupId>
-            <artifactId>phoenix-core</artifactId>
-            <version>4.13.2-cdh5.11.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
 
+
+
+            <dependency>
+                <groupId>org.apache.phoenix</groupId>
+                <artifactId>phoenix-core</artifactId>
+                <version>4.13.2-cdh5.11.2</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+    -->
         <!-- https://mvnrepository.com/artifact/nl.cloudfarming.client/lib-geotools -->
         <dependency>
             <groupId>nl.cloudfarming.client</groupId>

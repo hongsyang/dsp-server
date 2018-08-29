@@ -1,6 +1,7 @@
 package cn.shuzilm.bean.adview.request;
 
 import cn.shuzilm.bean.lj.request.AppExt;
+import cn.shuzilm.bean.lj.request.LJContent;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -19,6 +20,7 @@ public class App implements Serializable {
     private String id;//(T) App 唯一标识，由 AdView 生成
     private String name;//(T) App 名称
     private String domain;//(F)  官网地址
+    private LJContent content;//灵集content
     private String[] cat;//(F) App 类型，参考附录 6 [
     private String ver;//(F)  App 版本
     private String bundle;//(F) App 程序主包名

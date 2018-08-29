@@ -108,7 +108,7 @@ public class RuleMatching {
 	 *            ADX名称
 	 * @param material
 	 *            物料
-	 * @param extSet
+	 * @param extStr
 	 *            广告位支持的文件扩展名列表
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
@@ -138,9 +138,6 @@ public class RuleMatching {
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
-	 * 
-	 * @param tagBean
-	 *            标签
 	 * @param adType
 	 *            广告类型
 	 * @param width

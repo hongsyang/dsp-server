@@ -51,7 +51,7 @@ if __name__ == '__main__':
      distance = sys.argv[3]
 
      leftdown,rightup = convert_leftdown_rightup(lng,lat,distance)
-     print str(leftdown[0]) + ',' + str(leftdown[1]) + '\t' + str(rightup[0]) + ',' + str(rightup[1])
+     print (str(leftdown[0]) + ',' + str(leftdown[1]) + '\t' + str(rightup[0]) + ',' + str(rightup[1]))
 
 if __name__ == '__main__2':
     coords = [

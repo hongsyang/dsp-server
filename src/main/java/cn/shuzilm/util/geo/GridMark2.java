@@ -24,9 +24,9 @@ public class GridMark2 {
     /**
      * 将次改为对应的class目录
      */
-//    private static final String dir = Constants.getInstance().getConf("PYTHON_GEO_TRANSFER_DIR");
+    private static final String dir = Constants.getInstance().getConf("PYTHON_GEO_TRANSFER_DIR");
 
-    private static final String dir = "d:\\";
+    //private static final String dir = "d:\\";
 
     private static final String pythonEnvDir = "python.exe";
     
