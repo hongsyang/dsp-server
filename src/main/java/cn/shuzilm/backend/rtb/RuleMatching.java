@@ -138,7 +138,6 @@ public class RuleMatching {
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
-	 * 
 	 * @param adType
 	 *            广告类型
 	 * @param width

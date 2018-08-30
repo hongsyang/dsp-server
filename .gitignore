@@ -1,5 +1,8 @@
+/bin/
+/logs/
 /target/
 /.idea/
 /.settings/
 /.classpath
 /.project
+/.gitignore
