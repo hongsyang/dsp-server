@@ -118,19 +118,9 @@ public class JedisManager {
      *
      * @param jedis
      */
-    public void returnResource(Jedis jedis) {
-        if(jedis == null) {
-            return;
-        }
-        try {
-            jedisPool.returnResource(jedis);
-        } catch (Exception e) {
-            jedisPool.returnBrokenResource(jedis);
-            log.error("Failed to return jedis resource, reason is " + e.getMessage());
-        }finally{
+    public void returnResource(Jedis jedis) {        
         	if(jedis != null){
         		jedis.close();
         	}
-        }
     }
 }
