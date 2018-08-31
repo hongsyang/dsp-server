@@ -89,7 +89,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             element.setHour(date.getHours());
             MDC.put("sift", "LingJiExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
-            MDC.put("phoenix", "app");
+            MDC.put("phoenix", "Exp");
             log.debug(        "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",

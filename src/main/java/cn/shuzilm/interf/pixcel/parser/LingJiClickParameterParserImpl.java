@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -52,8 +54,8 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                 bean.setAdUid(element.getAdUid());
             }
             bean.setHost(configs.getString("HOST"));
-//            bean.setMoney(Double.valueOf(urlRequest.get("price")));
-            bean.setWinNoticeNums(1);
+            bean.setClickNums(1);
+            bean.setClickTime(new Date().getTime());
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiClickBean：{}", bean);
             PixelFlowControl.getInstance().sendStatus(bean);
@@ -63,20 +65,34 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
             element.setRequestId(requestId);
             element.setAdxSource("LingJi");
             MDC.put("sift", "LingJiClick");
-            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+            log.debug("发送到Phoenix的DUFlowBean:{}", element);
+            MDC.put("phoenix", "Click");
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}",
+                    element.getInfoId(), element.getHour(),
+                    element.getCreateTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
-                    element.getAdUid(), element.getAdvertiserUid(),
-                    element.getAdvertiserUid(), element.getAgencyUid(),
+                    element.getAdUid(), element.getAudienceuid(),
+                    element.getAgencyUid(), element.getAdvertiserUid(),
                     element.getCreativeUid(), element.getProvince(),
-                    element.getCity(), element.getRequestId());
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
-            if (lingJiClick) {
-                log.debug("发送到Phoenix：{}", lingJiClick);
-            } else {
-                log.debug("发送到Phoenix：{}", lingJiClick);
-            }
-        }catch (Exception e){
-            log.error("redis获取失败或者超时 ，异常：{}",e);
+                    element.getCity(), element.getActualPricePremium(),
+                    element.getBiddingPrice(), element.getActualPrice(),
+                    element.getAgencyProfit(), element.getOurProfit(),
+                    element.getAdxId(), element.getAppName(),
+                    element.getAppPackageName(), element.getAppVersion(),
+                    element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
+            MDC.remove("phoenix");
+        } catch (Exception e) {
+            log.error("获取失败或者超时 ，异常：{}", e);
+        } finally {
+            jedis.close();
+        }
+        boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
+        if (lingJiClick) {
+            log.debug("发送到Phoenix：{}", lingJiClick);
+        } else {
+            log.debug("发送到Phoenix：{}", lingJiClick);
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
