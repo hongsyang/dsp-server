@@ -12,7 +12,7 @@ import org.quartz.JobExecutionException;
 public class PixelTenMinuteTask implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        PixelFlowControl.getInstance().pullTenMinutes();
+        PixelFlowControl.getInstance().pullTenMinutes(false);
 
     }
 }

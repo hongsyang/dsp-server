@@ -46,7 +46,7 @@ public class PixelCronDispatch {
      */
     public static void main(String[] args) {
     	//第一次启动加载全部缓存
-    	PixelFlowControl.getInstance().pullTenMinutes();
+    	PixelFlowControl.getInstance().pullTenMinutes(true);
     	
         PixelCronDispatch.startTimer(1);
         
@@ -55,8 +55,8 @@ public class PixelCronDispatch {
     
     public static void startPixelDispatch() {
     	//第一次启动加载全部缓存
-    	PixelFlowControl.getInstance().pullTenMinutes();
-        System.out.println("第一次启动加载全部缓存");
+    	PixelFlowControl.getInstance().pullTenMinutes(true);
+    	
         PixelCronDispatch.startTimer(1);
         
 
