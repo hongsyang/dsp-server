@@ -8,6 +8,7 @@ import org.jboss.netty.handler.codec.http.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -53,7 +54,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 						.toString().split(":")[0].replace("/", "");
 //				System.out.println("remoteIp : "+remoteIp);
 				//接收 POST 请求 , 获取 SDK 回传数据
-				System.out.println(URLDecoder.decode(new String(request.getContent().array())));
 				String dataStr = URLDecoder.decode(new String(request.getContent().array(),"utf-8"));
 //				String dataStr = new String(request.getContent().array(),"utf-8");
 //				System.out.println("接收到的原始数据 --- "+dataStr);
