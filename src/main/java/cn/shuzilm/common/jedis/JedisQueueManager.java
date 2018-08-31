@@ -3,6 +3,9 @@ package cn.shuzilm.common.jedis;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import cn.shuzilm.backend.master.MsgControlCenter;
+import cn.shuzilm.bean.control.TaskBean;
 import redis.clients.jedis.Jedis;
 
 import java.util.LinkedList;
@@ -330,8 +333,24 @@ public class JedisQueueManager {
         }
     }
     
-//    public static void main(String[] args) {
+    public static void main(String[] args) {
 //    	removeAll("rtb-001ad");
 //    	removeAll("rtb-001_pixel");
-//	}
+//    	try{
+//    		for(int i=0;i<100;i++){
+//    		try{
+    		TaskBean taskBean = MsgControlCenter.recvTask("rtb-001");
+    		System.out.println(taskBean.getAdUid());
+//    		}catch(Exception ex){
+//    			System.out.println(ex);
+//    			continue;
+//    		}
+//    		}
+//    	}catch(Exception e){
+//    		System.out.println(e);
+//    	}
+//    	List list = getAllElement("rtb-001_down");
+//    	
+//    	System.out.println(list.size());
+	}
 }
