@@ -127,6 +127,10 @@ public class JedisManager {
         } catch (Exception e) {
             jedisPool.returnBrokenResource(jedis);
             log.error("Failed to return jedis resource, reason is " + e.getMessage());
+        }finally{
+        	if(jedis != null){
+        		jedis.close();
+        	}
         }
     }
 }
