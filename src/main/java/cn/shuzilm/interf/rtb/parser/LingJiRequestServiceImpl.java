@@ -189,6 +189,11 @@ public class LingJiRequestServiceImpl implements RequestService {
                         ADX_ID,//ADX 服务商ID
                         stringSet//文件扩展名
                 );
+                if (targetDuFlowBean == null) {
+                    response = "未匹配到广告";
+                    return response;
+                }
+                log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                 targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -393,9 +398,9 @@ public class LingJiRequestServiceImpl implements RequestService {
             } else {
                 log.debug("jedis为空：{}", jedis);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             jedis.close();
         }
     }

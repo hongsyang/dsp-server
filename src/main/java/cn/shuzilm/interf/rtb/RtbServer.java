@@ -57,7 +57,7 @@ public class RtbServer {
         jedisManager=JedisManager.getInstance();
         ruleMatching=RuleMatching.getInstance();
         RtbServer server = new RtbServer();
-        server.start(configs.getInt("PORT"));
+        server.start(configs.getInt("RTB_PORT"));
     }
 
     public void start(int port) {
