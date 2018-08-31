@@ -28,7 +28,7 @@ public class GridMark2 {
 
     //private static final String dir = "d:\\";
 
-    private static final String pythonEnvDir = "python.exe";
+    private static final String pythonEnvDir = "python";
     
     private static final Logger LOG = LoggerFactory.getLogger(GridMark2.class);
 
