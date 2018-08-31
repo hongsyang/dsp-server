@@ -334,13 +334,18 @@ public class JedisQueueManager {
     }
     
     public static void main(String[] args) {
-//    	removeAll("rtb-001ad");
-//    	removeAll("rtb-001_pixel");
+    	
+//    	Object o1 = getElementFromQueue("rtb-001ad");
+//    	Object o2 = getElementFromQueue("rtb-002ad");
+//    	Object o3 = getElementFromQueue("rtb-003ad");
+//    	System.out.println(o1);
+//    	System.out.println(o2);
+//    	System.out.println(o3);
 //    	try{
 //    		for(int i=0;i<100;i++){
 //    		try{
-    		TaskBean taskBean = MsgControlCenter.recvTask("rtb-001");
-    		System.out.println(taskBean.getAdUid());
+//    		TaskBean taskBean = MsgControlCenter.recvTask("rtb-001");
+//    		System.out.println(taskBean.getAdUid());
 //    		}catch(Exception ex){
 //    			System.out.println(ex);
 //    			continue;

@@ -608,7 +608,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("97C304E-4C8E-4872-8666-03FE67DC15D1", "feed", 720, 400, true, 5, 5, "1", "jpg,gif,mp4");
+		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DF", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");
 	}
 
 }
