@@ -1,5 +1,6 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.adview.request.*;
 import cn.shuzilm.bean.adview.response.*;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
@@ -37,6 +38,10 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewRequestServiceImpl.class);
 
+    private static JedisManager jedisManager = JedisManager.getInstance();
+
+
+    private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
     private AppConfigs configs = null;
 
@@ -253,14 +258,20 @@ public class AdViewRequestServiceImpl implements RequestService {
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
         log.debug("redis连接时间计数");
-        Jedis jedis = JedisManager.getInstance().getResource();
-        if (jedis != null) {
-            log.debug("AdView_jedis：{}", jedis);
-            String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-            Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
-            log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
-        } else {
-            log.debug("jedis为空：{}", jedis);
+        Jedis jedis = jedisManager.getResource();
+        try {
+            if (jedis != null) {
+                log.debug("jedis：{}", jedis);
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
+            } else {
+                log.debug("jedis为空：{}", jedis);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            jedis.close();
         }
     }
 }

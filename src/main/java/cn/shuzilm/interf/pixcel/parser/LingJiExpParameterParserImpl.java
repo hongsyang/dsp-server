@@ -109,6 +109,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 
         } catch (Exception e) {
             log.error("adPixelBean获取失败或者超时 ，异常：{}", e);
+        }finally {
+            jedis.close();
         }
         boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
         MDC.put("sift", "LingJiExp");

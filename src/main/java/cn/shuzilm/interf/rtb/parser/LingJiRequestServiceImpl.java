@@ -382,15 +382,21 @@ public class LingJiRequestServiceImpl implements RequestService {
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
-        log.debug("redis计数");
+        log.debug("redis连接时间计数");
         Jedis jedis = jedisManager.getResource();
-        if (jedis != null) {
-            log.debug("jedis：{}", jedis);
-            String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-            Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
-            log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
-        } else {
-            log.debug("jedis为空：{}", jedis);
+        try {
+            if (jedis != null) {
+                log.debug("jedis：{}", jedis);
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
+            } else {
+                log.debug("jedis为空：{}", jedis);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            jedis.close();
         }
     }
 

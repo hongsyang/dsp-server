@@ -1,10 +1,12 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.UrlParserUtil;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,10 @@ public class RtbRequestParser {
 
     private static volatile Reflections reflections;
 
+    private AppConfigs configs = null;
+
+    private static final String FILTER_CONFIG = "filter.properties";
+
 
     private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
 
@@ -40,7 +46,14 @@ public class RtbRequestParser {
      */
     public String parseData(String url, String dataStr, String remoteIp) {
         String responseStr = "没有对应的厂商";
+        this.configs = AppConfigs.getInstance(FILTER_CONFIG);
+        MDC.put("sift","adx_request");
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
+        MDC.remove("sift");
+        if (Boolean.valueOf(configs.getString("FILTER_RTB"))){
+            responseStr="测试请求";
+            return responseStr;
+        }
         List<String> urlList = UrlParserUtil.urlParser(url);
         Reflections reflections = instance(FILE_NAME);
         Set<Class<? extends RequestService>> monitorClasses = reflections.getSubTypesOf(RequestService.class);
