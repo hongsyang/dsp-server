@@ -282,24 +282,26 @@ public class LingJiRequestServiceImpl implements RequestService {
         } else if ("interstitial".equals(adType)) {
             bid.setAdm(duFlowBean.getAdm());// 插屏
         } else if ("feed".equals(adType)) {//信息流
+            bid.setNurl("");//
             LJNativeResponse ljNativeResponse = new LJNativeResponse();
 
             NativeAD nativeAD = new NativeAD();
             List urls = new ArrayList();
             urls.add(nurl);
-            urls.add(curl);
             nativeAD.setImptrackers(urls);// 展示曝光URL数组
 
             LJLink ljLink = new LJLink();//	点击跳转URL地址(落地页)
             ljLink.setUrl(duFlowBean.getLandingUrl());//落地页
-            ljLink.setClicktrackers(urls);
+            List curls = new ArrayList();
+            curls.add(curl);
+            ljLink.setClicktrackers(curls);
             ljLink.setAction(2);
             nativeAD.setLink(ljLink);
 
             List<LJEvent> ljEvents = new ArrayList<>();
             LJEvent event = new LJEvent();
             event.setV("0");
-            event.setVm(urls);
+            event.setVm(curls);
             ljEvents.add(event);
             nativeAD.setEvent(ljEvents);
 
