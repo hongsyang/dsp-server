@@ -177,7 +177,7 @@ public class JedisQueueManager {
         Jedis jedis = null;
         try {
             jedis = manager.getResource();
-            return ObjectUtils.converteToObject(jedis.lpop(queueName.getBytes("utf-8")));
+            return ObjectUtils.converteToObject(jedis.rpop(queueName.getBytes("utf-8")));
         } catch (Exception e) {
             logger.error("Get element failure from queue {}, {}", queueName, e);
             return null;
