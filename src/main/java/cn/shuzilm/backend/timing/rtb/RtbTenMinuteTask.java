@@ -12,7 +12,7 @@ import org.quartz.JobExecutionException;
 public class RtbTenMinuteTask implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        RtbFlowControl.getInstance().pullTenMinutes(false);
+        RtbFlowControl.getInstance().pullTenMinutes();
 
     }
 }

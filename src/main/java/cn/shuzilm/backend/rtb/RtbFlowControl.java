@@ -141,11 +141,9 @@ public class RtbFlowControl {
 
     public void trigger() {
         // 5 s
-        pullAndUpdateTask(false);
-
+        pullAndUpdateTask();
         // 10分钟拉取一次最新的广告内容
-        pullTenMinutes(false);
-
+        pullTenMinutes();
         // 1 hour
         refreshAdStatus();
     }
@@ -172,23 +170,9 @@ public class RtbFlowControl {
     /**
      * 每隔 10 分钟更新一次广告素材或者人群包
      */
-    public void pullTenMinutes(boolean isFirstPullData) {
+    public void pullTenMinutes() {
         // 从 10 分钟的队列中获得广告素材和人群包
-    	ArrayList<AdBean> adBeanList = new ArrayList<AdBean>();
-    	if(isFirstPullData){
-    		myLog.info("开始从["+nodeName+"]队列初始化rtb广告数据.....");
-    		ArrayList<AdBean> adBeanTempList = new ArrayList<AdBean>();
-    		while(true){
-    			adBeanList.clear();
-    			adBeanList.addAll(adBeanTempList);
-    			adBeanTempList = MsgControlCenter.recvAdBean(nodeName);
-    			if(adBeanTempList == null || adBeanTempList.size() == 0){
-    				break;
-    			}
-    		}
-    	}else{
-        adBeanList = MsgControlCenter.recvAdBean(nodeName);
-    	}
+    	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
     	try{
     		redisGeoMap = redis.getHMAsync(redisGeoKey);
     	}catch(Exception e){
@@ -328,7 +312,7 @@ public class RtbFlowControl {
                 gridMap.put(0, new GridMark2(gpsResidenceList,redisGeoMap));
                 gridMap.put(1, new GridMark2(gpsWorkList,redisGeoMap));
                 gridMap.put(2, new GridMark2(gpsActiveList,redisGeoMap));
-
+                
                 myLog.info("广告共计加载条目数 : " + adBeanList.size());
                 //myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
 
@@ -339,23 +323,8 @@ public class RtbFlowControl {
     /**
      * 每隔 5 秒钟从消息中心获得当前节点的当前任务，并与当前两个 MAP monitor 进行更新 不包括素材
      */
-    public void pullAndUpdateTask(boolean isFirstPullData) {
-    	TaskBean task = null;
-    	List<TaskBean> taskList = new ArrayList<TaskBean>();
-    	if(isFirstPullData){
-    		myLog.info("开始从["+nodeName+"]队列初始化rtb任务数据.....");
-    		while(true){
-    			taskList.clear();
-    			taskList.add(task);
-    			task = MsgControlCenter.recvTask(nodeName);
-    			if(task == null){
-    				break;
-    			}
-    		}
-    		task = taskList.get(0);
-    	}else{
-    		task = MsgControlCenter.recvTask(nodeName);
-    	}
+    public void pullAndUpdateTask() {
+    	TaskBean task = MsgControlCenter.recvTask(nodeName);
         if (task == null) {
             return;
         }

@@ -12,6 +12,6 @@ import org.quartz.JobExecutionException;
 public  class RtbRealTask implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        RtbFlowControl.getInstance().pullAndUpdateTask(false);
+        RtbFlowControl.getInstance().pullAndUpdateTask();
     }
 }

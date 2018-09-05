@@ -9,6 +9,7 @@ import com.yao.util.db.bean.ResultMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.BeanUtils;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -642,30 +643,303 @@ public class AdFlowControl {
      * 其中包括各种对广告的控制，包括开启广告，暂停广告，终止广告等
      */
     private void dispatchTask() {
+    	nodeList.clear();
+    	WorkNodeBean testNode = new WorkNodeBean();
+    	testNode.setId(20);
+    	testNode.setIp("192.168.1.1");
+    	testNode.setName("rtb-008");
+    	testNode.setStatus(1);
+    	testNode.setMemo(null);
+    	nodeList.add(testNode);
         int nodeNums = nodeList.size();
+        
+        
+        
         //遍历所有的广告
         ArrayList<AdBean> adList = new ArrayList<>();
-        for (String adUid : mapAd.keySet()) {
-            //对任务进行拆解
-            TaskBean task = new TaskBean(adUid);
-            AdBean ad = mapAd.get(adUid);
+        
+        
+        AdBean ad1 = new AdBean();
+		AudienceBean au1 = new AudienceBean();
+		String curl = "http://101.200.56.200:8880/" + "lingjiclick?" + "id=" + "1213" + "&price=" + 6 + "&pmp="
+				+ "2222";
+		au1.setAdUid("12345678");
+		au1.setAdviserId("123456");
+		au1.setName("大学生");
+		au1.setRemark("remark");
+		au1.setType("location");
+		au1.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		 au1.setGeos(
+			 "[{\"北京市通州区\":[\"116.640865\",\"39.852104\",\"1000\"]},{\"北京市大兴区公园北环路辅路-旧宫,清和园\":[\"116.461492\",\"39.794028\",\"5316\"]}]");
+		au1.setMobilityType(0);
+		//[{"北京市通州区":["116.640865","39.852104","1000"]},{"北京市大兴区公园北环路辅路-旧宫,清和园":["116.461492","39.794028","5316"]}]
+		au1.setDemographicTagId("[111120,222220,333320,444420]");
+		au1.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		au1.setIncomeLevel(2);
+		au1.setAppPreferenceIds("eat food");
+		au1.setPlatformId(1);
+		au1.setBrandIds("335");
+		au1.setPhonePriceLevel(3);
+		au1.setNetworkId(2);
+		au1.setCarrierId(4);
+		au1.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
+		au1.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
 
-            //从小时监控中取出曝光量、点击次数 、点击金额
-            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
-            task.setClickNums(statusHour.getClickNums());
-            task.setExposureNums(statusHour.getWinNums());
-            task.setMoney(statusHour.getMoney());
+		List<AudienceBean> au1List = new ArrayList<AudienceBean>();
+		au1List.add(au1);
+		ad1.setAudienceList(au1List);
 
-            //给每一个节点分配自己的 曝光 额度
-            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
-            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
-            task.setCommand(TaskBean.COMMAND_START);
-            adList.add(ad);
-            for (WorkNodeBean node : nodeList) {
-                //发送广告状态
-                pushTaskSingleNode(node.getName(), task);
-            }
-        }
+		AdPropertyBean propertyBean = new AdPropertyBean();
+		propertyBean.setImpProcess(3);
+		propertyBean.setCreativeQuality(2);
+		propertyBean.setMoneyLeft(4);
+		propertyBean.setAdvertiserScore(5);
+		propertyBean.setCtrScore(2);
+
+		ad1.setPropertyBean(propertyBean);
+
+		AdvertiserBean advertiser = new AdvertiserBean();
+		advertiser.setUid("7777777");
+		advertiser.setName("广告主A");
+		advertiser.setGrade(1);
+
+		ad1.setAdvertiser(advertiser);
+
+		ad1.setAdUid("23455555");
+		ad1.setName("广告名称A");
+
+		CreativeBean creative = new CreativeBean();
+		creative.setUid("567890");
+		creative.setName("广告素材A");
+		creative.setApproved(1);
+
+		Material material = new Material();
+		material.setUid("1");
+		material.setType("banner");
+		material.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material.setWidth(340);
+		material.setHeight(70);
+		material.setApproved_adx("1");
+		material.setExt("jpg");
+		Material material01 = new Material();
+		material01.setUid("01");
+		material01.setType("banner");
+		material01.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material01.setWidth(320);
+		material01.setHeight(50);
+		material01.setApproved_adx("1");
+		material01.setExt("jpg");
+		Material material02 = new Material();
+		material02.setUid("02");
+		material02.setType("banner");
+		material02.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material02.setWidth(350);
+		material02.setHeight(80);
+		material02.setApproved_adx("1");
+		material02.setExt("jpg");
+		Material material03 = new Material();
+		material03.setUid("03");
+		material03.setType("banner");
+		material03.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material03.setWidth(360);
+		material03.setHeight(90);
+		material03.setExt("jpg");
+		material03.setApproved_adx("1");
+
+		List<Material> materialList = new ArrayList<Material>();
+		materialList.add(material);
+		materialList.add(material01);
+		materialList.add(material02);
+		materialList.add(material03);
+		creative.setType("banner");
+		creative.setMaterialList(materialList);
+		creative.setApproved_adx("1");
+		List<CreativeBean> creativeList = new ArrayList<CreativeBean>();
+		creativeList.add(creative);
+
+		ad1.setCreativeList(creativeList);
+
+		ad1.setPrice(100);
+		
+		creative.setLink(curl);
+		creative.setTracking("https://www.shuzilm.cn/");
+		creative.setLanding("https://www.shuzilm.cn/");
+
+		AdBean ad2 = new AdBean();
+		AudienceBean au2 = new AudienceBean();
+		au2.setAdUid("12345678");
+		au2.setAdviserId("123456");
+		au2.setName("大学生");
+		au2.setRemark("remark");
+		au2.setType("location");
+		au2.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		 au2.setGeos(
+		 "[{\"北京市通州区\":[\"116.640865\",\"22.852104\",\"1000\"]},{\"北京市大兴区公园北环路辅路-旧宫,清和园\":[\"116.461492\",\"22.794028\",\"5316\"]}]");
+		au2.setMobilityType(0);
+		au2.setDemographicTagId("[111120,222220,333320,444420]");
+		au2.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
+		au2.setIncomeLevel(2);
+		au2.setAppPreferenceIds("eat food");
+		au2.setPlatformId(1);
+		au2.setBrandIds("335");
+		au2.setPhonePriceLevel(3);
+		au2.setNetworkId(2);
+		au2.setCarrierId(4);
+		au2.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
+		au2.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
+
+		List<AudienceBean> au2List = new ArrayList<AudienceBean>();
+		au2List.add(au2);
+		ad2.setAudienceList(au2List);
+
+		AdPropertyBean propertyBean2 = new AdPropertyBean();
+		propertyBean2.setImpProcess(4);
+		propertyBean2.setCreativeQuality(3);
+		propertyBean2.setMoneyLeft(4);
+		propertyBean2.setAdvertiserScore(5);
+		propertyBean2.setCtrScore(5);
+
+		ad2.setPropertyBean(propertyBean2);
+
+		AdvertiserBean advertiser2 = new AdvertiserBean();
+		advertiser2.setUid("7777777");
+		advertiser2.setName("广告主A");
+		advertiser2.setGrade(1);
+
+		ad2.setAdvertiser(advertiser2);
+
+		ad2.setAdUid("23455556");
+		ad2.setName("广告名称A");
+
+		CreativeBean creative2 = new CreativeBean();
+		creative2.setUid("567890");
+		creative2.setName("广告素材A");
+		Material material2 = new Material();
+		material2.setUid("2");
+		material2.setType("banner");
+		material2.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material2.setWidth(820);
+		material2.setHeight(630);
+		material2.setApproved_adx("1");
+		material2.setExt("jpg");
+		Material material21 = new Material();
+		material21.setUid("21");
+		material21.setType("banner");
+		material21.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material21.setWidth(390);
+		material21.setHeight(100);
+		material21.setExt("jpg");
+		material21.setApproved_adx("1");
+		Material material22 = new Material();
+		material22.setUid("22");
+		material22.setType("banner");
+		material22.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material22.setWidth(360);
+		material22.setHeight(70);
+		material22.setApproved_adx("1");
+		material22.setExt("jpg");
+		Material material23 = new Material();
+		material23.setUid("23");
+		material23.setType("banner");
+		material23.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+		material23.setWidth(320);
+		material23.setHeight(50);
+		material23.setApproved_adx("1");
+		material23.setExt("jpg");
+
+		List<Material> materialList2 = new ArrayList<Material>();
+		materialList2.add(material2);
+		materialList2.add(material21);
+		materialList2.add(material22);
+		materialList2.add(material23);
+		creative2.setMaterialList(materialList2);
+		creative2.setType("banner");
+		creative2.setApproved_adx("1");
+		creative2.setApproved(1);
+		List<CreativeBean> creativeList2 = new ArrayList<CreativeBean>();
+		creativeList2.add(creative2);
+
+		ad2.setCreativeList(creativeList2);
+
+		ad2.setPrice(100);
+		
+		creative2.setLink(curl);
+		creative2.setTracking("https://www.shuzilm.cn/");
+		creative2.setLanding("https://www.shuzilm.cn/");
+
+		adList.add(ad1);
+		adList.add(ad2);
+
+		for (int i = 0; i < 10000; i++) {
+			AdBean ad = new AdBean();
+			BeanUtils.copyProperties(ad2, ad);
+			AudienceBean auTemp = ad2.getAudienceList().get(0);
+			AudienceBean au = new AudienceBean();
+			BeanUtils.copyProperties(auTemp,au);
+			List<AudienceBean> audienceList = new ArrayList<AudienceBean>();
+			au.setGeos(
+					 "[{\"北京市通州区\":[\"116.640"+i+"\",\"22.852"+i+"\",\"1000\"]},{\"北京市大兴区公园北环路辅路-旧宫,清和园\":[\"116.461"+i+"\",\"22.794"+i+"\",\"5316\"]}]");
+			audienceList.add(au);
+			ad.setAudienceList(audienceList);
+			ad.setAdUid("aaa" + i);
+			List<CreativeBean> list = ad.getCreativeList();
+			List<CreativeBean> list1 = new ArrayList<CreativeBean>();
+			CreativeBean c = list.get(0);
+			CreativeBean c1 = new CreativeBean();
+			BeanUtils.copyProperties(c, c1);
+			List<Material> materialList1 = c.getMaterialList();
+			List<Material> materialList3 = new ArrayList<Material>();
+			int k = 0;
+			for (int q = 0; q < materialList1.size(); q++) {
+				Material m = new Material();
+				m.setUid(Math.random() + "");
+				m.setType("banner");
+				m.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+				m.setApproved_adx("1");
+				m.setWidth(320 + k);
+				m.setHeight(50 + k);
+				m.setExt("jpg");
+				k = k + 10;
+				materialList3.add(m);
+			}
+			c1.setMaterialList(materialList3);
+			list1.add(c1);
+			ad.setCreativeList(list1);
+			// for(Material m:materialList1){
+			// Material m1 = new Material();
+			// BeanUtils.copyProperties(m1, m);
+			// m.setUid(Math.random()+"");
+			// m.setType("banner");
+			// m.setFileName("http://dp.test.zhiheworld.com/m/qsbk_320x50.gif");
+			//
+			// material22.setWidth(800+k);
+			// material22.setHeight(600+k);
+			// k =k+10;
+			// }
+			adList.add(ad);
+		}
+        
+//        for (String adUid : mapAd.keySet()) {
+//            //对任务进行拆解
+//            TaskBean task = new TaskBean(adUid);
+//            AdBean ad = mapAd.get(adUid);
+//
+//            //从小时监控中取出曝光量、点击次数 、点击金额
+//            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
+//            task.setClickNums(statusHour.getClickNums());
+//            task.setExposureNums(statusHour.getWinNums());
+//            task.setMoney(statusHour.getMoney());
+//
+//            //给每一个节点分配自己的 曝光 额度
+//            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
+//            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
+//            task.setCommand(TaskBean.COMMAND_START);
+//            adList.add(ad);
+//            for (WorkNodeBean node : nodeList) {
+//                //发送广告状态
+//                pushTaskSingleNode(node.getName(), task);
+//            }
+//        }
 
         for (WorkNodeBean node : nodeList) {
             //发送广告

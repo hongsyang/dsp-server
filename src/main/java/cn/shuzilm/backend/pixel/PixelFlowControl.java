@@ -126,23 +126,9 @@ public class PixelFlowControl {
     /**
      * 每隔 10 分钟更新一次广告素材或者人群包
      */
-    public void pullTenMinutes(boolean isFirstPullData) {
+    public void pullTenMinutes() {
         // 从 10 分钟的队列中获得广告素材和人群包
-    	ArrayList<AdBean> adBeanList = new ArrayList<AdBean>();
-    	if(isFirstPullData){
-    		LOG.info("开始从["+nodeName+"]队列初始化pixel数据.....");
-    		ArrayList<AdBean> adBeanTempList = new ArrayList<AdBean>();
-    		while(true){
-    			adBeanList.clear();
-    			adBeanList.addAll(adBeanTempList);
-    			adBeanTempList = MsgControlCenter.recvAdBean(nodeName);
-    			if(adBeanTempList == null || adBeanTempList.size() == 0){
-    				break;
-    			}
-    		}
-    	}else{
-        adBeanList = MsgControlCenter.recvAdBean(nodeName);
-    	}
+    	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
         if(adBeanList != null){
         for(AdBean ad:adBeanList){
         	mapAd.put(ad.getAdUid(), ad);
