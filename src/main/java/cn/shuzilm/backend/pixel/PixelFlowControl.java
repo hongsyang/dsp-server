@@ -48,6 +48,7 @@ public class PixelFlowControl {
 
     public AdPixelBean sendStatus(AdPixelBean pixel){
     	if(pixel.getClickNums() == 1){
+    		pixel.setFinalCost(0.0);
     		MsgControlCenter.sendPixelStatus(this.nodeName,pixel);
             return pixel;
     	}
