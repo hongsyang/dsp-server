@@ -9,6 +9,9 @@ import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -28,6 +31,15 @@ import cn.shuzilm.common.Constants;
  */
 public class AsyncRedisClient {
     private StatefulRedisClusterConnection<String, String> connection = null;
+    
+    private static AsyncRedisClient redisClient = null;
+    
+    public static AsyncRedisClient getInstance(String[] nodes){
+    	if(redisClient == null){
+    		redisClient = new AsyncRedisClient(nodes);
+    	}
+    	return redisClient;
+    }
 
     public AsyncRedisClient(String[] nodes){
         ArrayList<RedisURI> nodeList = new ArrayList<>();
@@ -66,7 +78,7 @@ public class AsyncRedisClient {
     	
     	TagBean tagBean = new TagBean();
 		tagBean.setTagId(123);
-		float[] work = { 116.641f, 39.853f };
+		float[] work = { 116.641f, 22.853f };
 		float[] residence = { 33.11f, 44.22f };
 		float[] activity = { 55.11f, 66.22f };
 		tagBean.setWork(work);
@@ -91,13 +103,24 @@ public class AsyncRedisClient {
 		String ss = JSON.toJSONString(tagBean);
 		String nodeStr = RtbConstants.getInstance().getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
 		String nodes [] = nodeStr.split(";");
-    	AsyncRedisClient redis = new AsyncRedisClient(nodes);
-    	RedisAdvancedClusterAsyncCommands<String, String> commands = redis.connection.async();
-//    	//commands.hset("3D8A278F33E4F97181DF1EAEFE500D06","test", ss);
-    	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15D1", ss);
-    	
-    	String s = redis.getAsync("97C304E-4C8E-4872-8666-03FE67DC15DF");
-    	System.out.println(s);
+    	AsyncRedisClient redis1 = AsyncRedisClient.getInstance(nodes);
+    	System.out.println(redis1);
+    	Map<String,String> map = new HashMap<String,String>();
+//    	for(int i=0;i<10000;i++){
+//    		map.put(""+i, ""+(i+5));
+//    	}
+    	//redis1.setHMAsync("geoTest", map);
+    	//commands.hmset("geoTest", map);
+//    	Map<String,String> future = redis1.getHMAsync("geoTest");
+//    	try {
+//			System.out.println(future.get("2"));
+//			//116.6403_22.8523_1000
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+    	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);		
+    	//String s = redis.getAsync("116.6403_22.8523_1000");
     	
        /* String[] urls = new String[]{"192.168.1.241","101.200.56.200"};
         AsyncRedisClient client = new AsyncRedisClient(urls,6379);
@@ -137,4 +160,54 @@ public class AsyncRedisClient {
         return value;
     }
 
+    public void setAsync(String key,String value){
+    	RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+    	commands.set(key, value);
+    }
+    
+    public void delAsync(String key){
+    	RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+    	commands.del(key);
+    }
+    
+    public void setHAsync(String key,String field,String value){
+    	RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+    	commands.hset(key, field, value);
+    }
+    
+    public void setHMAsync(String key,Map<String,String> map){
+    	RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+    	commands.hmset(key, map);
+    }
+    
+    public Map<String,String> getHMAsync(String key){
+    	RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+    	RedisFuture<Map<String,String>> future = commands.hgetall(key);
+    	Map<String,String> map = null;
+    	try {
+			map = future.get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+    	
+    	return map;
+    }
+    
+    public String getHAsync(String key,String field){
+    	RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
+    	RedisFuture<String> future = commands.hget(key,field);
+    	String value = null;
+    	try {
+			value = future.get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+    	
+    	return value;
+    }
+    
 }

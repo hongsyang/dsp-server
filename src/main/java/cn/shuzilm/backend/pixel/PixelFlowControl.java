@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
@@ -127,16 +128,21 @@ public class PixelFlowControl {
      */
     public void pullTenMinutes(boolean isFirstPullData) {
         // 从 10 分钟的队列中获得广告素材和人群包
-    	ArrayList<AdBean> adBeanList = null;
-//    	if(isFirstPullData){
-//    		while(true){
-//    			adBeanList = MsgControlCenter.recvAdBean(nodeName);
-//    			if(adBeanList == null){
-//    				break;
-//    			}
-//    		}
-//    	}
+    	ArrayList<AdBean> adBeanList = new ArrayList<AdBean>();
+    	if(isFirstPullData){
+    		LOG.info("开始从["+nodeName+"]队列初始化pixel数据.....");
+    		ArrayList<AdBean> adBeanTempList = new ArrayList<AdBean>();
+    		while(true){
+    			adBeanList.clear();
+    			adBeanList.addAll(adBeanTempList);
+    			adBeanTempList = MsgControlCenter.recvAdBean(nodeName);
+    			if(adBeanTempList == null || adBeanTempList.size() == 0){
+    				break;
+    			}
+    		}
+    	}else{
         adBeanList = MsgControlCenter.recvAdBean(nodeName);
+    	}
         if(adBeanList != null){
         for(AdBean ad:adBeanList){
         	mapAd.put(ad.getAdUid(), ad);

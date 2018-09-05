@@ -78,9 +78,11 @@ public class RuleMatching {
 		constant = RtbConstants.getInstance();
 		String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
 		String nodes [] = nodeStr.split(";");
-		redis = new AsyncRedisClient(nodes);
+		redis = AsyncRedisClient.getInstance(nodes);
 		// jedis = JedisManager.getInstance().getResource();
+		long start = System.currentTimeMillis();
 		RtbCronDispatch.startRtbDispatch();
+		LOG.info("初始化缓存时间:"+(System.currentTimeMillis()-start));
 		rtbIns = RtbFlowControl.getInstance();
 		
 		tagRandom = new Random();
@@ -608,7 +610,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DF", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");
+		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DG", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");
 	}
 
 }

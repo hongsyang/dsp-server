@@ -3,6 +3,8 @@ package cn.shuzilm.backend.timing.rtb;
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.rtb.RtbFlowControl;
 import cn.shuzilm.backend.timing.pixel.PixelTenMinuteTask;
+import cn.shuzilm.util.AsyncRedisClient;
+
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -55,7 +57,6 @@ public class RtbCronDispatch {
     	//第一次启动加载全部缓存
     	RtbFlowControl rtbIns = RtbFlowControl.getInstance();
     			rtbIns.trigger();
-    	System.out.println("rtbIns1="+rtbIns);
     	
         RtbCronDispatch.startTimer(0);
         

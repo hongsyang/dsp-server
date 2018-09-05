@@ -357,5 +357,7 @@ public class JedisQueueManager {
 //    	List list = getAllElement("rtb-001_down");
 //    	
 //    	System.out.println(list.size());
+    	
+    	
 	}
 }
