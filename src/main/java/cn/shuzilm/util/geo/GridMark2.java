@@ -227,21 +227,19 @@ public class GridMark2 {
 				return adUidList;
 			else {
 				BitSet destSet = new BitSet();
-				SortedMap smRight = tmRightLng.tailMap(lng);//经度左边集
-				//long start = System.currentTimeMillis();
-				List<List<Integer>> smRightList =  new ArrayList<List<Integer>>(smRight.values());
-				
-				//System.out.println("list="+(System.currentTimeMillis()-start));
-				for(List<Integer> list:smRightList){
+				SortedMap smRight = tmRightLng.tailMap(lng);//经度左边集				
+				Collection<List<Integer>> smRightValues = smRight.values();
+				for(Iterator<List<Integer>> valIt = smRightValues.iterator();valIt.hasNext();){
+					List<Integer> list = valIt.next();
 					for(Integer num:list){
 						destSet.set(num);
 					}
 				}
-				//System.out.println("循环="+(System.currentTimeMillis()-start));
 				BitSet smLeftSet = new BitSet();
 				SortedMap smLeft = tmLeftLng.headMap(lng);//经度右边集
-				List<List<Integer>> smLeftList =   new ArrayList<List<Integer>>(smLeft.values());
-				for(List<Integer> list:smLeftList){
+				Collection<List<Integer>> smLeftValues = smLeft.values();
+				for(Iterator<List<Integer>> valIt = smLeftValues.iterator();valIt.hasNext();){
+					List<Integer> list = valIt.next();
 					for(Integer num:list){
 						smLeftSet.set(num);
 					}
@@ -249,8 +247,10 @@ public class GridMark2 {
 				destSet.and(smLeftSet);
 				SortedMap smUp = tmUpLat.tailMap(lat);//纬度上边集
 				BitSet smUpSet = new BitSet();
-				List<List<Integer>> smUpList =  new ArrayList<List<Integer>>(smUp.values());
-				for(List<Integer> list:smUpList){
+
+				Collection<List<Integer>> smUpValues = smUp.values();
+				for(Iterator<List<Integer>> valIt = smUpValues.iterator();valIt.hasNext();){
+					List<Integer> list = valIt.next();
 					for(Integer num:list){
 						smUpSet.set(num);
 					}
@@ -259,13 +259,13 @@ public class GridMark2 {
 				
 				SortedMap smDown = tmDownlat.headMap(lat);//纬度下边集
 				BitSet smDownSet = new BitSet();
-				List<List<Integer>> smDownList =  new ArrayList<List<Integer>>(smDown.values());
-				for(List<Integer> list:smDownList){
+				Collection<List<Integer>> smDownValues = smDown.values();
+				for(Iterator<List<Integer>> valIt = smDownValues.iterator();valIt.hasNext();){
+					List<Integer> list = valIt.next();
 					for(Integer num:list){
 						smDownSet.set(num);
 					}
 				}
-				
 				destSet.and(smDownSet);
 				for(int i = destSet.nextSetBit(1);i<destSet.size();i++){
 					if(i != -1 && destSet.get(i)){
