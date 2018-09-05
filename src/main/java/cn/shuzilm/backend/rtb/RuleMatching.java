@@ -324,6 +324,20 @@ public class RuleMatching {
 					audienceMap.put(ad.getAdUid(), audience);
 					break;
 				}
+			}else if(audience.getType().equals("ip")){//智能设备
+				Set<String> ipSet = audience.getIpSet();
+				if(ipSet != null && ipSet.contains(tagBean.getIp())){
+					machedAdList.add(ad);
+					audienceMap.put(ad.getAdUid(), audience);
+					break;
+				}
+			}else if(audience.getType().equals("dmp")){//定制人群包
+				String dmpId = audience.getDmpId();
+				if(dmpId != null && !dmpId.trim().equals("") && dmpId.equals(deviceId)){
+					machedAdList.add(ad);
+					audienceMap.put(ad.getAdUid(), audience);
+					break;
+				}
 			}
 			}
 		}

@@ -80,6 +80,15 @@ public class AudienceBean implements ICommand {
     private Set<String> companyIdSet;
     @Setter
     private String companyNames;//公司全称 ，用","号隔开
+    
+    //智能设备定向
+    private String ips;//智能设备录入IP列表
+    
+    private Set<String> ipSet;
+    
+    //定制人群包
+    @Setter
+    private String dmpId;
 
     public void setDemographicCitys(String citys){
         if(citys == null)
@@ -277,6 +286,21 @@ public class AudienceBean implements ICommand {
                 set.add(replace);
             }
             this.brandIdSet = set;
+        }
+	}
+
+	public void setIps(String ips) {
+		this.ips = ips;
+		if (StringUtils.isNotBlank(ips)) {
+            String[] split = ips.split(",");
+            Set<String> set = new HashSet<String>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(replace);
+            }
+            this.ipSet = set;
         }
 	}
     
