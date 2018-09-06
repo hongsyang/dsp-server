@@ -47,7 +47,7 @@ public class RtbRequestParser {
     public String parseData(String url, String dataStr, String remoteIp) {
         String responseStr = "没有对应的厂商";
         this.configs = AppConfigs.getInstance(FILTER_CONFIG);
-        MDC.put("sift","adx_request");
+        MDC.put("sift",configs.getString("ADX_REQUEST"));
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
         MDC.remove("sift");
         if (Boolean.valueOf(configs.getString("FILTER_RTB"))){

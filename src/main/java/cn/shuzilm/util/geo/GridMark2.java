@@ -175,6 +175,13 @@ public class GridMark2 {
                 return adUidList;
             else{
                 SortedMap smRight = tmRightLng.tailMap(lng);
+                Collection values = smRight.values();
+                Object[] objects = values.toArray();
+
+                System.out.println(     Arrays.toString(objects));
+                for (Object value : values) {
+                    System.out.println(value);
+                }
                 destList.addAll(smRight.values());
 
                 ArrayList<Integer> leftList = new ArrayList<>();
