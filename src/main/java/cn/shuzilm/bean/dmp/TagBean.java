@@ -39,6 +39,8 @@ public class TagBean {
      * 所属公司标签 公司 ID
      */
     private String companyIdList;
+    
+    private String ip;
 
 
     public static void main(String[] args) {
