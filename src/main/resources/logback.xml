@@ -17,7 +17,7 @@
             <DefaultValue>dsp-server</DefaultValue>
         </discriminator>
         <sift>
-            <appender name="FILE-${sift}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <appender name="SIFT" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <File>${LOG_HOME}/${sift}/${sift}.log</File>
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                     <FileNamePattern>${LOG_HOME}/${sift}/${sift}.%d{yyyyMMddHH}.log</FileNamePattern>
@@ -34,7 +34,7 @@
             <DefaultValue>phoenix</DefaultValue>
         </discriminator>
         <sift>
-            <appender name="FILE-${phoenix}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <appender name="PHOENIX" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <File>${LOG_HOME}/${phoenix}/${phoenix}.log</File>
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
                     <FileNamePattern>/${LOG_HOME}/${phoenix}/${phoenix}.%d{yyyyMMddHH}.log</FileNamePattern>
@@ -45,6 +45,9 @@
             </appender>
         </sift>
     </appender>
+
+
+
     <logger name="org.quartz" level="ERROR" />
     <logger name="io.lettuce" level="ERROR" />
     <!--设置日志输出为文件-->

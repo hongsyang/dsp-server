@@ -5,6 +5,8 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -21,6 +23,8 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author
  */
 public class RtbHandler extends SimpleChannelUpstreamHandler {
+
+	private static final Logger log = LoggerFactory.getLogger(RtbRequestParser.class);
 //	private WriteDataToLog wdt;
     RtbRequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
@@ -32,9 +36,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     }
 
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
-			throws Exception {
+	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e){
 		try {
+			int i =1/0;
 //            System.out.println(Thread.currentThread().getName() + "\t" + counter);
             counter.getAndAdd(1);
 			if (e.getMessage() instanceof HttpRequest) {
@@ -88,6 +92,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //				ch.close();
 			}
 		} catch (Exception e2) {
+			log.error("",e2);
 			e2.printStackTrace();
 		}
 

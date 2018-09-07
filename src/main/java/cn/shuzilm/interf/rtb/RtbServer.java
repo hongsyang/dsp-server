@@ -79,9 +79,8 @@ public class RtbServer {
         System.out.println("admin start on " + port);
     }
 
-    private class ServerPipelineFactory implements
-            ChannelPipelineFactory {
-        public ChannelPipeline getPipeline() throws Exception {
+    private class ServerPipelineFactory implements ChannelPipelineFactory {
+        public ChannelPipeline getPipeline() {
             // Create a default pipeline implementation.
             ChannelPipeline pipeline = Channels.pipeline();
 
