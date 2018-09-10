@@ -53,7 +53,7 @@ public class Bid implements Serializable {
     private ResponseVideo video;//(F) Video 响应对象。
 
     //admt=8 时，需要填充以下字段：
-    private NativeBean nativeBean; //根据 RTB 原生广告协议组装成 NativeResponse。参考《AdView 移动交易平台 RTB原生广告协议 V1.2》。
+    private NativeResponseBean Native; //根据 RTB 原生广告协议组装成 NativeResponse。参考《AdView 移动交易平台 RTB原生广告协议 V1.2》。
 
 
     //广告上报与落地页等相关字段：【视频广告的播放汇报字段在 Video 对象中,见 5.5 章节】

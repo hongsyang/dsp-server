@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,6 +35,8 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
     private static final Logger log = LoggerFactory.getLogger(AdViewExpParameterParserImpl.class);
 
     private AppConfigs configs = null;
+
+    private static  PixelFlowControl pixelFlowControl =  PixelFlowControl.getInstance();
 
     private static final String PIXEL_CONFIG = "pixel.properties";
 
@@ -60,18 +64,35 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
 
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
+            element.setActualPrice(Double.valueOf(priceLong)/10000);//成本价
+            element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
+            element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
+            element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
+            Date date = new Date(element.getWinNoticeTime());//时间小时数
+            element.setHour(date.getHours());
             MDC.put("sift", "AdViewExp");
-            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+            log.debug("发送到Phoenix的DUFlowBean:{}", element);
+            MDC.put("phoenix", "app");
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                    element.getInfoId(), element.getHour(),
+                    element.getCreateTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
-                    element.getAdUid(), element.getAdvertiserUid(),
-                    element.getAdvertiserUid(), element.getAgencyUid(),
+                    element.getAdUid(), element.getAudienceuid(),
+                    element.getAgencyUid(), element.getAdvertiserUid(),
                     element.getCreativeUid(), element.getProvince(),
-                    element.getCity(), element.getRequestId());
+                    element.getCity(), element.getActualPricePremium(),
+                    element.getBiddingPrice(), element.getActualPrice(),
+                    element.getAgencyProfit(), element.getOurProfit(),
+                    element.getAdxId(), element.getAppName(),
+                    element.getAppPackageName(), element.getAppVersion(),
+                    element.getRequestId(),element.getImpression(),element.getDealid() );
+            MDC.remove("phoenix");
+            MDC.put("sift", "AdViewExp");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送到Phoenix：{}", lingJiClick);

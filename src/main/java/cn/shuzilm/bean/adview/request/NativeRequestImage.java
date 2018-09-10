@@ -17,8 +17,12 @@ import java.io.Serializable;
 public class NativeRequestImage implements Serializable {
     private Integer type;//(F)图片类型
     private Integer w;//(F)图片宽度
-    private Integer wmin;//(F)最小宽度，如果只有w，认为需要确切匹配宽度
     private Integer h;//(F)图片高度
+    private Integer wmin;//(F)最小宽度，如果只有w，认为需要确切匹配宽度
     private String[] mimes;//(F)额外支持的图片格式。默认支持["image/jpg","image/gif"]
     private RequestExt ext;//(F) 扩展内容
+
+    //返回结果
+    private  String  url;//图片素材地址
+
 }

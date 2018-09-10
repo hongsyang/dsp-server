@@ -1,5 +1,6 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.UrlParserUtil;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -21,8 +22,17 @@ public class RtbRequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(RtbRequestParser.class);
 
+
+    private static final Object lock = new Object();
+
+    private static volatile Reflections reflections;
+
+
+    private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
+
     /**
      * 根据厂商解析post参数
+     *
      * @param url
      * @param dataStr
      * @param remoteIp
@@ -30,23 +40,40 @@ public class RtbRequestParser {
      */
     public String parseData(String url, String dataStr, String remoteIp) {
         String responseStr = "没有对应的厂商";
-//        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
-        List<String> urlList = UrlParserUtil.urlParser( url);
-        Reflections reflections = new Reflections("cn.shuzilm.interf.rtb.parser");
+        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
+        List<String> urlList = UrlParserUtil.urlParser(url);
+        Reflections reflections = instance(FILE_NAME);
         Set<Class<? extends RequestService>> monitorClasses = reflections.getSubTypesOf(RequestService.class);
-        String className =null;
+        String className = null;
         for (Class<? extends RequestService> monitorClass : monitorClasses) {
-            for (int i = 0; i <urlList.size() ; i++) {
-                if (monitorClass.getName().toLowerCase().contains(urlList.get(i))){
-                    className=monitorClass.getName();
+            for (int i = 0; i < urlList.size(); i++) {
+                if (monitorClass.getName().toLowerCase().contains(urlList.get(i))) {
+                    className = monitorClass.getName();
                     break;
                 }
             }
         }
-        if(className!=null){
+        if (className != null) {
             RequestService requestService = RequestServiceFactory.getRequestService(className);
             responseStr = requestService.parseRequest(dataStr);
         }
         return responseStr;
+    }
+
+    /**
+     * 实例化扫描器
+     *
+     * @param fileName
+     * @return
+     */
+    private Reflections instance(String fileName) {
+        if (reflections == null) {
+            synchronized (lock) {
+                if (reflections == null) {
+                    reflections = new Reflections(fileName);
+                }
+            }
+        }
+        return reflections;
     }
 }

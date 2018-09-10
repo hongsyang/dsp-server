@@ -17,4 +17,7 @@ import java.io.Serializable;
 public class NativeRequestTitle implements Serializable{
     private Integer len;//最大文本长度，0不限制
     private RequestExt ext;//(F) 扩展内容
+
+
+    private String text;//(F) 文本内容。
 }

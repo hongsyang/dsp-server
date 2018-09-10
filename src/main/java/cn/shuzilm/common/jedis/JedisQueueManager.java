@@ -3,8 +3,19 @@ package cn.shuzilm.common.jedis;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+
+import cn.shuzilm.backend.master.MsgControlCenter;
+import cn.shuzilm.bean.control.AdBean;
+import cn.shuzilm.bean.control.AdPropertyBean;
+import cn.shuzilm.bean.control.AdvertiserBean;
+import cn.shuzilm.bean.control.CreativeBean;
+import cn.shuzilm.bean.control.Material;
+import cn.shuzilm.bean.control.TaskBean;
+import cn.shuzilm.bean.dmp.AudienceBean;
 import redis.clients.jedis.Jedis;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -330,7 +341,35 @@ public class JedisQueueManager {
         }
     }
     
-//    public static void main(String[] args) {
-//    	removeAll("rtb-001ad");
-//	}
+    public static void main(String[] args) {
+    	
+//    	Object o1 = getElementFromQueue("rtb-001ad");
+//    	Object o2 = getElementFromQueue("rtb-002ad");
+//    	Object o3 = getElementFromQueue("rtb-003ad");
+//    	System.out.println(o1);
+//    	System.out.println(o2);
+//    	System.out.println(o3);
+//    	try{
+//    		for(int i=0;i<100;i++){
+//    		try{
+//    		TaskBean taskBean = MsgControlCenter.recvTask("rtb-001");
+//    		System.out.println(taskBean.getAdUid());
+//    		}catch(Exception ex){
+//    			System.out.println(ex);
+//    			continue;
+//    		}
+//    		}
+//    	}catch(Exception e){
+//    		System.out.println(e);
+//    	}
+//    	List list = getAllElement("rtb-001_down");
+//    	
+//    	System.out.println(list.size());
+    	
+    	long start = System.currentTimeMillis();
+    	putElementToQueue("rtb-009","123",null);
+    	putElementToQueue("rtb-009","456",null);
+    	System.out.println(getElementFromQueue("rtb-009"));
+    	
+	}
 }

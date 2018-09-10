@@ -51,6 +51,10 @@ public class TaskServicve extends Service {
             bean.setPlatformId(rm.get("platform_id") != null ? rm.getInteger("platform_id") : 0);
             //特定公司
             bean.setCompanyIds(rm.getString("company_ids"));
+            //智能设备
+            bean.setIps(rm.getString("ips"));
+            //定制人群包ID
+            bean.setDmpId(rm.getString("dmp_tag"));
             aList.add(bean);
 
         }

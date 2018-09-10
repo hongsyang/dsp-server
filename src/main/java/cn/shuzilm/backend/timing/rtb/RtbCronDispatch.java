@@ -3,6 +3,8 @@ package cn.shuzilm.backend.timing.rtb;
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.rtb.RtbFlowControl;
 import cn.shuzilm.backend.timing.pixel.PixelTenMinuteTask;
+import cn.shuzilm.util.AsyncRedisClient;
+
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -10,8 +12,6 @@ import org.quartz.impl.StdSchedulerFactory;
  * Created by thunders on 2018/7/23.
  */
 public class RtbCronDispatch {
-    private static AdFlowControl control = new AdFlowControl();
-
     public static void dispatch(Class<? extends Job> myClass , String cronTime){
         try {
             //得到默认的调度器
@@ -54,8 +54,14 @@ public class RtbCronDispatch {
 
     public static void main(String[] args) {
 
+    	//第一次启动加载全部缓存
+    	RtbFlowControl rtbIns = RtbFlowControl.getInstance();
+    			rtbIns.trigger();
+    	
         RtbCronDispatch.startTimer(0);
+        
         RtbCronDispatch.startTimer(1);
+        
         RtbCronDispatch.startTimer(2);
         // 测试 RTB 引擎的
 //        RtbFlowControl.getInstance().trigger();
@@ -70,6 +76,18 @@ public class RtbCronDispatch {
 //        RtbFlowControl.getInstance().refreshAdStatus();
 
 
+    }
+    
+    public static void startRtbDispatch() {
+
+    	//第一次启动加载全部缓存
+    	RtbFlowControl.getInstance().trigger();
+    	
+        RtbCronDispatch.startTimer(0);
+        
+        RtbCronDispatch.startTimer(1);
+        
+        RtbCronDispatch.startTimer(2);
     }
 
     /**

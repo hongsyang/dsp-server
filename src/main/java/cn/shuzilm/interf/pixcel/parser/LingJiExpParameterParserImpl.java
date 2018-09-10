@@ -15,6 +15,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
+import javax.xml.crypto.Data;
+import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,6 +36,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
     private static final Logger log = LoggerFactory.getLogger(LingJiExpParameterParserImpl.class);
 
     private static final String PIXEL_CONFIG = "pixel.properties";
+
+
+    private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
+
 
     private AppConfigs configs = null;
 
@@ -62,26 +70,41 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             bean.setCost(money);
             bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             bean.setWinNoticeNums(1);
+            bean.setPremiumFactor(element.getPremiumFactor());
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
-            PixelFlowControl.getInstance().sendStatus(bean);
-
+            AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+            NumberFormat numberFormat = NumberFormat.getNumberInstance();
+            numberFormat.setMaximumFractionDigits(5);
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-            element.setActualPricePremium(money);//成本价
-            element.setActualPricePremium(money * element.getPremiumFactor());//溢价
+            element.setActualPrice(money);//成本价
+            element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
+            element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
+            element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             element.setAdxSource("LingJi");
+            Date date = new Date(element.getWinNoticeTime());//时间小时数
+            element.setHour(date.getHours());
             MDC.put("sift", "LingJiExp");
-            log.debug("\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}", element.getInfoId(),
+            log.debug("发送到Phoenix的DUFlowBean:{}", element);
+            MDC.put("phoenix", "app");
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                    element.getInfoId(), element.getHour(),
+                    element.getCreateTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
-                    element.getAdUid(), element.getAdvertiserUid(),
-                    element.getAdvertiserUid(), element.getAgencyUid(),
+                    element.getAdUid(), element.getAudienceuid(),
+                    element.getAgencyUid(), element.getAdvertiserUid(),
                     element.getCreativeUid(), element.getProvince(),
-                    element.getCity(), element.getRequestId(),
-                    element.getActualPrice(), element.getBiddingPrice(),
-                    element.getWinNoticeTime(), element.getPremiumFactor());
+                    element.getCity(), element.getActualPricePremium(),
+                    element.getBiddingPrice(), element.getActualPrice(),
+                    element.getAgencyProfit(), element.getOurProfit(),
+                    element.getAdxId(), element.getAppName(),
+                    element.getAppPackageName(), element.getAppVersion(),
+                    element.getRequestId(),element.getImpression(),element.getDealid() );
+            MDC.remove("phoenix");
+            MDC.put("sift", "LingJiExp");
             boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiExp) {
                 log.debug("发送到Phoenix：{}", lingJiExp);

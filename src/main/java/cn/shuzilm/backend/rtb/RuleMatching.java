@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.backend.timing.rtb.RtbCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
@@ -77,8 +78,11 @@ public class RuleMatching {
 		constant = RtbConstants.getInstance();
 		String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
 		String nodes [] = nodeStr.split(";");
-		redis = new AsyncRedisClient(nodes);
+		redis = AsyncRedisClient.getInstance(nodes);
 		// jedis = JedisManager.getInstance().getResource();
+		long start = System.currentTimeMillis();
+		RtbCronDispatch.startRtbDispatch();
+		LOG.info("初始化缓存时间:"+(System.currentTimeMillis()-start));
 		rtbIns = RtbFlowControl.getInstance();
 		
 		tagRandom = new Random();
@@ -106,7 +110,7 @@ public class RuleMatching {
 	 *            ADX名称
 	 * @param material
 	 *            物料
-	 * @param extSet
+	 * @param extStr
 	 *            广告位支持的文件扩展名列表
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
@@ -136,9 +140,6 @@ public class RuleMatching {
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
-	 * 
-	 * @param tagBean
-	 *            标签
 	 * @param adType
 	 *            广告类型
 	 * @param width
@@ -159,8 +160,6 @@ public class RuleMatching {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
 			return null;
 		}
-		rtbIns.pullAndUpdateTask();
-		rtbIns.pullTenMinutes();
 		// 取出标签
 		String tagJson = redis.getAsync(deviceId);
 		// String tagJson = jedis.get(deviceId);
@@ -240,15 +239,15 @@ public class RuleMatching {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
 			if (!isAvaliable) {
-				// LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				 LOG.debug("ID[" + adUid + "]广告不参与投放!");
 				continue;
 			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
 			if (creative.getApproved() != 1 || creative.getApproved_adx() == null ||!creative.getApproved_adx().contains(adxName)) {
-				// LOG.debug("广告ID[" + adUid +
-				// "]创意未在ADX["+adxName+"]通过,不参与投放!");
+				 LOG.debug("广告ID[" + adUid +
+				 "]创意未在ADX["+adxName+"]通过,不参与投放!");
 				continue;
 			}
 
@@ -263,6 +262,8 @@ public class RuleMatching {
 				}
 			}
 			if (!filterFlag) {
+				LOG.debug("广告ID[" + adUid +
+				 "]下未匹配到满足要求的物料,不参与投放!");
 				continue;
 			}
 
@@ -319,6 +320,20 @@ public class RuleMatching {
 				if (audience.getCompanyIdSet() != null && checkRetain(companyIdList, audience.getCompanyIdSet())) {// 涉及到库中存储的数据样式和标签中的样式
 					// LOG.debug("ID[" + ad.getAdUid() +
 					// "]通过匹配，参与排序");//记录日志太花费时间,忽略
+					machedAdList.add(ad);
+					audienceMap.put(ad.getAdUid(), audience);
+					break;
+				}
+			}else if(audience.getType().equals("ip")){//智能设备
+				Set<String> ipSet = audience.getIpSet();
+				if(ipSet != null && ipSet.contains(tagBean.getIp())){
+					machedAdList.add(ad);
+					audienceMap.put(ad.getAdUid(), audience);
+					break;
+				}
+			}else if(audience.getType().equals("dmp")){//定制人群包
+				String dmpId = audience.getDmpId();
+				if(dmpId != null && !dmpId.trim().equals("") && dmpId.equals(deviceId)){
 					machedAdList.add(ad);
 					audienceMap.put(ad.getAdUid(), audience);
 					break;
@@ -539,7 +554,7 @@ public class RuleMatching {
 		if(material.getFileName().contains("http")){
 			targetDuFlowBean.setAdm(material.getFileName());// 广告素材
 		}else{
-			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getFileName());
+			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getUid()).concat(".").concat(material.getExt());
 			targetDuFlowBean.setAdm(url);// 广告素材
 		}			
 		targetDuFlowBean.setAdw(material.getWidth());
@@ -609,7 +624,7 @@ public class RuleMatching {
 	
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("3D8A278F33E4F97181DF1EAEFE500D08", "feed", 320, 50, true, 5, 5, "1", "jpg,gif");
+		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DG", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");
 	}
 
 }
