@@ -24,7 +24,7 @@ public class FLowControlTest {
         //模拟曝光请求超过了允许的范围
         AdPixelBean pixel = new AdPixelBean();
         pixel.setWinNoticeNums(1);
-        pixel.setCost(2000d);
+        pixel.setFinalCost(2000d);
         pixel.setAdUid(adUid);
         pixel.setType(0);
         pixel.setHost("rtb-001");
