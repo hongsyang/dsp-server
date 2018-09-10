@@ -82,7 +82,7 @@ public class RuleMatching {
 		// jedis = JedisManager.getInstance().getResource();
 		long start = System.currentTimeMillis();
 		RtbCronDispatch.startRtbDispatch();
-		LOG.info("初始化缓存时间:"+(System.currentTimeMillis()-start));
+		LOG.info("初始化缓存完成,加载时间:"+(System.currentTimeMillis()-start)+" ms");
 		rtbIns = RtbFlowControl.getInstance();
 		
 		tagRandom = new Random();
@@ -234,7 +234,7 @@ public class RuleMatching {
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
-		long startOrder = System.currentTimeMillis();
+		//long startOrder = System.currentTimeMillis();
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
@@ -356,7 +356,7 @@ public class RuleMatching {
 				}
 			}
 		}
-		LOG.info("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
+		//LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
 		// 排序
 		if (machedAdList.size() > 0)
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, tagIdList, audienceMap);
@@ -393,7 +393,7 @@ public class RuleMatching {
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList, audienceMap);
 		} else {
-			long startOrder = System.currentTimeMillis();
+			//long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
 			if (machedAdList.size() == 1) {
 				ad = machedAdList.get(0);
@@ -403,7 +403,7 @@ public class RuleMatching {
 				ad = gradeByRandom(machedAdList);
 			}
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
-			LOG.info("排序花费时间:" + (System.currentTimeMillis() - startOrder));
+			//LOG.debug("排序花费时间:" + (System.currentTimeMillis() - startOrder));
 			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList, audienceMap);
