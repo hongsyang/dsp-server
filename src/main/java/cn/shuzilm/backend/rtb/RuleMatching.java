@@ -291,9 +291,6 @@ public class RuleMatching {
 					}
 
 				} else {// 按照经纬度匹配
-					// boolean isInBound =
-					// this.checkInBoudByType(audience.getMobilityType(),
-					// tagBean);
 					if (commonMatch(tagBean, audience, appPreferenceIdList, brandList)) {
 						// LOG.debug("ID[" + ad.getAdUid() +
 						// "]通过匹配，参与排序");//记录日志太花费时间,忽略
