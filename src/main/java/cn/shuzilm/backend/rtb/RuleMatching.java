@@ -312,7 +312,6 @@ public class RuleMatching {
 						break;
 					}
 				}
-
 			} else if (audience.getType().equals("company")) { // 具体公司
 				if (audience.getCompanyIdSet() != null && checkRetain(companyIdList, audience.getCompanyIdSet())) {// 涉及到库中存储的数据样式和标签中的样式
 					// LOG.debug("ID[" + ad.getAdUid() +
