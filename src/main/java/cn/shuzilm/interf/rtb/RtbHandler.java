@@ -24,7 +24,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class RtbHandler extends SimpleChannelUpstreamHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(RtbRequestParser.class);
+	private static final Logger log = LoggerFactory.getLogger(RtbHandler.class);
 //	private WriteDataToLog wdt;
     RtbRequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
@@ -38,7 +38,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e){
 		try {
-			int i =1/0;
 //            System.out.println(Thread.currentThread().getName() + "\t" + counter);
             counter.getAndAdd(1);
 			if (e.getMessage() instanceof HttpRequest) {
@@ -78,6 +77,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 				response.setHeader("Accept-Ranges", "bytes");
                 response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
 				buffer.writeBytes(content);
+				//设置返回状态
+				response.setStatus(HttpResponseStatus.ACCEPTED);
 				response.setContent(buffer);
 
 				// Write the response.
