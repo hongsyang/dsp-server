@@ -66,7 +66,6 @@ public class LingJiRequestServiceImpl implements RequestService {
             Device userDevice = bidRequestBean.getDevice();//设备信息
             Impression userImpression = bidRequestBean.getImp().get(0);//曝光信息
             App app = bidRequestBean.getApp();//应用信息
-            app.getExt();
             Integer width = null;//广告位的宽
             Integer height = null;//广告位的高
             Integer showtype = userImpression.getExt().getShowtype();//广告类型
