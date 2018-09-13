@@ -622,7 +622,7 @@ public class AdFlowControl {
             //计算权重因子
             adProperty.handle();
             //定期 10 分钟更新 CPC 阀值
-            cpcHandler.updateIndicator();
+            cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
 //            for (int i = 0; i < 10000 ; i++) {
