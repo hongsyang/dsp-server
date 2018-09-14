@@ -3,10 +3,12 @@ package cn.shuzilm.backend.rtb;
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
+import cn.shuzilm.bean.control.AdBidBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.Material;
+import cn.shuzilm.bean.control.NodeStatusBean;
 import cn.shuzilm.bean.control.TaskBean;
 import cn.shuzilm.bean.dmp.AreaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,6 +83,14 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String, Set<String>> getDemographicMap() {
         return demographicMap;
     }
+    
+    public ConcurrentHashMap<String,Long> getBidMap(){
+    	return bidMap;
+    }
+    
+    public ArrayList<AdBidBean> getBidList(){
+    	return bidList;
+    }
 
     private String nodeName;
     /**
@@ -116,7 +127,12 @@ public class RtbFlowControl {
     private static Map<String,String> redisGeoMap = null;
 
     // 判断标签坐标是否在 广告主的选取范围内
-    private HashMap<Integer, GridMark2> gridMap = null;
+    private static HashMap<Integer, GridMark2> gridMap = null;
+    
+    //每个广告5秒内的rtb请求数量
+    private static ConcurrentHashMap<String,Long> bidMap = null;
+    
+    private static ArrayList<AdBidBean> bidList = null;
 
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
@@ -128,6 +144,8 @@ public class RtbFlowControl {
         mapAdMaterial = new ConcurrentHashMap<>();
         mapAdMaterialRatio = new ConcurrentHashMap<>();
         mapMaterialRatio = new ConcurrentHashMap<>();
+        bidMap = new ConcurrentHashMap<>();
+        bidList = new ArrayList<AdBidBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
         gridMap = new HashMap<>();
@@ -146,6 +164,11 @@ public class RtbFlowControl {
         pullTenMinutes();
         // 1 hour
         refreshAdStatus();
+        //5s上传一次rtb请求数
+        pushAdBidNums();
+        
+        //10分钟上传一次RTB节点心跳
+        pushRtbHeart();
     }
 
     /**
@@ -324,15 +347,54 @@ public class RtbFlowControl {
      * 每隔 5 秒钟从消息中心获得当前节点的当前任务，并与当前两个 MAP monitor 进行更新 不包括素材
      */
     public void pullAndUpdateTask() {
-    	TaskBean task = MsgControlCenter.recvTask(nodeName);
-        if (task == null) {
+    	List<TaskBean> taskList = MsgControlCenter.recvTask(nodeName);
+        if (taskList == null || taskList.size() == 0) {
             return;
         }
-        if (task != null) {
+        for(TaskBean task:taskList){
             // 把最新的任务更新到 MAP task 中
             mapTask.put(task.getAdUid(), task);
         }
 
+    }
+    
+    /**
+     * 每隔 5 秒钟上报rtb引擎中广告的rtb请求数
+     */
+    public void pushAdBidNums() {
+    	bidList.clear();
+    	if(bidMap != null && !bidMap.isEmpty()){
+    		Iterator iter = bidMap.entrySet().iterator();
+    		while(iter.hasNext()){
+    			Map.Entry entry = (Map.Entry) iter.next();
+    			String key = (String) entry.getKey();
+    			long value = (long) entry.getValue();
+    			if(value != 0){
+    				AdBidBean bid = new AdBidBean();
+    				bid.setUid(key);
+    				bid.setBidNums(value);
+    				bidList.add(bid);
+    			}
+    		}
+    		
+    	}
+    	if(bidList.size() > 0){
+    		NodeStatusBean bean = new NodeStatusBean();
+    		bean.setBidList(bidList);
+    		MsgControlCenter.sendBidStatus(nodeName, bean);
+    	}
+    	
+    	bidMap.clear();
+        
+    }
+    
+    /**
+     * 每隔 10分钟上报rtb引擎心跳
+     */
+    public void pushRtbHeart(){
+    	NodeStatusBean bean = new NodeStatusBean();
+    	bean.setLastUpdateTime(System.currentTimeMillis());
+    	MsgControlCenter.sendNodeStatus(nodeName, bean);
     }
 
     /**

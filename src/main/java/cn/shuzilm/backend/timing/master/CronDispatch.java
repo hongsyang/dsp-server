@@ -60,6 +60,8 @@ public class CronDispatch {
 //        AdFlowControl.getInstance().resetDayMonitor();
 //        //  10 min 触发
         CronDispatch.startTimer(1);
+        
+        CronDispatch.startTimer(4);
 //        AdFlowControl.getInstance().loadAdInterval(true);
     }
 
@@ -81,11 +83,13 @@ public class CronDispatch {
                dispatch(TenMinuteTask.class,"0 0/10 * * * ?");
                break;
            case 2:
-               dispatch(HourTask.class,"0 * * * * ?");
+               dispatch(HourTask.class,"0 0 * * * ?");
                break;
            case 3:
-               dispatch(DailyTask.class,"0 0 * * * ?");
+               dispatch(DailyTask.class,"0 0 0 * * ?");
                break;
+           case 4:
+        	   dispatch(UpdateNodeStatusTask.class,"0 0/5 * * * ?");
            default:
                break;
        }

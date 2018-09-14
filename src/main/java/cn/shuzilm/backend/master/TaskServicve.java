@@ -8,12 +8,15 @@ import com.yao.util.db.bean.ResultMap;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Created by thunders on 2018/7/11.
  */
 public class TaskServicve extends Service {
+	
+	private SimpleDateFormat dateFm = new SimpleDateFormat("yyyyMM");
     /**
      * 查找 10 分钟前的 人群包条件
      *
@@ -110,7 +113,7 @@ public class TaskServicve extends Service {
             if(rm == null)
                 return null;
             bean.setUid(rm.getString("uid"));
-            bean.setAbbr(rm.getString("abbr"));
+            bean.setAbbr(rm.getString("name"));
             bean.setCompany(rm.getString("company"));
             bean.setName(rm.getString("name"));
             bean.setRebate(rm.getDouble("rebate"));
@@ -307,9 +310,11 @@ public class TaskServicve extends Service {
         //转换成秒的时间戳
         arr[0] = startTime / 1000;
         arr[1] = endTime / 1000;
+        Date date = new Date();
+		String time = "_"+dateFm.format(date);
         String sql = "";
         if(isHour)
-            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour where created_at >= ? and created_at <= ?  group by ad_uid";
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour"+time+" where created_at >= ? and created_at <= ?  group by ad_uid";
         else
             sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where created_at >= ? and created_at <= ?  group by ad_uid";
         try {

@@ -64,6 +64,8 @@ public class RuleMatching {
 	private Random adRandom;
 	
 	private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
+	
+	private static int gradeRatio = 30;
 
 	public static RuleMatching getInstance() {
 		if (rule == null) {
@@ -77,6 +79,8 @@ public class RuleMatching {
 		// 加载标签溢价比和权重
 		constant = RtbConstants.getInstance();
 		String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
+		String gradeRatioStr = gradeRatioStr = constant.getRtbStrVar(RtbConstants.GRADE_RATIO);
+		gradeRatio = Integer.parseInt(gradeRatioStr);
 		String nodes [] = nodeStr.split(";");
 		redis = AsyncRedisClient.getInstance(nodes);
 		// jedis = JedisManager.getInstance().getResource();
@@ -354,8 +358,14 @@ public class RuleMatching {
 		}
 		//LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
 		// 排序
-		if (machedAdList.size() > 0)
+		if (machedAdList.size() > 0){
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, tagIdList, audienceMap);
+			if(rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null){
+				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(), rtbIns.getBidMap().get(targetDuFlowBean.getAdUid())+1);
+			}else{
+				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(), 1L);
+			}
+		}
 
 		return targetDuFlowBean;
 	}
@@ -375,7 +385,7 @@ public class RuleMatching {
 				gradeList.add(ad);
 			} else {// 70%执行分级策略
 				int num = adRandom.nextInt(100);
-				if (num <= 30) {
+				if (num <= gradeRatio) {
 					ungradeList.add(ad);
 				} else {
 					gradeList.add(ad);
@@ -391,12 +401,12 @@ public class RuleMatching {
 		} else {
 			//long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
-			if (machedAdList.size() == 1) {
-				ad = machedAdList.get(0);
+			if (gradeList.size() == 1) {
+				ad = gradeList.get(0);
 			} else {
-				gradeOrderByPremiumStrategy(machedAdList, audienceMap);
-				gradeOrderOtherParaStrategy(machedAdList);
-				ad = gradeByRandom(machedAdList);
+				gradeOrderByPremiumStrategy(gradeList, audienceMap);
+				gradeOrderOtherParaStrategy(gradeList);
+				ad = gradeByRandom(gradeList);
 			}
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
 			//LOG.debug("排序花费时间:" + (System.currentTimeMillis() - startOrder));
@@ -404,7 +414,7 @@ public class RuleMatching {
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList, audienceMap);
 		}
-
+		
 		return targetDuFlowBean;
 	}
 

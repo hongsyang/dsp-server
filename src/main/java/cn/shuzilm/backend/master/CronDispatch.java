@@ -47,15 +47,16 @@ public class CronDispatch {
 
 
     public static void main(String[] args) {
+    	//该类已废除
 //        CronDispatch.startTimer(0);
 //        System.out.println();
-    	AdFlowControl.getInstance().loadAdInterval(true);
-        //    // 5 s 触发
-        AdFlowControl.getInstance().pullAndUpdateTask();
-        //  每小时触发
-        AdFlowControl.getInstance().resetHourMonitor();
-        //  每天触发
-        AdFlowControl.getInstance().resetDayMonitor();
+//    	AdFlowControl.getInstance().loadAdInterval(true);
+//        //    // 5 s 触发
+//        AdFlowControl.getInstance().pullAndUpdateTask();
+//        //  每小时触发
+//        AdFlowControl.getInstance().resetHourMonitor();
+//        //  每天触发
+//        AdFlowControl.getInstance().resetDayMonitor();
         //  10 min 触发
         
 
@@ -81,10 +82,10 @@ public class CronDispatch {
                dispatch(TenMinuteTask.class,"0 0/10 * * * ?");
                break;
            case 2:
-               dispatch(HourTask.class,"0 * * * * ?");
+               dispatch(HourTask.class,"0 0 * * * ?");
                break;
            case 3:
-               dispatch(DailyTask.class,"0 0 * * * ?");
+               dispatch(DailyTask.class,"0 0 0 * * ?");
                break;
            default:
                break;

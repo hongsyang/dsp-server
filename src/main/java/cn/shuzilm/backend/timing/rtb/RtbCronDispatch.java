@@ -63,17 +63,10 @@ public class RtbCronDispatch {
         RtbCronDispatch.startTimer(1);
         
         RtbCronDispatch.startTimer(2);
-        // 测试 RTB 引擎的
-//        RtbFlowControl.getInstance().trigger();
-
-//        // 5 s
-//        RtbFlowControl.getInstance().pullAndUpdateTask();
-//
-//        // 10 分钟拉取一次最新的广告内容
-//        RtbFlowControl.getInstance().pullTenMinutes();
-//
-//        // 1 hour
-//        RtbFlowControl.getInstance().refreshAdStatus();
+        
+        RtbCronDispatch.startTimer(4);
+        
+        RtbCronDispatch.startTimer(5);
 
 
     }
@@ -88,6 +81,10 @@ public class RtbCronDispatch {
         RtbCronDispatch.startTimer(1);
         
         RtbCronDispatch.startTimer(2);
+        
+        RtbCronDispatch.startTimer(4);
+        
+        RtbCronDispatch.startTimer(5);
     }
 
     /**
@@ -105,14 +102,18 @@ public class RtbCronDispatch {
                dispatch(RtbRealTask.class,"0/5 * * * * ?");
                break;
            case 1:
-               dispatch(RtbTenMinuteTask.class,"0 0/10 * * * ?");
+               dispatch(RtbTenMinuteTask.class,"0 0/5 * * * ?");
                break;
            case 2:
-               dispatch(RtbHourTask.class,"0 * * * * ?");
+               dispatch(RtbHourTask.class,"0 0 * * * ?");
                break;
            case 3:
 //               dispatch(DailyTask.class,"0 0 * * * ?");
                break;
+           case 4:
+        	   dispatch(RtbPushAdBidNumsTask.class,"0/5 * * * * ?");
+           case 5:
+        	   dispatch(RtbPushHeartTask.class,"0 0/10 * * * ?");
            default:
                break;
        }

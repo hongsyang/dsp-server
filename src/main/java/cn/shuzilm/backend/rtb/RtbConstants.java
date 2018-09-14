@@ -18,6 +18,7 @@ public class RtbConstants {
 	public static String COMPANY = "COMPANY";
 	public static String REDIS_CLUSTER_URI = "REDIS_CLUSTER_URI";
 	public static String MATERIAL_URL = "MATERIAL_URL";
+	public static String GRADE_RATIO = "GRADE_RATIO";
 	
 	
 	private static RtbConstants con;

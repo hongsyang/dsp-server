@@ -50,7 +50,7 @@ public class PixelCronDispatch {
     	
         PixelCronDispatch.startTimer(1);
         
-
+        PixelCronDispatch.startTimer(2);
     }
     
     public static void startPixelDispatch() {
@@ -59,7 +59,7 @@ public class PixelCronDispatch {
     	
         PixelCronDispatch.startTimer(1);
         
-
+        PixelCronDispatch.startTimer(2);
     }
 
     /**
@@ -77,10 +77,10 @@ public class PixelCronDispatch {
 //               dispatch(RealTask.class,"0/5 * * * * ?");
                break;
            case 1:
-               dispatch(PixelTenMinuteTask.class,"0 0/10 * * * ?");
+               dispatch(PixelTenMinuteTask.class,"0 0/5 * * * ?");
                break;
            case 2:
-//               dispatch(HourTask.class,"0 * * * * ?");
+               dispatch(PixelPushHeartTask.class,"0 0/10 * * * ?");
                break;
            case 3:
 //               dispatch(DailyTask.class,"0 0 * * * ?");

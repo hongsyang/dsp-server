@@ -41,6 +41,11 @@ public class AdFlowControl {
      */
     private static final int INTERVAL = 10 * 60 * 1000;
     private static TaskServicve taskService = new TaskServicve();
+    
+    /**
+     * 节点判定宕机时间周期
+     */
+    private static final int NODE_DOWN_INTERVAL = 30 * 60 * 1000;
 
 //    /**
 //     * 广告主对应的广告 MAP
@@ -57,6 +62,10 @@ public class AdFlowControl {
 
     public HashMap<String, ReportBean> getReportMapHour(){
         return reportMapHour;
+    }
+    
+    public HashMap<String,Long> getNodeStatusMap(){
+    	return nodeStatusMap;
     }
 
     /**
@@ -109,6 +118,8 @@ public class AdFlowControl {
      * 广告主设定的总流量和金额 (最高限)
      */
     private static HashMap<String, AdFlowStatus> adverConsumeMapCurr = null;
+    
+    private static HashMap<String,Long> nodeStatusMap = null;
 
     public AdFlowControl() {
         MDC.put("sift", "control");
@@ -125,12 +136,13 @@ public class AdFlowControl {
         mapMonitorTotal = new HashMap<>();
         reportMapHour = new HashMap<>();
         mapMonitorAdGroupTotal = new HashMap<>();
+        nodeStatusMap = new HashMap<>();
 //        adviserMap = new HashMap<>();
 
 
     }
 
-    public void trigger(int type) {
+    public void trigger() {
         // 5 s 触发
         pullAndUpdateTask();
         // 10 min 触发
@@ -229,7 +241,6 @@ public class AdFlowControl {
                 }
 
                 //更新广告组金额状态
-                System.out.println(adUid);
                 groupId = mapAd.get(adUid).getGroupId();
                 statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
                 statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
@@ -644,7 +655,8 @@ public class AdFlowControl {
     private void dispatchTask() {
         int nodeNums = nodeList.size();
         //遍历所有的广告
-        ArrayList<AdBean> adList = new ArrayList<>();
+        ArrayList<AdBean> adList = new ArrayList<AdBean>();
+        ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (String adUid : mapAd.keySet()) {
             //对任务进行拆解
             TaskBean task = new TaskBean(adUid);
@@ -661,24 +673,68 @@ public class AdFlowControl {
             task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
             task.setCommand(TaskBean.COMMAND_START);
             adList.add(ad);
-            for (WorkNodeBean node : nodeList) {
-                //发送广告状态
-                pushTaskSingleNode(node.getName(), task);
-            }
+            taskList.add(task);
+           
         }
 
         for (WorkNodeBean node : nodeList) {
-            //发送广告
-            pushAdSingleNode(node.getName(), adList);
+            //发送广告和任务
+        	if(!isNodeDown(node.getName())){
+        		pushAdSingleNode(node.getName(), adList);
+        		pushTaskSingleNode(node.getName(), taskList);
+        	}
         }
+    }
+    
+    
+    /**
+     * 5分钟获取一次RTB和PIXEL节点心跳
+     */
+    public void updateNodeStatusMap(){
+    	for (WorkNodeBean node : nodeList) {
+    		while(true){
+    		NodeStatusBean nodeStatus = MsgControlCenter.recvNodeStatus(node.getName());
+    		if(nodeStatus == null){
+    			break;
+    		}
+    		nodeStatusMap.put(node.getName(), nodeStatus.getLastUpdateTime());
+    		}
+    		
+    	}
+    }
+    
+    public boolean isNodeDown(String nodeName){
+    	Long lastTime = nodeStatusMap.get(nodeName);
+    	if(lastTime == null || lastTime == 0){
+    		return false;
+    	}
+    	long nowTime = System.currentTimeMillis();
+    	if(nowTime - lastTime >= NODE_DOWN_INTERVAL){//判定节点宕机
+    		MsgControlCenter.removeAll(nodeName);//移除该节点堆积的任务和广告
+    		return true;
+    	}
+    	
+    	return false;
     }
 
     /**
+     * 下发任务 pixel不需要接收任务
      * @param nodeName
-     * @param bean
+     * @param taskList
      */
-    private void pushTaskSingleNode(String nodeName, TaskBean bean) {
-        MsgControlCenter.sendTask(nodeName, bean, Priority.NORM_PRIORITY);
+    private void pushTaskSingleNode(String nodeName, ArrayList<TaskBean> taskList) {
+    	if(nodeName != null && !nodeName.contains("pixel"))
+    		MsgControlCenter.sendTask(nodeName, taskList, Priority.NORM_PRIORITY);
+    }
+    
+    /**
+     * 下发任务 pixel不需要接收任务
+     * @param nodeName
+     * @param task
+     */
+    private void pushTaskSingleNode(String nodeName, TaskBean task) {
+    	if(nodeName != null && !nodeName.contains("pixel"))
+    		MsgControlCenter.sendTask(nodeName, task, Priority.NORM_PRIORITY);
     }
 
     /**
@@ -696,12 +752,15 @@ public class AdFlowControl {
      * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
     public void pauseAd(String adUid, String reason, boolean isHourOrAll) {
+    	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (WorkNodeBean node : nodeList) {
+        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
-            pushTaskSingleNode(node.getName(), task);
+            taskList.add(task);
+            pushTaskSingleNode(node.getName(), taskList);
         }
 
     }
@@ -712,12 +771,15 @@ public class AdFlowControl {
      * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
     public void stopAd(String adUid, String reason, boolean isHourOrAll) {
+    	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (WorkNodeBean node : nodeList) {
+        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
-            pushTaskSingleNode(node.getName(), task);
+            taskList.add(task);
+            pushTaskSingleNode(node.getName(), taskList);
         }
 
     }

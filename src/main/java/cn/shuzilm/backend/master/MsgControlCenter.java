@@ -17,11 +17,12 @@ import java.util.List;
 public class MsgControlCenter {
 
     public static final String UP = "_up";
-    public static final String DOWN = "_down";
-    public static final String AD_BEAN = "ad";
+    public static final String DOWN = "_tdown";
+    public static final String AD_BEAN = "_ad";
     public static final String PIXEL_STATUS = "_pixel";
     public static final String BID_STATUS = "_bid";
-    public static final String MASTER_QUEUE_NAME = "task_queue";
+    public static final String MASTER_QUEUE_NAME = "_task_queue";
+    public static final String NODE_STATUS = "_node_status";
 
     public static ICommand getCommandFromMasterQueue(){
         Object obj = JedisQueueManager.getElementFromQueue(MASTER_QUEUE_NAME);
@@ -60,16 +61,20 @@ public class MsgControlCenter {
 
 
 
+    public static boolean sendTask(String nodeName, ArrayList<TaskBean> taskList, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + DOWN,taskList,priority);
+    }
+    
     public static boolean sendTask(String nodeName, TaskBean bean, Priority priority){
         return JedisQueueManager.putElementToQueue(nodeName + DOWN,bean,priority);
     }
 
-    public static TaskBean recvTask(String nodeName){
+    public static ArrayList<TaskBean> recvTask(String nodeName){
         Object obj = JedisQueueManager.getElementFromQueue(nodeName + DOWN);
         if(obj == null)
             return null;
         else
-            return (TaskBean)obj;
+            return (ArrayList<TaskBean>)obj;
     }
 
     /**
@@ -133,6 +138,36 @@ public class MsgControlCenter {
      */
     public static boolean sendBidStatus(String nodeId,NodeStatusBean bean){
         return JedisQueueManager.putElementToQueue(nodeId + BID_STATUS,bean,Priority.NORM_PRIORITY) ;
+
+    }
+    
+    public static void removeAll(String nodeId){
+    	JedisQueueManager.removeAll(nodeId.concat(DOWN));
+    	JedisQueueManager.removeAll(nodeId.concat(AD_BEAN));
+    	
+    }
+    
+    /**
+     * 主控机 ： 接收节点状态
+     * @param nodeId
+     * @return
+     */
+    public static NodeStatusBean recvNodeStatus(String nodeId){
+        Object obj =  JedisQueueManager.getElementFromQueue(nodeId + NODE_STATUS);
+        if(obj!=null)
+            return (NodeStatusBean)obj;
+        else
+            return null;
+    }
+
+    /**
+     * 发送节点状态
+     * @param nodeId
+     * @param bean
+     * @return
+     */
+    public static boolean sendNodeStatus(String nodeId,NodeStatusBean bean){
+        return JedisQueueManager.putElementToQueue(nodeId + NODE_STATUS,bean,Priority.NORM_PRIORITY) ;
 
     }
 
