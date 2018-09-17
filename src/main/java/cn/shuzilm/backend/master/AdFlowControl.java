@@ -619,7 +619,22 @@ public class AdFlowControl {
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
-                mapTask.put(adUid, new TaskBean(adUid));
+                
+              //AdBean 里面的加速投放为 0 ,对应数据库里面 1（ALL） ，匀速相反
+                
+                TaskBean task = null;
+                if(mapTask.containsKey(adUid)){
+                    task = mapTask.get(adUid);
+                    int scope = -1;
+                    if(ad.getSpeedMode() == 0)
+                        scope = 1;
+                    else if(ad.getSpeedMode() == 1)
+                        scope = 0;
+                    task.setScope(scope);
+                }else{
+                    task = new TaskBean(adUid);
+                }
+                mapTask.put(adUid, task);
                 counter++;
 
                 if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
@@ -659,21 +674,23 @@ public class AdFlowControl {
         ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (String adUid : mapAd.keySet()) {
             //对任务进行拆解
-            TaskBean task = new TaskBean(adUid);
+//            TaskBean task = new TaskBean(adUid);
+        	TaskBean task = mapTask.get(adUid);
             AdBean ad = mapAd.get(adUid);
 
             //从小时监控中取出曝光量、点击次数 、点击金额
-            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
-            task.setClickNums(statusHour.getClickNums());
-            task.setExposureNums(statusHour.getWinNums());
-            task.setMoney(statusHour.getMoney());
-
-            //给每一个节点分配自己的 曝光 额度
-            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
-            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
-            task.setCommand(TaskBean.COMMAND_START);
+//            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
+//            task.setClickNums(statusHour.getClickNums());
+//            task.setExposureNums(statusHour.getWinNums());
+//            task.setMoney(statusHour.getMoney());
+//
+//            //给每一个节点分配自己的 曝光 额度
+//            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
+//            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
+//            task.setCommand(TaskBean.COMMAND_START);
             adList.add(ad);
-            taskList.add(task);
+            if(task.getCommand() == TaskBean.COMMAND_START)
+            	taskList.add(task);
            
         }
 
@@ -756,6 +773,10 @@ public class AdFlowControl {
         for (WorkNodeBean node : nodeList) {
         	taskList.clear();
             TaskBean task = mapTask.get(adUid);
+            if(task.getCommand() == TaskBean.COMMAND_PAUSE ||
+            		task.getCommand() == TaskBean.COMMAND_STOP){
+            	continue;
+            }
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
@@ -775,6 +796,10 @@ public class AdFlowControl {
         for (WorkNodeBean node : nodeList) {
         	taskList.clear();
             TaskBean task = mapTask.get(adUid);
+            if(task.getCommand() == TaskBean.COMMAND_PAUSE ||
+            		task.getCommand() == TaskBean.COMMAND_STOP){
+            	continue;
+            }
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
