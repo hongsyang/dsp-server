@@ -1,6 +1,7 @@
 package cn.shuzilm.backend.timing.master;
 
 import cn.shuzilm.backend.master.AdFlowControl;
+import cn.shuzilm.backend.master.CPCHandler;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -49,6 +50,8 @@ public class CronDispatch {
     public static void main(String[] args) {
         //程序初始化 加载程序
         AdFlowControl.getInstance().loadAdInterval(true);
+        // 初始化CPC结算方式的广告的 阈值和moniter
+        CPCHandler.getInstance().updateIndicator(true);
         //    // 5 s 触发
         CronDispatch.startTimer(0);
 //        AdFlowControl.getInstance().pullAndUpdateTask();

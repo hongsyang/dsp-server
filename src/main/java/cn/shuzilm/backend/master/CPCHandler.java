@@ -32,6 +32,16 @@ public class CPCHandler {
     // 广告信息
     private HashMap<String, AdBean> adMap = null;
 
+    private static CPCHandler cpcHandler;
+
+    public static CPCHandler getInstance(){
+        if( cpcHandler == null){
+            AdFlowControl adFlowControl = AdFlowControl.getInstance();
+            cpcHandler = new CPCHandler(adFlowControl);
+        }
+        return cpcHandler;
+    }
+
     public CPCHandler(AdFlowControl controlIns){
         adMap = controlIns.getMapAd();
     }
@@ -66,7 +76,7 @@ public class CPCHandler {
      * 更新阈值
      * @return
      */
-    public boolean updateIndicator(){
+    public boolean updateIndicator(boolean isInitial){
         AdBean adBean = null;
         for (String adUid : adMap.keySet()) {
             try{
@@ -82,6 +92,11 @@ public class CPCHandler {
                 status.setWinNums(winTotalNums);
                 status.setMoney(adBean.getMoneyArrears());
                 mapThresholdTotal.put(adUid, status);
+
+                if(isInitial) {
+                    AdFlowStatus moniterStatus = new AdFlowStatus();
+                    mapMonitorTotal.put(adUid,moniterStatus);
+                }
             }catch (Exception e){
                 myLog.error("更新阈值失败，广告id: " + adUid, e);
                 return false;
