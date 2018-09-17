@@ -96,7 +96,7 @@
         <level value="DEBUG"/>
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="SIFT"/>
-        <appender-ref ref="PHOENIX"/>
+        <!--<appender-ref ref="PHOENIX"/>-->
         <!--<appender-ref ref="FILEERROR"/>-->
     </root>
 
