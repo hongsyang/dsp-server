@@ -116,7 +116,7 @@ public class TaskServicve extends Service {
             bean.setAbbr(rm.getString("name"));
             bean.setCompany(rm.getString("company"));
             bean.setName(rm.getString("name"));
-            bean.setRebate(rm.getDouble("rebate"));
+            bean.setRebate(rm.getFloat("rebate"));
             bean.setRemark(rm.getString("remark"));
             return bean;
 
@@ -184,6 +184,7 @@ public class TaskServicve extends Service {
                 material.setWidth(rm.getInteger("w"));
                 material.setHeight(rm.getInteger("h"));
                 material.setApproved_adx(rm.getString("approved_adx"));
+                material.setDuration(rm.getInteger("duration"));
                 list.add(material);
             }
             return list;

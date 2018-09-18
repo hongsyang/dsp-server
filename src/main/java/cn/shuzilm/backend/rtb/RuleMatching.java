@@ -606,6 +606,7 @@ public class RuleMatching {
 		targetDuFlowBean.setDescShort(creative.getDescShort());
 		targetDuFlowBean.setDescLong(creative.getDescLong());
 		targetDuFlowBean.setMode(ad.getMode());
+		targetDuFlowBean.setDuration(material.getDuration());
 		return targetDuFlowBean;
 	}
 
