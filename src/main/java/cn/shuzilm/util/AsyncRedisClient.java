@@ -119,7 +119,7 @@ public class AsyncRedisClient {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-    	 redis1.setAsync("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);
+    	 //redis1.setAsync("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);
     	 System.out.println(redis1.getAsync("97C304E-4C8E-4872-8666-03FE67DC15DG"));
     	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);	
     	//System.out.println(commands.get("97C304E-4C8E-4872-8666-03FE67DC15DG"));

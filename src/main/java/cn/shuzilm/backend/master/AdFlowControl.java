@@ -796,8 +796,7 @@ public class AdFlowControl {
         for (WorkNodeBean node : nodeList) {
         	taskList.clear();
             TaskBean task = mapTask.get(adUid);
-            if(task.getCommand() == TaskBean.COMMAND_PAUSE ||
-            		task.getCommand() == TaskBean.COMMAND_STOP){
+            if(task.getCommand() == TaskBean.COMMAND_STOP){
             	continue;
             }
             task.setCommandMemo(reason);
