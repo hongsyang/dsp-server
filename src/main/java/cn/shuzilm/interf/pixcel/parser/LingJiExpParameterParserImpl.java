@@ -71,6 +71,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             bean.setWinNoticeNums(1);
             bean.setPremiumFactor(element.getPremiumFactor());
+            bean.setType(0);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
             AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果

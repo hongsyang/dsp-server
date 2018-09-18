@@ -45,7 +45,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static final String ADX_NAME = "LingJi";
 
-    private static final String ADX_ID = "1";
+    private static final String ADX_ID = "001";
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
@@ -78,6 +78,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 response = "没有对应的广告类型";
                 return response;
             }
+            //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getExt().getIdfa();
@@ -87,6 +88,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     deviceId = userDevice.getExt().getMac();
                 }
             }
+            //支持的文件类型
             List<LJAssets> assets = new ArrayList<>();
             if ("banner".equals(adType)) {// banner 类型
                 width = userImpression.getBanner().getW();

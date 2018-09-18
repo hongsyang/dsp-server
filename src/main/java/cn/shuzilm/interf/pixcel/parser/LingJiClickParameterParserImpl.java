@@ -56,6 +56,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
             bean.setHost(configs.getString("HOST"));
             bean.setClickNums(1);
             bean.setClickTime(new Date().getTime());
+            bean.setType(0);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiClickBean：{}", bean);
             PixelFlowControl.getInstance().sendStatus(bean);

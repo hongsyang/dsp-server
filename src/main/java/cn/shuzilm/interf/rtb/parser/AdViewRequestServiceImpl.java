@@ -20,10 +20,7 @@ import redis.clients.jedis.Jedis;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Description: KuaiyouParser 快友post参数解析
@@ -43,6 +40,10 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
+    private static final String ADX_NAME = "AdView";
+
+    private static final String ADX_ID = "002";
+
     private AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
@@ -57,17 +58,108 @@ public class AdViewRequestServiceImpl implements RequestService {
             //请求报文解析
             BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
             //创建返回结果  bidRequest请求参数保持不变
-            DUFlowBean sourceDuFlowBean = new DUFlowBean();
-            sourceDuFlowBean.setRequestId(bidRequestBean.getId());
-            sourceDuFlowBean.setImpression(bidRequestBean.getImp());
-            sourceDuFlowBean.setDeviceId(bidRequestBean.getDevice().getDidmd5());
+            Device userDevice = bidRequestBean.getDevice();//设备信息
+            Impression userImpression = bidRequestBean.getImp().get(0);//曝光信息
+            App app = bidRequestBean.getApp();//应用信息
+            Integer width = null;//广告位的宽
+            Integer height = null;//广告位的高
+            Integer showtype = userImpression.getExt().getShowtype();//广告类型
+            String adType = convertAdType(showtype); //对应内部 广告类型
+            String stringSet = null;//文件类型列表
+            String deviceId = null;//设备号
+
+            if (StringUtils.isBlank(adType)) {
+                response = "没有对应的广告类型";
+                return response;
+            }
+            //设备的设备号：用于匹配数盟库中的数据
+            if (userDevice != null) {
+                if ("ios".equals(userDevice.getOs().toLowerCase())) {
+                    deviceId = userDevice.getIfa();
+                } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
+                    deviceId = userDevice.getDidsha1();
+                } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
+                    deviceId = userDevice.getDidsha1();
+                }
+            }
+
+            //支持的文件类型
+            List<LJAssets> assets = new ArrayList<>();
+            if ("banner".equals(adType)) {// banner 类型
+                width = userImpression.getBanner().getW();
+                height = userImpression.getBanner().getH();
+                String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
+                stringSet = Arrays.toString(mimes);
+
+            } else if ("fullscreen".equals(adType)) { //开屏
+                if (userImpression.getVideo() != null) {
+                    width = userImpression.getVideo().getW();
+                    height = userImpression.getVideo().getH();
+                    String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
+                    stringSet = Arrays.toString(mimes);
+                } else if (userImpression.getBanner() != null) {
+                    width = userImpression.getBanner().getW();
+                    height = userImpression.getBanner().getH();
+                    String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
+                    stringSet = Arrays.toString(mimes);
+                }
+            } else if ("interstitial".equals(adType)) {//插屏
+                if (userImpression.getVideo() != null) {
+                    width = userImpression.getVideo().getW();
+                    height = userImpression.getVideo().getH();
+                    String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
+                    stringSet = Arrays.toString(mimes);
+                } else if (userImpression.getBanner() != null) {
+                    width = userImpression.getBanner().getW();
+                    height = userImpression.getBanner().getH();
+                    String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
+                    stringSet = Arrays.toString(mimes);
+                }
+
+            } else if ("feed".equals(adType)) { //信息流
+                assets = userImpression.getNativead().getAssets();
+                for (LJAssets asset : assets) {
+                    if (asset.getImg() != null && asset.getRequired().equals(true)) {
+                        width = asset.getImg().getW();
+                        height = asset.getImg().getH();
+                        stringSet = Arrays.toString(asset.getImg().getMimes());
+                    } else if (asset.getVideo() != null && asset.getRequired().equals(true)) {
+                        width = asset.getVideo().getW();
+                        height = asset.getVideo().getH();
+                        stringSet = Arrays.toString(asset.getVideo().getMimes());
+                    }
+
+                }
+            }
+
+
             //初步过滤规则开关
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
                 if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "adview")) {
-                    DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
-                    BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
+                    DUFlowBean targetDuFlowBean = ruleMatching.match(
+                            deviceId,//设备mac的MD5
+                            adType,//广告类型
+                            width,//广告位的宽
+                            height,//广告位的高
+                            true,// 是否要求分辨率
+                            5,//宽误差值
+                            5,// 高误差值;
+                            ADX_ID,//ADX 服务商ID
+                            stringSet//文件扩展名
+                    );
+                    targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+                    targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
+                    targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+                    targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+                    targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
+                    targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+                    targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                    targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
+                    targetDuFlowBean.setAppName(app.getName());//APP名称
+                    targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+                    targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
                     log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
-                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean,bidRequestBean);
+                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
                     pushRedis(targetDuFlowBean);//上传到redis服务器
                     response = JSON.toJSONString(bidResponseBean);
                     log.debug("过滤通过的bidResponseBean:{}", response);
@@ -75,10 +167,31 @@ public class AdViewRequestServiceImpl implements RequestService {
                     response = JSON.toJSONString(msg);//过滤规则结果输出
                 }
             } else {
-                DUFlowBean targetDuFlowBean = new DUFlowBean();  //Todo 规则引擎 等待写入数据
-                BeanUtils.copyProperties(sourceDuFlowBean, targetDuFlowBean);
+                DUFlowBean targetDuFlowBean = ruleMatching.match(
+                        deviceId,//设备mac的MD5
+                        adType,//广告类型
+                        width,//广告位的宽
+                        height,//广告位的高
+                        true,// 是否要求分辨率
+                        5,//宽误差值
+                        5,// 高误差值;
+                        ADX_ID,//ADX 服务商ID
+                        stringSet//文件扩展名
+                );
+                //需要添加到Phoenix中的数据
+                targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+                targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
+                targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+                targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+                targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
+                targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+                targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
+                targetDuFlowBean.setAppName(app.getName());//APP名称
+                targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+                targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
                 log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean,bidRequestBean);
+                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
                 pushRedis(targetDuFlowBean);//上传到redis服务器
                 log.debug("json计数");
                 response = JSON.toJSONString(bidResponseBean);
@@ -96,13 +209,13 @@ public class AdViewRequestServiceImpl implements RequestService {
      * @param duFlowBean
      * @return
      */
-    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean,BidRequestBean bidRequestBean) {
+    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, BidRequestBean bidRequestBean) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String format = LocalDateTime.now().format(formatter);//时间戳
         bidResponseBean.setId(duFlowBean.getRequestId());//从bidRequestBean里面取 bidRequest的id
-        bidResponseBean.setBidid(duFlowBean.getBidid() + format);//BidResponse 的唯一标识,由 DSP生成
+        bidResponseBean.setBidid(duFlowBean.getBidid());//BidResponse 的唯一标识,由 DSP生成
         List<SeatBid> seatBidList = new ArrayList<SeatBid>();//注意第一层数组  DSP出价 目前仅支持一个
         List<Bid> bidList = new ArrayList<Bid>();//注意第二层数组 针对单次曝光的出价
         SeatBid seatBid = new SeatBid();
@@ -111,13 +224,13 @@ public class AdViewRequestServiceImpl implements RequestService {
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-        bid.setAdid(configs.getString("ADID"));//duFlowBean.getAdUid()广告id，对应duFlowBean的AdUid；
+        bid.setAdid(duFlowBean.getAdUid());//duFlowBean.getAdUid()广告id，对应duFlowBean的AdUid；
         Integer instl = bidRequestBean.getImp().get(0).getInstl();
-        String curl = "http://101.200.56.200:8880/" + "adviewclick?" +
+        String serviceUrl = configs.getString("SERVICE_URL");
+        String curl = serviceUrl + "adviewclick?" +
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-                "&price=" + 6.0 +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
@@ -126,9 +239,9 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
-        if (instl==5){
-            bid.setAdmt(6);//duFlowBean.getAdmt()广告类型
-            ResponseVideo responseVideo =new ResponseVideo();
+        if (instl == 5) {
+            bid.setAdmt(6);//duFlowBean.getAdmt()广告类型  视频广告
+            ResponseVideo responseVideo = new ResponseVideo();
             responseVideo.setXmltype(2);
             responseVideo.setVideourl(configs.getString("VADURL"));
             responseVideo.setDuration(15);
@@ -136,46 +249,46 @@ public class AdViewRequestServiceImpl implements RequestService {
             responseVideo.setHeight(Integer.valueOf(configs.getString("vh")));
             bid.setVideo(responseVideo);
 
-        }else if (instl==6){
-            bid.setAdmt(8);//duFlowBean.getAdmt()广告类型
-            NativeResponseBean nativeResponseBean =new NativeResponseBean();
+        } else if (instl == 6) {
+            bid.setAdmt(8);//duFlowBean.getAdmt()广告类型   信息流广告
+            NativeResponseBean nativeResponseBean = new NativeResponseBean();
             nativeResponseBean.setVer("1");
             List<Assets> assets = bidRequestBean.getImp().get(0).getNative().getRequest().getAssets();
-            List<Assets> assetsList =new ArrayList<>();
-            Assets assetsTitle =new Assets();
-            Assets assetsData =new Assets();
-            Assets assetsImg =new Assets();
-            Assets assetsVideo =new Assets();
+            List<Assets> assetsList = new ArrayList<>();
+            Assets assetsTitle = new Assets();
+            Assets assetsData = new Assets();
+            Assets assetsImg = new Assets();
+            Assets assetsVideo = new Assets();
             for (Assets asset : assets) {
-                if (asset.getTitle()!=null){
+                if (asset.getTitle() != null) {
                     assetsTitle.setId(asset.getId());
-                }else if (asset.getData()!=null){
+                } else if (asset.getData() != null) {
                     assetsData.setId(asset.getId());
-                }else if (asset.getImg()!=null){
+                } else if (asset.getImg() != null) {
                     assetsImg.setId(asset.getId());
-                }else if(asset.getVideo()!=null){
+                } else if (asset.getVideo() != null) {
                     assetsVideo.setId(asset.getId());
                 }
             }
-            NativeRequestTitle title =new NativeRequestTitle();
+            NativeRequestTitle title = new NativeRequestTitle();
             title.setText("数盟测试数据");
             assetsTitle.setTitle(title);
             assetsList.add(assetsTitle);
 
-            NativeRequestData data =new NativeRequestData();
+            NativeRequestData data = new NativeRequestData();
             data.setValue("数盟测试数据不知道对不对");
             assetsData.setData(data);
             assetsList.add(assetsData);
             for (Assets asset : assets) {
-                if (asset.getImg()!=null){
-                    NativeRequestImage image =new NativeRequestImage();
+                if (asset.getImg() != null) {
+                    NativeRequestImage image = new NativeRequestImage();
                     image.setW(Integer.valueOf(configs.getString("nw")));
                     image.setH(Integer.valueOf(configs.getString("nh")));
                     image.setUrl(configs.getString("NADM"));
                     assetsImg.setImg(image);
                     assetsList.add(assetsImg);
-                }else if (asset.getVideo()!=null){
-                    NativeRequestVideo video =new NativeRequestVideo();
+                } else if (asset.getVideo() != null) {
+                    NativeRequestVideo video = new NativeRequestVideo();
                     video.setXmltype(2);
                     video.setVideourl(configs.getString("VADURL"));
                     video.setDuration(15);
@@ -187,32 +300,29 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
 
-
-
             nativeResponseBean.setAssets(assetsList);
-            ResponseLink link =new ResponseLink();
-            List<String>  linkCurls =new ArrayList<>();
+            ResponseLink link = new ResponseLink();
+            List<String> linkCurls = new ArrayList<>();
             linkCurls.add(curl);
             link.setUrl(configs.getString("ADURL"));
             link.setClicktrackers(linkCurls);
             nativeResponseBean.setLink(link);
-            List<String>  curls =new ArrayList<>();
+            List<String> curls = new ArrayList<>();
             curls.add(curl);
             nativeResponseBean.setImptrackers(curls);//点击检测
-            log.debug("nativeResponseBean:{}",nativeResponseBean);
+            log.debug("nativeResponseBean:{}", nativeResponseBean);
             bid.setNative(nativeResponseBean);
-        }else if (instl==0){
-            bid.setAdmt(2);//duFlowBean.getAdmt()广告类型
-            bid.setCrid(configs.getString("CRID"));//duFlowBean.getCrid()广告物料 ID
-//        bid.setAdm(configs.getString("ADM"));//duFlowBean.getAdm() 广告物料html数据
-            bid.setAdi(configs.getString("ADM"));//图片路径
-            bid.setAdh(50);//duFlowBean.getAdw()广告物料高度
-            bid.setAdw(320);//duFlowBean.getAdh()广告物料宽度
-        }else {
-            log.debug("无此类型广告：{}",instl);
+        } else if (instl == 0) {
+            bid.setAdmt(Integer.valueOf(duFlowBean.getAdmt()));//duFlowBean.getAdmt()广告类型
+            bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid()广告物料 ID
+            bid.setAdi(duFlowBean.getAdm());//图片路径 duFlowBean.getAdm() 广告物料html数据
+            bid.setAdh(duFlowBean.getAdh());//duFlowBean.getAdh()广告物料高度
+            bid.setAdw(duFlowBean.getAdw());//duFlowBean.getAdw()广告物料宽度
+        } else {
+            log.debug("无此类型广告：{}", instl);
         }
         //曝光wurl
-        String wurl = "http://101.200.56.200:8880/" + "adviewexp?" +
+        String wurl = serviceUrl + "adviewexp?" +
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
@@ -236,13 +346,14 @@ public class AdViewRequestServiceImpl implements RequestService {
         List curls = new ArrayList();
         curls.add(curl);
         //等待写入
-//        Double biddingPrice = duFlowBean.getBiddingPrice()*1000;
-//        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
-        bid.setPrice(Integer.valueOf(configs.getString("PRICE")));//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
+        Double biddingPrice = duFlowBean.getBiddingPrice() * 1000;
+        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
+        bid.setPrice(price);//CPM 出价
+//        bid.setPrice(Integer.valueOf(configs.getString("PRICE")));//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
 
         bid.setAdct(0);//duFlowBean.getAdct() 广告点击行为类型，参考附录 9
-        bid.setCid(configs.getString("CID"));//duFlowBean.getCreativeUid()广告创意 ID，可用于去重
+        bid.setCid(duFlowBean.getCreativeUid());//duFlowBean.getCreativeUid()广告创意 ID，可用于去重
         //添加到list中
         bidList.add(bid);
         seatBid.setBid(bidList);
@@ -268,10 +379,36 @@ public class AdViewRequestServiceImpl implements RequestService {
             } else {
                 log.debug("jedis为空：{}", jedis);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        }finally {
+        } finally {
             jedis.close();
         }
+    }
+
+    /**
+     * 广告类型转换
+     *
+     * @param showtype
+     * @return
+     */
+    private String convertAdType(Integer showtype) {
+        String adType = "";
+        if (showtype == 0) {
+            adType = "banner";//横幅
+            log.debug("广告类型adType:{}", adType);
+        } else if (showtype == 6) {
+            adType = "feed";//信息流
+            log.debug("广告类型adType:{}", adType);
+        } else if (showtype == 4 || showtype == 5) {
+            adType = "fullscreen";//开屏
+            log.debug("广告类型adType:{}", adType);
+        } else if (showtype == 1) {
+            adType = "interstitial";//插屏
+            log.debug("广告类型adType:{}", adType);
+        } else {
+            adType = null;
+        }
+        return adType;
     }
 }
