@@ -148,7 +148,7 @@ public class RtbFlowControl {
         bidList = new ArrayList<AdBidBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
-        gridMap = new HashMap<>();
+//        gridMap = new HashMap<>();
         constant = RtbConstants.getInstance();
         String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
 		String nodes [] = nodeStr.split(";");
@@ -196,15 +196,15 @@ public class RtbFlowControl {
     public void pullTenMinutes() {
         // 从 10 分钟的队列中获得广告素材和人群包
     	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
-    	try{
-    		redisGeoMap = redis.getHMAsync(redisGeoKey);
-    	}catch(Exception e){
-    		myLog.error("从redis获取坐标失败:"+e.getMessage());
-    	}
-        ArrayList<GpsBean> gpsAll = new ArrayList<>();
-        ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
-        ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
-        ArrayList<GpsBean> gpsActiveList = new ArrayList<>();
+//    	try{
+//    		redisGeoMap = redis.getHMAsync(redisGeoKey);
+//    	}catch(Exception e){
+//    		myLog.error("从redis获取坐标失败:"+e.getMessage());
+//    	}
+//        ArrayList<GpsBean> gpsAll = new ArrayList<>();
+//        ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
+//        ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
+//        ArrayList<GpsBean> gpsActiveList = new ArrayList<>();
         if (adBeanList != null) {
             for (AdBean adBean : adBeanList) {
                 // 广告ID
@@ -215,36 +215,36 @@ public class RtbFlowControl {
                 if (audienceList.size() == 0) {
                     myLog.error(adBean.getAdUid() + "\t" + adBean.getName() + " 没有设置人群包..");
                 }
-                ArrayList<GpsBean> gpsList = null;
+//                ArrayList<GpsBean> gpsList = null;
                 for (AudienceBean audience : audienceList) {
                     if (audience != null) {
                         //加载人群中的GEO位置信息
-                        gpsList = audience.getGeoList();
-                        if (gpsList != null) {
-                            for (GpsBean gps : gpsList) {
-                                gps.setPayload(uid);
-                            }
-                            switch (audience.getMobilityType()) {
-                                case 0:
-                                    gpsResidenceList.addAll(gpsList);
-                                    gpsWorkList.addAll(gpsList);
-                                    gpsActiveList.addAll(gpsList);
-                                    break;
-                                case 1://居住地
-                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
-                                    gpsResidenceList.addAll(gpsList);
-                                    break;
-                                case 2://工作地
-                                    gpsWorkList.addAll(gpsList);
-                                    break;
-                                case 3://活动地
-                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
-                                    gpsActiveList.addAll(gpsList);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+//                        gpsList = audience.getGeoList();
+//                        if (gpsList != null) {
+//                            for (GpsBean gps : gpsList) {
+//                                gps.setPayload(uid);
+//                            }
+//                            switch (audience.getMobilityType()) {
+//                                case 0:
+//                                    gpsResidenceList.addAll(gpsList);
+//                                    gpsWorkList.addAll(gpsList);
+//                                    gpsActiveList.addAll(gpsList);
+//                                    break;
+//                                case 1://居住地
+//                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
+//                                    gpsResidenceList.addAll(gpsList);
+//                                    break;
+//                                case 2://工作地
+//                                    gpsWorkList.addAll(gpsList);
+//                                    break;
+//                                case 3://活动地
+//                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
+//                                    gpsActiveList.addAll(gpsList);
+//                                    break;
+//                                default:
+//                                    break;
+//                            }
+//                        }
                             // 将 省、地级、县级装载到 MAP 中，便于快速查找
                             List<AreaBean> areaList = audience.getCityList();
                             String key = null;
@@ -330,11 +330,11 @@ public class RtbFlowControl {
                         }
                     }
             }
-                gridMap.clear();
-                // 将 GPS 坐标加载到 栅格快速比对处理类中
-                gridMap.put(0, new GridMark2(gpsResidenceList,redisGeoMap));
-                gridMap.put(1, new GridMark2(gpsWorkList,redisGeoMap));
-                gridMap.put(2, new GridMark2(gpsActiveList,redisGeoMap));
+//                gridMap.clear();
+//                // 将 GPS 坐标加载到 栅格快速比对处理类中
+//                gridMap.put(0, new GridMark2(gpsResidenceList,redisGeoMap));
+//                gridMap.put(1, new GridMark2(gpsWorkList,redisGeoMap));
+//                gridMap.put(2, new GridMark2(gpsActiveList,redisGeoMap));
                 
                 myLog.info("广告共计加载条目数 : " + adBeanList.size());
                 //myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());

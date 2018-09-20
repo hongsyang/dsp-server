@@ -110,19 +110,22 @@ public class CPCHandler {
      * @param auid  广告id
      * @return  false : 暂停广告发放  true: 继续广告发放
      */
-    public boolean checkAvailable(String auid) {
-        try{
+    public String checkAvailable(String auid) {
+    	String reason = null;
+        try{        	
             AdFlowStatus statusMonitor = mapMonitorTotal.get(auid);
             AdFlowStatus statusThreshold = mapThresholdTotal.get(auid);
             if(statusMonitor == null || statusThreshold == null) {
-                myLog.error("监视器或者阈值为空，广告id： " + auid);
-                return false;
+               // myLog.error("监视器或者阈值为空，广告id： " + auid);
+            	reason = "监视器或者阈值为空，广告id： " + auid;
+                return reason;
             }
 
             AdBean adBean = adMap.get(auid);
             if(adBean == null){
-                myLog.error("未找到广告信息："+auid);
-                return false;
+                //myLog.error("未找到广告信息："+auid);
+                reason = "未找到广告信息："+auid;
+                return reason;
             }
             // 点击量
             long clickNum = statusMonitor.getClickNums();
@@ -134,8 +137,8 @@ public class CPCHandler {
             float price = adBean.getPrice();
             // 广告的可拖欠额度
             int moneyArrears = adBean.getMoneyArrears();
-            myLog.info("CPC结算广告流量控制：点击量：{}，曝光数量：{}，曝光花费：{}，报价：{}，额度： {}",
-                    clickNum, winNum, money, price, moneyArrears);
+//            myLog.info("CPC结算广告流量控制：点击量：{}，曝光数量：{}，曝光花费：{}，报价：{}，额度： {}",
+//                    clickNum, winNum, money, price, moneyArrears);
 
             if(clickNum > 0) {
                 // 有点击
@@ -143,32 +146,37 @@ public class CPCHandler {
                 float clickPrice = money / clickNum;
                 // 大于广告主单个CPC报价，则暂停广告发放
                 if(clickPrice >= price) {
-                    myLog.debug("出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放");
-                    return false;
+                   // myLog.debug("出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放");
+                	reason = "出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放   "+auid;
+                    return reason;
                 }else {
-                    myLog.debug("出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放");
-                    return true;
+                    //myLog.debug("出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放");
+                	reason = "出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放   "+auid;
+                    return null;
                 }
             }else {
                 // 没有点击
                 // 如果投放完毕
                 if(winNum >= winTotalNums) {
-                    myLog.debug("没有点击，投放完毕，暂停发放");
-                    return false;
+                    //myLog.debug("没有点击，投放完毕，暂停发放");
+                	reason = "没有点击，投放完毕，暂停发放   "+auid;
+                    return reason;
                 }else {
                     // 超额，暂停广告发放
                     if(money >= moneyArrears) {
-                        myLog.debug("没有点击，未投放完毕，超额，暂停广告投放");
-                        return false;
+                        //myLog.debug("没有点击，未投放完毕，超额，暂停广告投放");
+                    	reason = "没有点击，未投放完毕，超额，暂停广告投放   "+auid;
+                        return reason;
                     }else {
-                        myLog.debug("没有点击，未投放完毕，未超额，继续广告投放");
-                        return true;
+                        //myLog.debug("没有点击，未投放完毕，未超额，继续广告投放");
+                        return null;
                     }
                 }
             }
         }catch (Exception e){
             myLog.error("判断广告是否可以发放出错，广告id：" + auid, e);
-            return false;
+            reason = "判断广告是否可以发放出错，广告id：" + auid+e;
+            return reason;
         }
     }
 }

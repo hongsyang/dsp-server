@@ -369,16 +369,20 @@ public class JedisQueueManager {
 //    	long start = System.currentTimeMillis();
 //    	putElementToQueue("rtb-010","123",null);
 //    	putElementToQueue("rtb-010","456",null);
-    	ArrayList<TaskBean> taskList = (ArrayList<TaskBean>) getElementFromQueue("rtb-001_tdown");
+    	ArrayList<AdBean> taskList = (ArrayList<AdBean>) getElementFromQueue("rtb-008_ad");
     	System.out.println(taskList.size());
     	//NodeStatusBean node = (NodeStatusBean)getElementFromQueue("rtb-001_node_status");
     	//System.out.println(node);
     	//System.out.println(node.getNodeName());
     	//System.out.println(node.getLastUpdateTime());
     	
-//    	for(int i=1;i<7;i++){
+//    	for(int i=1;i<9;i++){
 //    	removeAll("pixel-00"+i+"_pixel");
 //    	removeAll("rtb-00"+i+"_pixel");
+//    	removeAll("pixel-00"+i+"_ad");
+//    	removeAll("rtb-00"+i+"_ad");
+//    	removeAll("pixel-00"+i+"_tdown");
+//    	removeAll("rtb-00"+i+"_tdown");
 //    	}
 	}
 }

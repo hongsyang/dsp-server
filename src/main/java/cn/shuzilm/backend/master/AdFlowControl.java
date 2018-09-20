@@ -288,11 +288,15 @@ public class AdFlowControl {
         //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
         for (String auid : mapThresholdHour.keySet()) {
             //监测 CPC 类型的广告是否可以投放
-            boolean isOk = cpcHandler.checkAvailable(auid);
-            if(!isOk){
-                String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
-                stopAd(auid, reason, false);
+        	AdBean ad = mapAd.get(auid);
+        	String mode = ad.getMode();
+        	if("cpc".equalsIgnoreCase(mode)){
+            String isOk = cpcHandler.checkAvailable(auid);
+            if(isOk != null){
+                //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
+                stopAd(auid, isOk, false);
             }
+        	}
             AdFlowStatus threshold = mapThresholdHour.get(auid);
             AdFlowStatus monitor = mapMonitorHour.get(auid);
             //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
@@ -342,6 +346,7 @@ public class AdFlowControl {
 
     /**
      * 小时计数器清零
+     * 每个小时重置一次 重置每个小时的投放状态，如果为暂停状态，且作用域为小时，则下一个小时可以继续开始
      */
     public void resetHourMonitor() {
         //清理小时计数器
@@ -350,6 +355,15 @@ public class AdFlowControl {
             status.setBidNums(0);
             status.setMoney(0);
             status.setWinNums(0);
+        }
+        
+        for (String auid : mapTask.keySet()) {
+        	TaskBean bean = mapTask.get(auid);
+        	int scope = bean.getScope();
+            int commandCode = bean.getCommand();
+            if (scope == TaskBean.SCOPE_HOUR && commandCode == TaskBean.COMMAND_PAUSE) {
+                bean.setCommand(TaskBean.COMMAND_START);
+            }
         }
     }
 
@@ -799,6 +813,7 @@ public class AdFlowControl {
             if(task.getCommand() == TaskBean.COMMAND_STOP){
             	continue;
             }
+            myLog.debug(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);

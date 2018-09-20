@@ -40,8 +40,10 @@ public class AudienceBean implements ICommand {
     private List<AreaBean> cityList;
     private String geos; //地理位置 经纬度  对应：mysql 中的 location_map
     private ArrayList<GpsBean> geoList;
-    @Setter
-    private int mobilityType; //地理位置-流动性 0 不限 1 居住地 2 工作地 3 活动地
+    
+    private String mobilityType; //地理位置-流动性 0 不限 1 居住地 2 工作地 3 活动地
+    
+    private Set<Integer> mobilityTypeSet;
     
     private String demographicTagId; //特定人群-标签选定项  例如： 大学生、家长、户外爱好者
     
@@ -53,25 +55,36 @@ public class AudienceBean implements ICommand {
     private Set<AreaBean> demographicCitySet;//特定人群城市
 
     //属性筛选
-    @Setter
-    private int incomeLevel; //收入水平  0 不限 1 超高 2 高 3 中  4 低
+    
+    private String incomeLevel; //收入水平  0 不限 1 超高 2 高 3 中  4 低
+    
+    private Set<Integer> incomeLevelSet;
     
     private String appPreferenceIds;//兴趣
     
     private Set<String> appPreferenceIdSet;//兴趣列表
 
-    @Setter
-    private int platformId; //平台 安卓  或 IOS  0 不限 1 安卓 2 ios
+    private String platformId; //平台 安卓  或 IOS  0 不限 1 安卓 2 ios (后支持多选)
+    
+    private Set<Integer> platformIdSet;
     
     private String brandIds; //品牌
     
     private Set<String> brandIdSet;//品牌列表
-    @Setter
-    private int phonePriceLevel;//设备价格 分档  0 不限 1 1000 元内 2 1000-4000 3 4000- 10000  4 10000 以上
-    @Setter
-    private int networkId; //网络类型  不限 0 移动网络  1 WIFI 2
-    @Setter
-    private int carrierId; // 运营商 不限 0 移动 1 电信 2 联通 3
+    
+    private String phonePriceLevel;//设备价格 分档  0 不限 1 1000 元内 2 1000-4000 3 4000- 10000  4 10000 以上
+    
+    private Set<Integer> phonePriceLevelSet;
+    
+    
+    private String networkId; //网络类型  不限 0 移动网络  1 WIFI 2
+    
+    private Set<Integer> networkIdSet;
+    
+    
+    private String carrierId; // 运营商 不限 0 移动 1 电信 2 联通 3
+    
+    private Set<Integer> carrierIdSet;
 
     //公司定向
     
@@ -301,6 +314,96 @@ public class AudienceBean implements ICommand {
                 set.add(replace);
             }
             this.ipSet = set;
+        }
+	}
+
+	public void setPlatformId(String platformId) {
+		this.platformId = platformId;
+		if (StringUtils.isNotBlank(platformId)) {
+            String[] split = platformId.split(",");
+            Set<Integer> set = new HashSet<Integer>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(Integer.parseInt(replace));
+            }
+            this.platformIdSet = set;
+        }
+	}
+
+	public void setPhonePriceLevel(String phonePriceLevel) {
+		this.phonePriceLevel = phonePriceLevel;
+		if (StringUtils.isNotBlank(phonePriceLevel)) {
+            String[] split = phonePriceLevel.split(",");
+            Set<Integer> set = new HashSet<Integer>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(Integer.parseInt(replace));
+            }
+            this.phonePriceLevelSet = set;
+        }
+	}
+
+	public void setNetworkId(String networkId) {
+		this.networkId = networkId;
+		if (StringUtils.isNotBlank(networkId)) {
+            String[] split = networkId.split(",");
+            Set<Integer> set = new HashSet<Integer>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(Integer.parseInt(replace));
+            }
+            this.networkIdSet = set;
+        }
+	}
+
+	public void setCarrierId(String carrierId) {
+		this.carrierId = carrierId;
+		if (StringUtils.isNotBlank(carrierId)) {
+            String[] split = carrierId.split(",");
+            Set<Integer> set = new HashSet<Integer>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(Integer.parseInt(replace));
+            }
+            this.carrierIdSet = set;
+        }
+	}
+
+	public void setIncomeLevel(String incomeLevel) {
+		this.incomeLevel = incomeLevel;
+		if (StringUtils.isNotBlank(incomeLevel)) {
+            String[] split = incomeLevel.split(",");
+            Set<Integer> set = new HashSet<Integer>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(Integer.parseInt(replace));
+            }
+            this.incomeLevelSet = set;
+        }
+	}
+
+	public void setMobilityType(String mobilityType) {
+		this.mobilityType = mobilityType;
+		if (StringUtils.isNotBlank(mobilityType)) {
+            String[] split = mobilityType.split(",");
+            Set<Integer> set = new HashSet<Integer>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(Integer.parseInt(replace));
+            }
+            this.mobilityTypeSet = set;
         }
 	}
     

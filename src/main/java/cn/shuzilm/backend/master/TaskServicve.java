@@ -43,15 +43,15 @@ public class TaskServicve extends Service {
             //兴趣偏好标签
             bean.setAppPreferenceIds(rm.getString("app_preference_ids"));
             bean.setBrandIds(rm.getString("brand_ids"));
-            bean.setCarrierId(rm.get("carrier_id") != null ? rm.getInteger("carrier_id") : 0);
+            bean.setCarrierId(rm.getString("carrier_id"));
             //选定城市或者经纬度 工作地、居住地、活动地
-            bean.setMobilityType(rm.get("location_type") != null ? rm.getInteger("location_type") : 0);
+            bean.setMobilityType(rm.getString("location_type"));
             bean.setCitys(rm.getString("location_city"));
             bean.setGeos(rm.get("location_map") != null ? rm.getString("location_map") : "");
-            bean.setIncomeLevel(rm.get("income_level") != null ? rm.getInteger("income_level") : 0);
-            bean.setNetworkId(rm.get("network_id") != null ? rm.getInteger("network_id") : 0);
-            bean.setPhonePriceLevel(rm.get("phone_price_level") != null ? rm.getInteger("phone_price_level") : 0);
-            bean.setPlatformId(rm.get("platform_id") != null ? rm.getInteger("platform_id") : 0);
+            bean.setIncomeLevel(rm.getString("income_level"));
+            bean.setNetworkId(rm.getString("network_id"));
+            bean.setPhonePriceLevel(rm.getString("phone_price_level"));
+            bean.setPlatformId(rm.getString("platform_id"));
             //特定公司
             bean.setCompanyIds(rm.getString("company_ids"));
             //智能设备
