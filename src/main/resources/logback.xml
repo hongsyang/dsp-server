@@ -37,7 +37,7 @@
             <appender name="PHOENIX" class="ch.qos.logback.core.rolling.RollingFileAppender">
                 <File>${LOG_HOME}/${phoenix}/${phoenix}.log</File>
                 <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                    <FileNamePattern>/${LOG_HOME}/${phoenix}/${phoenix}.%d{yyyyMMddHH}.log.gz</FileNamePattern>
+                    <FileNamePattern>/${LOG_HOME}/${phoenix}/${phoenix}.%d{yyyyMMddHHmm}.%i.log.gz</FileNamePattern>
                 </rollingPolicy>
                 <layout class="ch.qos.logback.classic.PatternLayout">
                     <Pattern>%m%n</Pattern>
@@ -96,7 +96,7 @@
         <level value="DEBUG"/>
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="SIFT"/>
-        <!--<appender-ref ref="PHOENIX"/>-->
+        <appender-ref ref="PHOENIX"/>
         <!--<appender-ref ref="FILEERROR"/>-->
     </root>
 
