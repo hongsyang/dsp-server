@@ -122,7 +122,7 @@ public class RuleMatching {
 			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,
 			Set<String> materialSet) {
 		// 筛选审核通过的物料
-		if (material.getApproved_adx() != null && !material.getApproved_adx().contains(adxName)) {
+		if (material.getApproved_adx() != null && !material.getApprovedAdxSet().contains(adxName)) {
 			return false;
 		}
 		if (!extStr.contains(material.getExt())) {
@@ -253,7 +253,7 @@ public class RuleMatching {
 			CreativeBean creative = ad.getCreativeList().get(0);
 
 			if (creative.getApproved() != 1 || creative.getApproved_adx() == null
-					|| !creative.getApproved_adx().contains(adxName)) {
+					|| !creative.getApprovedAdxSet().contains(adxName)) {
 				LOG.debug("广告ID[" + adUid + "]创意未在ADX[" + adxName + "]通过,不参与投放!");
 				continue;
 			}
@@ -697,7 +697,7 @@ public class RuleMatching {
 
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DG", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");
+		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DG", "banner", 640, 960, true, 5, 5, "1", "jpg,gif");
 	}
 
 }
