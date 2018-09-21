@@ -665,9 +665,9 @@ public class AdFlowControl {
             cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-            for (int i = 0; i < 1000 ; i++) {
+//            for (int i = 0; i < 1000 ; i++) {
             dispatchTask();
-            }
+//            }
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 分发完毕。。。");
             myLog.info("主控： 共有 " + mapAd.keySet().size() + " 个广告在运行");
