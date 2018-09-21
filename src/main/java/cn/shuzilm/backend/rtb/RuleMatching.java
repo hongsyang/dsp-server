@@ -571,6 +571,7 @@ public class RuleMatching {
 		} else {
 			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getUid()).concat(".")
 					.concat(material.getExt());
+			System.out.println(url);
 			targetDuFlowBean.setAdm(url);// 广告素材
 		}
 		targetDuFlowBean.setAdw(material.getWidth());
@@ -697,7 +698,7 @@ public class RuleMatching {
 
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DG", "banner", 640, 960, true, 5, 5, "1", "jpg,gif");
+		rule.match("a24e0e337853d4d9da28769d4bf83577", "fullscreen", 640, 960, true, 5, 5, "1", "jpg,gif");
 	}
 
 }
