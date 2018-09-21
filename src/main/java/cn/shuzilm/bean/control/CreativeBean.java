@@ -1,7 +1,10 @@
 package cn.shuzilm.bean.control;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
 
 import lombok.Setter;
 
@@ -29,6 +32,8 @@ public class CreativeBean implements ICommand {
     
     private int approved;//是否通过审批（0:待审批/1:通过/-1:拒绝）
 	private String approved_adx;//适用平台
+	
+	private Set<String> approvedAdxSet;
     
     /**
      * 点击动作：0未确认/1打开网页/2下载应用/3播放视频/4打开应用/5打开Deeplink目标/6打开地图/7拨打电话/8发送短信/9其它
@@ -184,6 +189,17 @@ public class CreativeBean implements ICommand {
 
 	public void setApproved_adx(String approved_adx) {
 		this.approved_adx = approved_adx;
+		if (StringUtils.isNotBlank(approved_adx)) {
+            String[] split = approved_adx.split(",");
+            Set<String> set = new HashSet<String>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(replace);
+            }
+            this.approvedAdxSet = set;
+        }
 	}
 
 	public String getType() {
@@ -192,6 +208,10 @@ public class CreativeBean implements ICommand {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Set<String> getApprovedAdxSet() {
+		return approvedAdxSet;
 	}
     
 }

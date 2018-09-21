@@ -104,7 +104,7 @@ public class AudienceBean implements ICommand {
     private String dmpId;
 
     public void setDemographicCitys(String citys){
-        if(citys == null)
+        if(citys == null || citys.trim().equals(""))
             return;
         demographicCitys = citys;
         String[] split = citys.split("],");
@@ -120,6 +120,9 @@ public class AudienceBean implements ICommand {
     
     public void setCompanyIds(String companyIds) {
 		this.companyIds = companyIds;
+		if(companyIds == null || companyIds.trim().equals("")){
+			return;
+		}
 		String[] split = companyIds.split(",");
 		Set<String> set = new HashSet();
 		String re = "{";

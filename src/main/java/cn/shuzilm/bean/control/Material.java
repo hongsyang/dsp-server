@@ -1,5 +1,10 @@
 package cn.shuzilm.bean.control;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.lang.StringUtils;
+
 public class Material implements ICommand {
 	
 	private String uid;
@@ -22,6 +27,9 @@ public class Material implements ICommand {
 	private String updatedBy;//更新者
 	private int approved;//是否通过审批（0:待审批/1:通过/-1:拒绝）
 	private String approved_adx;//适用平台
+	
+	private Set<String> approvedAdxSet;
+	
 	private int duration;//视频总时长
 
 	public String getUid() {
@@ -113,12 +121,26 @@ public class Material implements ICommand {
 	}
 	public void setApproved_adx(String approved_adx) {
 		this.approved_adx = approved_adx;
+		if (StringUtils.isNotBlank(approved_adx)) {
+            String[] split = approved_adx.split(",");
+            Set<String> set = new HashSet<String>();
+            String re = "[";
+            String ra = "]";
+            for (String s : split) {
+                String replace = s.replace(re, "").trim().replace(ra, "");
+                set.add(replace);
+            }
+            this.approvedAdxSet = set;
+        }
 	}
 	public int getDuration() {
 		return duration;
 	}
 	public void setDuration(int duration) {
 		this.duration = duration;
+	}
+	public Set<String> getApprovedAdxSet() {
+		return approvedAdxSet;
 	}
 	
 	
