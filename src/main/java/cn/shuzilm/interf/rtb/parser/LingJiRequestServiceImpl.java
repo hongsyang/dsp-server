@@ -276,6 +276,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
 
+        //人群包，创意id，省，市，广告主id，代理商id，广告id，数盟did
+
         if ("banner".equals(adType)) {
             bid.setAdm(duFlowBean.getAdm());//  横幅
         } else if ("fullscreen".equals(adType)) {
