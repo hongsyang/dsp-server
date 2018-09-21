@@ -192,17 +192,17 @@ public class PutGEOToRedis {
 		au1.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
 		 au1.setGeos(
 			 "[{\"北京市通州区\":[\"116.640865\",\"39.852104\",\"1000\"]},{\"北京市大兴区公园北环路辅路-旧宫,清和园\":[\"116.461492\",\"39.794028\",\"5316\"]}]");
-		au1.setMobilityType(0);
+		au1.setMobilityType("[1,2]");
 		//[{"北京市通州区":["116.640865","39.852104","1000"]},{"北京市大兴区公园北环路辅路-旧宫,清和园":["116.461492","39.794028","5316"]}]
 		au1.setDemographicTagId("[111120,222220,333320,444420]");
 		au1.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		au1.setIncomeLevel(2);
+		au1.setIncomeLevel("[2]");
 		au1.setAppPreferenceIds("eat food");
-		au1.setPlatformId(1);
+		au1.setPlatformId("[1]");
 		au1.setBrandIds("335");
-		au1.setPhonePriceLevel(3);
-		au1.setNetworkId(2);
-		au1.setCarrierId(4);
+		au1.setPhonePriceLevel("[3]");
+		au1.setNetworkId("[2]");
+		au1.setCarrierId("[4]");
 		au1.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
 		au1.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
 
@@ -296,16 +296,16 @@ public class PutGEOToRedis {
 		au2.setCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
 		 au2.setGeos(
 		 "[{\"北京市通州区\":[\"116.640865\",\"22.852104\",\"1000\"]},{\"北京市大兴区公园北环路辅路-旧宫,清和园\":[\"116.461492\",\"22.794028\",\"5316\"]}]");
-		au2.setMobilityType(0);
+		au2.setMobilityType("[1,2]");
 		au2.setDemographicTagId("[111120,222220,333320,444420]");
 		au2.setDemographicCitys("[[6,62,737],[4,45,0],[23,271,2504]]");
-		au2.setIncomeLevel(2);
+		au2.setIncomeLevel("[2]");
 		au2.setAppPreferenceIds("eat food");
-		au2.setPlatformId(1);
+		au2.setPlatformId("[1]");
 		au2.setBrandIds("335");
-		au2.setPhonePriceLevel(3);
-		au2.setNetworkId(2);
-		au2.setCarrierId(4);
+		au2.setPhonePriceLevel("[3]");
+		au2.setNetworkId("[2]");
+		au2.setCarrierId("[4]");
 		au2.setCompanyIds("{\"北京AAA有限公司\":275231,\"北京BBB有限公司\":375331,\"北京CCC有限公司\":475431}");
 		au2.setCompanyNames("北京AAA有限公司,北京BBB有限公司,北京CCC有限公司");
 

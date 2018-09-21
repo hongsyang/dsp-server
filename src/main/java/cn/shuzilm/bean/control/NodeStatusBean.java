@@ -16,7 +16,6 @@ public class NodeStatusBean implements ICommand{
 
     private int nodeId;
     private String nodeName;
-    private boolean isLost;
     /**
      * 总的竞价次数
      */
@@ -33,6 +32,11 @@ public class NodeStatusBean implements ICommand{
      * 广告个数
      */
     private int adNums;
+    
+    /**
+     * 节点最后上报心跳时间
+     */
+    private long lastUpdateTime;
 
     public ArrayList<AdPixelBean> getPixelList() {
         return pixelList;
@@ -70,14 +74,6 @@ public class NodeStatusBean implements ICommand{
         this.nodeName = nodeName;
     }
 
-    public boolean isLost() {
-        return isLost;
-    }
-
-    public void setLost(boolean lost) {
-        isLost = lost;
-    }
-
     public long getTotalBids() {
         return totalBids;
     }
@@ -109,4 +105,14 @@ public class NodeStatusBean implements ICommand{
     public void setAdNums(int adNums) {
         this.adNums = adNums;
     }
+
+	public long getLastUpdateTime() {
+		return lastUpdateTime;
+	}
+
+	public void setLastUpdateTime(long lastUpdateTime) {
+		this.lastUpdateTime = lastUpdateTime;
+	}
+
+    
 }

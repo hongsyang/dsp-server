@@ -3,10 +3,12 @@ package cn.shuzilm.backend.rtb;
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
+import cn.shuzilm.bean.control.AdBidBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.Material;
+import cn.shuzilm.bean.control.NodeStatusBean;
 import cn.shuzilm.bean.control.TaskBean;
 import cn.shuzilm.bean.dmp.AreaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
@@ -29,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,6 +83,14 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String, Set<String>> getDemographicMap() {
         return demographicMap;
     }
+    
+    public ConcurrentHashMap<String,Long> getBidMap(){
+    	return bidMap;
+    }
+    
+    public ArrayList<AdBidBean> getBidList(){
+    	return bidList;
+    }
 
     private String nodeName;
     /**
@@ -116,7 +127,12 @@ public class RtbFlowControl {
     private static Map<String,String> redisGeoMap = null;
 
     // 判断标签坐标是否在 广告主的选取范围内
-    private HashMap<Integer, GridMark2> gridMap = null;
+    private static HashMap<Integer, GridMark2> gridMap = null;
+    
+    //每个广告5秒内的rtb请求数量
+    private static ConcurrentHashMap<String,Long> bidMap = null;
+    
+    private static ArrayList<AdBidBean> bidList = null;
 
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
@@ -128,9 +144,11 @@ public class RtbFlowControl {
         mapAdMaterial = new ConcurrentHashMap<>();
         mapAdMaterialRatio = new ConcurrentHashMap<>();
         mapMaterialRatio = new ConcurrentHashMap<>();
+        bidMap = new ConcurrentHashMap<>();
+        bidList = new ArrayList<AdBidBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
-        gridMap = new HashMap<>();
+//        gridMap = new HashMap<>();
         constant = RtbConstants.getInstance();
         String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
 		String nodes [] = nodeStr.split(";");
@@ -146,6 +164,11 @@ public class RtbFlowControl {
         pullTenMinutes();
         // 1 hour
         refreshAdStatus();
+        //5s上传一次rtb请求数
+        pushAdBidNums();
+        
+        //10分钟上传一次RTB节点心跳
+        pushRtbHeart();
     }
 
     /**
@@ -173,15 +196,15 @@ public class RtbFlowControl {
     public void pullTenMinutes() {
         // 从 10 分钟的队列中获得广告素材和人群包
     	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
-    	try{
-    		redisGeoMap = redis.getHMAsync(redisGeoKey);
-    	}catch(Exception e){
-    		myLog.error("从redis获取坐标失败:"+e.getMessage());
-    	}
-        ArrayList<GpsBean> gpsAll = new ArrayList<>();
-        ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
-        ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
-        ArrayList<GpsBean> gpsActiveList = new ArrayList<>();
+//    	try{
+//    		redisGeoMap = redis.getHMAsync(redisGeoKey);
+//    	}catch(Exception e){
+//    		myLog.error("从redis获取坐标失败:"+e.getMessage());
+//    	}
+//        ArrayList<GpsBean> gpsAll = new ArrayList<>();
+//        ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
+//        ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
+//        ArrayList<GpsBean> gpsActiveList = new ArrayList<>();
         if (adBeanList != null) {
             for (AdBean adBean : adBeanList) {
                 // 广告ID
@@ -192,36 +215,36 @@ public class RtbFlowControl {
                 if (audienceList.size() == 0) {
                     myLog.error(adBean.getAdUid() + "\t" + adBean.getName() + " 没有设置人群包..");
                 }
-                ArrayList<GpsBean> gpsList = null;
+//                ArrayList<GpsBean> gpsList = null;
                 for (AudienceBean audience : audienceList) {
                     if (audience != null) {
                         //加载人群中的GEO位置信息
-                        gpsList = audience.getGeoList();
-                        if (gpsList != null) {
-                            for (GpsBean gps : gpsList) {
-                                gps.setPayload(uid);
-                            }
-                            switch (audience.getMobilityType()) {
-                                case 0:
-                                    gpsResidenceList.addAll(gpsList);
-                                    gpsWorkList.addAll(gpsList);
-                                    gpsActiveList.addAll(gpsList);
-                                    break;
-                                case 1://居住地
-                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
-                                    gpsResidenceList.addAll(gpsList);
-                                    break;
-                                case 2://工作地
-                                    gpsWorkList.addAll(gpsList);
-                                    break;
-                                case 3://活动地
-                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
-                                    gpsActiveList.addAll(gpsList);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
+//                        gpsList = audience.getGeoList();
+//                        if (gpsList != null) {
+//                            for (GpsBean gps : gpsList) {
+//                                gps.setPayload(uid);
+//                            }
+//                            switch (audience.getMobilityType()) {
+//                                case 0:
+//                                    gpsResidenceList.addAll(gpsList);
+//                                    gpsWorkList.addAll(gpsList);
+//                                    gpsActiveList.addAll(gpsList);
+//                                    break;
+//                                case 1://居住地
+//                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
+//                                    gpsResidenceList.addAll(gpsList);
+//                                    break;
+//                                case 2://工作地
+//                                    gpsWorkList.addAll(gpsList);
+//                                    break;
+//                                case 3://活动地
+//                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
+//                                    gpsActiveList.addAll(gpsList);
+//                                    break;
+//                                default:
+//                                    break;
+//                            }
+//                        }
                             // 将 省、地级、县级装载到 MAP 中，便于快速查找
                             List<AreaBean> areaList = audience.getCityList();
                             String key = null;
@@ -307,11 +330,11 @@ public class RtbFlowControl {
                         }
                     }
             }
-                gridMap.clear();
-                // 将 GPS 坐标加载到 栅格快速比对处理类中
-                gridMap.put(0, new GridMark2(gpsResidenceList,redisGeoMap));
-                gridMap.put(1, new GridMark2(gpsWorkList,redisGeoMap));
-                gridMap.put(2, new GridMark2(gpsActiveList,redisGeoMap));
+//                gridMap.clear();
+//                // 将 GPS 坐标加载到 栅格快速比对处理类中
+//                gridMap.put(0, new GridMark2(gpsResidenceList,redisGeoMap));
+//                gridMap.put(1, new GridMark2(gpsWorkList,redisGeoMap));
+//                gridMap.put(2, new GridMark2(gpsActiveList,redisGeoMap));
                 
                 myLog.info("广告共计加载条目数 : " + adBeanList.size());
                 //myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
@@ -324,15 +347,54 @@ public class RtbFlowControl {
      * 每隔 5 秒钟从消息中心获得当前节点的当前任务，并与当前两个 MAP monitor 进行更新 不包括素材
      */
     public void pullAndUpdateTask() {
-    	TaskBean task = MsgControlCenter.recvTask(nodeName);
-        if (task == null) {
+    	List<TaskBean> taskList = MsgControlCenter.recvTask(nodeName);
+        if (taskList == null || taskList.size() == 0) {
             return;
         }
-        if (task != null) {
+        for(TaskBean task:taskList){
             // 把最新的任务更新到 MAP task 中
             mapTask.put(task.getAdUid(), task);
         }
 
+    }
+    
+    /**
+     * 每隔 5 秒钟上报rtb引擎中广告的rtb请求数
+     */
+    public void pushAdBidNums() {
+    	bidList.clear();
+    	if(bidMap != null && !bidMap.isEmpty()){
+    		Iterator iter = bidMap.entrySet().iterator();
+    		while(iter.hasNext()){
+    			Map.Entry entry = (Map.Entry) iter.next();
+    			String key = (String) entry.getKey();
+    			long value = (long) entry.getValue();
+    			if(value != 0){
+    				AdBidBean bid = new AdBidBean();
+    				bid.setUid(key);
+    				bid.setBidNums(value);
+    				bidList.add(bid);
+    			}
+    		}
+    		
+    	}
+    	if(bidList.size() > 0){
+    		NodeStatusBean bean = new NodeStatusBean();
+    		bean.setBidList(bidList);
+    		MsgControlCenter.sendBidStatus(nodeName, bean);
+    	}
+    	
+    	bidMap.clear();
+        
+    }
+    
+    /**
+     * 每隔 10分钟上报rtb引擎心跳
+     */
+    public void pushRtbHeart(){
+    	NodeStatusBean bean = new NodeStatusBean();
+    	bean.setLastUpdateTime(System.currentTimeMillis());
+    	MsgControlCenter.sendNodeStatus(nodeName, bean);
     }
 
     /**

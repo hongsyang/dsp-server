@@ -7,11 +7,13 @@ import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.Material;
 import cn.shuzilm.bean.dmp.AudienceBean;
+import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.GPSDistance;
 import cn.shuzilm.util.JsonTools;
 import cn.shuzilm.util.MathTools;
 import cn.shuzilm.util.TimeUtil;
@@ -62,8 +64,10 @@ public class RuleMatching {
 	 * 随机数控制广告进度等顺序，雨露均沾
 	 */
 	private Random adRandom;
-	
+
 	private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
+
+	private static int gradeRatio = 30;
 
 	public static RuleMatching getInstance() {
 		if (rule == null) {
@@ -77,18 +81,19 @@ public class RuleMatching {
 		// 加载标签溢价比和权重
 		constant = RtbConstants.getInstance();
 		String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
-		String nodes [] = nodeStr.split(";");
+		String gradeRatioStr = gradeRatioStr = constant.getRtbStrVar(RtbConstants.GRADE_RATIO);
+		gradeRatio = Integer.parseInt(gradeRatioStr);
+		String nodes[] = nodeStr.split(";");
 		redis = AsyncRedisClient.getInstance(nodes);
 		// jedis = JedisManager.getInstance().getResource();
 		long start = System.currentTimeMillis();
 		RtbCronDispatch.startRtbDispatch();
-		LOG.info("初始化缓存时间:"+(System.currentTimeMillis()-start));
+		LOG.info("初始化缓存完成,加载时间:" + (System.currentTimeMillis() - start) + " ms");
 		rtbIns = RtbFlowControl.getInstance();
-		
+
 		tagRandom = new Random();
 		adRandom = new Random();
 
-		
 	}
 
 	/**
@@ -114,7 +119,8 @@ public class RuleMatching {
 	 *            广告位支持的文件扩展名列表
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,Set<String> materialSet) {
+			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,
+			Set<String> materialSet) {
 		// 筛选审核通过的物料
 		if (material.getApproved_adx() != null && !material.getApproved_adx().contains(adxName)) {
 			return false;
@@ -122,7 +128,7 @@ public class RuleMatching {
 		if (!extStr.contains(material.getExt())) {
 			return false;
 		}
-		if(!materialSet.contains(material.getUid())){
+		if (!materialSet.contains(material.getUid())) {
 			return false;
 		}
 		if (isResolutionRatio) {
@@ -140,6 +146,7 @@ public class RuleMatching {
 
 	/**
 	 * 将设备ID 的标签从加速层取出，并做规则判断
+	 * 
 	 * @param adType
 	 *            广告类型
 	 * @param width
@@ -185,7 +192,7 @@ public class RuleMatching {
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		List<AdBean> geoAdList = new ArrayList<AdBean>();// 符合经纬度的广告资源列表
 		Map<String, Material> metrialMap = new HashMap<String, Material>();
-		Map<String, AudienceBean> audienceMap = new HashMap<String,AudienceBean>();
+		Map<String, AudienceBean> audienceMap = new HashMap<String, AudienceBean>();
 
 		String tagIdStr = tagBean.getTagIdList();
 		String tagIds[] = tagIdStr.split(",");
@@ -202,7 +209,7 @@ public class RuleMatching {
 		String brandStr = tagBean.getBrand();
 		String brands[] = brandStr.split(",");
 		List<String> brandList = Arrays.asList(brands);
-		
+
 		Date date = new Date();
 		String time = dateFm.format(date);
 		String splitTime[] = time.split("_");
@@ -210,11 +217,11 @@ public class RuleMatching {
 		int dayNum = Integer.parseInt(splitTime[1]);
 		if (dayNum == 24)
 			dayNum = 0;
-		
+
 		String provinceIdKey = String.valueOf(tagBean.getProvinceId());
 		String cityIdKey = provinceIdKey.concat("_").concat(String.valueOf(tagBean.getCityId()));
 		String countryIdKey = cityIdKey.concat("_").concat(String.valueOf(tagBean.getCountyId()));
-		
+
 		String key = null;
 		// 省市县的匹配
 		if (tagBean.getProvinceId() == 0) {
@@ -226,28 +233,28 @@ public class RuleMatching {
 		} else {
 			key = countryIdKey;
 		}
-		
-		if(extStr.contains("jpg")){
+
+		if (extStr.contains("jpg")) {
 			extStr = extStr.concat(",jpeg");
-		}else if(extStr.contains("jpeg")){
+		} else if (extStr.contains("jpeg")) {
 			extStr = extStr.concat(",jpg");
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
-		long startOrder = System.currentTimeMillis();
+//		long startOrder = System.currentTimeMillis();
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
 			if (!isAvaliable) {
-				 LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				LOG.debug("ID[" + adUid + "]广告不参与投放!");
 				continue;
 			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
-			if (creative.getApproved() != 1 || creative.getApproved_adx() == null ||!creative.getApproved_adx().contains(adxName)) {
-				 LOG.debug("广告ID[" + adUid +
-				 "]创意未在ADX["+adxName+"]通过,不参与投放!");
+			if (creative.getApproved() != 1 || creative.getApproved_adx() == null
+					|| !creative.getApproved_adx().contains(adxName)) {
+				LOG.debug("广告ID[" + adUid + "]创意未在ADX[" + adxName + "]通过,不参与投放!");
 				continue;
 			}
 
@@ -255,111 +262,116 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			for (Material material : materialList) {
 				if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
-						heightDeviation, adxName, material, extStr,materialSet)) {
+						heightDeviation, adxName, material, extStr, materialSet)) {
 					metrialMap.put(ad.getAdUid(), material);
 					filterFlag = true;
 					break;
 				}
 			}
 			if (!filterFlag) {
-				LOG.debug("广告ID[" + adUid +
-				 "]下未匹配到满足要求的物料,不参与投放!");
+				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
 				continue;
 			}
 
 			List<AudienceBean> audienceList = ad.getAudienceList();
-			for(AudienceBean audience:audienceList){
-			if (audience.getType().equals("location")) {// 地理位置
-				if (audience.getGeos() == null || audience.getGeos().trim().equals("")) {
-					//省市县的匹配
-					if (tagBean.getProvinceId() == 0) {
-						key = "china";
-					} else if (tagBean.getCityId() == 0) {
-						key = tagBean.getProvinceId() + "";
-					} else if (tagBean.getCountyId() == 0) {
-						key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
-					} else {
-						key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
+			for (AudienceBean audience : audienceList) {
+				if (audience.getType().equals("location")) {// 地理位置
+					if (audience.getGeos() == null || audience.getGeos().trim().equals("")) {
+						// 省市县的匹配
+						if (tagBean.getProvinceId() == 0) {
+							key = "china";
+						} else if (tagBean.getCityId() == 0) {
+							key = tagBean.getProvinceId() + "";
+						} else if (tagBean.getCountyId() == 0) {
+							key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
+						} else {
+							key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
+						}
+						if (rtbIns.getAreaMap().get(key) != null && rtbIns.getAreaMap().get(key).contains(ad.getAdUid())
+								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
+							// LOG.debug("ID[" + ad.getAdUid() +
+							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
+							machedAdList.add(ad);
+							audienceMap.put(ad.getAdUid(), audience);
+							break;
+						}
+
+					} else {// 按照经纬度匹配
+						if (commonMatch(tagBean, audience, appPreferenceIdList, brandList)
+								&& checkInBound(tagBean, audience)) {
+							// LOG.debug("ID[" + ad.getAdUid() +
+							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
+							// machedAdList.add(ad);
+							// geoAdList.add(ad);
+							machedAdList.add(ad);
+							audienceMap.put(ad.getAdUid(), audience);
+							break;
+						}
 					}
-					if (rtbIns.getAreaMap().get(key) != null && rtbIns.getAreaMap().get(key).contains(ad.getAdUid())
-							&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
+				} else if (audience.getType().equals("demographic")) { // 特定人群
+					if (audience.getDemographicTagIdSet() != null
+							&& checkRetain(tagIdList, audience.getDemographicTagIdSet())) {
+						if (rtbIns.getDemographicMap().get(key).contains(ad.getAdUid())
+								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
+							// LOG.debug("ID[" + ad.getAdUid() +
+							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
+							machedAdList.add(ad);
+							audienceMap.put(ad.getAdUid(), audience);
+							break;
+						}
+					}
+				} else if (audience.getType().equals("company")) { // 具体公司
+					if (audience.getCompanyIdSet() != null && checkRetain(companyIdList, audience.getCompanyIdSet())) {// 涉及到库中存储的数据样式和标签中的样式
 						// LOG.debug("ID[" + ad.getAdUid() +
 						// "]通过匹配，参与排序");//记录日志太花费时间,忽略
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						break;
 					}
-
-				} else {// 按照经纬度匹配
-					// boolean isInBound =
-					// this.checkInBoudByType(audience.getMobilityType(),
-					// tagBean);
-					if (commonMatch(tagBean, audience, appPreferenceIdList, brandList)) {
-						// LOG.debug("ID[" + ad.getAdUid() +
-						// "]通过匹配，参与排序");//记录日志太花费时间,忽略
-						// machedAdList.add(ad);
-						geoAdList.add(ad);
+				} else if (audience.getType().equals("ip")) {// 智能设备
+					Set<String> ipSet = audience.getIpSet();
+					if (ipSet != null && ipSet.contains(tagBean.getIp())) {
+						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						break;
 					}
-				}
-			} else if (audience.getType().equals("demographic")) { // 特定人群
-				if (audience.getDemographicTagIdSet() != null
-						&& checkRetain(tagIdList, audience.getDemographicTagIdSet())) {
-					if (rtbIns.getDemographicMap().get(key).contains(ad.getAdUid())
-							&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
-						// LOG.debug("ID[" + ad.getAdUid() +
-						// "]通过匹配，参与排序");//记录日志太花费时间,忽略
+				} else if (audience.getType().equals("dmp")) {// 定制人群包
+					String dmpId = audience.getDmpId();
+					if (dmpId != null && !dmpId.trim().equals("") && dmpId.equals(deviceId)) {
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						break;
 					}
 				}
-
-			} else if (audience.getType().equals("company")) { // 具体公司
-				if (audience.getCompanyIdSet() != null && checkRetain(companyIdList, audience.getCompanyIdSet())) {// 涉及到库中存储的数据样式和标签中的样式
-					// LOG.debug("ID[" + ad.getAdUid() +
-					// "]通过匹配，参与排序");//记录日志太花费时间,忽略
-					machedAdList.add(ad);
-					audienceMap.put(ad.getAdUid(), audience);
-					break;
-				}
-			}else if(audience.getType().equals("ip")){//智能设备
-				Set<String> ipSet = audience.getIpSet();
-				if(ipSet != null && ipSet.contains(tagBean.getIp())){
-					machedAdList.add(ad);
-					audienceMap.put(ad.getAdUid(), audience);
-					break;
-				}
-			}else if(audience.getType().equals("dmp")){//定制人群包
-				String dmpId = audience.getDmpId();
-				if(dmpId != null && !dmpId.trim().equals("") && dmpId.equals(deviceId)){
-					machedAdList.add(ad);
-					audienceMap.put(ad.getAdUid(), audience);
-					break;
-				}
-			}
 			}
 		}
 
 		// 按经纬度匹配
-		if (geoAdList.size() > 0) {
-			float[] residenceArray = tagBean.getResidence();
-			float[] workArray = tagBean.getWork();
-			float[] activityArray = tagBean.getActivity();
-			double[] lng = { residenceArray[0], workArray[0], activityArray[0] };
-			double[] lat = { residenceArray[1], workArray[1], activityArray[1] };
-			Set<String> boundSet = rtbIns.checkInBound(lng, lat);
-			for (AdBean ad : geoAdList) {
-				if (boundSet.contains(ad.getAdUid())) {
-					machedAdList.add(ad);
-				}
+		// if (geoAdList.size() > 0) {
+		// float[] residenceArray = tagBean.getResidence();
+		// float[] workArray = tagBean.getWork();
+		// float[] activityArray = tagBean.getActivity();
+		// double[] lng = { residenceArray[0], workArray[0], activityArray[0] };
+		// double[] lat = { residenceArray[1], workArray[1], activityArray[1] };
+		// Set<String> boundSet = rtbIns.checkInBound(lng, lat);
+		// for (AdBean ad : geoAdList) {
+		// if (boundSet.contains(ad.getAdUid())) {
+		// machedAdList.add(ad);
+		// }
+		// }
+		// }
+//		LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
+		// 排序
+		if (machedAdList.size() > 0) {
+			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, tagIdList,
+					audienceMap);
+			if (rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null) {
+				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(),
+						rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) + 1);
+			} else {
+				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(), 1L);
 			}
 		}
-		LOG.info("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
-		// 排序
-		if (machedAdList.size() > 0)
-			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, tagIdList, audienceMap);
 
 		return targetDuFlowBean;
 	}
@@ -368,7 +380,7 @@ public class RuleMatching {
 	 * 对匹配的广告按照规则进行排序
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
-			TagBean tagBean, String widthHeightRatio, List<String> tagIdList,Map<String, AudienceBean> audienceMap) {
+			TagBean tagBean, String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap) {
 
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -379,7 +391,7 @@ public class RuleMatching {
 				gradeList.add(ad);
 			} else {// 70%执行分级策略
 				int num = adRandom.nextInt(100);
-				if (num <= 30) {
+				if (num <= gradeRatio) {
 					ungradeList.add(ad);
 				} else {
 					gradeList.add(ad);
@@ -391,22 +403,24 @@ public class RuleMatching {
 			// 封装返回接口引擎数据
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
 			Material material = metrialMap.get(ad.getAdUid());
-			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList, audienceMap);
+			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList,
+					audienceMap);
 		} else {
-			long startOrder = System.currentTimeMillis();
+			// long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
-			if (machedAdList.size() == 1) {
-				ad = machedAdList.get(0);
+			if (gradeList.size() == 1) {
+				ad = gradeList.get(0);
 			} else {
-				gradeOrderByPremiumStrategy(machedAdList, audienceMap);
-				gradeOrderOtherParaStrategy(machedAdList);
-				ad = gradeByRandom(machedAdList);
+				gradeOrderByPremiumStrategy(gradeList, audienceMap);
+				gradeOrderOtherParaStrategy(gradeList);
+				ad = gradeByRandom(gradeList);
 			}
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
-			LOG.info("排序花费时间:" + (System.currentTimeMillis() - startOrder));
+			// LOG.debug("排序花费时间:" + (System.currentTimeMillis() - startOrder));
 			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
-			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList, audienceMap);
+			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList,
+					audienceMap);
 		}
 
 		return targetDuFlowBean;
@@ -422,7 +436,7 @@ public class RuleMatching {
 	public boolean commonMatch(TagBean tagBean, AudienceBean audience, List<String> appPreferenceIdList,
 			List<String> brandList) {
 		// 匹配收入
-		if (audience.getIncomeLevel() != 0 && tagBean.getIncomeId() != audience.getIncomeLevel()) {
+		if (audience.getIncomeLevel() != null && !audience.getIncomeLevelSet().contains(tagBean.getIncomeId())) {
 			return false;
 		}
 		// 匹配兴趣
@@ -431,7 +445,7 @@ public class RuleMatching {
 			return false;
 		}
 		// 匹配平台
-		if (audience.getPlatformId() != 0 && tagBean.getPlatformId() != audience.getPlatformId()) {
+		if (audience.getPlatformId() != null && !audience.getPlatformIdSet().contains(tagBean.getPlatformId())) {
 			return false;
 		}
 
@@ -441,17 +455,18 @@ public class RuleMatching {
 		}
 
 		// 匹配设备价格
-		if (audience.getPhonePriceLevel() != 0 && tagBean.getPhonePrice() != audience.getPhonePriceLevel()) {
+		if (audience.getPhonePriceLevel() != null
+				&& !audience.getPhonePriceLevelSet().contains(tagBean.getPhonePrice())) {
 			return false;
 		}
 
 		// 匹配网络类型
-		if (audience.getNetworkId() != 0 && tagBean.getNetworkId() != audience.getNetworkId()) {
+		if (audience.getNetworkId() != null && !audience.getNetworkIdSet().contains(tagBean.getNetworkId())) {
 			return false;
 		}
 
 		// 匹配运营商
-		if (audience.getCarrierId() != 0 && tagBean.getCarrierId() != audience.getCarrierId()) {
+		if (audience.getCarrierId() != null && !audience.getCarrierIdSet().contains(tagBean.getCarrierId())) {
 			return false;
 		}
 		// 扩展
@@ -463,7 +478,7 @@ public class RuleMatching {
 	 * 
 	 * @param machedAdList
 	 */
-	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList,Map<String, AudienceBean> audienceMap) {
+	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList, Map<String, AudienceBean> audienceMap) {
 		Collections.sort(machedAdList, new Comparator<AdBean>() {
 
 			@Override
@@ -545,18 +560,19 @@ public class RuleMatching {
 	}
 
 	public DUFlowBean packageDUFlowData(Material material, String deviceId, AdBean ad, TagBean tagBean,
-			String widthHeightRatio, List<String> tagIdList,Map<String, AudienceBean> audienceMap) {
+			String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap) {
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
 		AdvertiserBean advertiser = ad.getAdvertiser();
 		// targetDuFlowBean.setBidid("123");// 广告竞价ID
-		if(material.getFileName().contains("http")){
+		if (material.getFileName().contains("http")) {
 			targetDuFlowBean.setAdm(material.getFileName());// 广告素材
-		}else{
-			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getUid()).concat(".").concat(material.getExt());
+		} else {
+			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getUid()).concat(".")
+					.concat(material.getExt());
 			targetDuFlowBean.setAdm(url);// 广告素材
-		}			
+		}
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
 		targetDuFlowBean.setCrid(creative.getUid());
@@ -578,7 +594,7 @@ public class RuleMatching {
 		targetDuFlowBean.setCreativeUid(creative.getUid());
 		targetDuFlowBean.setProvince(tagBean.getProvinceId() + "");// 省
 		targetDuFlowBean.setCity(tagBean.getCityId() + "");// 市
-		targetDuFlowBean.setCountry(tagBean.getCountyId()+"");
+		targetDuFlowBean.setCountry(tagBean.getCountyId() + "");
 		// targetDuFlowBean.setActualPrice(1.0);//成本价
 		String type = audience.getType().toUpperCase();
 		double premiumRatio = constant.getRtbVar(type);
@@ -600,6 +616,7 @@ public class RuleMatching {
 		targetDuFlowBean.setDescShort(creative.getDescShort());
 		targetDuFlowBean.setDescLong(creative.getDescLong());
 		targetDuFlowBean.setMode(ad.getMode());
+		targetDuFlowBean.setDuration(material.getDuration());
 		return targetDuFlowBean;
 	}
 
@@ -621,7 +638,63 @@ public class RuleMatching {
 		}
 		return false;
 	}
-	
+
+	public boolean checkInBound(TagBean tagBean, AudienceBean audience) {
+		boolean isInBoundReturn = false;
+		double[] residenceArray = tagBean.getResidence();
+		double[] workArray = tagBean.getWork();
+		double[] activityArray = tagBean.getActivity();
+		List<GpsBean> geoList = audience.getGeoList();
+		for (GpsBean gps : geoList) {
+			if (audience.getMobilityType() == null) {// 不限流动性
+				boolean isInBoundResidence = GPSDistance.isInArea(residenceArray[0], residenceArray[1], gps.getLng(),
+						gps.getLat(), gps.getRadius());
+				if (isInBoundResidence) {
+					isInBoundReturn = true;
+					break;
+				}
+				boolean isInBoundWork = GPSDistance.isInArea(workArray[0], workArray[1], gps.getLng(), gps.getLat(),
+						gps.getRadius());
+				if (isInBoundWork) {
+					isInBoundReturn = true;
+					break;
+				}
+				boolean isInBoundActivity = GPSDistance.isInArea(activityArray[0], activityArray[1], gps.getLng(),
+						gps.getLat(), gps.getRadius());
+				if (isInBoundActivity) {
+					isInBoundReturn = true;
+					break;
+				}
+			} else {
+				if (audience.getMobilityTypeSet().contains(1)) {// 居住地
+					boolean isInBound = GPSDistance.isInArea(residenceArray[0], residenceArray[1], gps.getLng(),
+							gps.getLat(), gps.getRadius());
+					if (isInBound) {
+						isInBoundReturn = true;
+						break;
+					}
+				}
+				if (audience.getMobilityTypeSet().contains(2)) {// 工作地
+					boolean isInBound = GPSDistance.isInArea(workArray[0], workArray[1], gps.getLng(), gps.getLat(),
+							gps.getRadius());
+					if (isInBound) {
+						isInBoundReturn = true;
+						break;
+					}
+				}
+				if (audience.getMobilityTypeSet().contains(3)) {// 活动地
+					boolean isInBound = GPSDistance.isInArea(activityArray[0], activityArray[1], gps.getLng(),
+							gps.getLat(), gps.getRadius());
+					if (isInBound) {
+						isInBoundReturn = true;
+						break;
+					}
+				}
+			}
+		}
+		return isInBoundReturn;
+	}
+
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
 		rule.match("97C304E-4C8E-4872-8666-03FE67DC15DG", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");

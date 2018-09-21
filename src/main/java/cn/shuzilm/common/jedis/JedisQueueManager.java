@@ -11,6 +11,7 @@ import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.Material;
+import cn.shuzilm.bean.control.NodeStatusBean;
 import cn.shuzilm.bean.control.TaskBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import redis.clients.jedis.Jedis;
@@ -343,7 +344,7 @@ public class JedisQueueManager {
     
     public static void main(String[] args) {
     	
-//    	Object o1 = getElementFromQueue("rtb-001ad");
+//    	Object o1 = getElementFromQueue("rtb-008ad");
 //    	Object o2 = getElementFromQueue("rtb-002ad");
 //    	Object o3 = getElementFromQueue("rtb-003ad");
 //    	System.out.println(o1);
@@ -365,11 +366,23 @@ public class JedisQueueManager {
 //    	List list = getAllElement("rtb-001_down");
 //    	
 //    	System.out.println(list.size());
+//    	long start = System.currentTimeMillis();
+//    	putElementToQueue("rtb-010","123",null);
+//    	putElementToQueue("rtb-010","456",null);
+    	ArrayList<AdBean> taskList = (ArrayList<AdBean>) getElementFromQueue("rtb-008_ad");
+    	System.out.println(taskList.size());
+    	//NodeStatusBean node = (NodeStatusBean)getElementFromQueue("rtb-001_node_status");
+    	//System.out.println(node);
+    	//System.out.println(node.getNodeName());
+    	//System.out.println(node.getLastUpdateTime());
     	
-    	long start = System.currentTimeMillis();
-    	putElementToQueue("rtb-009","123",null);
-    	putElementToQueue("rtb-009","456",null);
-    	System.out.println(getElementFromQueue("rtb-009"));
-    	
+//    	for(int i=1;i<9;i++){
+//    	removeAll("pixel-00"+i+"_pixel");
+//    	removeAll("rtb-00"+i+"_pixel");
+//    	removeAll("pixel-00"+i+"_ad");
+//    	removeAll("rtb-00"+i+"_ad");
+//    	removeAll("pixel-00"+i+"_tdown");
+//    	removeAll("rtb-00"+i+"_tdown");
+//    	}
 	}
 }

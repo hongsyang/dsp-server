@@ -8,12 +8,15 @@ import com.yao.util.db.bean.ResultMap;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Created by thunders on 2018/7/11.
  */
 public class TaskServicve extends Service {
+	
+	private SimpleDateFormat dateFm = new SimpleDateFormat("yyyyMM");
     /**
      * 查找 10 分钟前的 人群包条件
      *
@@ -40,15 +43,15 @@ public class TaskServicve extends Service {
             //兴趣偏好标签
             bean.setAppPreferenceIds(rm.getString("app_preference_ids"));
             bean.setBrandIds(rm.getString("brand_ids"));
-            bean.setCarrierId(rm.get("carrier_id") != null ? rm.getInteger("carrier_id") : 0);
+            bean.setCarrierId(rm.getString("carrier_id"));
             //选定城市或者经纬度 工作地、居住地、活动地
-            bean.setMobilityType(rm.get("location_type") != null ? rm.getInteger("location_type") : 0);
+            bean.setMobilityType(rm.getString("location_type"));
             bean.setCitys(rm.getString("location_city"));
             bean.setGeos(rm.get("location_map") != null ? rm.getString("location_map") : "");
-            bean.setIncomeLevel(rm.get("income_level") != null ? rm.getInteger("income_level") : 0);
-            bean.setNetworkId(rm.get("network_id") != null ? rm.getInteger("network_id") : 0);
-            bean.setPhonePriceLevel(rm.get("phone_price_level") != null ? rm.getInteger("phone_price_level") : 0);
-            bean.setPlatformId(rm.get("platform_id") != null ? rm.getInteger("platform_id") : 0);
+            bean.setIncomeLevel(rm.getString("income_level"));
+            bean.setNetworkId(rm.getString("network_id"));
+            bean.setPhonePriceLevel(rm.getString("phone_price_level"));
+            bean.setPlatformId(rm.getString("platform_id"));
             //特定公司
             bean.setCompanyIds(rm.getString("company_ids"));
             //智能设备
@@ -110,10 +113,10 @@ public class TaskServicve extends Service {
             if(rm == null)
                 return null;
             bean.setUid(rm.getString("uid"));
-            bean.setAbbr(rm.getString("abbr"));
+            bean.setAbbr(rm.getString("name"));
             bean.setCompany(rm.getString("company"));
             bean.setName(rm.getString("name"));
-            bean.setRebate(rm.getDouble("rebate"));
+            bean.setRebate(rm.getFloat("rebate"));
             bean.setRemark(rm.getString("remark"));
             return bean;
 
@@ -181,6 +184,7 @@ public class TaskServicve extends Service {
                 material.setWidth(rm.getInteger("w"));
                 material.setHeight(rm.getInteger("h"));
                 material.setApproved_adx(rm.getString("approved_adx"));
+                material.setDuration(rm.getInteger("duration"));
                 list.add(material);
             }
             return list;
@@ -307,9 +311,11 @@ public class TaskServicve extends Service {
         //转换成秒的时间戳
         arr[0] = startTime / 1000;
         arr[1] = endTime / 1000;
+        Date date = new Date();
+		String time = "_"+dateFm.format(date);
         String sql = "";
         if(isHour)
-            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour where created_at >= ? and created_at <= ?  group by ad_uid";
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour"+time+" where created_at >= ? and created_at <= ?  group by ad_uid";
         else
             sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where created_at >= ? and created_at <= ?  group by ad_uid";
         try {

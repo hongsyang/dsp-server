@@ -14,9 +14,9 @@ public class TagBean {
     private int tagId;//标签 id
 
     //地理位置
-    private float[] work;//工作地
-    private float[] residence;//居住地
-    private float[] activity;//活动地
+    private double[] work;//工作地
+    private double[] residence;//居住地
+    private double[] activity;//活动地
     private int provinceId;//省份ID
     private int cityId;//城市ID
     private int countyId;//县级ID

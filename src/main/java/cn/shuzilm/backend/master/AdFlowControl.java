@@ -41,6 +41,11 @@ public class AdFlowControl {
      */
     private static final int INTERVAL = 10 * 60 * 1000;
     private static TaskServicve taskService = new TaskServicve();
+    
+    /**
+     * 节点判定宕机时间周期
+     */
+    private static final int NODE_DOWN_INTERVAL = 30 * 60 * 1000;
 
 //    /**
 //     * 广告主对应的广告 MAP
@@ -57,6 +62,10 @@ public class AdFlowControl {
 
     public HashMap<String, ReportBean> getReportMapHour(){
         return reportMapHour;
+    }
+    
+    public HashMap<String,Long> getNodeStatusMap(){
+    	return nodeStatusMap;
     }
 
     /**
@@ -109,6 +118,8 @@ public class AdFlowControl {
      * 广告主设定的总流量和金额 (最高限)
      */
     private static HashMap<String, AdFlowStatus> adverConsumeMapCurr = null;
+    
+    private static HashMap<String,Long> nodeStatusMap = null;
 
     public AdFlowControl() {
         MDC.put("sift", "control");
@@ -125,12 +136,13 @@ public class AdFlowControl {
         mapMonitorTotal = new HashMap<>();
         reportMapHour = new HashMap<>();
         mapMonitorAdGroupTotal = new HashMap<>();
+        nodeStatusMap = new HashMap<>();
 //        adviserMap = new HashMap<>();
 
 
     }
 
-    public void trigger(int type) {
+    public void trigger() {
         // 5 s 触发
         pullAndUpdateTask();
         // 10 min 触发
@@ -229,7 +241,6 @@ public class AdFlowControl {
                 }
 
                 //更新广告组金额状态
-                System.out.println(adUid);
                 groupId = mapAd.get(adUid).getGroupId();
                 statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
                 statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
@@ -277,11 +288,15 @@ public class AdFlowControl {
         //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
         for (String auid : mapThresholdHour.keySet()) {
             //监测 CPC 类型的广告是否可以投放
-            boolean isOk = cpcHandler.checkAvailable(auid);
-            if(!isOk){
-                String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
-                stopAd(auid, reason, false);
+        	AdBean ad = mapAd.get(auid);
+        	String mode = ad.getMode();
+        	if("cpc".equalsIgnoreCase(mode)){
+            String isOk = cpcHandler.checkAvailable(auid);
+            if(isOk != null){
+                //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
+                stopAd(auid, isOk, false);
             }
+        	}
             AdFlowStatus threshold = mapThresholdHour.get(auid);
             AdFlowStatus monitor = mapMonitorHour.get(auid);
             //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
@@ -331,6 +346,7 @@ public class AdFlowControl {
 
     /**
      * 小时计数器清零
+     * 每个小时重置一次 重置每个小时的投放状态，如果为暂停状态，且作用域为小时，则下一个小时可以继续开始
      */
     public void resetHourMonitor() {
         //清理小时计数器
@@ -339,6 +355,15 @@ public class AdFlowControl {
             status.setBidNums(0);
             status.setMoney(0);
             status.setWinNums(0);
+        }
+        
+        for (String auid : mapTask.keySet()) {
+        	TaskBean bean = mapTask.get(auid);
+        	int scope = bean.getScope();
+            int commandCode = bean.getCommand();
+            if (scope == TaskBean.SCOPE_HOUR && commandCode == TaskBean.COMMAND_PAUSE) {
+                bean.setCommand(TaskBean.COMMAND_START);
+            }
         }
     }
 
@@ -608,7 +633,22 @@ public class AdFlowControl {
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
-                mapTask.put(adUid, new TaskBean(adUid));
+                
+              //AdBean 里面的加速投放为 0 ,对应数据库里面 1（ALL） ，匀速相反
+                
+                TaskBean task = null;
+                if(mapTask.containsKey(adUid)){
+                    task = mapTask.get(adUid);
+                    int scope = -1;
+                    if(ad.getSpeedMode() == 0)
+                        scope = 1;
+                    else if(ad.getSpeedMode() == 1)
+                        scope = 0;
+                    task.setScope(scope);
+                }else{
+                    task = new TaskBean(adUid);
+                }
+                mapTask.put(adUid, task);
                 counter++;
 
                 if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
@@ -622,7 +662,7 @@ public class AdFlowControl {
             //计算权重因子
             adProperty.handle();
             //定期 10 分钟更新 CPC 阀值
-            cpcHandler.updateIndicator();
+            cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
 //            for (int i = 0; i < 10000 ; i++) {
@@ -644,41 +684,88 @@ public class AdFlowControl {
     private void dispatchTask() {
         int nodeNums = nodeList.size();
         //遍历所有的广告
-        ArrayList<AdBean> adList = new ArrayList<>();
+        ArrayList<AdBean> adList = new ArrayList<AdBean>();
+        ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (String adUid : mapAd.keySet()) {
             //对任务进行拆解
-            TaskBean task = new TaskBean(adUid);
+//            TaskBean task = new TaskBean(adUid);
+        	TaskBean task = mapTask.get(adUid);
             AdBean ad = mapAd.get(adUid);
 
             //从小时监控中取出曝光量、点击次数 、点击金额
-            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
-            task.setClickNums(statusHour.getClickNums());
-            task.setExposureNums(statusHour.getWinNums());
-            task.setMoney(statusHour.getMoney());
-
-            //给每一个节点分配自己的 曝光 额度
-            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
-            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
-            task.setCommand(TaskBean.COMMAND_START);
+//            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
+//            task.setClickNums(statusHour.getClickNums());
+//            task.setExposureNums(statusHour.getWinNums());
+//            task.setMoney(statusHour.getMoney());
+//
+//            //给每一个节点分配自己的 曝光 额度
+//            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
+//            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
+//            task.setCommand(TaskBean.COMMAND_START);
             adList.add(ad);
-            for (WorkNodeBean node : nodeList) {
-                //发送广告状态
-                pushTaskSingleNode(node.getName(), task);
-            }
+            if(task.getCommand() == TaskBean.COMMAND_START)
+            	taskList.add(task);
+           
         }
 
         for (WorkNodeBean node : nodeList) {
-            //发送广告
-            pushAdSingleNode(node.getName(), adList);
+            //发送广告和任务
+        	if(!isNodeDown(node.getName())){
+        		pushAdSingleNode(node.getName(), adList);
+        		pushTaskSingleNode(node.getName(), taskList);
+        	}
         }
+    }
+    
+    
+    /**
+     * 5分钟获取一次RTB和PIXEL节点心跳
+     */
+    public void updateNodeStatusMap(){
+    	for (WorkNodeBean node : nodeList) {
+    		while(true){
+    		NodeStatusBean nodeStatus = MsgControlCenter.recvNodeStatus(node.getName());
+    		if(nodeStatus == null){
+    			break;
+    		}
+    		nodeStatusMap.put(node.getName(), nodeStatus.getLastUpdateTime());
+    		}
+    		
+    	}
+    }
+    
+    public boolean isNodeDown(String nodeName){
+    	Long lastTime = nodeStatusMap.get(nodeName);
+    	if(lastTime == null || lastTime == 0){
+    		return false;
+    	}
+    	long nowTime = System.currentTimeMillis();
+    	if(nowTime - lastTime >= NODE_DOWN_INTERVAL){//判定节点宕机
+    		MsgControlCenter.removeAll(nodeName);//移除该节点堆积的任务和广告
+    		return true;
+    	}
+    	
+    	return false;
     }
 
     /**
+     * 下发任务 pixel不需要接收任务
      * @param nodeName
-     * @param bean
+     * @param taskList
      */
-    private void pushTaskSingleNode(String nodeName, TaskBean bean) {
-        MsgControlCenter.sendTask(nodeName, bean, Priority.NORM_PRIORITY);
+    private void pushTaskSingleNode(String nodeName, ArrayList<TaskBean> taskList) {
+    	if(nodeName != null && !nodeName.contains("pixel"))
+    		MsgControlCenter.sendTask(nodeName, taskList, Priority.NORM_PRIORITY);
+    }
+    
+    /**
+     * 下发任务 pixel不需要接收任务
+     * @param nodeName
+     * @param task
+     */
+    private void pushTaskSingleNode(String nodeName, TaskBean task) {
+    	if(nodeName != null && !nodeName.contains("pixel"))
+    		MsgControlCenter.sendTask(nodeName, task, Priority.NORM_PRIORITY);
     }
 
     /**
@@ -696,12 +783,19 @@ public class AdFlowControl {
      * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
     public void pauseAd(String adUid, String reason, boolean isHourOrAll) {
+    	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (WorkNodeBean node : nodeList) {
+        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
+            if(task.getCommand() == TaskBean.COMMAND_PAUSE ||
+            		task.getCommand() == TaskBean.COMMAND_STOP){
+            	continue;
+            }
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
-            pushTaskSingleNode(node.getName(), task);
+            taskList.add(task);
+            pushTaskSingleNode(node.getName(), taskList);
         }
 
     }
@@ -712,12 +806,19 @@ public class AdFlowControl {
      * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
     public void stopAd(String adUid, String reason, boolean isHourOrAll) {
+    	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (WorkNodeBean node : nodeList) {
+        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
+            if(task.getCommand() == TaskBean.COMMAND_STOP){
+            	continue;
+            }
+            myLog.debug(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
-            pushTaskSingleNode(node.getName(), task);
+            taskList.add(task);
+            pushTaskSingleNode(node.getName(), taskList);
         }
 
     }

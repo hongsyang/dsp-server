@@ -78,9 +78,9 @@ public class AsyncRedisClient {
     	
     	TagBean tagBean = new TagBean();
 		tagBean.setTagId(123);
-		float[] work = { 116.641f, 22.853f };
-		float[] residence = { 33.11f, 44.22f };
-		float[] activity = { 55.11f, 66.22f };
+		double[] work = { 116.641f, 22.853f };
+		double[] residence = { 33.11f, 44.22f };
+		double[] activity = { 55.11f, 66.22f };
 		tagBean.setWork(work);
 		tagBean.setResidence(residence);
 		tagBean.setActivity(activity);
@@ -104,8 +104,8 @@ public class AsyncRedisClient {
 		String nodeStr = RtbConstants.getInstance().getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
 		String nodes [] = nodeStr.split(";");
     	AsyncRedisClient redis1 = AsyncRedisClient.getInstance(nodes);
-    	System.out.println(redis1);
-    	Map<String,String> map = new HashMap<String,String>();
+    	
+    	//Map<String,String> map = new HashMap<String,String>();
 //    	for(int i=0;i<10000;i++){
 //    		map.put(""+i, ""+(i+5));
 //    	}
@@ -119,7 +119,12 @@ public class AsyncRedisClient {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-    	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);		
+    	 redis1.setAsync("a24e0e337853d4d9da28769d4bf83577", ss);
+    	 System.out.println(redis1.getAsync("a24e0e337853d4d9da28769d4bf83577"));
+    	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);	
+    	//System.out.println(commands.get("97C304E-4C8E-4872-8666-03FE67DC15DG"));
+    	//commands.set("a", "b");
+    	//System.out.println(commands.get("a"));
     	//String s = redis.getAsync("116.6403_22.8523_1000");
     	
        /* String[] urls = new String[]{"192.168.1.241","101.200.56.200"};

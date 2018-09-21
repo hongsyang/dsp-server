@@ -12,6 +12,7 @@ import org.springframework.beans.BeanUtils;
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPixelBean;
+import cn.shuzilm.bean.control.NodeStatusBean;
 import cn.shuzilm.common.Constants;
 
 /**
@@ -135,6 +136,15 @@ public class PixelFlowControl {
         	mapAd.put(ad.getAdUid(), ad);
         }
         }
+    }
+    
+    /**
+     * 每隔 10分钟上报pixel引擎心跳
+     */
+    public void pushPixelHeart(){
+    	NodeStatusBean bean = new NodeStatusBean();
+    	bean.setLastUpdateTime(System.currentTimeMillis());
+    	MsgControlCenter.sendNodeStatus(nodeName, bean);
     }
     
     /**
