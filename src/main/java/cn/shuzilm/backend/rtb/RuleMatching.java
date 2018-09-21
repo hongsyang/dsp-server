@@ -571,7 +571,6 @@ public class RuleMatching {
 		} else {
 			String url = constant.getRtbStrVar(RtbConstants.MATERIAL_URL).concat(material.getUid()).concat(".")
 					.concat(material.getExt());
-			System.out.println(url);
 			targetDuFlowBean.setAdm(url);// 广告素材
 		}
 		targetDuFlowBean.setAdw(material.getWidth());
