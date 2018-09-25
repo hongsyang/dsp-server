@@ -791,6 +791,7 @@ public class AdFlowControl {
             		task.getCommand() == TaskBean.COMMAND_STOP){
             	continue;
             }
+            myLog.debug(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);

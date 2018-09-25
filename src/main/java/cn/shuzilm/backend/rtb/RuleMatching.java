@@ -575,7 +575,8 @@ public class RuleMatching {
 		}
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
-		targetDuFlowBean.setCrid(creative.getUid());
+		//targetDuFlowBean.setCrid(creative.getUid());
+		targetDuFlowBean.setCrid(material.getAuditId());
 		targetDuFlowBean.setAdmt(material.getType());
 		targetDuFlowBean.setAdct(creative.getLink_type());// 点击广告行为
 		targetDuFlowBean.setAdUid(ad.getAdUid());
