@@ -45,7 +45,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static final String ADX_NAME = "LingJi";
 
-    private static final String ADX_ID = "001";
+    private static final String ADX_ID = "1";
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
@@ -77,15 +77,18 @@ public class LingJiRequestServiceImpl implements RequestService {
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
                 return response;
+
             }
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getExt().getIdfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
-                    deviceId = userDevice.getExt().getMac();
+//                    deviceId = userDevice.getExt().getMac();
+                    deviceId = userDevice.getDidmd5();
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
-                    deviceId = userDevice.getExt().getMac();
+//                    deviceId = userDevice.getExt().getMac();
+                    deviceId = userDevice.getDidmd5();
                 }
             }
             //支持的文件类型
@@ -152,6 +155,10 @@ public class LingJiRequestServiceImpl implements RequestService {
                             ADX_ID,//ADX 服务商ID
                             stringSet//文件扩展名
                     );
+                    if (targetDuFlowBean == null) {
+                        response = "未匹配到广告";
+                        return response;
+                    }
 
                     //需要添加到Phoenix中的数据
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
@@ -274,6 +281,14 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
 
         //人群包，创意id，省，市，广告主id，代理商id，广告id，数盟did

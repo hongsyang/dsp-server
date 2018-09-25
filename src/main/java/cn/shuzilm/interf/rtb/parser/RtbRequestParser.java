@@ -34,6 +34,7 @@ public class RtbRequestParser {
     private static final String FILTER_CONFIG = "filter.properties";
 
 
+
     private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
 
     /**
@@ -49,7 +50,7 @@ public class RtbRequestParser {
         this.configs = AppConfigs.getInstance(FILTER_CONFIG);
         MDC.put("sift",configs.getString("ADX_REQUEST"));
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
-        MDC.remove("sift");
+//        MDC.remove("sift");
         if (Boolean.valueOf(configs.getString("FILTER_RTB"))){
             responseStr="测试请求";
             return responseStr;

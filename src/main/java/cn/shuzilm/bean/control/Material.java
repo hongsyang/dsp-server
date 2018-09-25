@@ -6,7 +6,10 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 public class Material implements ICommand {
-	
+
+
+	private static final long serialVersionUID = -6496094043819279538L;
+
 	private String uid;
 	private String nid;
 	

@@ -42,7 +42,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static final String ADX_NAME = "AdView";
 
-    private static final String ADX_ID = "002";
+    private static final String ADX_ID = "2";
 
     private AppConfigs configs = null;
 
@@ -63,7 +63,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             App app = bidRequestBean.getApp();//应用信息
             Integer width = null;//广告位的宽
             Integer height = null;//广告位的高
-            Integer showtype = userImpression.getExt().getShowtype();//广告类型
+            Integer showtype = userImpression.getInstl();//广告类型
             String adType = convertAdType(showtype); //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
@@ -77,9 +77,9 @@ public class AdViewRequestServiceImpl implements RequestService {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getIfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
-                    deviceId = userDevice.getDidsha1();
+                    deviceId = userDevice.getDidmd5();
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
-                    deviceId = userDevice.getDidsha1();
+                    deviceId = userDevice.getDidmd5();
                 }
             }
 
@@ -147,6 +147,10 @@ public class AdViewRequestServiceImpl implements RequestService {
                             ADX_ID,//ADX 服务商ID
                             stringSet//文件扩展名
                     );
+                    if (targetDuFlowBean == null) {
+                        response = "未匹配到广告";
+                        return response;
+                    }
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                     targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
                     targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
@@ -178,6 +182,10 @@ public class AdViewRequestServiceImpl implements RequestService {
                         ADX_ID,//ADX 服务商ID
                         stringSet//文件扩展名
                 );
+                if (targetDuFlowBean == null) {
+                    response = "未匹配到广告";
+                    return response;
+                }
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                 targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -243,10 +251,10 @@ public class AdViewRequestServiceImpl implements RequestService {
             bid.setAdmt(6);//duFlowBean.getAdmt()广告类型  视频广告
             ResponseVideo responseVideo = new ResponseVideo();
             responseVideo.setXmltype(2);
-            responseVideo.setVideourl(configs.getString("VADURL"));
+            responseVideo.setVideourl(duFlowBean.getAdm());
             responseVideo.setDuration(15);
-            responseVideo.setWidth(Integer.valueOf(configs.getString("vw")));
-            responseVideo.setHeight(Integer.valueOf(configs.getString("vh")));
+            responseVideo.setWidth(duFlowBean.getAdw());
+            responseVideo.setHeight(duFlowBean.getAdw());
             bid.setVideo(responseVideo);
 
         } else if (instl == 6) {
@@ -271,29 +279,29 @@ public class AdViewRequestServiceImpl implements RequestService {
                 }
             }
             NativeRequestTitle title = new NativeRequestTitle();
-            title.setText("数盟测试数据");
+            title.setText(duFlowBean.getTitle());
             assetsTitle.setTitle(title);
             assetsList.add(assetsTitle);
 
             NativeRequestData data = new NativeRequestData();
-            data.setValue("数盟测试数据不知道对不对");
+            data.setValue(duFlowBean.getDesc());
             assetsData.setData(data);
             assetsList.add(assetsData);
             for (Assets asset : assets) {
                 if (asset.getImg() != null) {
                     NativeRequestImage image = new NativeRequestImage();
-                    image.setW(Integer.valueOf(configs.getString("nw")));
-                    image.setH(Integer.valueOf(configs.getString("nh")));
-                    image.setUrl(configs.getString("NADM"));
+                    image.setW(duFlowBean.getAdw());
+                    image.setH(duFlowBean.getAdh());
+                    image.setUrl(duFlowBean.getAdm());
                     assetsImg.setImg(image);
                     assetsList.add(assetsImg);
                 } else if (asset.getVideo() != null) {
                     NativeRequestVideo video = new NativeRequestVideo();
                     video.setXmltype(2);
-                    video.setVideourl(configs.getString("VADURL"));
+                    video.setVideourl(duFlowBean.getAdm());
                     video.setDuration(15);
-                    video.setWidth(Integer.valueOf(configs.getString("vw")));
-                    video.setHeight(Integer.valueOf(configs.getString("vh")));
+                    video.setWidth(duFlowBean.getAdw());
+                    video.setHeight(duFlowBean.getAdh());
                     assetsVideo.setVideo(video);
                     assetsList.add(assetsVideo);
                 }
@@ -304,7 +312,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             ResponseLink link = new ResponseLink();
             List<String> linkCurls = new ArrayList<>();
             linkCurls.add(curl);
-            link.setUrl(configs.getString("ADURL"));
+            link.setUrl(duFlowBean.getLinkUrl());
             link.setClicktrackers(linkCurls);
             nativeResponseBean.setLink(link);
             List<String> curls = new ArrayList<>();
@@ -338,7 +346,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
         List<String> urls = new ArrayList<>();
-        bid.setAdurl(configs.getString("ADURL"));//广告点击跳转落地页，可以支持重定向
+        bid.setAdurl(duFlowBean.getLinkUrl());//广告点击跳转落地页，可以支持重定向
         urls.add(curl);
         Map nurlMap = new HashMap();
         nurlMap.put("0", urls);
