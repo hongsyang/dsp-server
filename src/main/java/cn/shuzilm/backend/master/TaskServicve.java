@@ -97,7 +97,7 @@ public class TaskServicve extends Service {
             adver.setAgencyBean(agencyBean);
             adver.setName(rm.getString("name"));
             adver.setUid(rm.getString("uid"));
-            adver.setGrade(rm.getInteger("grade"));
+            adver.setGrade(rm.getInteger("priority"));
             return adver;
         } catch (SQLException e) {
             e.printStackTrace();
