@@ -125,7 +125,7 @@ public class RuleMatching {
 		if (material.getApproved_adx() != null && !material.getApprovedAdxSet().contains(adxName)) {
 			return false;
 		}
-		if (!extStr.contains(material.getExt())) {
+		if (!extStr.equals("") && !extStr.contains(material.getExt())) {
 			return false;
 		}
 		if (!materialSet.contains(material.getUid())) {
