@@ -389,9 +389,11 @@ public class RuleMatching {
 		List<AdBean> ungradeList = new ArrayList<AdBean>();
 		for (AdBean ad : machedAdList) {
 			int grade = ad.getAdvertiser().getGrade();
-			if (grade >= 1 && grade <= 2) {// 100%执行分级策略
+			//优先级为1或者2的,100%执行分级策略
+			if (grade >= 1 && grade <= 2) {
 				gradeList.add(ad);
-			} else {// 70%执行分级策略
+			} else {
+				//优先级为3-5的,70%执行分级策略,30%的概率跳出分级,直接参与投放
 				int num = adRandom.nextInt(100);
 				if (num <= gradeRatio) {
 					ungradeList.add(ad);

@@ -397,7 +397,11 @@ public class AdFlowControl {
                 status2.setUid(auid);
                 status2.setName(name);
                 mapMonitorHour.put(auid, status2);
-
+                
+                if(mapTask.containsKey(auid)){
+                	TaskBean task = mapTask.get(auid);
+                	task.setCommand(TaskBean.COMMAND_START);
+                }
 
             }
         } catch (SQLException e) {
@@ -461,7 +465,11 @@ public class AdFlowControl {
                 status4.setWinNumsByThousand(winNumsHour);
                 status4.setMoney(money.floatValue());
                 mapThresholdHour.put(auid, status4);
-
+                
+                if(mapTask.containsKey(auid)){
+                	TaskBean task = mapTask.get(auid);
+                	task.setCommand(TaskBean.COMMAND_START);
+                }
                 //写入广告主每日限额
                 ReportBean report = reportMapHour.get(auid);
                 if(report != null){
@@ -615,7 +623,7 @@ public class AdFlowControl {
                 //出价模式
                 ad.setMode(map.getString("mode"));
 
-                ad.setPriority(map.getInteger("priority"));
+//                ad.setPriority(map.getInteger("priority"));
                 //限额
                 // 如果当前广告设定限额为 0 ，则以该账户的每日限额为准，
                 BigDecimal quotaAmount = map.getBigDecimal("quota_amount");
