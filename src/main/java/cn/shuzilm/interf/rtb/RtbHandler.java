@@ -42,7 +42,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             counter.getAndAdd(1);
             if (e.getMessage() instanceof HttpRequest) {
                 HttpRequest request = (HttpRequest) e.getMessage();
-//				System.out.println("------------\r\n" + request.getUri());
                 boolean close = HttpHeaders.Values.CLOSE
                         .equalsIgnoreCase(request
                                 .getHeader(HttpHeaders.Names.CONNECTION))
@@ -51,6 +50,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         && !HttpHeaders.Values.KEEP_ALIVE
                         .equalsIgnoreCase(request
                                 .getHeader(HttpHeaders.Names.CONNECTION));
+//				System.out.println("------------\r\n" + request.getUri());
                 // 获取对方的ip地址
 
                 String remoteIp = ctx.getChannel().getRemoteAddress()
@@ -68,7 +68,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
                 ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-
                 //主业务逻辑
                 byte[] content = null;
                 String resultData = parseRequest(url, dataStr, remoteIp);
@@ -97,6 +96,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //				ch.close();
             }
         } catch (Exception e2) {
+            HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            ChannelFuture future2 = e.getChannel().write(response);
+            future2.addListener(ChannelFutureListener.CLOSE);
             log.error("", e2);
             e2.printStackTrace();
         }

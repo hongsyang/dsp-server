@@ -88,8 +88,13 @@ public class AdViewRequestServiceImpl implements RequestService {
             if ("banner".equals(adType)) {// banner 类型
                 width = userImpression.getBanner().getW();
                 height = userImpression.getBanner().getH();
+
                 String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                stringSet = Arrays.toString(mimes);
+                if (mimes==null){
+                    stringSet = "";
+                }else {
+                    stringSet = Arrays.toString(mimes);
+                }
 
             } else if ("fullscreen".equals(adType)) { //开屏
                 if (userImpression.getVideo() != null) {
