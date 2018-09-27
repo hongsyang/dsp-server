@@ -104,16 +104,20 @@ public class AudienceBean implements ICommand {
     private String dmpId;
 
     public void setDemographicCitys(String citys){
-        if(citys == null || citys.trim().equals(""))
+        if(citys == null)
             return;
         demographicCitys = citys;
         String[] split = citys.split("],");
         Set<String> set = new HashSet();
-        String re = "[";
-        String ra = "]";
-        for (String s : split) {
-            String replace = s.replace(re, "").trim().replace(ra, "");
-            set.add(replace);
+        if(!citys.trim().equals("")){
+        	String re = "[";
+        	String ra = "]";
+        	for (String s : split) {
+        		String replace = s.replace(re, "").trim().replace(ra, "").replace("\"", "");
+        		set.add(replace);
+        	}
+        }else{
+        	set.add("0");
         }
         this.demographicCitySet = convertToAreaBeanSet(set);
     }
@@ -144,14 +148,18 @@ public class AudienceBean implements ICommand {
 
     public void setCitys(String citys) {
         this.citys = citys;
-        if (StringUtils.isNotBlank(citys)) {
+        if (citys != null) {
             String[] split = citys.split("],");
             List<String> list = new ArrayList();
-            String re = "[";
-            String ra = "]";
-            for (String s : split) {
-                String replace = s.replace(re, "").trim().replace(ra, "");
-                list.add(replace);
+            if(!citys.trim().equals("")){
+            	String re = "[";
+            	String ra = "]";
+            	for (String s : split) {
+            		String replace = s.replace(re, "").trim().replace(ra, "").replace("\"", "");
+            		list.add(replace);
+            	}
+            }else{
+            	list.add("0");
             }
             this.cityList = convertToAreaBeanList(list);
         }
@@ -172,10 +180,19 @@ public class AudienceBean implements ICommand {
             String[] cityDetail = city.split(",");
             Integer provinceId = Integer.valueOf(cityDetail[0]);
             areaBean.setProvinceId(provinceId);
+            if(cityDetail.length == 1){
+            	areaBean.setCityId(0);
+            	areaBean.setCountyId(0);
+            }else if(cityDetail.length == 2){
+            	Integer cityId = Integer.valueOf(cityDetail[1]);
+                areaBean.setCityId(cityId);
+            	areaBean.setCountyId(0);
+            }else{
             Integer cityId = Integer.valueOf(cityDetail[1]);
             areaBean.setCityId(cityId);
             Integer countyId = Integer.valueOf(cityDetail[2]);
             areaBean.setCountyId(countyId);
+            }
             cityList.add(areaBean);
         }
         return cityList;
@@ -196,10 +213,19 @@ public class AudienceBean implements ICommand {
             String[] cityDetail = city.split(",");
             Integer provinceId = Integer.valueOf(cityDetail[0]);
             areaBean.setProvinceId(provinceId);
+            if(cityDetail.length == 1){
+            	areaBean.setCityId(0);
+            	areaBean.setCountyId(0);
+            }else if(cityDetail.length == 2){
+            	Integer cityId = Integer.valueOf(cityDetail[1]);
+                areaBean.setCityId(cityId);
+            	areaBean.setCountyId(0);
+            }else{
             Integer cityId = Integer.valueOf(cityDetail[1]);
             areaBean.setCityId(cityId);
             Integer countyId = Integer.valueOf(cityDetail[2]);
             areaBean.setCountyId(countyId);
+            }
             citySet.add(areaBean);
         }
         return citySet;
@@ -409,6 +435,13 @@ public class AudienceBean implements ICommand {
             this.mobilityTypeSet = set;
         }
 	}
-    
+    public static void main(String[] args) {
+    	String citys = "";
+    	AudienceBean a = new AudienceBean();
+    	a.setCitys(citys);
+    	for(AreaBean s :a.getCityList()){
+    		System.out.println(s.getProvinceId());
+    	}
+	}
     
 }

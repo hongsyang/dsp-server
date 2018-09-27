@@ -6,10 +6,9 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 public class Material implements ICommand {
-
-
+	
 	private static final long serialVersionUID = -6496094043819279538L;
-
+	
 	private String uid;
 	private String nid;
 	
@@ -34,6 +33,8 @@ public class Material implements ICommand {
 	private Set<String> approvedAdxSet;
 	
 	private int duration;//视频总时长
+	
+	private String auditId;//推审ID
 
 	public String getUid() {
 		return uid;
@@ -144,6 +145,12 @@ public class Material implements ICommand {
 	}
 	public Set<String> getApprovedAdxSet() {
 		return approvedAdxSet;
+	}
+	public String getAuditId() {
+		return auditId;
+	}
+	public void setAuditId(String auditId) {
+		this.auditId = auditId;
 	}
 	
 	

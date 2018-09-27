@@ -125,7 +125,7 @@ public class RuleMatching {
 		if (material.getApproved_adx() != null && !material.getApprovedAdxSet().contains(adxName)) {
 			return false;
 		}
-		if (!extStr.contains(material.getExt())) {
+		if (!extStr.equals("") && !extStr.contains(material.getExt())) {
 			return false;
 		}
 		if (!materialSet.contains(material.getUid())) {
@@ -167,6 +167,8 @@ public class RuleMatching {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
 			return null;
 		}
+		
+		deviceId = deviceId.toLowerCase();
 		// 取出标签
 		String tagJson = redis.getAsync(deviceId);
 		// String tagJson = jedis.get(deviceId);
@@ -575,7 +577,8 @@ public class RuleMatching {
 		}
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
-		targetDuFlowBean.setCrid(creative.getUid());
+		//targetDuFlowBean.setCrid(creative.getUid());
+		targetDuFlowBean.setCrid(material.getAuditId());
 		targetDuFlowBean.setAdmt(material.getType());
 		targetDuFlowBean.setAdct(creative.getLink_type());// 点击广告行为
 		targetDuFlowBean.setAdUid(ad.getAdUid());
@@ -697,7 +700,7 @@ public class RuleMatching {
 
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("a24e0e337853d4d9da28769d4bf83577", "fullscreen", 640, 960, true, 5, 5, "1", "jpg,gif");
+		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 320, 50, true, 5, 5, "2", "jpg,gif");
 	}
 
 }

@@ -185,6 +185,7 @@ public class TaskServicve extends Service {
                 material.setHeight(rm.getInteger("h"));
                 material.setApproved_adx(rm.getString("approved_adx"));
                 material.setDuration(rm.getInteger("duration"));
+                material.setAuditId(rm.getString("audit_id"));
                 list.add(material);
             }
             return list;

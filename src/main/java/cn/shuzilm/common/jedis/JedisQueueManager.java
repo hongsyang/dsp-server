@@ -369,7 +369,7 @@ public class JedisQueueManager {
 //    	long start = System.currentTimeMillis();
 //    	putElementToQueue("rtb-010","123",null);
 //    	putElementToQueue("rtb-010","456",null);
-    	ArrayList<AdBean> taskList = (ArrayList<AdBean>) getElementFromQueue("rtb-008_ad");
+    	ArrayList<AdBean> taskList = (ArrayList<AdBean>) getElementFromQueue("rtb-001_ad");
     	System.out.println(taskList.size());
     	//NodeStatusBean node = (NodeStatusBean)getElementFromQueue("rtb-001_node_status");
     	//System.out.println(node);
