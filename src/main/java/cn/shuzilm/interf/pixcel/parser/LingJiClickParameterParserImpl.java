@@ -97,6 +97,6 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
-        return duFlowBeanJson;
+        return requestId;
     }
 }

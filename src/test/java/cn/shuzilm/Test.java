@@ -36,14 +36,19 @@ import java.util.List;
 
 
 public class Test {
-    private StatefulRedisClusterConnection<String, String> connection = null;
     public static void main(String[] args) {
+        byte[] content = {1,2,3,4,5,6,78,};
+        System.out.println(content.length);
+
+
+        Long priceLong = AdViewDecodeUtil.priceDecode("4Kc2GWYBAAAGZE1CYxZrD3KYNzyTz56onfCs6A", "hqvBbhco3nPm5kr0TXgQxaO4Er25qd7n", "eKUKpIu1cFDETMSo3CY8RJYxfRpNQSu2");
+        System.out.println(Double.valueOf(priceLong)/10000);
 //        String adm="{\"nativead\":{\"imptrackers\":[\"http://test.xxx.com?id=${AUCTION_ID}&bidid=${AUCTION_BID_ID}&impid=${AUCTION_IMP_ID}&price=${AUCTION_PRICE}\",\"http://a.com/a\",\"http://b.com/b\"],\"link\":{\"url\":\"deeplink://deeplink/url/into/app\",\"clicktrackers\":[\"http://a.com/a\",\"http://b.com/b\"]},\"event\":[{\"vm\":[\"http://test1\",\"http://test2\"],\"v\":0}],\"assets\":[{\"id\":1,\"title\":{\"text\":\"InstallBOA\"}},{\"id\":2,\"data\":{\"value\":5}},{\"id\":3,\"img\":{\"url\":[\"http://cdn.mobad.com/ad.png\",\"http://img2.com\"],\"w\":1200,\"h\":627}},{\"id\":4,\"video\":{\"url\":\"http://video.com\",\"cover_img_url\":\"http://img.com\",\"w\":640,\"h\":480,\"duration\":15}},{\"id\":5,\"data\":{\"value\":\"Click\"}}]}}";
 //        String s = UrlEncoded.encodeString(adm);
+////        System.out.println(s);
+//        String nodes[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
+//        String s = Arrays.toString(nodes);
 //        System.out.println(s);
-        String nodes[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
-        String s = Arrays.toString(nodes);
-        System.out.println(s);
 //        List<RedisURI> nodeList = new ArrayList<>();
 //        for(String node : nodes){
 //            String[] nodeArr = node.split(",");

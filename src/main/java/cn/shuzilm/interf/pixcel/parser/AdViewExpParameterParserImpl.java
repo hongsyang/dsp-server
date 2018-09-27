@@ -51,12 +51,13 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
         try {
-            log.debug("AdViewExp曝光的requestid:{},wurl值:{}:[]", requestId, element);
+            log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
                 bean.setAdUid(element.getAdUid());
             }
+            bean.setPremiumFactor(element.getPremiumFactor());
             bean.setHost(configs.getString("HOST"));
             String price = urlRequest.get("price");
             Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
@@ -107,6 +108,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
-        return duFlowBeanJson;
+        return requestId;
     }
 }
