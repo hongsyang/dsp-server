@@ -254,8 +254,7 @@ public class RuleMatching {
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			CreativeBean creative = ad.getCreativeList().get(0);
 
-			if (creative.getApproved() != 1 || creative.getApproved_adx() == null
-					|| !creative.getApprovedAdxSet().contains(adxName)) {
+			if (creative.getApproved() != 1) {
 				LOG.debug("广告ID[" + adUid + "]创意未在ADX[" + adxName + "]通过,不参与投放!");
 				continue;
 			}
