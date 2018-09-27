@@ -84,15 +84,14 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
             //支持的文件类型
-            List<LJAssets> assets = new ArrayList<>();
+            List<Assets> assets = new ArrayList<>();
             if ("banner".equals(adType)) {// banner 类型
                 width = userImpression.getBanner().getW();
                 height = userImpression.getBanner().getH();
-
                 String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                if (mimes==null){
-                    stringSet = "";
-                }else {
+                if (mimes == null) {
+                    stringSet = "[image/jpeg, image/png]";
+                } else {
                     stringSet = Arrays.toString(mimes);
                 }
 
@@ -101,37 +100,61 @@ public class AdViewRequestServiceImpl implements RequestService {
                     width = userImpression.getVideo().getW();
                     height = userImpression.getVideo().getH();
                     String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
-                    stringSet = Arrays.toString(mimes);
+                    if (mimes == null) {
+                        stringSet = "[image/jpeg, image/png]";
+                    } else {
+                        stringSet = Arrays.toString(mimes);
+                    }
                 } else if (userImpression.getBanner() != null) {
                     width = userImpression.getBanner().getW();
                     height = userImpression.getBanner().getH();
                     String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                    stringSet = Arrays.toString(mimes);
+                    if (mimes == null) {
+                        stringSet = "[image/jpeg, image/png]";
+                    } else {
+                        stringSet = Arrays.toString(mimes);
+                    }
                 }
             } else if ("interstitial".equals(adType)) {//插屏
                 if (userImpression.getVideo() != null) {
                     width = userImpression.getVideo().getW();
                     height = userImpression.getVideo().getH();
                     String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
-                    stringSet = Arrays.toString(mimes);
+                    if (mimes == null) {
+                        stringSet = "[image/jpeg, image/png]";
+                    } else {
+                        stringSet = Arrays.toString(mimes);
+                    }
                 } else if (userImpression.getBanner() != null) {
                     width = userImpression.getBanner().getW();
                     height = userImpression.getBanner().getH();
                     String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                    stringSet = Arrays.toString(mimes);
+                    if (mimes == null) {
+                        stringSet = "[image/jpeg, image/png]";
+                    } else {
+                        stringSet = Arrays.toString(mimes);
+                    }
                 }
 
             } else if ("feed".equals(adType)) { //信息流
-                assets = userImpression.getNativead().getAssets();
-                for (LJAssets asset : assets) {
-                    if (asset.getImg() != null && asset.getRequired().equals(true)) {
+                assets = userImpression.getNative().getRequest().getAssets();
+                for (Assets asset : assets) {
+                    if (asset.getImg() != null && asset.getRequired().equals(1)) {
                         width = asset.getImg().getW();
                         height = asset.getImg().getH();
-                        stringSet = Arrays.toString(asset.getImg().getMimes());
-                    } else if (asset.getVideo() != null && asset.getRequired().equals(true)) {
+                        if (asset.getVideo().getMimes() == null) {
+                            stringSet = "[image/jpeg, image/png]";
+                        } else {
+                            stringSet = Arrays.toString(asset.getVideo().getMimes());
+                        }
+                    } else if (asset.getVideo() != null && asset.getRequired().equals(1)) {
                         width = asset.getVideo().getW();
                         height = asset.getVideo().getH();
-                        stringSet = Arrays.toString(asset.getVideo().getMimes());
+                        if (asset.getVideo().getMimes() == null) {
+                            stringSet = "[image/jpeg, image/png]";
+                        } else {
+                            stringSet = Arrays.toString(asset.getVideo().getMimes());
+                        }
                     }
 
                 }
@@ -252,7 +275,13 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
-        if (instl == 5) {
+        if (instl == 0) {
+            bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
+            bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid()广告物料 ID
+            bid.setAdi(duFlowBean.getAdm());//图片路径 duFlowBean.getAdm() 广告物料html数据
+            bid.setAdh(duFlowBean.getAdh());//duFlowBean.getAdh()广告物料高度
+            bid.setAdw(duFlowBean.getAdw());//duFlowBean.getAdw()广告物料宽度
+        } else if (instl == 5) {
             bid.setAdmt(6);//duFlowBean.getAdmt()广告类型  视频广告
             ResponseVideo responseVideo = new ResponseVideo();
             responseVideo.setXmltype(2);
@@ -325,12 +354,6 @@ public class AdViewRequestServiceImpl implements RequestService {
             nativeResponseBean.setImptrackers(curls);//点击检测
             log.debug("nativeResponseBean:{}", nativeResponseBean);
             bid.setNative(nativeResponseBean);
-        } else if (instl == 0) {
-            bid.setAdmt(Integer.valueOf(duFlowBean.getAdmt()));//duFlowBean.getAdmt()广告类型
-            bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid()广告物料 ID
-            bid.setAdi(duFlowBean.getAdm());//图片路径 duFlowBean.getAdm() 广告物料html数据
-            bid.setAdh(duFlowBean.getAdh());//duFlowBean.getAdh()广告物料高度
-            bid.setAdw(duFlowBean.getAdw());//duFlowBean.getAdw()广告物料宽度
         } else {
             log.debug("无此类型广告：{}", instl);
         }
@@ -359,8 +382,8 @@ public class AdViewRequestServiceImpl implements RequestService {
         List curls = new ArrayList();
         curls.add(curl);
         //等待写入
-        Double biddingPrice = duFlowBean.getBiddingPrice() * 1000;
-        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
+        double biddingPrice = duFlowBean.getBiddingPrice() * 1000;
+        Integer price = (int) biddingPrice;
         bid.setPrice(price);//CPM 出价
 //        bid.setPrice(Integer.valueOf(configs.getString("PRICE")));//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
         bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
