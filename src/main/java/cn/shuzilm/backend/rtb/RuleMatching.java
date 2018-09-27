@@ -167,7 +167,7 @@ public class RuleMatching {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
 			return null;
 		}
-		
+
 		deviceId = deviceId.toLowerCase();
 		// 取出标签
 		String tagJson = redis.getAsync(deviceId);
@@ -243,7 +243,7 @@ public class RuleMatching {
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
-//		long startOrder = System.currentTimeMillis();
+		// long startOrder = System.currentTimeMillis();
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
@@ -279,15 +279,6 @@ public class RuleMatching {
 				if (audience.getType().equals("location")) {// 地理位置
 					if (audience.getGeos() == null || audience.getGeos().trim().equals("")) {
 						// 省市县的匹配
-						if (tagBean.getProvinceId() == 0) {
-							key = "china";
-						} else if (tagBean.getCityId() == 0) {
-							key = tagBean.getProvinceId() + "";
-						} else if (tagBean.getCountyId() == 0) {
-							key = tagBean.getProvinceId() + "_" + tagBean.getCityId();
-						} else {
-							key = tagBean.getProvinceId() + "_" + tagBean.getCityId() + "_" + tagBean.getCountyId();
-						}
 						if (rtbIns.getAreaMap().get(key) != null && rtbIns.getAreaMap().get(key).contains(ad.getAdUid())
 								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
 							// LOG.debug("ID[" + ad.getAdUid() +
@@ -312,7 +303,8 @@ public class RuleMatching {
 				} else if (audience.getType().equals("demographic")) { // 特定人群
 					if (audience.getDemographicTagIdSet() != null
 							&& checkRetain(tagIdList, audience.getDemographicTagIdSet())) {
-						if (rtbIns.getDemographicMap().get(key).contains(ad.getAdUid())
+						if (rtbIns.getDemographicMap().get(key) != null
+								&& rtbIns.getDemographicMap().get(key).contains(ad.getAdUid())
 								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
 							// LOG.debug("ID[" + ad.getAdUid() +
 							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
@@ -361,7 +353,7 @@ public class RuleMatching {
 		// }
 		// }
 		// }
-//		LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
+		// LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
 		// 排序
 		if (machedAdList.size() > 0) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, tagIdList,
@@ -388,11 +380,11 @@ public class RuleMatching {
 		List<AdBean> ungradeList = new ArrayList<AdBean>();
 		for (AdBean ad : machedAdList) {
 			int grade = ad.getAdvertiser().getGrade();
-			//优先级为1或者2的,100%执行分级策略
+			// 优先级为1或者2的,100%执行分级策略
 			if (grade >= 1 && grade <= 2) {
 				gradeList.add(ad);
 			} else {
-				//优先级为3-5的,70%执行分级策略,30%的概率跳出分级,直接参与投放
+				// 优先级为3-5的,70%执行分级策略,30%的概率跳出分级,直接参与投放
 				int num = adRandom.nextInt(100);
 				if (num <= gradeRatio) {
 					ungradeList.add(ad);
@@ -578,7 +570,7 @@ public class RuleMatching {
 		}
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
-		//targetDuFlowBean.setCrid(creative.getUid());
+		// targetDuFlowBean.setCrid(creative.getUid());
 		targetDuFlowBean.setCrid(material.getAuditId());
 		targetDuFlowBean.setAdmt(material.getType());
 		targetDuFlowBean.setAdct(creative.getLink_type());// 点击广告行为
