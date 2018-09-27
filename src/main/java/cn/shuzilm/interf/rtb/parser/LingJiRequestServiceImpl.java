@@ -156,7 +156,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                             stringSet//文件扩展名
                     );
                     if (targetDuFlowBean == null) {
-                        response = "未匹配到广告";
+                        response = "";
                         return response;
                     }
 
@@ -198,7 +198,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                         stringSet//文件扩展名
                 );
                 if (targetDuFlowBean == null) {
-                    response = "未匹配到广告";
+                    response = "";
                     return response;
                 }
                 log.debug("bidRequestBean.id:{}", bidRequestBean.getId());

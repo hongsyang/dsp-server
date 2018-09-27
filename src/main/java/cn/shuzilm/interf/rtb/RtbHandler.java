@@ -76,11 +76,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 response.setHeader("Content-Type", "text/html");
                 response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
-                response.setHeader("Content-Length", content.length);
+                response.setHeader("Content-Length",content.length );
                 response.setHeader("Accept-Ranges", "bytes");
-                if ("未匹配到广告".equals(resultData)){
+                if ("".equals(resultData)){
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
-                    response.setHeader("Content-Length", 0);
                 }
                 buffer.writeBytes(content);
                 //设置返回状态

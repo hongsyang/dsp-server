@@ -142,10 +142,10 @@ public class AdViewRequestServiceImpl implements RequestService {
                     if (asset.getImg() != null && asset.getRequired().equals(1)) {
                         width = asset.getImg().getW();
                         height = asset.getImg().getH();
-                        if (asset.getVideo().getMimes() == null) {
+                        if (asset.getImg().getMimes() == null) {
                             stringSet = "[image/jpeg, image/png]";
                         } else {
-                            stringSet = Arrays.toString(asset.getVideo().getMimes());
+                            stringSet = Arrays.toString(asset.getImg().getMimes());
                         }
                     } else if (asset.getVideo() != null && asset.getRequired().equals(1)) {
                         width = asset.getVideo().getW();
@@ -176,7 +176,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                             stringSet//文件扩展名
                     );
                     if (targetDuFlowBean == null) {
-                        response = "未匹配到广告";
+                        response = "";
                         return response;
                     }
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
@@ -211,7 +211,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                         stringSet//文件扩展名
                 );
                 if (targetDuFlowBean == null) {
-                    response = "未匹配到广告";
+                    response = "";
                     return response;
                 }
                 //需要添加到Phoenix中的数据
@@ -263,7 +263,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setAdid(duFlowBean.getAdUid());//duFlowBean.getAdUid()广告id，对应duFlowBean的AdUid；
         Integer instl = bidRequestBean.getImp().get(0).getInstl();
         String serviceUrl = configs.getString("SERVICE_URL");
-        String curl = serviceUrl + "adviewclick?" +
+        String  curl = serviceUrl + "adviewclick?" +
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
@@ -346,7 +346,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             ResponseLink link = new ResponseLink();
             List<String> linkCurls = new ArrayList<>();
             linkCurls.add(curl);
-            link.setUrl(duFlowBean.getLinkUrl());
+            link.setUrl(duFlowBean.getLandingUrl());
             link.setClicktrackers(linkCurls);
             nativeResponseBean.setLink(link);
             List<String> curls = new ArrayList<>();
@@ -373,20 +373,21 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&pmp=" + duFlowBean.getDealid();
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
-        List<String> urls = new ArrayList<>();
-        bid.setAdurl(duFlowBean.getLinkUrl());//广告点击跳转落地页，可以支持重定向
-        urls.add(curl);
+        bid.setAdurl(duFlowBean.getLandingUrl());//广告点击跳转落地页，可以支持重定向
+
         Map nurlMap = new HashMap();
-        nurlMap.put("0", urls);
-        bid.setNurl(nurlMap);//带延迟的展示汇报，由客户端发送
+        nurlMap.put("0", duFlowBean.getTracking());
+        bid.setNurl(nurlMap);//带延迟的曝光，由客户端发送  //曝光监测
+
+
         List curls = new ArrayList();
         curls.add(curl);
-        //等待写入
+        curls.add(duFlowBean.getLinkUrl());
+        bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
+
         double biddingPrice = duFlowBean.getBiddingPrice() * 1000;
         Integer price = (int) biddingPrice;
         bid.setPrice(price);//CPM 出价
-//        bid.setPrice(Integer.valueOf(configs.getString("PRICE")));//CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
-        bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
 
         bid.setAdct(0);//duFlowBean.getAdct() 广告点击行为类型，参考附录 9
         bid.setCid(duFlowBean.getCreativeUid());//duFlowBean.getCreativeUid()广告创意 ID，可用于去重

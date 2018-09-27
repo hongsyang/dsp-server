@@ -30,7 +30,7 @@ public class MD5Util {
 //        System.out.println("品牌：oppo r7007;"+"操作系统：Android;IMEI:"+MD5("866089025831526"));
 //        System.out.println("品牌：山寨苹果;"+"操作系统：Android;IMEI"+MD5("350998832332580"));
 //        System.out.println("品牌：Lenovo K30;"+"操作系统：Android;IMEI"+MD5("867792029921198"));
-        System.out.println("品牌：小米NOTE4;"+"操作系统：Android;IMEI"+MD5("861206037426724"));
+        System.out.println("品牌：小米NOTE4;"+"操作系统：Android;IMEI"+MD5("A61206037426724"));
 //        System.out.println("品牌：红米2A;"+"操作系统：Android;IMEI"+MD5("868942026149793"));
 //        System.out.println("品牌：中兴远航3;"+"操作系统：Android;IMEI"+MD5("868153022515488"));
 //        System.out.println("品牌：小辣椒;"+"操作系统：Android;IMEI"+MD5("867338031004605"));
