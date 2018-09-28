@@ -142,10 +142,10 @@ public class AdViewRequestServiceImpl implements RequestService {
                     if (asset.getImg() != null && asset.getRequired().equals(1)) {
                         width = asset.getImg().getW();
                         height = asset.getImg().getH();
-                        if (asset.getImg().getMimes() == null) {
+                        if (asset.getVideo().getMimes() == null) {
                             stringSet = "[image/jpeg, image/png]";
                         } else {
-                            stringSet = Arrays.toString(asset.getImg().getMimes());
+                            stringSet = Arrays.toString(asset.getVideo().getMimes());
                         }
                     } else if (asset.getVideo() != null && asset.getRequired().equals(1)) {
                         width = asset.getVideo().getW();
@@ -176,7 +176,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                             stringSet//文件扩展名
                     );
                     if (targetDuFlowBean == null) {
-                        response = "";
+                        response = "未匹配到广告";
                         return response;
                     }
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
@@ -211,7 +211,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                         stringSet//文件扩展名
                 );
                 if (targetDuFlowBean == null) {
-                    response = "";
+                    response = "未匹配到广告";
                     return response;
                 }
                 //需要添加到Phoenix中的数据
