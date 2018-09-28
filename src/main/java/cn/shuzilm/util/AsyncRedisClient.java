@@ -95,7 +95,7 @@ public class AsyncRedisClient {
 		tagBean.setBrand("335");
 		tagBean.setPhonePrice(3);
 		tagBean.setNetworkId(2);
-		tagBean.setCarrierId(4);
+		tagBean.setCarrierId("4");
 		tagBean.setTagIdList("2,3");
 		tagBean.setCompanyIdList("123,321,222");
 		

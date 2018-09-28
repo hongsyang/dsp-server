@@ -84,7 +84,7 @@ public class AudienceBean implements ICommand {
     
     private String carrierId; // 运营商 不限 0 移动 1 电信 2 联通 3
     
-    private Set<Integer> carrierIdSet;
+    private Set<String> carrierIdSet;
 
     //公司定向
     
@@ -395,12 +395,12 @@ public class AudienceBean implements ICommand {
 		this.carrierId = carrierId;
 		if (StringUtils.isNotBlank(carrierId)) {
             String[] split = carrierId.split(",");
-            Set<Integer> set = new HashSet<Integer>();
+            Set<String> set = new HashSet<String>();
             String re = "[";
             String ra = "]";
             for (String s : split) {
                 String replace = s.replace(re, "").trim().replace(ra, "");
-                set.add(Integer.parseInt(replace));
+                set.add(replace);
             }
             this.carrierIdSet = set;
         }

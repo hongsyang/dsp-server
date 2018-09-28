@@ -207,10 +207,18 @@ public class RuleMatching {
 		String appPreferenceIdStr = tagBean.getAppPreferenceIds();
 		String appPreferenceIds[] = appPreferenceIdStr.split(",");
 		List<String> appPreferenceIdList = Arrays.asList(appPreferenceIds);
+		
+		String carrierIdStr = tagBean.getCarrierId();
+		String carrierIds[] = carrierIdStr.split(",");
+		List<String> carrierIdList = Arrays.asList(carrierIds);
 
 		String brandStr = tagBean.getBrand();
 		String brands[] = brandStr.split(",");
 		List<String> brandList = Arrays.asList(brands);
+		
+		String ipStr = tagBean.getIp();
+		String ips[] = ipStr.split(",");
+		List<String> ipList = Arrays.asList(ips);
 
 		Date date = new Date();
 		String time = dateFm.format(date);
@@ -274,13 +282,13 @@ public class RuleMatching {
 						// 省市县的匹配
 						if (((rtbIns.getAreaMap().get(chinaKey) != null
 								&& rtbIns.getAreaMap().get(chinaKey).contains(ad.getAdUid()))
-								|| (rtbIns.getAreaMap().get(provinceIdKey) != null
-										&& rtbIns.getAreaMap().get(provinceIdKey).contains(ad.getAdUid()))
-								|| (rtbIns.getAreaMap().get(cityIdKey) != null
-										&& rtbIns.getAreaMap().get(cityIdKey).contains(ad.getAdUid()))
-								|| (rtbIns.getAreaMap().get(countryIdKey) != null
-										&& rtbIns.getAreaMap().get(countryIdKey).contains(ad.getAdUid())))
-								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
+								|| (rtbIns.getAreaMap().get(demoProvinceIdKey) != null
+										&& rtbIns.getAreaMap().get(demoProvinceIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(demoCityIdKey) != null
+										&& rtbIns.getAreaMap().get(demoCityIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(demoCountryIdKey) != null
+										&& rtbIns.getAreaMap().get(demoCountryIdKey).contains(ad.getAdUid())))
+								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList,carrierIdList))) {
 							// LOG.debug("ID[" + ad.getAdUid() +
 							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
 							machedAdList.add(ad);
@@ -289,7 +297,7 @@ public class RuleMatching {
 						}
 
 					} else {// 按照经纬度匹配
-						if (commonMatch(tagBean, audience, appPreferenceIdList, brandList)
+						if (commonMatch(tagBean, audience, appPreferenceIdList, brandList,carrierIdList)
 								&& checkInBound(tagBean, audience)) {
 							// LOG.debug("ID[" + ad.getAdUid() +
 							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
@@ -311,7 +319,7 @@ public class RuleMatching {
 										&& rtbIns.getDemographicMap().get(demoCityIdKey).contains(ad.getAdUid()))
 								|| (rtbIns.getDemographicMap().get(demoCountryIdKey) != null
 										&& rtbIns.getDemographicMap().get(demoCountryIdKey).contains(ad.getAdUid())))
-								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
+								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList,carrierIdList))) {
 							// LOG.debug("ID[" + ad.getAdUid() +
 							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
 							machedAdList.add(ad);
@@ -329,7 +337,7 @@ public class RuleMatching {
 					}
 				} else if (audience.getType().equals("ip")) {// 智能设备
 					Set<String> ipSet = audience.getIpSet();
-					if (ipSet != null && ipSet.contains(tagBean.getIp())) {
+					if (ipSet != null && checkRetain(ipList,ipSet)) {
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						break;
@@ -435,15 +443,18 @@ public class RuleMatching {
 	 * @return
 	 */
 	public boolean commonMatch(TagBean tagBean, AudienceBean audience, List<String> appPreferenceIdList,
-			List<String> brandList) {
+			List<String> brandList,List<String> carrierIdList) {
 		// 匹配收入
 		if (audience.getIncomeLevel() != null && !audience.getIncomeLevelSet().contains(tagBean.getIncomeId())) {
 			return false;
 		}
 		// 匹配兴趣
-		if (audience.getAppPreferenceIds() != null
-				&& !checkRetain(appPreferenceIdList, audience.getAppPreferenceIdSet())) {
+		if (audience.getAppPreferenceIds() != null) {
+			if(audience.getAppPreferenceIds().equals("")){ //全部兴趣
+				//不做处理
+			}else if(!checkRetain(appPreferenceIdList, audience.getAppPreferenceIdSet())){
 			return false;
+			}
 		}
 		// 匹配平台
 		if (audience.getPlatformId() != null && !audience.getPlatformIdSet().contains(tagBean.getPlatformId())) {
@@ -456,18 +467,18 @@ public class RuleMatching {
 		}
 
 		// 匹配设备价格
-		if (audience.getPhonePriceLevel() != null
-				&& !audience.getPhonePriceLevelSet().contains(tagBean.getPhonePrice())) {
-			return false;
-		}
+//		if (audience.getPhonePriceLevel() != null
+//				&& !audience.getPhonePriceLevelSet().contains(tagBean.getPhonePrice())) {
+//			return false;
+//		}
 
 		// 匹配网络类型
-		if (audience.getNetworkId() != null && !audience.getNetworkIdSet().contains(tagBean.getNetworkId())) {
-			return false;
-		}
+//		if (audience.getNetworkId() != null && !audience.getNetworkIdSet().contains(tagBean.getNetworkId())) {
+//			return false;
+//		}
 
 		// 匹配运营商
-		if (audience.getCarrierId() != null && !audience.getCarrierIdSet().contains(tagBean.getCarrierId())) {
+		if (audience.getCarrierId() != null && !checkRetain(carrierIdList,audience.getCarrierIdSet())) {
 			return false;
 		}
 		// 扩展

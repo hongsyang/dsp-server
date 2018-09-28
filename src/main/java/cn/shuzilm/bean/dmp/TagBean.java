@@ -33,7 +33,7 @@ public class TagBean {
     private String brand; //品牌
     private int phonePrice;//设备价格 分档
     private int networkId; //网络类型 LTE 3G
-    private int carrierId; // 运营商
+    private String carrierId; // 运营商
 //    private String appPreferenceId;// 应用偏好
     /**
      * 人群标签ID 白领，政府机构人士 。。。
