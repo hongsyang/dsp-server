@@ -176,8 +176,9 @@ public class AdFlowControl {
      * @param type             0 hour  1 daily  2 total -1 全部都更新
      * @param clickNums 点击次数
      * @param pixelType pixcel 类型，曝光 0 和 点击 1
+     * @param isLower true 表示允许继续投放 false 表示竞价价格过低，要求提升报价
      */
-    private void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type , long clickNums, int pixelType) {
+    private void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type , long clickNums, int pixelType, boolean isLower) {
         //cpc 定价计算逻辑
         cpcHandler.updatePixel(adUid,1,addMoney,clickNums,1);
 
@@ -248,6 +249,11 @@ public class AdFlowControl {
                 	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
                 	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
                 }
+                
+                if(!isLower && mapTask.containsKey(adUid)){
+                	String reason = "["+adUid+"]竞价价格过低，请提升报价";
+                	stopAd(adUid, reason, false);
+                }
                 break;
         }
     }
@@ -284,7 +290,7 @@ public class AdFlowControl {
                 AdPixelBean pix = MsgControlCenter.recvPixelStatus(node.getName());
                 if (pix == null)
                     break;
-                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getFinalCost().toString()), -1,pix.getClickNums(),pix.getType());
+                updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getFinalCost().toString()), -1,pix.getClickNums(),pix.getType(),pix.isLower());
             }
         }
 
@@ -623,7 +629,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapHour.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 0,0,0);
+                            this.updatePixel(adUid, 0, expense.floatValue(), 0,0,0,true);
                         }
                     }
 
@@ -631,7 +637,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapDaily.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 1,0,0);
+                            this.updatePixel(adUid, 0, expense.floatValue(), 1,0,0,true);
                         }
                     }
 
@@ -639,7 +645,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapTotal.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 2,0,0);
+                            this.updatePixel(adUid, 0, expense.floatValue(), 2,0,0,true);
                         }
                     }
                 }
@@ -821,7 +827,7 @@ public class AdFlowControl {
         for (WorkNodeBean node : nodeList) {
         	taskList.clear();
             TaskBean task = mapTask.get(adUid);
-            if(task.getCommand() == TaskBean.COMMAND_STOP){
+            if(task.getCommand() == TaskBean.COMMAND_STOP){           
             	continue;
             }
             myLog.debug(reason);
