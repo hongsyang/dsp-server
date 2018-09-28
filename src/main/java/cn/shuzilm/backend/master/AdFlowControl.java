@@ -663,7 +663,7 @@ public class AdFlowControl {
 
                 if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
                     stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false);
-                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
+//                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
                     continue;
                 }
 
