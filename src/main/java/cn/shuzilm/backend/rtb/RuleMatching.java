@@ -81,7 +81,7 @@ public class RuleMatching {
 		// 加载标签溢价比和权重
 		constant = RtbConstants.getInstance();
 		String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
-		String gradeRatioStr = gradeRatioStr = constant.getRtbStrVar(RtbConstants.GRADE_RATIO);
+		String gradeRatioStr = constant.getRtbStrVar(RtbConstants.GRADE_RATIO);
 		gradeRatio = Integer.parseInt(gradeRatioStr);
 		String nodes[] = nodeStr.split(";");
 		redis = AsyncRedisClient.getInstance(nodes);
