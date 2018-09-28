@@ -223,18 +223,11 @@ public class RuleMatching {
 		String provinceIdKey = String.valueOf(tagBean.getProvinceId());
 		String cityIdKey = provinceIdKey.concat("_").concat(String.valueOf(tagBean.getCityId()));
 		String countryIdKey = cityIdKey.concat("_").concat(String.valueOf(tagBean.getCountyId()));
+		String chinaKey = "china";
 
-		String key = null;
-		// 省市县的匹配
-		if (tagBean.getProvinceId() == 0) {
-			key = "china";
-		} else if (tagBean.getCityId() == 0) {
-			key = provinceIdKey;
-		} else if (tagBean.getCountyId() == 0) {
-			key = cityIdKey;
-		} else {
-			key = countryIdKey;
-		}
+		String demoProvinceIdKey = String.valueOf(tagBean.getDemographicProvinceId());
+		String demoCityIdKey = demoProvinceIdKey.concat("_").concat(String.valueOf(tagBean.getDemographicCityId()));
+		String demoCountryIdKey = demoCityIdKey.concat("_").concat(String.valueOf(tagBean.getDemographicCountyId()));
 
 		if (extStr.contains("jpg")) {
 			extStr = extStr.concat(",jpeg");
@@ -243,7 +236,7 @@ public class RuleMatching {
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
-		// long startOrder = System.currentTimeMillis();
+		//long startOrder = System.currentTimeMillis();
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
 			// 是否投当前的广告
@@ -279,7 +272,14 @@ public class RuleMatching {
 				if (audience.getType().equals("location")) {// 地理位置
 					if (audience.getGeos() == null || audience.getGeos().trim().equals("")) {
 						// 省市县的匹配
-						if (rtbIns.getAreaMap().get(key) != null && rtbIns.getAreaMap().get(key).contains(ad.getAdUid())
+						if (((rtbIns.getAreaMap().get(chinaKey) != null
+								&& rtbIns.getAreaMap().get(chinaKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(provinceIdKey) != null
+										&& rtbIns.getAreaMap().get(provinceIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(cityIdKey) != null
+										&& rtbIns.getAreaMap().get(cityIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(countryIdKey) != null
+										&& rtbIns.getAreaMap().get(countryIdKey).contains(ad.getAdUid())))
 								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
 							// LOG.debug("ID[" + ad.getAdUid() +
 							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
@@ -303,8 +303,14 @@ public class RuleMatching {
 				} else if (audience.getType().equals("demographic")) { // 特定人群
 					if (audience.getDemographicTagIdSet() != null
 							&& checkRetain(tagIdList, audience.getDemographicTagIdSet())) {
-						if (rtbIns.getDemographicMap().get(key) != null
-								&& rtbIns.getDemographicMap().get(key).contains(ad.getAdUid())
+						if (((rtbIns.getDemographicMap().get(chinaKey) != null
+								&& rtbIns.getDemographicMap().get(chinaKey).contains(ad.getAdUid()))
+								|| (rtbIns.getDemographicMap().get(demoProvinceIdKey) != null
+										&& rtbIns.getDemographicMap().get(demoProvinceIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getDemographicMap().get(demoCityIdKey) != null
+										&& rtbIns.getDemographicMap().get(demoCityIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getDemographicMap().get(demoCountryIdKey) != null
+										&& rtbIns.getDemographicMap().get(demoCountryIdKey).contains(ad.getAdUid())))
 								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList))) {
 							// LOG.debug("ID[" + ad.getAdUid() +
 							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
@@ -353,7 +359,7 @@ public class RuleMatching {
 		// }
 		// }
 		// }
-		// LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
+		//LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
 		// 排序
 		if (machedAdList.size() > 0) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, tagIdList,
@@ -693,7 +699,7 @@ public class RuleMatching {
 
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 320, 50, true, 5, 5, "2", "jpg,gif");
+		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");
 	}
 
 }
