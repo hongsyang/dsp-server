@@ -214,9 +214,11 @@ public class AdFlowControl {
                 statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
                 statusAll.setMoney(statusAll.getMoney() + addMoney);
                 //更新广告组金额状态
-                String groupId = mapAd.get(adUid).getGroupId();
-                AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
-                statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                if(mapAd.containsKey(adUid)){
+                	String groupId = mapAd.get(adUid).getGroupId();
+                	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
+                	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                }
                 break;
             case -1:
                 statusHour = mapMonitorHour.get(adUid);
@@ -241,10 +243,11 @@ public class AdFlowControl {
                 }
 
                 //更新广告组金额状态
-                groupId = mapAd.get(adUid).getGroupId();
-                statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
-                statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
-
+                if(mapAd.containsKey(adUid)){
+                	String groupId = mapAd.get(adUid).getGroupId();
+                	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
+                	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                }
                 break;
         }
     }
@@ -550,43 +553,6 @@ public class AdFlowControl {
                 ad.setGroupId(groupId);
                 String adUid = ad.getAdUid();
 
-                if (isInitial) {
-                    //初始化所有的监控
-                    AdFlowStatus statusHour = new AdFlowStatus();
-                    mapMonitorHour.put(adUid,statusHour);
-                    AdFlowStatus statusDay = new AdFlowStatus();
-                    mapMonitorDaily.put(adUid,statusDay);
-                    AdFlowStatus statusAll = new AdFlowStatus();
-                    mapMonitorTotal.put(adUid,statusAll);
-                    AdFlowStatus statusAdGroup = new AdFlowStatus();
-                    mapMonitorAdGroupTotal.put(groupId,statusAdGroup);
-
-                    if (reportMapHour.size() > 0) {
-                        ReportBean report = reportMapHour.get(adUid);
-                        if (report != null) {
-                            BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 0,0,0);
-                        }
-                    }
-
-                    if (reportMapDaily.size() > 0) {
-                        ReportBean report = reportMapDaily.get(adUid);
-                        if (report != null) {
-                            BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 1,0,0);
-                        }
-                    }
-
-                    if (reportMapTotal.size() > 0) {
-                        ReportBean report = reportMapTotal.get(adUid);
-                        if (report != null) {
-                            BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 2,0,0);
-                        }
-                    }
-                }
-
-
                 String adverUid = map.getString("advertiser_uid");
 
                 //根据 广告主ID 获得 广告主
@@ -641,6 +607,42 @@ public class AdFlowControl {
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
+                
+                if (isInitial) {
+                    //初始化所有的监控
+                    AdFlowStatus statusHour = new AdFlowStatus();
+                    mapMonitorHour.put(adUid,statusHour);
+                    AdFlowStatus statusDay = new AdFlowStatus();
+                    mapMonitorDaily.put(adUid,statusDay);
+                    AdFlowStatus statusAll = new AdFlowStatus();
+                    mapMonitorTotal.put(adUid,statusAll);
+                    AdFlowStatus statusAdGroup = new AdFlowStatus();
+                    mapMonitorAdGroupTotal.put(groupId,statusAdGroup);
+
+                    if (reportMapHour.size() > 0) {
+                        ReportBean report = reportMapHour.get(adUid);
+                        if (report != null) {
+                            BigDecimal expense = report.getExpense();
+                            this.updatePixel(adUid, 0, expense.floatValue(), 0,0,0);
+                        }
+                    }
+
+                    if (reportMapDaily.size() > 0) {
+                        ReportBean report = reportMapDaily.get(adUid);
+                        if (report != null) {
+                            BigDecimal expense = report.getExpense();
+                            this.updatePixel(adUid, 0, expense.floatValue(), 1,0,0);
+                        }
+                    }
+
+                    if (reportMapTotal.size() > 0) {
+                        ReportBean report = reportMapTotal.get(adUid);
+                        if (report != null) {
+                            BigDecimal expense = report.getExpense();
+                            this.updatePixel(adUid, 0, expense.floatValue(), 2,0,0);
+                        }
+                    }
+                }
                 
               //AdBean 里面的加速投放为 0 ,对应数据库里面 1（ALL） ，匀速相反
                 
