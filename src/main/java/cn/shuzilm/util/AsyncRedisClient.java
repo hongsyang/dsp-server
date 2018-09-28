@@ -96,12 +96,12 @@ public class AsyncRedisClient {
 		tagBean.setPhonePrice(3);
 		tagBean.setNetworkId(2);
 		tagBean.setCarrierId(4);
-		tagBean.setAppPreferenceId("app");
 		tagBean.setTagIdList("2,3");
 		tagBean.setCompanyIdList("123,321,222");
 		
 		String ss = JSON.toJSONString(tagBean);
 		String nodeStr = RtbConstants.getInstance().getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
+		System.out.println(nodeStr);
 		String nodes [] = nodeStr.split(";");
     	AsyncRedisClient redis1 = AsyncRedisClient.getInstance(nodes);
     	
@@ -119,7 +119,8 @@ public class AsyncRedisClient {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-    	 redis1.setAsync("72229B9518E18744620932CB50FC43DC", ss);
+//    	 redis1.setAsync("72229B9518E18744620932CB50FC43DC", ss);
+    	redis1.delAsync("72229B9518E18744620932CB50FC43DC");
     	 System.out.println(redis1.getAsync("72229B9518E18744620932CB50FC43DC"));
     	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);	
     	//System.out.println(commands.get("97C304E-4C8E-4872-8666-03FE67DC15DG"));
