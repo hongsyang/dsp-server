@@ -20,6 +20,10 @@ public class TagBean {
     private int provinceId;//省份ID
     private int cityId;//城市ID
     private int countyId;//县级ID
+    
+    private int demographicProvinceId;//特定人群省份ID
+    private int demographicCityId;//特定人群城市ID
+    private int demographicCountyId;//特定人群县级ID
 
     //属性筛选
     private int incomeId; //收入水平
@@ -29,8 +33,8 @@ public class TagBean {
     private String brand; //品牌
     private int phonePrice;//设备价格 分档
     private int networkId; //网络类型 LTE 3G
-    private int carrierId; // 运营商
-    private String appPreferenceId;// 应用偏好
+    private String carrierId; // 运营商
+//    private String appPreferenceId;// 应用偏好
     /**
      * 人群标签ID 白领，政府机构人士 。。。
      */

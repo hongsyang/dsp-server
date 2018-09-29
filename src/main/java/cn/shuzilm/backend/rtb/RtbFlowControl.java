@@ -273,13 +273,33 @@ public class RtbFlowControl {
                                     Set<String> set = areaMap.get(key);
                                     set.add(adBean.getAdUid());
                                 }
+                            }
+                            
+                            Set<AreaBean> areaSet = audience.getDemographicCitySet();
+                            String demoKey = null;
+                            if(areaSet == null){
+                            	continue;
+                            }
+                            for (AreaBean area : areaSet) {
+                                if (area.getProvinceId() == 0) {
+                                    // 当省选项为 0 的时候，则认为是匹配全国
+                                	demoKey = "china";
+                                } else if (area.getCityId() == 0) {
+                                    // 当市级选项为 0 的时候，则认为是匹配全省
+                                	demoKey = area.getProvinceId() + "";
+                                } else if (area.getCountyId() == 0) {
+                                    // 当县级选项为 0 的时候，则认为是匹配全市
+                                	demoKey = area.getProvinceId() + "_" + area.getCityId();
+                                } else {
+                                	demoKey = area.getProvinceId() + "_" + area.getCityId() + "_" + area.getCountyId();
+                                }
 
-                                if (!demographicMap.containsKey(key)) {
+                                if (!demographicMap.containsKey(demoKey)) {
                                     Set<String> set = new HashSet<String>();
                                     set.add(adBean.getAdUid());
-                                    demographicMap.put(key, set);
+                                    demographicMap.put(demoKey, set);
                                 } else {
-                                    Set<String> set = demographicMap.get(key);
+                                    Set<String> set = demographicMap.get(demoKey);
                                     set.add(adBean.getAdUid());
                                 }
                             }

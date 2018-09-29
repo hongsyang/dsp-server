@@ -34,6 +34,9 @@ public class AudienceBean implements ICommand {
     private String remark; //备注
     @Setter
     private String type; //人群类型 人群选择方式（location:地域/demographic:人群/company:公司）
+    
+    @Setter
+    private String locationMode; //city or map
 
     //地理位置
     private String citys; //地理位置 省份、地级、县级 选定列表
@@ -84,7 +87,7 @@ public class AudienceBean implements ICommand {
     
     private String carrierId; // 运营商 不限 0 移动 1 电信 2 联通 3
     
-    private Set<Integer> carrierIdSet;
+    private Set<String> carrierIdSet;
 
     //公司定向
     
@@ -105,7 +108,7 @@ public class AudienceBean implements ICommand {
 
     public void setDemographicCitys(String citys){
         if(citys == null)
-            return;
+            citys = "";
         demographicCitys = citys;
         String[] split = citys.split("],");
         Set<String> set = new HashSet();
@@ -148,6 +151,9 @@ public class AudienceBean implements ICommand {
 
     public void setCitys(String citys) {
         this.citys = citys;
+        if(citys == null){
+        	citys = "";
+        }
         if (citys != null) {
             String[] split = citys.split("],");
             List<String> list = new ArrayList();
@@ -395,12 +401,12 @@ public class AudienceBean implements ICommand {
 		this.carrierId = carrierId;
 		if (StringUtils.isNotBlank(carrierId)) {
             String[] split = carrierId.split(",");
-            Set<Integer> set = new HashSet<Integer>();
+            Set<String> set = new HashSet<String>();
             String re = "[";
             String ra = "]";
             for (String s : split) {
                 String replace = s.replace(re, "").trim().replace(ra, "");
-                set.add(Integer.parseInt(replace));
+                set.add(replace);
             }
             this.carrierIdSet = set;
         }
