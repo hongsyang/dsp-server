@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
 
 import cn.shuzilm.backend.master.MsgControlCenter;
@@ -44,6 +45,7 @@ public class PixelFlowControl {
     private String nodeName;
     public PixelFlowControl(String nodeName){
         this.nodeName = nodeName;
+        MDC.put("sift", "pixel");
         mapAd = new ConcurrentHashMap<String,AdBean>();
     }
 
@@ -55,7 +57,7 @@ public class PixelFlowControl {
     	}
     	String adUid = pixel.getAdUid();
     	AdBean ad = mapAd.get(adUid);
-    	double rebate = 0.0;
+    	double rebate = 0.15;
     	if(ad == null){
     		return null;
     	}
@@ -66,6 +68,10 @@ public class PixelFlowControl {
     	double cost = pixel.getCost();
     	double premiumFactor = pixel.getPremiumFactor();
     	double dspAndRebatePremiumFactor = premiumFactor + rebate;
+    	if(dspAndRebatePremiumFactor >= 1){
+    		dspAndRebatePremiumFactor = 1;
+    		premiumFactor = 1 - rebate;
+    	}
     	double price = ad.getPrice();
     	double finalPrice = getResult(cost, getResult(1.0, dspAndRebatePremiumFactor, "-"),"/");
     	if(finalPrice > price){//最终消耗金额高于广告出价金额,适当调整DSP平台利润
@@ -114,8 +120,8 @@ public class PixelFlowControl {
 
     public static void main(String[] args) {
         AdPixelBean bean = new AdPixelBean();
-        bean.setCost(40.0);
-        bean.setPremiumFactor(0.5);
+        bean.setCost(15.01);
+        bean.setPremiumFactor(0.6);
         bean.setAdUid("123");
         AdPixelBean pixel = PixelFlowControl.getInstance().sendStatus(bean);
         
