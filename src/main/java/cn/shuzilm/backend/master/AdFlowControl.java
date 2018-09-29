@@ -599,7 +599,7 @@ public class AdFlowControl {
                 //限额
                 // 如果当前广告设定限额为 0 ，则以该账户的每日限额为准，
                 BigDecimal quotaAmount = map.getBigDecimal("quota_amount");
-                if(quotaAmount.doubleValue() <= 0 ){
+                if(quotaAmount.doubleValue() <= 0 && reportMapHour.containsKey(adUid)){
                     ad.setQuotaAmount(reportMapHour.get(adUid).getMoneyQuota());
                 }else{
                     ad.setQuotaAmount(quotaAmount);

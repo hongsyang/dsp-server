@@ -197,28 +197,46 @@ public class RuleMatching {
 		Map<String, AudienceBean> audienceMap = new HashMap<String, AudienceBean>();
 
 		String tagIdStr = tagBean.getTagIdList();
-		String tagIds[] = tagIdStr.split(",");
-		List<String> tagIdList = Arrays.asList(tagIds);
+		List<String> tagIdList = new ArrayList<String>();
+		if(tagIdStr != null){
+			String tagIds[] = tagIdStr.split(",");
+			tagIdList = Arrays.asList(tagIds);
+		}
 
 		String companyIdStr = tagBean.getCompanyIdList();
-		String companyIds[] = companyIdStr.split(",");
-		List<String> companyIdList = Arrays.asList(companyIds);
+		List<String> companyIdList = new ArrayList<String>();
+		if(companyIdStr != null){
+			String companyIds[] = companyIdStr.split(",");
+			companyIdList = Arrays.asList(companyIds);
+		}
 
 		String appPreferenceIdStr = tagBean.getAppPreferenceIds();
-		String appPreferenceIds[] = appPreferenceIdStr.split(",");
-		List<String> appPreferenceIdList = Arrays.asList(appPreferenceIds);
+		List<String> appPreferenceIdList = new ArrayList<String>();
+		if(appPreferenceIdStr != null){
+			String appPreferenceIds[] = appPreferenceIdStr.split(",");
+			appPreferenceIdList = Arrays.asList(appPreferenceIds);
+		}
 		
 		String carrierIdStr = tagBean.getCarrierId();
-		String carrierIds[] = carrierIdStr.split(",");
-		List<String> carrierIdList = Arrays.asList(carrierIds);
+		List<String> carrierIdList = new ArrayList<String>();
+		if(carrierIdStr != null){
+			String carrierIds[] = carrierIdStr.split(",");
+			carrierIdList = Arrays.asList(carrierIds);
+		}
 
 		String brandStr = tagBean.getBrand();
-		String brands[] = brandStr.split(",");
-		List<String> brandList = Arrays.asList(brands);
+		List<String> brandList = new ArrayList<String>();
+		if(brandStr != null){
+			String brands[] = brandStr.split(",");
+			brandList = Arrays.asList(brands);
+		}
 		
 		String ipStr = tagBean.getIp();
-		String ips[] = ipStr.split(",");
-		List<String> ipList = Arrays.asList(ips);
+		List<String> ipList = new ArrayList<String>();
+		if(ipStr != null){
+			String ips[] = ipStr.split(",");
+			ipList = Arrays.asList(ips);
+		}
 
 		Date date = new Date();
 		String time = dateFm.format(date);
@@ -278,7 +296,7 @@ public class RuleMatching {
 			List<AudienceBean> audienceList = ad.getAudienceList();
 			for (AudienceBean audience : audienceList) {
 				if (audience.getType().equals("location")) {// 地理位置
-					if (audience.getGeos() == null || audience.getGeos().trim().equals("")) {
+					if(audience.getLocationMode().equals("city")){
 						// 省市县的匹配
 						if (((rtbIns.getAreaMap().get(chinaKey) != null
 								&& rtbIns.getAreaMap().get(chinaKey).contains(ad.getAdUid()))
@@ -287,7 +305,13 @@ public class RuleMatching {
 								|| (rtbIns.getAreaMap().get(demoCityIdKey) != null
 										&& rtbIns.getAreaMap().get(demoCityIdKey).contains(ad.getAdUid()))
 								|| (rtbIns.getAreaMap().get(demoCountryIdKey) != null
-										&& rtbIns.getAreaMap().get(demoCountryIdKey).contains(ad.getAdUid())))
+										&& rtbIns.getAreaMap().get(demoCountryIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(provinceIdKey) != null
+										&& rtbIns.getAreaMap().get(provinceIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(cityIdKey) != null
+										&& rtbIns.getAreaMap().get(cityIdKey).contains(ad.getAdUid()))
+								|| (rtbIns.getAreaMap().get(countryIdKey) != null
+										&& rtbIns.getAreaMap().get(countryIdKey).contains(ad.getAdUid())))
 								&& (commonMatch(tagBean, audience, appPreferenceIdList, brandList,carrierIdList))) {
 							// LOG.debug("ID[" + ad.getAdUid() +
 							// "]通过匹配，参与排序");//记录日志太花费时间,忽略
@@ -449,12 +473,8 @@ public class RuleMatching {
 			return false;
 		}
 		// 匹配兴趣
-		if (audience.getAppPreferenceIds() != null) {
-			if(audience.getAppPreferenceIds().equals("")){ //全部兴趣
-				//不做处理
-			}else if(!checkRetain(appPreferenceIdList, audience.getAppPreferenceIdSet())){
+		if(audience.getAppPreferenceIds() != null && !checkRetain(appPreferenceIdList, audience.getAppPreferenceIdSet())){
 			return false;
-			}
 		}
 		// 匹配平台
 		if (audience.getPlatformId() != null && !audience.getPlatformIdSet().contains(tagBean.getPlatformId())) {
@@ -654,32 +674,51 @@ public class RuleMatching {
 
 	public boolean checkInBound(TagBean tagBean, AudienceBean audience) {
 		boolean isInBoundReturn = false;
+		boolean residenceFlag = true,workFlag = true,activityFlag = true;
+		if(tagBean.getResidence() == null){
+			residenceFlag = false;
+		}
+		if(tagBean.getWork() == null){
+			workFlag = false;
+		}
+		if(tagBean.getActivity() == null){
+			activityFlag = false;
+		}
+		if(!residenceFlag && !workFlag && !activityFlag){
+			return false;
+		}
 		double[] residenceArray = tagBean.getResidence();
 		double[] workArray = tagBean.getWork();
 		double[] activityArray = tagBean.getActivity();
 		List<GpsBean> geoList = audience.getGeoList();
 		for (GpsBean gps : geoList) {
 			if (audience.getMobilityType() == null) {// 不限流动性
+				if(residenceFlag){
 				boolean isInBoundResidence = GPSDistance.isInArea(residenceArray[0], residenceArray[1], gps.getLng(),
 						gps.getLat(), gps.getRadius());
 				if (isInBoundResidence) {
 					isInBoundReturn = true;
 					break;
 				}
+				}
+				if(workFlag){
 				boolean isInBoundWork = GPSDistance.isInArea(workArray[0], workArray[1], gps.getLng(), gps.getLat(),
 						gps.getRadius());
 				if (isInBoundWork) {
 					isInBoundReturn = true;
 					break;
 				}
+				}
+				if(activityFlag){
 				boolean isInBoundActivity = GPSDistance.isInArea(activityArray[0], activityArray[1], gps.getLng(),
 						gps.getLat(), gps.getRadius());
 				if (isInBoundActivity) {
 					isInBoundReturn = true;
 					break;
 				}
+				}
 			} else {
-				if (audience.getMobilityTypeSet().contains(1)) {// 居住地
+				if (audience.getMobilityTypeSet().contains(1) && residenceFlag) {// 居住地
 					boolean isInBound = GPSDistance.isInArea(residenceArray[0], residenceArray[1], gps.getLng(),
 							gps.getLat(), gps.getRadius());
 					if (isInBound) {
@@ -687,7 +726,7 @@ public class RuleMatching {
 						break;
 					}
 				}
-				if (audience.getMobilityTypeSet().contains(2)) {// 工作地
+				if (audience.getMobilityTypeSet().contains(2) && workFlag) {// 工作地
 					boolean isInBound = GPSDistance.isInArea(workArray[0], workArray[1], gps.getLng(), gps.getLat(),
 							gps.getRadius());
 					if (isInBound) {
@@ -695,7 +734,7 @@ public class RuleMatching {
 						break;
 					}
 				}
-				if (audience.getMobilityTypeSet().contains(3)) {// 活动地
+				if (audience.getMobilityTypeSet().contains(3) && activityFlag) {// 活动地
 					boolean isInBound = GPSDistance.isInArea(activityArray[0], activityArray[1], gps.getLng(),
 							gps.getLat(), gps.getRadius());
 					if (isInBound) {
@@ -710,7 +749,7 @@ public class RuleMatching {
 
 	public static void main(String[] args) {
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 320, 50, true, 5, 5, "1", "jpg,gif");
+		rule.match("72229B9518E18744620932CB50FC43DC", "feed", 720, 240, true, 5, 5, "2", "jpg,gif");
 	}
 
 }

@@ -52,6 +52,7 @@ public class TaskServicve extends Service {
             bean.setNetworkId(rm.getString("network_id"));
             bean.setPhonePriceLevel(rm.getString("phone_price_level"));
             bean.setPlatformId(rm.getString("platform_id"));
+            bean.setLocationMode(rm.getString("location_mode"));
             //特定公司
             bean.setCompanyIds(rm.getString("company_ids"));
             //智能设备
