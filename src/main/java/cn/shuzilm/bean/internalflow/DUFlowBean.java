@@ -63,8 +63,8 @@ public class DUFlowBean implements Serializable {
     private String dealid  ;//私有交易id，判断是否属于私有交易
     private Double premiumFactor;//溢价系数
     private Long winNoticeTime;//1533628505531 对账时间戳
-    private String landingUrl;//点击广告之后的跳转url
-    private String linkUrl;//点击目标链接
+    private String landingUrl;//点击广告之后的跳转url,link_uri替换之
+    private String linkUrl;//点击目标链接,click_tracking_uri替换之
     private String tracking;//曝光监测链接
     private String adxSource;//ADX服务商渠道
     private String title;//信息流标题
