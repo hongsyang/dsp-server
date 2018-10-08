@@ -142,10 +142,10 @@ public class AdViewRequestServiceImpl implements RequestService {
                     if (asset.getImg() != null && asset.getRequired().equals(1)) {
                         width = asset.getImg().getW();
                         height = asset.getImg().getH();
-                        if (asset.getVideo().getMimes() == null) {
+                        if (asset.getImg().getMimes() == null) {
                             stringSet = "[image/jpeg, image/png]";
                         } else {
-                            stringSet = Arrays.toString(asset.getVideo().getMimes());
+                            stringSet = Arrays.toString(asset.getImg().getMimes());
                         }
                     } else if (asset.getVideo() != null && asset.getRequired().equals(1)) {
                         width = asset.getVideo().getW();

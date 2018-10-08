@@ -1,6 +1,7 @@
 package cn.shuzilm;
 
 
+import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.jedis.JedisManager;
@@ -30,16 +31,19 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 public class Test {
     public static void main(String[] args) {
-        String result = AES.decrypt("1JhqBHCPuAdwdO2OsPom9b758Vn-cov2e6jsjGdWo9o","af36ec6c77c042b5a5e49e6414fb436f" );
-        System.out.println(result);
+        AudienceBean audience =new AudienceBean();
+        Set<Integer> carrierIdSet = new HashSet<>();
+        carrierIdSet.add(Integer.parseInt("1"));
+        audience.getCarrierIdSet();
+        System.out.println(carrierIdSet.contains(1));
+
+//        String result = AES.decrypt("1JhqBHCPuAdwdO2OsPom9b758Vn-cov2e6jsjGdWo9o","af36ec6c77c042b5a5e49e6414fb436f" );
+//        System.out.println(result);
 //        Long priceLong = AdViewDecodeUtil.priceDecode("4Kc2GWYBAAAGZE1CYxZrD3KYNzyTz56onfCs6A", "hqvBbhco3nPm5kr0TXgQxaO4Er25qd7n", "eKUKpIu1cFDETMSo3CY8RJYxfRpNQSu2");
 //        System.out.println(Double.valueOf(priceLong)/10000);
 //        String adm="{\"nativead\":{\"imptrackers\":[\"http://test.xxx.com?id=${AUCTION_ID}&bidid=${AUCTION_BID_ID}&impid=${AUCTION_IMP_ID}&price=${AUCTION_PRICE}\",\"http://a.com/a\",\"http://b.com/b\"],\"link\":{\"url\":\"deeplink://deeplink/url/into/app\",\"clicktrackers\":[\"http://a.com/a\",\"http://b.com/b\"]},\"event\":[{\"vm\":[\"http://test1\",\"http://test2\"],\"v\":0}],\"assets\":[{\"id\":1,\"title\":{\"text\":\"InstallBOA\"}},{\"id\":2,\"data\":{\"value\":5}},{\"id\":3,\"img\":{\"url\":[\"http://cdn.mobad.com/ad.png\",\"http://img2.com\"],\"w\":1200,\"h\":627}},{\"id\":4,\"video\":{\"url\":\"http://video.com\",\"cover_img_url\":\"http://img.com\",\"w\":640,\"h\":480,\"duration\":15}},{\"id\":5,\"data\":{\"value\":\"Click\"}}]}}";
