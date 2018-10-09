@@ -359,6 +359,7 @@ public class AdFlowControl {
      */
     public void resetHourMonitor() {
         //清理小时计数器
+    	myLog.debug("开始启动小时计数器清零......");
         for (String key : mapMonitorHour.keySet()) {
             AdFlowStatus status = mapMonitorHour.get(key);
             status.setBidNums(0);
@@ -381,6 +382,7 @@ public class AdFlowControl {
      * 每天初始化一次小时 和 天计数器
      */
     public void resetDayMonitor() {
+    	myLog.debug("开始启动天计数器清零......");
         long time = 0;
         ResultList rl = null;
         try {
@@ -744,6 +746,7 @@ public class AdFlowControl {
     		if(nodeStatus == null){
     			break;
     		}
+    		myLog.debug(node.getName()+" 节点运行正常!");
     		nodeStatusMap.put(node.getName(), nodeStatus.getLastUpdateTime());
     		}
     		
@@ -757,6 +760,7 @@ public class AdFlowControl {
     	}
     	long nowTime = System.currentTimeMillis();
     	if(nowTime - lastTime >= NODE_DOWN_INTERVAL){//判定节点宕机
+    		myLog.debug(nodeName+" 节点宕机,移除该节点堆积的任务和广告!");
     		MsgControlCenter.removeAll(nodeName);//移除该节点堆积的任务和广告
     		return true;
     	}
