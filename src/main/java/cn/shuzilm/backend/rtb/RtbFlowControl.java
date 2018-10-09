@@ -46,7 +46,6 @@ public class RtbFlowControl {
 
     private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
     
-    private static String redisGeoKey = "geo";
 
     public static RtbFlowControl getInstance() {
         if (rtb == null) {
@@ -57,8 +56,6 @@ public class RtbFlowControl {
 
     private RtbConstants constant;
     
-    private AsyncRedisClient redis;
-
 
     public ConcurrentHashMap<String, AdBean> getAdMap() {
         return mapAd;
@@ -151,9 +148,7 @@ public class RtbFlowControl {
 //        gridMap = new HashMap<>();
         constant = RtbConstants.getInstance();
         String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
-		String nodes [] = nodeStr.split(";");
-        redis = AsyncRedisClient.getInstance(nodes);
-        
+		String nodes [] = nodeStr.split(";");        
 
     }
 
@@ -196,11 +191,6 @@ public class RtbFlowControl {
     public void pullTenMinutes() {
         // 从 10 分钟的队列中获得广告素材和人群包
     	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
-//    	try{
-//    		redisGeoMap = redis.getHMAsync(redisGeoKey);
-//    	}catch(Exception e){
-//    		myLog.error("从redis获取坐标失败:"+e.getMessage());
-//    	}
 //        ArrayList<GpsBean> gpsAll = new ArrayList<>();
 //        ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
 //        ArrayList<GpsBean> gpsWorkList = new ArrayList<>();

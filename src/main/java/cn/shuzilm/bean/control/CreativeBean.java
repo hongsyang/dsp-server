@@ -54,6 +54,8 @@ public class CreativeBean implements ICommand {
      * 曝光监测链接（null为无曝光监测）
      */
     private String tracking;
+    
+    private String clickTrackingUrl;
 
     public String getUid() {
         return uid;
@@ -212,6 +214,14 @@ public class CreativeBean implements ICommand {
 
 	public Set<String> getApprovedAdxSet() {
 		return approvedAdxSet;
+	}
+
+	public String getClickTrackingUrl() {
+		return clickTrackingUrl;
+	}
+
+	public void setClickTrackingUrl(String clickTrackingUrl) {
+		this.clickTrackingUrl = clickTrackingUrl;
 	}
     
 }

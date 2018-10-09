@@ -634,8 +634,8 @@ public class RuleMatching {
 		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价
 		targetDuFlowBean.setBiddingPrice((double) ad.getPrice());
 		targetDuFlowBean.setPremiumFactor(premiumRatio);
-		targetDuFlowBean.setLandingUrl(creative.getLanding());
-		targetDuFlowBean.setLinkUrl(creative.getLink());
+		targetDuFlowBean.setLandingUrl(creative.getLink());
+		targetDuFlowBean.setLinkUrl(creative.getClickTrackingUrl());
 		targetDuFlowBean.setTracking(creative.getTracking());
 		// targetDuFlowBean.setDspid("123");// DSP对该次出价分配的ID
 		targetDuFlowBean.setWidthHeightRatio(widthHeightRatio);
