@@ -377,7 +377,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         Double biddingPrice = duFlowBean.getBiddingPrice() * 100;
         Float price = Float.valueOf(String.valueOf(biddingPrice));
         bid.setPrice(price);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
-        bid.setCrid(duFlowBean.getCreativeUid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
+        bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
 
 
         LJResponseExt ljResponseExt = new LJResponseExt();
