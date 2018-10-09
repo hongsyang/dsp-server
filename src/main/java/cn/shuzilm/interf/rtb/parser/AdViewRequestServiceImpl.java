@@ -275,7 +275,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pmp=" + duFlowBean.getDealid();
-        if (instl == 0) {
+        if (instl == 0 ||instl == 4||instl == 1) {
             bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
             bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid()广告物料 ID
             bid.setAdi(duFlowBean.getAdm());//图片路径 duFlowBean.getAdm() 广告物料html数据
@@ -390,7 +390,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setPrice(price);//CPM 出价
 
         bid.setAdct(0);//duFlowBean.getAdct() 广告点击行为类型，参考附录 9
-        bid.setCid(duFlowBean.getCreativeUid());//duFlowBean.getCreativeUid()广告创意 ID，可用于去重
+        bid.setCid(duFlowBean.getCrid());//duFlowBean.getCreativeUid()广告创意 ID，可用于去重
         //添加到list中
         bidList.add(bid);
         seatBid.setBid(bidList);
