@@ -59,7 +59,7 @@ public class AudienceBean implements ICommand {
 
     //属性筛选
     
-    private String incomeLevel; //收入水平  0 不限 1 超高 2 高 3 中  4 低
+    private String incomeLevel; //收入水平  0 不限 1 低 2 中 3 高  4 超高
     
     private Set<Integer> incomeLevelSet;
     

@@ -4,6 +4,7 @@ import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.CPCHandler;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.MDC;
 
 /**
  * Created by thunders on 2018/7/23.
@@ -97,15 +98,5 @@ public class CronDispatch {
                break;
        }
     }
-
-
-
-
-
-
-
-
-
-
 
 }
