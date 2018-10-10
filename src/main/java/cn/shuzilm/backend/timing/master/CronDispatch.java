@@ -17,6 +17,7 @@ public class CronDispatch {
 
     public static void dispatch(Class<? extends Job> myClass , String cronTime){
         try {
+
             //得到默认的调度器
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
 

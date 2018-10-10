@@ -385,7 +385,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         curls.add(duFlowBean.getLinkUrl());
         bid.setCurl(curls);//点击监控地址，客户端逐个发送通知
 
-        double biddingPrice = duFlowBean.getBiddingPrice() * 1000;
+        double biddingPrice = duFlowBean.getBiddingPrice() * 10000;
         Integer price = (int) biddingPrice;
         bid.setPrice(price);//CPM 出价
 
