@@ -69,7 +69,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             String deviceId = null;//设备号
 
             if (StringUtils.isBlank(adType)) {
-                response = "没有对应的广告类型";
+                response = "";
                 return response;
             }
             //设备的设备号：用于匹配数盟库中的数据
@@ -176,7 +176,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                             stringSet//文件扩展名
                     );
                     if (targetDuFlowBean == null) {
-                        response = "未匹配到广告";
+                        response = "";
                         return response;
                     }
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
@@ -211,7 +211,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                         stringSet//文件扩展名
                 );
                 if (targetDuFlowBean == null) {
-                    response = "未匹配到广告";
+                    response = "";
                     return response;
                 }
                 //需要添加到Phoenix中的数据
