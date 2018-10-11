@@ -11,6 +11,7 @@ import cn.shuzilm.bean.lj.response.NativeAD;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
 import cn.shuzilm.filter.FilterRule;
 import com.alibaba.fastjson.JSON;
@@ -214,6 +215,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     response = "";
                     return response;
                 }
+                MDC.put("sift",configs.getString("ADX_REQUEST"));
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                 targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
