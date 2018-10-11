@@ -162,6 +162,7 @@ public class RuleMatching {
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
 			int widthDeviation, int heightDeviation, String adxName, String extStr) {
+		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
@@ -412,7 +413,7 @@ public class RuleMatching {
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
 			TagBean tagBean, String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) {
-
+		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
 		List<AdBean> ungradeList = new ArrayList<AdBean>();

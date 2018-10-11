@@ -189,6 +189,7 @@ public class RtbFlowControl {
      * 每隔 10 分钟更新一次广告素材或者人群包
      */
     public void pullTenMinutes() {
+    	MDC.put("sift", "rtb");
         // 从 10 分钟的队列中获得广告素材和人群包
     	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
 //        ArrayList<GpsBean> gpsAll = new ArrayList<>();
@@ -357,6 +358,7 @@ public class RtbFlowControl {
      * 每隔 5 秒钟从消息中心获得当前节点的当前任务，并与当前两个 MAP monitor 进行更新 不包括素材
      */
     public void pullAndUpdateTask() {
+    	MDC.put("sift", "rtb");
     	List<TaskBean> taskList = MsgControlCenter.recvTask(nodeName);
         if (taskList == null || taskList.size() == 0) {
             return;
@@ -372,6 +374,7 @@ public class RtbFlowControl {
      * 每隔 5 秒钟上报rtb引擎中广告的rtb请求数
      */
     public void pushAdBidNums() {
+    	MDC.put("sift", "rtb");
     	bidList.clear();
     	if(bidMap != null && !bidMap.isEmpty()){
     		Iterator iter = bidMap.entrySet().iterator();
@@ -402,6 +405,7 @@ public class RtbFlowControl {
      * 每隔 10分钟上报rtb引擎心跳
      */
     public void pushRtbHeart(){
+    	MDC.put("sift", "rtb");
     	NodeStatusBean bean = new NodeStatusBean();
     	bean.setLastUpdateTime(System.currentTimeMillis());
     	MsgControlCenter.sendNodeStatus(nodeName, bean);
@@ -411,6 +415,7 @@ public class RtbFlowControl {
      * 每个小时重置一次 重置每个小时的投放状态，如果为暂停状态，且作用域为小时，则下一个小时可以继续开始
      */
     public void refreshAdStatus() {
+    	MDC.put("sift", "rtb");
         for (String auid : mapTask.keySet()) {
             TaskBean bean = mapTask.get(auid);
             AdBean ad = mapAd.get(auid);
