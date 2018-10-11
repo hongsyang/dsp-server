@@ -177,7 +177,7 @@ public class RuleMatching {
 		// TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
 
 		if (tagBean == null) {
-			LOG.warn("TAGBEAN[" + tagBean + "]为空!");
+			LOG.warn("根据DEVICEID["+deviceId+"]查找TAGBEAN[" + tagBean + "]为空!");
 			return null;
 		}
 
