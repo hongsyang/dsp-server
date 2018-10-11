@@ -281,17 +281,17 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
-//                "&appv=" + duFlowBean.getAppVersion() +
+                "&ddem=" + duFlowBean.getDemographicTagId() + //人群包
+                "&dcuid=" + duFlowBean.getCreativeUid()+ // 创意id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid();
 
-        //人群包，创意id，省，市，广告主id，代理商id，广告id，数盟did
+        //人群包，创意id，省，市，广告主id，代理商id，广告id，
 
         if ("banner".equals(adType)) {
             bid.setAdm(duFlowBean.getAdm());//  横幅
