@@ -274,6 +274,13 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
+                "&dcuid=" + duFlowBean.getCreativeUid()+ // 创意id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid();
         if (instl == 0 ||instl == 4||instl == 1) {
             bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
