@@ -260,7 +260,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
         bid.setImpid(impression.getId());//从bidRequestBean里面取
-        bid.setAdid(duFlowBean.getAdUid());//duFlowBean.getAdUid()广告id，对应duFlowBean的AdUid；
+        bid.setAdid(duFlowBean.getMaterialId());//duFlowBean.getAdUid()广告id，对应数据库Uid；
         Integer instl = bidRequestBean.getImp().get(0).getInstl();
         String serviceUrl = configs.getString("SERVICE_URL");
         String  curl = serviceUrl + "adviewclick?" +
