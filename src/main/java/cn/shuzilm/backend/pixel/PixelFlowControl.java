@@ -50,6 +50,7 @@ public class PixelFlowControl {
     }
 
     public AdPixelBean sendStatus(AdPixelBean pixel){
+    	MDC.put("sift", "pixel");
     	if(pixel.getClickNums() == 1){
     		pixel.setFinalCost(0.0);
     		MsgControlCenter.sendPixelStatus(this.nodeName,pixel);
@@ -148,6 +149,7 @@ public class PixelFlowControl {
      * 每隔 10分钟上报pixel引擎心跳
      */
     public void pushPixelHeart(){
+    	MDC.put("sift", "pixel");
     	NodeStatusBean bean = new NodeStatusBean();
     	bean.setLastUpdateTime(System.currentTimeMillis());
     	MsgControlCenter.sendNodeStatus(nodeName, bean);
