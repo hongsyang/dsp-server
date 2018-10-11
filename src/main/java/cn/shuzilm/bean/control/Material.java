@@ -1,6 +1,8 @@
 package cn.shuzilm.bean.control;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -35,6 +37,8 @@ public class Material implements ICommand {
 	private int duration;//视频总时长
 	
 	private String auditId;//推审ID
+	
+	private Map<String,String> auditIdMap;
 
 	public String getUid() {
 		return uid;
@@ -151,6 +155,20 @@ public class Material implements ICommand {
 	}
 	public void setAuditId(String auditId) {
 		this.auditId = auditId;
+		if (StringUtils.isNotBlank(auditId)) {
+			String[] split = auditId.split(",");
+			Map<String,String> map = new HashMap<String,String>();
+			String re = "{";
+			String ra = "}";
+			for(String s: split){
+				String[] audSplit = s.replace(re, "").trim().replace(ra, "").replace("\"", "").split(":");
+				map.put(audSplit[0], audSplit[1]);
+			}
+			this.auditIdMap = map;
+		}
+	}
+	public Map<String, String> getAuditIdMap() {
+		return auditIdMap;
 	}
 	
 	

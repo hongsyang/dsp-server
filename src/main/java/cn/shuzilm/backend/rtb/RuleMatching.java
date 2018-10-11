@@ -395,7 +395,7 @@ public class RuleMatching {
 		// 排序
 		if (machedAdList.size() > 0) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, tagIdList,
-					audienceMap);
+					audienceMap,adxName);
 			if (rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null) {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(),
 						rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) + 1);
@@ -411,7 +411,7 @@ public class RuleMatching {
 	 * 对匹配的广告按照规则进行排序
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
-			TagBean tagBean, String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap) {
+			TagBean tagBean, String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) {
 
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -437,7 +437,7 @@ public class RuleMatching {
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList,
-					audienceMap);
+					audienceMap,adxName);
 		} else {
 			// long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
@@ -445,7 +445,7 @@ public class RuleMatching {
 				ad = gradeList.get(0);
 			} else {
 				gradeOrderByPremiumStrategy(gradeList, audienceMap);
-				gradeOrderOtherParaStrategy(gradeList);
+				//gradeOrderOtherParaStrategy(gradeList);  //暂时移除广告因子打分排序
 				ad = gradeByRandom(gradeList);
 			}
 			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
@@ -453,7 +453,7 @@ public class RuleMatching {
 			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList,
-					audienceMap);
+					audienceMap,adxName);
 		}
 
 		return targetDuFlowBean;
@@ -592,7 +592,7 @@ public class RuleMatching {
 	}
 
 	public DUFlowBean packageDUFlowData(Material material, String deviceId, AdBean ad, TagBean tagBean,
-			String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap) {
+			String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) {
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
@@ -608,7 +608,8 @@ public class RuleMatching {
 		targetDuFlowBean.setAdw(material.getWidth());
 		targetDuFlowBean.setAdh(material.getHeight());
 		// targetDuFlowBean.setCrid(creative.getUid());
-		targetDuFlowBean.setCrid(material.getAuditId());
+		
+		targetDuFlowBean.setCrid(material.getAuditIdMap()!=null?material.getAuditIdMap().get(adxName):null);
 		targetDuFlowBean.setAdmt(material.getType());
 		targetDuFlowBean.setAdct(creative.getLink_type());// 点击广告行为
 		targetDuFlowBean.setAdUid(ad.getAdUid());
@@ -650,6 +651,7 @@ public class RuleMatching {
 		targetDuFlowBean.setDescLong(creative.getDescLong());
 		targetDuFlowBean.setMode(ad.getMode());
 		targetDuFlowBean.setDuration(material.getDuration());
+		targetDuFlowBean.setMaterialId(material.getUid());
 		return targetDuFlowBean;
 	}
 
