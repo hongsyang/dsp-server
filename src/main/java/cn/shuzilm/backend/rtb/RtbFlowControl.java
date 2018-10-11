@@ -367,7 +367,14 @@ public class RtbFlowControl {
             // 把最新的任务更新到 MAP task 中
             mapTask.put(task.getAdUid(), task);
         }
-
+        
+        Iterator iter = mapTask.entrySet().iterator();
+		while(iter.hasNext()){
+			Map.Entry<String, TaskBean> entry = (Map.Entry) iter.next();
+			String adUid = entry.getKey();
+			TaskBean task = entry.getValue();
+			myLog.debug("aduid["+adUid+"]\t任务状态["+task.getCommand()+"]");
+		}
     }
     
     /**
