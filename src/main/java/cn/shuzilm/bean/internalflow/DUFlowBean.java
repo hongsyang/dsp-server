@@ -77,5 +77,6 @@ public class DUFlowBean implements Serializable {
 
     private String mode;//出价模式
     private Integer duration;//视频总时长
+    private String materialId;//物料ID
 
 }

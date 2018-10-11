@@ -122,7 +122,6 @@ public class AdFlowControl {
     private static HashMap<String,Long> nodeStatusMap = null;
 
     public AdFlowControl() {
-        MDC.put("sift", "control");
 
         mapAd = new HashMap<>();
         mapTask = new HashMap<>();
@@ -181,7 +180,7 @@ public class AdFlowControl {
     private void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type , long clickNums, int pixelType, boolean isLower) {
         //cpc 定价计算逻辑
         cpcHandler.updatePixel(adUid,1,addMoney,clickNums,1);
-
+        MDC.put("sift", "control");
         switch (type) {
             case 0:
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
@@ -264,6 +263,7 @@ public class AdFlowControl {
      *
      */
     public void pullAndUpdateTask() {
+    	MDC.put("sift", "control");
         //分发任务
         //1、根据当前各个节点消耗的情况，进行扣减，如：之前已经有该广告在投放了，后来调整了配额或金额，则从当前的额度中减掉已经消耗的部分（每小时和每天的），然后剩余的作为任务重新分发下去
         //更新当前广告主报价，资金池，流量池,广告打分
@@ -358,8 +358,9 @@ public class AdFlowControl {
      * 每个小时重置一次 重置每个小时的投放状态，如果为暂停状态，且作用域为小时，则下一个小时可以继续开始
      */
     public void resetHourMonitor() {
+    	MDC.put("sift", "control");
         //清理小时计数器
-    	myLog.debug("开始启动小时计数器清零......");
+    	myLog.info("开始启动小时计数器清零......");
         for (String key : mapMonitorHour.keySet()) {
             AdFlowStatus status = mapMonitorHour.get(key);
             status.setBidNums(0);
@@ -382,7 +383,8 @@ public class AdFlowControl {
      * 每天初始化一次小时 和 天计数器
      */
     public void resetDayMonitor() {
-    	myLog.debug("开始启动天计数器清零......");
+    	MDC.put("sift", "control");
+    	myLog.info("开始启动天计数器清零......");
         long time = 0;
         ResultList rl = null;
         try {
@@ -426,6 +428,7 @@ public class AdFlowControl {
      * 返回 余额为 0 的广告
      */
     private HashSet<String> updateIndicator(ResultList adList) {
+    	MDC.put("sift", "control");
         HashSet<String> lowBalanceAdSet = new HashSet<>();
         try {
             for (ResultMap map : adList) {
@@ -514,9 +517,8 @@ public class AdFlowControl {
      * 从数据库中加载所有的广告,广告主、广告素材和广告配额
      */
     public void loadAdInterval(boolean isInitial) {
-
+    	MDC.put("sift", "control");
         HashMap<String, ReportBean> reportMapDaily = null;
-
 
         long timeNow = System.currentTimeMillis();
         long timeBefore = timeNow - INTERVAL;
@@ -683,7 +685,7 @@ public class AdFlowControl {
             cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-//            for (int i = 0; i < 1000 ; i++) {
+//            for (int i = 0; i < 6 ; i++) {
             dispatchTask();
 //            }
 
@@ -700,6 +702,7 @@ public class AdFlowControl {
      * 其中包括各种对广告的控制，包括开启广告，暂停广告，终止广告等
      */
     private void dispatchTask() {
+    	MDC.put("sift", "control");
         int nodeNums = nodeList.size();
         //遍历所有的广告
         ArrayList<AdBean> adList = new ArrayList<AdBean>();
@@ -740,13 +743,14 @@ public class AdFlowControl {
      * 5分钟获取一次RTB和PIXEL节点心跳
      */
     public void updateNodeStatusMap(){
+    	MDC.put("sift", "control");
     	for (WorkNodeBean node : nodeList) {
     		while(true){
     		NodeStatusBean nodeStatus = MsgControlCenter.recvNodeStatus(node.getName());
     		if(nodeStatus == null){
     			break;
     		}
-    		myLog.debug(node.getName()+" 节点运行正常!");
+    		myLog.info(node.getName()+" 节点运行正常!");
     		nodeStatusMap.put(node.getName(), nodeStatus.getLastUpdateTime());
     		}
     		
@@ -754,13 +758,14 @@ public class AdFlowControl {
     }
     
     public boolean isNodeDown(String nodeName){
+    	MDC.put("sift", "control");
     	Long lastTime = nodeStatusMap.get(nodeName);
     	if(lastTime == null || lastTime == 0){
     		return false;
     	}
     	long nowTime = System.currentTimeMillis();
     	if(nowTime - lastTime >= NODE_DOWN_INTERVAL){//判定节点宕机
-    		myLog.debug(nodeName+" 节点宕机,移除该节点堆积的任务和广告!");
+    		myLog.info(nodeName+" 节点宕机,移除该节点堆积的任务和广告!");
     		MsgControlCenter.removeAll(nodeName);//移除该节点堆积的任务和广告
     		return true;
     	}
@@ -803,6 +808,7 @@ public class AdFlowControl {
      * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
     public void pauseAd(String adUid, String reason, boolean isHourOrAll) {
+    	MDC.put("sift", "control");
     	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (WorkNodeBean node : nodeList) {
         	taskList.clear();
@@ -811,7 +817,7 @@ public class AdFlowControl {
             		task.getCommand() == TaskBean.COMMAND_STOP){
             	continue;
             }
-            myLog.debug(reason);
+            myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
@@ -827,6 +833,7 @@ public class AdFlowControl {
      * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
     public void stopAd(String adUid, String reason, boolean isHourOrAll) {
+    	MDC.put("sift", "control");
     	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
         for (WorkNodeBean node : nodeList) {
         	taskList.clear();
@@ -834,7 +841,7 @@ public class AdFlowControl {
             if(task.getCommand() == TaskBean.COMMAND_STOP){           
             	continue;
             }
-            myLog.debug(reason);
+            myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
