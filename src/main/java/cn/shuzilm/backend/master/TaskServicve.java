@@ -77,7 +77,7 @@ public class TaskServicve extends Service {
         arr[0] = startTime / 1000;
         arr[1] = now / 1000;
         arr[2] = now / 1000;
-        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ?";
+        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ? and status = 1";
         return select.select(sql,arr);
     }
 

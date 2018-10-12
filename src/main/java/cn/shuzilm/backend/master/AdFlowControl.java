@@ -510,6 +510,31 @@ public class AdFlowControl {
 //    public void statConsumeByAdver(){
 //
 //    }
+    
+    /**
+     * 每隔10分钟读取库中广告，判断是否有广告被关闭
+     */
+    public void updateCloseAdInterval(){
+    	MDC.put("sift", "control");    	
+        try {
+        	//加载广告信息
+			ResultList adList = taskService.queryAdByUpTime(0);
+			Set<String> adUidSet = new HashSet<String>();
+			for (ResultMap map : adList) {
+				adUidSet.add(map.getString("uid"));
+			}
+			Iterator iter = mapAd.entrySet().iterator();
+			while(iter.hasNext()){
+				Map.Entry<String, AdBean> entry = (Map.Entry) iter.next();
+				String adUid = entry.getKey();
+				if(!adUidSet.contains(adUid)){				
+					stopAd(adUid, adUid+"广告被关闭", false);
+				}
+			}
+		} catch (Exception e) {
+			myLog.error("移除广告更新缓存异常:"+e.getMessage());
+		}
+    }
 
 
     /**
@@ -618,7 +643,7 @@ public class AdFlowControl {
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
                 
-                if (isInitial) {
+                if (isInitial ||!mapMonitorTotal.containsKey(adUid)) {
                     //初始化所有的监控
                     AdFlowStatus statusHour = new AdFlowStatus();
                     mapMonitorHour.put(adUid,statusHour);
@@ -685,7 +710,7 @@ public class AdFlowControl {
             cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-//            for (int i = 0; i < 6 ; i++) {
+//            for (int i = 0; i < 1 ; i++) {
             dispatchTask();
 //            }
 
@@ -810,20 +835,19 @@ public class AdFlowControl {
     public void pauseAd(String adUid, String reason, boolean isHourOrAll) {
     	MDC.put("sift", "control");
     	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
-        for (WorkNodeBean node : nodeList) {
-        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
             if(task.getCommand() == TaskBean.COMMAND_PAUSE ||
             		task.getCommand() == TaskBean.COMMAND_STOP){
-            	continue;
+            	return;
             }
             myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
             taskList.add(task);
-            pushTaskSingleNode(node.getName(), taskList);
-        }
+            for (WorkNodeBean node : nodeList) {
+            	pushTaskSingleNode(node.getName(), taskList);
+            }
 
     }
 
@@ -835,19 +859,18 @@ public class AdFlowControl {
     public void stopAd(String adUid, String reason, boolean isHourOrAll) {
     	MDC.put("sift", "control");
     	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
-        for (WorkNodeBean node : nodeList) {
-        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
             if(task.getCommand() == TaskBean.COMMAND_STOP){           
-            	continue;
+            	return;
             }
             myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
             taskList.add(task);
-            pushTaskSingleNode(node.getName(), taskList);
-        }
+            for (WorkNodeBean node : nodeList) {
+            	pushTaskSingleNode(node.getName(), taskList);
+            }
 
     }
 

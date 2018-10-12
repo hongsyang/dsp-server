@@ -15,6 +15,7 @@ import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.control.NodeStatusBean;
 import cn.shuzilm.common.Constants;
+import cn.shuzilm.common.PixelConstants;
 
 /**
  * Created by thunders on 2018/7/17.
@@ -36,7 +37,7 @@ public class PixelFlowControl {
 
     public static PixelFlowControl getInstance(){
         if(pixcel == null){
-            String nodeName = Constants.getInstance().getConf("HOST");
+            String nodeName = PixelConstants.getInstance().getConf("HOST");
             pixcel = new PixelFlowControl(nodeName);
         }
         return pixcel;
@@ -60,6 +61,7 @@ public class PixelFlowControl {
     	AdBean ad = mapAd.get(adUid);
     	double rebate = 0.15;
     	if(ad == null){
+    		LOG.warn("根据ADUID["+adUid+"]未找到广告!");
     		return null;
     	}
     	if(ad.getAdvertiser().getAgencyBean() != null)
@@ -136,9 +138,11 @@ public class PixelFlowControl {
      * 每隔 10 分钟更新一次广告素材或者人群包
      */
     public void pullTenMinutes() {
+    	MDC.put("sift", "pixel");
         // 从 10 分钟的队列中获得广告素材和人群包
-    	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);
+    	ArrayList<AdBean> adBeanList = MsgControlCenter.recvAdBean(nodeName);    	
         if(adBeanList != null){
+        LOG.info("广告共计加载条目数:"+adBeanList.size());
         for(AdBean ad:adBeanList){
         	mapAd.put(ad.getAdUid(), ad);
         }

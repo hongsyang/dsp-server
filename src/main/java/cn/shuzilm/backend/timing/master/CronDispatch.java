@@ -67,6 +67,7 @@ public class CronDispatch {
         
         CronDispatch.startTimer(4);
 //        AdFlowControl.getInstance().loadAdInterval(true);
+        CronDispatch.startTimer(5);
     }
 
     /**
@@ -94,6 +95,9 @@ public class CronDispatch {
                break;
            case 4:
         	   dispatch(UpdateNodeStatusTask.class,"0 0/5 * * * ?");
+           case 5:
+        	   dispatch(UpdateCloseAdTask.class,"0 0/10 * * * ?");
+        	   break;
            default:
                break;
        }
