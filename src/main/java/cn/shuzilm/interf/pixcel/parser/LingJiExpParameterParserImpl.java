@@ -55,7 +55,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
         try {
-            log.debug("LingJiExp曝光的requestid:{},nurl值:{}:[]", requestId, element);
+            log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
@@ -86,8 +86,6 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             element.setAdxSource("LingJi");
-            Date date = new Date(element.getWinNoticeTime());//时间小时数
-            element.setHour(date.getHours());
             MDC.put("sift", "LingJiExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Exp");

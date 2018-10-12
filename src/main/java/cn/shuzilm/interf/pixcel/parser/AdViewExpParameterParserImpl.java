@@ -74,8 +74,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-            Date date = new Date(element.getWinNoticeTime());//时间小时数
-            element.setHour(date.getHours());
             MDC.put("sift", "AdViewExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "app");

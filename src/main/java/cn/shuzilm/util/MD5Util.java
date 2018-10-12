@@ -36,7 +36,7 @@ public class MD5Util {
 //        System.out.println("品牌：小辣椒;"+"操作系统：Android;IMEI"+MD5("867338031004605"));
         System.out.println("品牌：魅族;867900916074530"+"操作系统：Android;IMEI:"+MD5("867900916074530"));
 //        System.out.println("品牌：oppo r7007;"+"操作系统：Android;"+MD5("866089025831526"));
-//        System.out.println("品牌：oppo r7007;"+"操作系统：Android;"+MD5("866089025831526"));
+        System.out.println("品牌：oppo r7007;"+"操作系统：Android;"+MD5("860758044849497"));
 //        System.out.println("token;"+MD5("houkp@shuzilm.cncwxk9c2220wkpjvvughbrypay9k1x50o"));
     }
 }

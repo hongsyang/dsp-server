@@ -215,7 +215,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     response = "";
                     return response;
                 }
-                MDC.put("sift",configs.getString("ADX_REQUEST"));
+                MDC.put("sift", configs.getString("ADX_REQUEST"));
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                 targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -265,7 +265,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setAdid(duFlowBean.getMaterialId());//duFlowBean.getAdUid()广告id，对应数据库Uid；
         Integer instl = bidRequestBean.getImp().get(0).getInstl();
         String serviceUrl = configs.getString("SERVICE_URL");
-        String  curl = serviceUrl + "adviewclick?" +
+        String curl = serviceUrl + "adviewclick?" +
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
@@ -276,7 +276,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
-                "&dcuid=" + duFlowBean.getCreativeUid()+ // 创意id
+                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + duFlowBean.getProvince() +// 省
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
@@ -284,7 +284,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid();
-        if (instl == 0 ||instl == 4||instl == 1) {
+        if (instl == 0 | instl == 4 | instl == 1) {
             bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
             bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid()广告物料 ID
             bid.setAdi(duFlowBean.getAdm());//图片路径 duFlowBean.getAdm() 广告物料html数据
@@ -385,7 +385,9 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setAdurl(duFlowBean.getLandingUrl());//广告点击跳转落地页，可以支持重定向
 
         Map nurlMap = new HashMap();
-        nurlMap.put("0", duFlowBean.getTracking());
+        List<String> trackingurls = new ArrayList<>();
+        trackingurls.add(duFlowBean.getTracking());
+        nurlMap.put("0", trackingurls);
         bid.setNurl(nurlMap);//带延迟的曝光，由客户端发送  //曝光监测
 
 

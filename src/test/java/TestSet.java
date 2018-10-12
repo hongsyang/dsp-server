@@ -1,17 +1,10 @@
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class TestSet {
     public static void main(String[] args) {
-        int i=1;
-        System.out.println(i<<30);
-        System.out.println(i<<4);
-        Object key="1";
-        int h;
-        int code = key.hashCode();
-        int i1 = code ^ (code >>> 16);
-        System.out.println(i1);
-        System.out.println(key.hashCode()^16);
-        System.out.println((key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16));
+        Date date = new Date();//时间小时数
+        System.out.println(LocalDateTime.now().getHour());
 
 
 //        BitSet bm = new BitSet();

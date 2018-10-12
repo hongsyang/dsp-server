@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
 import java.net.URL;
@@ -159,7 +160,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                         response = "";
                         return response;
                     }
-
+                    MDC.put("sift",configs.getString("ADX_REQUEST"));
                     //需要添加到Phoenix中的数据
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                     targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -201,6 +202,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     response = "";
                     return response;
                 }
+                MDC.put("sift",configs.getString("ADX_REQUEST"));
                 log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
