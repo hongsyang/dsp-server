@@ -435,7 +435,7 @@ public class RuleMatching {
 		if (ungradeList.size() > 0) {
 			AdBean ad = ungradeList.get(0);// 暂时获取第一个
 			// 封装返回接口引擎数据
-			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
+			LOG.debug("广告ID[" + ad.getAdUid() + "]广告主ID["+ad.getAdvertiser().getUid()+"]通过排序获得竞价资格!");
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, tagIdList,
 					audienceMap,adxName);
@@ -449,7 +449,7 @@ public class RuleMatching {
 				//gradeOrderOtherParaStrategy(gradeList);  //暂时移除广告因子打分排序
 				ad = gradeByRandom(gradeList);
 			}
-			LOG.debug("ID[" + ad.getAdUid() + "]通过排序获得竞价资格!");
+			LOG.debug("广告ID[" + ad.getAdUid() + "]广告主ID["+ad.getAdvertiser().getUid()+"]通过排序获得竞价资格!");
 			// LOG.debug("排序花费时间:" + (System.currentTimeMillis() - startOrder));
 			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
