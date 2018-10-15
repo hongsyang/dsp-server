@@ -7,6 +7,7 @@ import cn.shuzilm.backend.timing.master.DailyTask;
 import cn.shuzilm.backend.timing.master.HourTask;
 import cn.shuzilm.backend.timing.master.RealTask;
 import cn.shuzilm.backend.timing.master.TenMinuteTask;
+import cn.shuzilm.backend.timing.master.UpdateAdMapTask;
 
 /**
  * Created by thunders on 2018/7/23.
@@ -58,8 +59,6 @@ public class CronDispatch {
 //        //  每天触发
 //        AdFlowControl.getInstance().resetDayMonitor();
         //  10 min 触发
-        
-
 
 
     }
@@ -87,6 +86,8 @@ public class CronDispatch {
            case 3:
                dispatch(DailyTask.class,"0 0 0 * * ?");
                break;
+           case 6:
+        	   dispatch(UpdateAdMapTask.class,"0 0/5 * * * ?");
            default:
                break;
        }

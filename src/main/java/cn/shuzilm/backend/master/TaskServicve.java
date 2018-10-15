@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by thunders on 2018/7/11.
@@ -17,6 +18,8 @@ import java.util.*;
 public class TaskServicve extends Service {
 	
 	private SimpleDateFormat dateFm = new SimpleDateFormat("yyyyMM");
+	
+	private static final int INTERVAL = 5 * 60 * 1000;
     /**
      * 查找 10 分钟前的 人群包条件
      *
@@ -33,6 +36,57 @@ public class TaskServicve extends Service {
         for(ResultMap rm : list) {
             AudienceBean bean = new AudienceBean();
             bean.setAdUid(adUid);
+            bean.setUid(rm.getString("uid"));
+            bean.setName(rm.getString("name"));
+            bean.setType(rm.getString("type"));
+            bean.setAdviserId(rm.getString("advertiser_uid"));
+
+            //特定人群
+            bean.setDemographicCitys(rm.getString("demographic_city"));
+            bean.setDemographicTagId(rm.getString("demographic_tag"));
+            //兴趣偏好标签
+            bean.setAppPreferenceIds(rm.getString("app_preference_ids"));
+            bean.setBrandIds(rm.getString("brand_ids"));
+            bean.setCarrierId(rm.getString("carrier_id"));
+            //选定城市或者经纬度 工作地、居住地、活动地
+            bean.setMobilityType(rm.getString("location_type"));
+            bean.setCitys(rm.getString("location_city"));
+            bean.setGeos(rm.get("location_map") != null ? rm.getString("location_map") : "");
+            bean.setIncomeLevel(rm.getString("income_level"));
+            bean.setNetworkId(rm.getString("network_id"));
+            bean.setPhonePriceLevel(rm.getString("phone_price_level"));
+            bean.setPlatformId(rm.getString("platform_id"));
+            bean.setLocationMode(rm.getString("location_mode"));
+            //特定公司
+            bean.setCompanyIds(rm.getString("company_ids"));
+            //智能设备
+            bean.setIps(rm.getString("ips"));
+            //定制人群包ID
+            bean.setDmpId(rm.getString("dmp_tag"));
+            aList.add(bean);
+
+        }
+        return aList;
+    }
+    
+    /**
+     * 查找 5 分钟前的 人群包条件
+     *
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public List<AudienceBean> queryAudienceByUpTime() throws SQLException {
+    	ArrayList<AudienceBean> aList = new ArrayList<>();
+        long timeNow = System.currentTimeMillis();
+        long timeBefore = timeNow - INTERVAL;
+        Object[] arr = new Object[1];
+        arr[0] = timeBefore / 1000;
+        String sql = "SELECT m.ad_uid,a.* FROM audience a JOIN map_ad_audience m ON m.audience_uid = uid where updated_at >= ?";
+        ResultList list =  select.select(sql,arr);
+        for(ResultMap rm : list) {
+        	AudienceBean bean = new AudienceBean();
+            bean.setAdUid(rm.getString("ad_uid"));
+            bean.setUid(rm.getString("uid"));
             bean.setName(rm.getString("name"));
             bean.setType(rm.getString("type"));
             bean.setAdviserId(rm.getString("advertiser_uid"));
@@ -166,6 +220,51 @@ public class TaskServicve extends Service {
     }
     
     /**
+     * 查找5分钟前的创意
+     * @param creativeUid
+     * @return
+     */
+    public List<CreativeBean> queryCreativeByUpTime() {
+    	List<CreativeBean> creativeList = new ArrayList<CreativeBean>();
+    	long timeNow = System.currentTimeMillis();
+        long timeBefore = timeNow - INTERVAL;
+        Object[] arr = new Object[1];
+        arr[0] = timeBefore / 1000;
+        String sql = "select a.uid ad_uid,c.* from creative c JOIN ad a ON c.uid=a.creative_uid where c.updated_at >= ?";
+        try {           
+            ResultList list =  select.select(sql,arr);
+            for(ResultMap cMap : list) {
+            	CreativeBean creativeBean = new CreativeBean();
+            	creativeBean.setRelatedAdUid(cMap.getString("ad_uid"));
+            	creativeBean.setName(cMap.getString("name"));
+                creativeBean.setUid(cMap.getString("uid"));
+                creativeBean.setBrand(cMap.getString("brand"));
+                creativeBean.setDesc(cMap.getString("text"));
+                creativeBean.setDescLong(cMap.getString("text_long"));
+//                creativeBean.setDescShort(cMap.getString("text_short"));
+                creativeBean.setDomain(cMap.getString("brand_domain"));
+                creativeBean.setTitle(cMap.getString("title"));
+                creativeBean.setTitleLong(cMap.getString("title_long"));
+//                creativeBean.setTitleShort(cMap.getString("title_short"));
+                creativeBean.setLink_type(Integer.parseInt(cMap.getString("link_type")));
+                creativeBean.setLink(cMap.getString("link_uri"));
+                creativeBean.setLanding(cMap.getString("landing_uri"));
+                creativeBean.setTracking(cMap.getString("tracking_uri"));
+                creativeBean.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
+                creativeBean.setApproved(Integer.parseInt(cMap.getString("approved")));
+                //creativeBean.setApproved_adx(cMap.getString("approved_adx"));
+                creativeBean.setType(cMap.getString("type"));
+                creativeList.add(creativeBean);
+            }
+            
+            return creativeList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    /**
      * 根据创意 ID 查询 物料
      * @return
      */
@@ -271,7 +370,7 @@ public class TaskServicve extends Service {
         return null;
     }
 
-    public HashMap<String,ReportBean> statAdCostTotal(){
+    public ConcurrentHashMap<String,ReportBean> statAdCostTotal(){
         long startStamp = 0;
         long nowStamp = System.currentTimeMillis();
         return statAdCost(startStamp,nowStamp,false);
@@ -281,7 +380,7 @@ public class TaskServicve extends Service {
      * 加载当前小时 0 分 到现在的账户消耗数据
      * @return
      */
-    public HashMap<String,ReportBean> statAdCostHour(){
+    public ConcurrentHashMap<String,ReportBean> statAdCostHour(){
         int minute = Calendar.getInstance().get(Calendar.MINUTE);
         Calendar start = Calendar.getInstance();
         start.set(Calendar.MINUTE,0);
@@ -292,7 +391,7 @@ public class TaskServicve extends Service {
         return statAdCost(startStamp,nowStamp,true);
     }
 
-    public HashMap<String,ReportBean> statAdCostDaily(){
+    public ConcurrentHashMap<String,ReportBean> statAdCostDaily(){
         Calendar start = Calendar.getInstance();
         start.set(Calendar.HOUR,0);
         start.set(Calendar.MINUTE,0);
@@ -307,7 +406,7 @@ public class TaskServicve extends Service {
      * @param startTime
      * @param endTime
      */
-    public HashMap<String,ReportBean> statAdCost(long startTime, long endTime,boolean isHour){
+    public ConcurrentHashMap<String,ReportBean> statAdCost(long startTime, long endTime,boolean isHour){
         // type：
         // 0 : 小时存量费用的统计，对于一个小时前，当天的广告耗费的汇总
         // 1 : 天存量费用的统计，
@@ -324,7 +423,7 @@ public class TaskServicve extends Service {
             sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where created_at >= ? and created_at <= ?  group by ad_uid";
         try {
             ResultList rl = select.select(sql,arr);
-            HashMap<String,ReportBean> map = new HashMap<>();
+            ConcurrentHashMap<String,ReportBean> map = new ConcurrentHashMap<>();
             for(ResultMap rm : rl){
                 ReportBean report = new ReportBean();
                 String adUid = rm.getString("ad_uid");

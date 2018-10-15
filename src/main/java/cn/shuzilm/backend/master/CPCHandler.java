@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by DENGJIAN on 2018/8/22.
@@ -30,7 +31,7 @@ public class CPCHandler {
     private static int winTotalNums = 5 * 1000;
 
     // 广告信息
-    private HashMap<String, AdBean> adMap = null;
+    private ConcurrentHashMap<String, AdBean> adMap = null;
 
     private static CPCHandler cpcHandler;
 
