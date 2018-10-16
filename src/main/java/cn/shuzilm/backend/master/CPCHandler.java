@@ -23,7 +23,7 @@ public class CPCHandler {
     /**
      * 数据库中设定的设计流控指标
      */
-    private static HashMap<String, AdFlowStatus> mapThresholdTotal = new HashMap<>();
+    //private static HashMap<String, AdFlowStatus> mapThresholdTotal = new HashMap<>();
 
     /**
      * cpc试投放数量
@@ -74,7 +74,7 @@ public class CPCHandler {
     }
 
     /**
-     * 更新阈值
+     * 初始化monitor
      * @return
      */
     public boolean updateIndicator(boolean isInitial){
@@ -86,13 +86,13 @@ public class CPCHandler {
                     myLog.error("未找到广告信息："+adUid);
                     return false;
                 }
-                AdFlowStatus status = new AdFlowStatus();
+               /* AdFlowStatus status = new AdFlowStatus();
                 status.reset();
                 status.setUid(adUid);
                 status.setName(adBean.getName());
                 status.setWinNums(winTotalNums);
                 status.setMoney(adBean.getMoneyArrears());
-                mapThresholdTotal.put(adUid, status);
+                mapThresholdTotal.put(adUid, status);*/
 
                 if(isInitial) {
                     AdFlowStatus moniterStatus = new AdFlowStatus();
@@ -115,8 +115,8 @@ public class CPCHandler {
     	String reason = null;
         try{        	
             AdFlowStatus statusMonitor = mapMonitorTotal.get(auid);
-            AdFlowStatus statusThreshold = mapThresholdTotal.get(auid);
-            if(statusMonitor == null || statusThreshold == null) {
+           // AdFlowStatus statusThreshold = mapThresholdTotal.get(auid);
+            if(statusMonitor == null) {
                // myLog.error("监视器或者阈值为空，广告id： " + auid);
             	reason = "监视器或者阈值为空，广告id： " + auid;
                 return reason;
@@ -181,4 +181,3 @@ public class CPCHandler {
         }
     }
 }
-

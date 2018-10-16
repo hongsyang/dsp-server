@@ -182,8 +182,11 @@ public class AdFlowControl {
      */
     private void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type , long clickNums, int pixelType, boolean isLower) {
         //cpc 定价计算逻辑
-        cpcHandler.updatePixel(adUid,1,addMoney,clickNums,1);
-        MDC.put("sift", "control");
+    	MDC.put("sift", "control");
+    	AdBean adBean = mapAd.get(adUid);
+        if(adBean.getMode()!= null && adBean.getMode().equals("cpc")){
+        	cpcHandler.updatePixel(adUid,addWinNoticeNums,addMoney,clickNums,pixelType);
+        }       
         switch (type) {
             case 0:
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
@@ -317,13 +320,13 @@ public class AdFlowControl {
                 pauseAd(auid, reason, true);
                 myLog.error(monitor.toString() + "\t" + reason);
             }
-            if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
-                //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
-                String reason = "#### 小时 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
-                pauseAd(auid, reason, true);
-                myLog.error(monitor.toString() + "\t" + reason);
+            /*if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
+            //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
+            String reason = "#### 小时 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
+            pauseAd(auid, reason, true);
+            myLog.error(monitor.toString() + "\t" + reason);
 
-            }
+        	}*/
 
             String groupId = mapAd.get(auid).getGroupId();
             AdFlowStatus monitorAdGroup = mapMonitorAdGroupTotal.get(groupId);
@@ -350,6 +353,13 @@ public class AdFlowControl {
                 stopAd(auid, reason, false);
                 myLog.error(monitor.toString() + "\t" + reason);
             }
+            
+            if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
+                String reason = "#### 每日 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
+                stopAd(auid, reason, true);
+                myLog.error(monitor.toString() + "\t" + reason);
+            }
+
         }
 
         //根据返回的 winnotice 个数 和金额，重新调节和下发需要提供的 bids 的个数
@@ -413,6 +423,14 @@ public class AdFlowControl {
                 status2.setUid(auid);
                 status2.setName(name);
                 mapMonitorHour.put(auid, status2);
+                
+             // 初始化广告组监视器
+                AdFlowStatus status3 = new AdFlowStatus();
+                status3.reset();
+                status3.setUid(auid);
+                status3.setName(name);
+                mapMonitorAdGroupTotal.put(auid, status3);
+
                 
                 if(mapTask.containsKey(auid)){
                 	TaskBean task = mapTask.get(auid);
@@ -758,7 +776,7 @@ public class AdFlowControl {
             //计算权重因子
             adProperty.handle();
             //定期 10 分钟更新 CPC 阀值
-            cpcHandler.updateIndicator(false);
+            //cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
 //            for (int i = 0; i < 1 ; i++) {
