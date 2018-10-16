@@ -13,6 +13,7 @@ import org.slf4j.MDC;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 广告流量控制
@@ -52,90 +53,90 @@ public class AdFlowControl {
 //     */
 //    private static HashMap<String,ArrayList<String>> adviserMap = null;
 
-    public HashMap<String, AdBean> getMapAd(){
+    public ConcurrentHashMap<String, AdBean> getMapAd(){
         return mapAd;
     }
 
-    public HashMap<String, AdFlowStatus> getMapMonitorHour(){
+    public ConcurrentHashMap<String, AdFlowStatus> getMapMonitorHour(){
         return mapMonitorHour;
     }
 
-    public HashMap<String, ReportBean> getReportMapHour(){
+    public ConcurrentHashMap<String, ReportBean> getReportMapHour(){
         return reportMapHour;
     }
     
-    public HashMap<String,Long> getNodeStatusMap(){
+    public ConcurrentHashMap<String,Long> getNodeStatusMap(){
     	return nodeStatusMap;
     }
 
     /**
      * 广告资源管理
      */
-    private static HashMap<String, AdBean> mapAd = null;
+    private static ConcurrentHashMap<String, AdBean> mapAd = null;
 
     /**
      * 广告任务管理
      */
-    private static HashMap<String, TaskBean> mapTask = null;
+    private static ConcurrentHashMap<String, TaskBean> mapTask = null;
 
-    private static HashMap<String, ReportBean> reportMapTotal = null;
-    private static HashMap<String, ReportBean> reportMapHour = null;
+    private static ConcurrentHashMap<String, ReportBean> reportMapTotal = null;
+    private static ConcurrentHashMap<String, ReportBean> reportMapHour = null;
 
     /**
      * 广告组与广告的对应关系
      */
-    private static HashMap<String, GroupAdBean> mapAdGroup = null;
+    private static ConcurrentHashMap<String, GroupAdBean> mapAdGroup = null;
 
     /**
      * 广告永久的指标监控
      */
-    private static HashMap<String, AdFlowStatus> mapMonitorTotal = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorTotal = null;
     /**
      * 广告每天的指标监控
      */
-    private static HashMap<String, AdFlowStatus> mapMonitorDaily = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorDaily = null;
     /**
      * 广告每小时的指标监控
      */
-    private static HashMap<String, AdFlowStatus> mapMonitorHour = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorHour = null;
 
     /**
      * 广告组的监视器
      */
-    private static HashMap<String, AdFlowStatus> mapMonitorAdGroupTotal = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorAdGroupTotal = null;
 
     /**
      * 数据库中设定的设计流控指标（天 最高限）
      */
-    private static HashMap<String, AdFlowStatus> mapThresholdDaily = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> mapThresholdDaily = null;
 
     /**
      * 数据库中设定的设计流控指标（小时 最高限）
      */
-    private static HashMap<String, AdFlowStatus> mapThresholdHour = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> mapThresholdHour = null;
 
     /**
      * 广告主设定的总流量和金额 (最高限)
      */
-    private static HashMap<String, AdFlowStatus> adverConsumeMapCurr = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> adverConsumeMapCurr = null;
     
-    private static HashMap<String,Long> nodeStatusMap = null;
+    private static ConcurrentHashMap<String,Long> nodeStatusMap = null;
 
     public AdFlowControl() {
 
-        mapAd = new HashMap<>();
-        mapTask = new HashMap<>();
+        mapAd = new ConcurrentHashMap<>();
+        mapTask = new ConcurrentHashMap<>();
 
-        mapMonitorDaily = new HashMap<>();
-        mapMonitorHour = new HashMap<>();
-        adverConsumeMapCurr = new HashMap<>();
-        mapThresholdDaily = new HashMap<>();
-        mapThresholdHour = new HashMap<>();
-        mapAdGroup = new HashMap<>();
-        mapMonitorTotal = new HashMap<>();
-        reportMapHour = new HashMap<>();
-        mapMonitorAdGroupTotal = new HashMap<>();
-        nodeStatusMap = new HashMap<>();
+        mapMonitorDaily = new ConcurrentHashMap<>();
+        mapMonitorHour = new ConcurrentHashMap<>();
+        adverConsumeMapCurr = new ConcurrentHashMap<>();
+        mapThresholdDaily = new ConcurrentHashMap<>();
+        mapThresholdHour = new ConcurrentHashMap<>();
+        mapAdGroup = new ConcurrentHashMap<>();
+        mapMonitorTotal = new ConcurrentHashMap<>();
+        reportMapHour = new ConcurrentHashMap<>();
+        mapMonitorAdGroupTotal = new ConcurrentHashMap<>();
+        nodeStatusMap = new ConcurrentHashMap<>();
 //        adviserMap = new HashMap<>();
 
 
@@ -161,9 +162,11 @@ public class AdFlowControl {
      */
     private void updateBids(String adUid, long addBidNums) {
         AdFlowStatus statusHour = mapMonitorHour.get(adUid);
-        statusHour.setBidNums(statusHour.getBidNums() + addBidNums);
+        if(statusHour != null)
+        	statusHour.setBidNums(statusHour.getBidNums() + addBidNums);
         AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
-        statusDaily.setBidNums(statusDaily.getBidNums() + addBidNums);
+        if(statusDaily != null)
+        	statusDaily.setBidNums(statusDaily.getBidNums() + addBidNums);
     }
 
     /**
@@ -510,6 +513,80 @@ public class AdFlowControl {
 //    public void statConsumeByAdver(){
 //
 //    }
+    
+    /**
+     * 每隔10分钟读取库中广告，判断是否有广告被关闭
+     */
+    public void updateCloseAdInterval(){
+    	MDC.put("sift", "control");    	
+        try {
+        	//加载广告信息
+			ResultList adList = taskService.queryAdByUpTime(0);
+			Set<String> adUidSet = new HashSet<String>();
+			for (ResultMap map : adList) {
+				adUidSet.add(map.getString("uid"));
+			}
+			Iterator iter = mapAd.entrySet().iterator();
+			while(iter.hasNext()){
+				Map.Entry<String, AdBean> entry = (Map.Entry) iter.next();
+				String adUid = entry.getKey();
+				if(!adUidSet.contains(adUid)){				
+					stopAd(adUid, adUid+"广告被关闭", false);
+				}
+			}
+		} catch (Exception e) {
+			myLog.error("移除广告更新缓存异常:"+e.getMessage());
+		}
+    }
+    
+    /**
+     * 每隔5分钟更新广告中有变化的人群包、创意、物料
+     */
+    public void updateAdMapInterval(){
+    	MDC.put("sift", "control"); 
+    	try{
+    		//开始更新人群包
+    		List<AudienceBean> audienceList = taskService.queryAudienceByUpTime();
+    		for(AudienceBean audience:audienceList){
+    			String adUid = audience.getAdUid();
+    			if(mapAd.containsKey(adUid)){
+    				AdBean ad = mapAd.get(adUid);
+    				List<AudienceBean> audienceTempList = ad.getAudienceList();
+    				ListIterator<AudienceBean> it = audienceTempList.listIterator();
+    				while(it.hasNext()){
+    					AudienceBean audienceBean = it.next();
+    					if(audienceBean.getUid().equals(audience.getUid())){
+    						it.remove();
+    						it.add(audience);
+    					}
+    				}
+    			}
+    		}
+    		
+    		//开始更新创意、物料
+    		List<CreativeBean> creativeList = taskService.queryCreativeByUpTime();
+    		for(CreativeBean creative:creativeList){
+    			String adUid = creative.getRelatedAdUid();
+    			List<Material> materialList = taskService.queryMaterialByCreativeId(creative.getUid());
+    			creative.setMaterialList(materialList);
+    			if(mapAd.containsKey(adUid)){
+    				AdBean ad = mapAd.get(adUid);
+    				List<CreativeBean> creativeTempList = ad.getCreativeList();
+    				ListIterator<CreativeBean> it = creativeTempList.listIterator();
+    				while(it.hasNext()){
+    					CreativeBean creativeBean = it.next();
+    					if(creativeBean.getUid().equals(creative.getUid())){
+    						it.remove();
+    						it.add(creative);
+    					}
+    				}
+    			}
+    			
+    		}
+    	}catch(Exception e){
+    		myLog.error("更新广告异常:"+e.getMessage());
+    	}
+    }
 
 
     /**
@@ -518,8 +595,7 @@ public class AdFlowControl {
      */
     public void loadAdInterval(boolean isInitial) {
     	MDC.put("sift", "control");
-        HashMap<String, ReportBean> reportMapDaily = null;
-
+    	ConcurrentHashMap<String, ReportBean> reportMapDaily = null;
         long timeNow = System.currentTimeMillis();
         long timeBefore = timeNow - INTERVAL;
         //取出所有的广告，并取出变动的部分，如果是配额和金额发生变化，则需要重新分配任务
@@ -618,7 +694,7 @@ public class AdFlowControl {
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
                 
-                if (isInitial) {
+                if (isInitial ||!mapMonitorTotal.containsKey(adUid)) {
                     //初始化所有的监控
                     AdFlowStatus statusHour = new AdFlowStatus();
                     mapMonitorHour.put(adUid,statusHour);
@@ -685,7 +761,7 @@ public class AdFlowControl {
             cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-//            for (int i = 0; i < 6 ; i++) {
+//            for (int i = 0; i < 1 ; i++) {
             dispatchTask();
 //            }
 
@@ -810,20 +886,19 @@ public class AdFlowControl {
     public void pauseAd(String adUid, String reason, boolean isHourOrAll) {
     	MDC.put("sift", "control");
     	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
-        for (WorkNodeBean node : nodeList) {
-        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
             if(task.getCommand() == TaskBean.COMMAND_PAUSE ||
             		task.getCommand() == TaskBean.COMMAND_STOP){
-            	continue;
+            	return;
             }
             myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
             taskList.add(task);
-            pushTaskSingleNode(node.getName(), taskList);
-        }
+            for (WorkNodeBean node : nodeList) {
+            	pushTaskSingleNode(node.getName(), taskList);
+            }
 
     }
 
@@ -835,19 +910,18 @@ public class AdFlowControl {
     public void stopAd(String adUid, String reason, boolean isHourOrAll) {
     	MDC.put("sift", "control");
     	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
-        for (WorkNodeBean node : nodeList) {
-        	taskList.clear();
             TaskBean task = mapTask.get(adUid);
             if(task.getCommand() == TaskBean.COMMAND_STOP){           
-            	continue;
+            	return;
             }
             myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
             taskList.add(task);
-            pushTaskSingleNode(node.getName(), taskList);
-        }
+            for (WorkNodeBean node : nodeList) {
+            	pushTaskSingleNode(node.getName(), taskList);
+            }
 
     }
 

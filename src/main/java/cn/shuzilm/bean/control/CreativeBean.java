@@ -22,6 +22,7 @@ public class CreativeBean implements ICommand {
     private String desc;
     private String descShort;
     private String descLong;
+    private String relatedAdUid;
 
     private String brand;
     private String domain;
@@ -222,6 +223,14 @@ public class CreativeBean implements ICommand {
 
 	public void setClickTrackingUrl(String clickTrackingUrl) {
 		this.clickTrackingUrl = clickTrackingUrl;
+	}
+
+	public String getRelatedAdUid() {
+		return relatedAdUid;
+	}
+
+	public void setRelatedAdUid(String relatedAdUid) {
+		this.relatedAdUid = relatedAdUid;
 	}
     
 }

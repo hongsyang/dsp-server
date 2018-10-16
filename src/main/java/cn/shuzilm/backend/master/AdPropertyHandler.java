@@ -14,9 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * 广告加权因子的计算
  */
 public class AdPropertyHandler {
-    private HashMap<String, AdBean> adMap = null;
-    private HashMap<String, AdFlowStatus> mapMonitorHour = null;
-    public HashMap<String, ReportBean> reportMapHour = null;
+    private ConcurrentHashMap<String, AdBean> adMap = null;
+    private ConcurrentHashMap<String, AdFlowStatus> mapMonitorHour = null;
+    public ConcurrentHashMap<String, ReportBean> reportMapHour = null;
 
     private enum Property{
         IMP_PROCESS,
@@ -24,11 +24,11 @@ public class AdPropertyHandler {
         CTR_SCORE
 
     }
-    private static HashMap<String,AdPropertyBean> map = null;
+    private static ConcurrentHashMap<String,AdPropertyBean> map = null;
     private AdFlowControl controlIns;
 
     public AdPropertyHandler(AdFlowControl controlIns){
-        map = new HashMap<>();
+        map = new ConcurrentHashMap<>();
         reportMapHour = controlIns.getReportMapHour();
         adMap = controlIns.getMapAd();
         mapMonitorHour = controlIns.getMapMonitorHour();
@@ -44,7 +44,7 @@ public class AdPropertyHandler {
             AdFlowStatus statusHour = mapMonitorHour.get(adUid);
             // 计算点击率 通过小时反馈的曝光和点击情况计算而来
             // 点击率 = 点击次数  / 曝光次数
-            if(statusHour.getWinNums() > 0 ){
+            if(statusHour != null && statusHour.getWinNums() > 0 ){
                 double clickRate = statusHour.getClickNums() * 1.0 / statusHour.getWinNums();
                 property.setCtrScore(clickRate);
             }

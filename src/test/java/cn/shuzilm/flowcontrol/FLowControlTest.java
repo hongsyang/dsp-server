@@ -6,6 +6,7 @@ import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPixelBean;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by thunders on 2018/8/21.
@@ -20,7 +21,7 @@ public class FLowControlTest {
         String adUid = "7635434a-7ff2-45f6-9806-09b6d4908e2d";
         AdFlowControl adIns = AdFlowControl.getInstance();
         adIns.loadAdInterval(true);
-        HashMap<String, AdBean> adMap = adIns.getMapAd();
+        ConcurrentHashMap<String, AdBean> adMap = adIns.getMapAd();
         //模拟曝光请求超过了允许的范围
         AdPixelBean pixel = new AdPixelBean();
         pixel.setWinNoticeNums(1);
