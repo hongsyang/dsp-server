@@ -59,6 +59,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);
+            MDC.put("sift", "dsp-server");
             log.debug(" BidRequest参数入参：{}", dataStr);
             Map msg = new HashMap();//过滤规则的返回结果
             //请求报文解析
@@ -202,7 +203,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     response = "";
                     return response;
                 }
-                MDC.put("sift",configs.getString("ADX_REQUEST"));
+                MDC.put("sift", "dsp-server");
                 log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id

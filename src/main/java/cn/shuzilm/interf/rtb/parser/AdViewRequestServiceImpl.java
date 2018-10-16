@@ -53,6 +53,7 @@ public class AdViewRequestServiceImpl implements RequestService {
     public String parseRequest(String dataStr) {
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
+            MDC.put("sift", "dsp-server");
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);
             log.debug(" BidRequest参数入参：{}", dataStr);
             Map msg = new HashMap();//过滤规则的返回结果
@@ -215,7 +216,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     response = "";
                     return response;
                 }
-                MDC.put("sift", configs.getString("ADX_REQUEST"));
+                MDC.put("sift", "dsp-server");
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                 targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -231,7 +232,6 @@ public class AdViewRequestServiceImpl implements RequestService {
                 log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
                 pushRedis(targetDuFlowBean);//上传到redis服务器
-                log.debug("json计数");
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
             }
