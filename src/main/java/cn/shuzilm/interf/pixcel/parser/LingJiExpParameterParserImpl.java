@@ -89,8 +89,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             element.setHour(date.getHours());
             MDC.put("sift", "LingJiExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
-            MDC.put("phoenix", "app");
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            MDC.put("phoenix", "Exp");
+            log.debug(        "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
                     element.getCreateTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -102,18 +104,20 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(),element.getImpression(),element.getDealid() );
+                    element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
             MDC.remove("phoenix");
-            MDC.put("sift", "LingJiExp");
-            boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-            if (lingJiExp) {
-                log.debug("发送到Phoenix：{}", lingJiExp);
-            } else {
-                log.debug("发送到Phoenix：{}", lingJiExp);
-            }
 
         } catch (Exception e) {
-            log.error("redis获取失败或者超时 ，异常：{}", e);
+            log.error("adPixelBean获取失败或者超时 ，异常：{}", e);
+        }finally {
+            jedis.close();
+        }
+        boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+        MDC.put("sift", "LingJiExp");
+        if (lingJiExp) {
+            log.debug("发送到Phoenix：{}", lingJiExp);
+        } else {
+            log.debug("发送到Phoenix：{}", lingJiExp);
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);

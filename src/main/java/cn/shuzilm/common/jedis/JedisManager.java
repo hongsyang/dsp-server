@@ -35,7 +35,7 @@ public class JedisManager {
 
     private static final int REDIS_POOL_DEFAULT_TIMEOUT = 20000;
 
-    private JedisPool jedisPool;
+    private  static JedisPool jedisPool;
 
     private JedisManager(String configFileName) {
         this.configs = AppConfigs.getInstance(configFileName);

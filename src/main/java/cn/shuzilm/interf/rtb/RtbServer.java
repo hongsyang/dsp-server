@@ -2,6 +2,7 @@ package cn.shuzilm.interf.rtb;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
+import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -36,6 +37,10 @@ public class RtbServer {
 
     private static JedisManager jedisManager ;
 
+    private static  AppConfigs configs = null;
+
+    private static final String FILTER_CONFIG = "filter.properties";
+
     /**
      * 创建数据库连接
      */
@@ -43,6 +48,7 @@ public class RtbServer {
     public static Connection conn;
 
     public static void main(String[] args) {
+        configs = AppConfigs.getInstance(FILTER_CONFIG);
         appKeySet = new HashSet<String>();
         appKeyIdMap = new HashMap<String, String>();
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
@@ -51,12 +57,12 @@ public class RtbServer {
         jedisManager=JedisManager.getInstance();
         ruleMatching=RuleMatching.getInstance();
         RtbServer server = new RtbServer();
-        server.start(8780);
+        server.start(configs.getInt("RTB_PORT"));
     }
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(50), Executors.newCachedThreadPool(), 50));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(), 50));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀

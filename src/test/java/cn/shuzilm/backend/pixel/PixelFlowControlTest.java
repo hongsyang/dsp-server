@@ -16,7 +16,12 @@ public class PixelFlowControlTest {
             bean.setType(0);
             bean.setWinNoticeNums(1);
             bean.setCost(5.0D);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            try {
+				PixelFlowControl.getInstance().sendStatus(bean);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         System.out.println("+++++++++++++++++++++++++++++++++++++++");
 
@@ -28,7 +33,12 @@ public class PixelFlowControlTest {
             bean.setType(0);
             bean.setWinNoticeNums(500);
             bean.setCost(4.0D);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            try {
+				PixelFlowControl.getInstance().sendStatus(bean);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
         System.out.println("+++++++++++++++++++++++++++++++++++++++");
 
@@ -40,7 +50,12 @@ public class PixelFlowControlTest {
             bean.setType(0);
             bean.setWinNoticeNums(1);
             bean.setCost(5.0D);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            try {
+				PixelFlowControl.getInstance().sendStatus(bean);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
 
         // 4次点击
@@ -49,7 +64,12 @@ public class PixelFlowControlTest {
             bean.setAdUid("f2cb2fda-caf3-4c24-8bdd-940ac2c74485");
             bean.setType(1);
             bean.setClickNums(1);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            try {
+				PixelFlowControl.getInstance().sendStatus(bean);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
 
         // 10次曝光
@@ -59,7 +79,12 @@ public class PixelFlowControlTest {
             bean.setType(0);
             bean.setWinNoticeNums(1);
             bean.setCost(5.0D);
-            PixelFlowControl.getInstance().sendStatus(bean);
+            try {
+				PixelFlowControl.getInstance().sendStatus(bean);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     }
 }

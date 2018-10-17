@@ -78,7 +78,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             MDC.put("sift", "AdViewExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "app");
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+            log.debug(       "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
                     element.getCreateTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -90,17 +92,18 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(),element.getImpression(),element.getDealid() );
+                    element.getRequestId(),element.getImpression().get(0).getId(),element.getDealid() );
+
             MDC.remove("phoenix");
-            MDC.put("sift", "AdViewExp");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
-            if (lingJiClick) {
-                log.debug("发送到Phoenix：{}", lingJiClick);
-            } else {
-                log.debug("发送到Phoenix：{}", lingJiClick);
-            }
         }catch (Exception e){
-            log.error("redis获取失败或者超时 ，异常：{}",e);
+            log.error("adPixelBean获取失败或者超时 ，异常：{}",e);
+        }
+        MDC.put("sift", "AdViewExp");
+        boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
+        if (lingJiClick) {
+            log.debug("发送到Phoenix：{}", lingJiClick);
+        } else {
+            log.debug("发送到Phoenix：{}", lingJiClick);
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);

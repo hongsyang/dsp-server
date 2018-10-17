@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
 import java.net.URL;
@@ -54,10 +55,11 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
     @Override
-    public String parseRequest(String dataStr) {
+    public String parseRequest(String dataStr) throws Exception {
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);
+            MDC.put("sift", "dsp-server");
             log.debug(" BidRequest参数入参：{}", dataStr);
             Map msg = new HashMap();//过滤规则的返回结果
             //请求报文解析
@@ -66,7 +68,6 @@ public class LingJiRequestServiceImpl implements RequestService {
             Device userDevice = bidRequestBean.getDevice();//设备信息
             Impression userImpression = bidRequestBean.getImp().get(0);//曝光信息
             App app = bidRequestBean.getApp();//应用信息
-
             Integer width = null;//广告位的宽
             Integer height = null;//广告位的高
             Integer showtype = userImpression.getExt().getShowtype();//广告类型
@@ -78,16 +79,21 @@ public class LingJiRequestServiceImpl implements RequestService {
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
                 return response;
+
             }
+            //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getExt().getIdfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
-                    deviceId = userDevice.getExt().getMac();
+//                    deviceId = userDevice.getExt().getMac();
+                    deviceId = userDevice.getDidmd5();
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
-                    deviceId = userDevice.getExt().getMac();
+//                    deviceId = userDevice.getExt().getMac();
+                    deviceId = userDevice.getDidmd5();
                 }
             }
+            //支持的文件类型
             List<LJAssets> assets = new ArrayList<>();
             if ("banner".equals(adType)) {// banner 类型
                 width = userImpression.getBanner().getW();
@@ -151,7 +157,11 @@ public class LingJiRequestServiceImpl implements RequestService {
                             ADX_ID,//ADX 服务商ID
                             stringSet//文件扩展名
                     );
-
+                    if (targetDuFlowBean == null) {
+                        response = "";
+                        return response;
+                    }
+                    MDC.put("sift",configs.getString("ADX_REQUEST"));
                     //需要添加到Phoenix中的数据
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                     targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -189,6 +199,12 @@ public class LingJiRequestServiceImpl implements RequestService {
                         ADX_ID,//ADX 服务商ID
                         stringSet//文件扩展名
                 );
+                if (targetDuFlowBean == null) {
+                    response = "";
+                    return response;
+                }
+                MDC.put("sift", "dsp-server");
+                log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
                 //需要添加到Phoenix中的数据
                 targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                 targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -268,7 +284,17 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
+                "&ddem=" + duFlowBean.getDemographicTagId() + //人群包
+                "&dcuid=" + duFlowBean.getCreativeUid()+ // 创意id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid();
+
+        //人群包，创意id，省，市，广告主id，代理商id，广告id，
 
         if ("banner".equals(adType)) {
             bid.setAdm(duFlowBean.getAdm());//  横幅
@@ -277,24 +303,26 @@ public class LingJiRequestServiceImpl implements RequestService {
         } else if ("interstitial".equals(adType)) {
             bid.setAdm(duFlowBean.getAdm());// 插屏
         } else if ("feed".equals(adType)) {//信息流
+            bid.setNurl("");//
             LJNativeResponse ljNativeResponse = new LJNativeResponse();
 
             NativeAD nativeAD = new NativeAD();
             List urls = new ArrayList();
             urls.add(nurl);
-            urls.add(curl);
             nativeAD.setImptrackers(urls);// 展示曝光URL数组
 
             LJLink ljLink = new LJLink();//	点击跳转URL地址(落地页)
             ljLink.setUrl(duFlowBean.getLandingUrl());//落地页
-            ljLink.setClicktrackers(urls);
+            List curls = new ArrayList();
+            curls.add(curl);
+            ljLink.setClicktrackers(curls);
             ljLink.setAction(2);
             nativeAD.setLink(ljLink);
 
             List<LJEvent> ljEvents = new ArrayList<>();
             LJEvent event = new LJEvent();
             event.setV("0");
-            event.setVm(urls);
+            event.setVm(curls);
             ljEvents.add(event);
             nativeAD.setEvent(ljEvents);
 
@@ -352,7 +380,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         Double biddingPrice = duFlowBean.getBiddingPrice() * 100;
         Float price = Float.valueOf(String.valueOf(biddingPrice));
         bid.setPrice(price);//price 测试值  //CPM 出价，数值为 CPM 实际价格*10000，如出价为 0.6 元，
-        bid.setCrid(duFlowBean.getCreativeUid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
+        bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
 
 
         LJResponseExt ljResponseExt = new LJResponseExt();
@@ -382,15 +410,21 @@ public class LingJiRequestServiceImpl implements RequestService {
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
-        log.debug("redis计数");
+        log.debug("redis连接时间计数");
         Jedis jedis = jedisManager.getResource();
-        if (jedis != null) {
-            log.debug("jedis：{}", jedis);
-            String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-            Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
-            log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
-        } else {
-            log.debug("jedis为空：{}", jedis);
+        try {
+            if (jedis != null) {
+                log.debug("jedis：{}", jedis);
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
+            } else {
+                log.debug("jedis为空：{}", jedis);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            jedis.close();
         }
     }
 
@@ -402,16 +436,16 @@ public class LingJiRequestServiceImpl implements RequestService {
      */
     private String convertAdType(Integer showtype) {
         String adType = "";
-        if (showtype == 14 || showtype == 11) {
+        if (showtype == 14 | showtype == 11) {
             adType = "banner";//横幅
             log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 13 || showtype == 20 || showtype == 19) {
+        } else if (showtype == 13 | showtype == 20 | showtype == 19) {
             adType = "feed";//信息流
             log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 15 || showtype == 12 || showtype == 17) {
+        } else if (showtype == 15 | showtype == 12 | showtype == 17) {
             adType = "fullscreen";//开屏
             log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 16 || showtype == 18) {
+        } else if (showtype == 16 | showtype == 18|showtype == 4) {
             adType = "interstitial";//插屏
             log.debug("广告类型adType:{}", adType);
         } else {

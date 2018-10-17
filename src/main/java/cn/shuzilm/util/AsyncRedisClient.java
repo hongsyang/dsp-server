@@ -4,6 +4,7 @@ import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisFuture;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.api.async.RedisAsyncCommands;
+import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
@@ -97,7 +98,7 @@ public class AsyncRedisClient {
 		tagBean.setNetworkId(2);
 		tagBean.setCarrierId("4");
 		tagBean.setTagIdList("2,3");
-		tagBean.setCompanyIdList("123,321,222");
+		tagBean.setCompanyIdList("123,321,222,2_1196028");
 		
 		String ss = JSON.toJSONString(tagBean);
 		String nodeStr = RtbConstants.getInstance().getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
@@ -119,9 +120,12 @@ public class AsyncRedisClient {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-//    	 redis1.setAsync("72229B9518E18744620932CB50FC43DC", ss);
-    	redis1.delAsync("72229B9518E18744620932CB50FC43DC");
-    	 System.out.println(redis1.getAsync("72229B9518E18744620932CB50FC43DC"));
+    	 redis1.setAsync("82d4f6b78850978e1a37e13d2bbd69c3", ss);
+//    	redis1.delAsync("72229b9518e18744620932cb50fc43dc");
+//    	String json = redis1.getAsync("00000e3de16c8a7e80d2cca6976fafcf");
+//    	TagBean tagBean1 = JSON.parseObject(json, TagBean.class);
+    	
+    	 System.out.println(redis1.getAsync("82d4f6b78850978e1a37e13d2bbd69c3"));
     	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);	
     	//System.out.println(commands.get("97C304E-4C8E-4872-8666-03FE67DC15DG"));
     	//commands.set("a", "b");
