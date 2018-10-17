@@ -122,7 +122,7 @@ public class RuleMatching {
 			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,
 			Set<String> materialSet) throws Exception{
 		// 筛选审核通过的物料
-		if (material.getApproved_adx() != null && !material.getApprovedAdxSet().contains(adxName)) {
+		if (material.getApproved_adx() != null && !material.getApproved_adx().trim().equals("") && !material.getApprovedAdxSet().contains(adxName)) {
 			return false;
 		}
 		if (!extStr.equals("") && !extStr.contains(material.getExt())) {

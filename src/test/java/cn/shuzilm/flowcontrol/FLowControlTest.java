@@ -30,7 +30,12 @@ public class FLowControlTest {
         pixel.setType(0);
         pixel.setHost("rtb-001");
 
-        PixelFlowControl.getInstance().sendStatus(pixel);
+        try {
+			PixelFlowControl.getInstance().sendStatus(pixel);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //        while(true){
         AdFlowControl.getInstance().pullAndUpdateTask();
 //        }

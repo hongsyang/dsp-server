@@ -344,7 +344,7 @@ public class JedisQueueManager {
     
     public static void main(String[] args) {
     	
-//    	Object o1 = getElementFromQueue("rtb-008ad");
+//    	Object o1 = getElementFromQueue("pixel-001_ad");
 //    	Object o2 = getElementFromQueue("rtb-002ad");
 //    	Object o3 = getElementFromQueue("rtb-003ad");
 //    	System.out.println(o1);
@@ -369,14 +369,14 @@ public class JedisQueueManager {
 //    	long start = System.currentTimeMillis();
 //    	putElementToQueue("rtb-010","123",null);
 //    	putElementToQueue("rtb-010","456",null);
-    	ArrayList<AdBean> taskList = (ArrayList<AdBean>) getElementFromQueue("rtb-001_ad");
-    	System.out.println(taskList.size());
+//    	ArrayList<TaskBean> taskList = (ArrayList<TaskBean>) getElementFromQueue("rtb-001_tdown");
+//    	System.out.println(taskList.size());
     	//NodeStatusBean node = (NodeStatusBean)getElementFromQueue("rtb-001_node_status");
     	//System.out.println(node);
     	//System.out.println(node.getNodeName());
     	//System.out.println(node.getLastUpdateTime());
     	
-//    	for(int i=1;i<9;i++){
+//    	for(int i=100;i<101;i++){
 //    	removeAll("pixel-00"+i+"_pixel");
 //    	removeAll("rtb-00"+i+"_pixel");
 //    	removeAll("pixel-00"+i+"_ad");
