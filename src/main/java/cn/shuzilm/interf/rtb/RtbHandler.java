@@ -121,7 +121,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
      *
      * @throws UnsupportedEncodingException
      */
-    public String parseRequest(String url, String dataStr, String remoteIp) throws UnsupportedEncodingException {
+    public String parseRequest(String url, String dataStr, String remoteIp) throws Exception {
         /**********		POST主业务逻辑		***************/
         String resultData = parser.parseData(url, dataStr, remoteIp);//SDK 2.0.1
 

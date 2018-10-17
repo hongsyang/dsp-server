@@ -55,7 +55,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
     @Override
-    public String parseRequest(String dataStr) {
+    public String parseRequest(String dataStr) throws Exception {
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);

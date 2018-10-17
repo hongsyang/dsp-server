@@ -18,5 +18,5 @@ public interface RequestService {
      * @param dataStr 报文入参
      * @return
      */
-    public String parseRequest(String dataStr);
+    public String parseRequest(String dataStr) throws Exception;
 }

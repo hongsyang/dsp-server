@@ -50,7 +50,7 @@ public class AdViewRequestServiceImpl implements RequestService {
     private static final String FILTER_CONFIG = "filter.properties";
 
     @Override
-    public String parseRequest(String dataStr) {
+    public String parseRequest(String dataStr) throws Exception {
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
             MDC.put("sift", "dsp-server");
