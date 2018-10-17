@@ -107,7 +107,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             MDC.remove("phoenix");
 
         } catch (Exception e) {
-            log.error("adPixelBean获取失败或者超时 ，异常：{}", e);
+            log.error("异常信息：{}", e);
         }finally {
             jedis.close();
         }

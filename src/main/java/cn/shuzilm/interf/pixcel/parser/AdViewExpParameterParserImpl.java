@@ -76,7 +76,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             MDC.put("sift", "AdViewExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
-            MDC.put("phoenix", "app");
+            MDC.put("phoenix", "Exp");
             log.debug(       "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",
@@ -95,7 +95,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
             MDC.remove("phoenix");
         }catch (Exception e){
-            log.error("adPixelBean获取失败或者超时 ，异常：{}",e);
+            log.error("异常信息：{}",e);
+        }finally {
+            jedis.close();
         }
         MDC.put("sift", "AdViewExp");
         boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
