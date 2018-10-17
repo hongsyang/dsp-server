@@ -468,7 +468,7 @@ public class RuleMatching {
 	 * @return
 	 */
 	public boolean commonMatch(TagBean tagBean, AudienceBean audience, List<String> appPreferenceIdList,
-			List<String> brandList,List<String> carrierIdList) {
+			List<String> brandList,List<String> carrierIdList) throws Exception{
 		// 匹配收入
 		if (audience.getIncomeLevel() != null && !audience.getIncomeLevelSet().contains(tagBean.getIncomeId())) {
 			return false;
@@ -511,8 +511,8 @@ public class RuleMatching {
 	 * 
 	 * @param machedAdList
 	 */
-	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList, Map<String, AudienceBean> audienceMap) {
-		Collections.sort(machedAdList, new Comparator<AdBean>() {
+	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList, Map<String, AudienceBean> audienceMap) throws Exception{
+		Collections.sort(machedAdList, new Comparator<AdBean>(){
 
 			@Override
 			public int compare(AdBean o1, AdBean o2) {
@@ -542,7 +542,7 @@ public class RuleMatching {
 	 * 
 	 * @param machedAdList
 	 */
-	public void gradeOrderOtherParaStrategy(List<AdBean> machedAdList) {
+	public void gradeOrderOtherParaStrategy(List<AdBean> machedAdList) throws Exception{
 		Collections.sort(machedAdList, new Comparator<AdBean>() {
 
 			@Override
@@ -573,7 +573,7 @@ public class RuleMatching {
 		});
 	}
 
-	public AdBean gradeByRandom(List<AdBean> machedAdList) {
+	public AdBean gradeByRandom(List<AdBean> machedAdList) throws Exception{
 		AdBean ad = null;
 		int num = tagRandom.nextInt(100);
 		if (num < 70) {
@@ -593,7 +593,7 @@ public class RuleMatching {
 	}
 
 	public DUFlowBean packageDUFlowData(Material material, String deviceId, AdBean ad, TagBean tagBean,
-			String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) {
+			String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) throws Exception{
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
@@ -675,7 +675,7 @@ public class RuleMatching {
 		return false;
 	}
 
-	public boolean checkInBound(TagBean tagBean, AudienceBean audience) {
+	public boolean checkInBound(TagBean tagBean, AudienceBean audience) throws Exception{
 		boolean isInBoundReturn = false;
 		boolean residenceFlag = true,workFlag = true,activityFlag = true;
 		if(tagBean.getResidence() == null){
