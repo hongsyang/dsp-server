@@ -618,12 +618,13 @@ public class RuleMatching {
 		targetDuFlowBean.setDeviceId(deviceId);
 		targetDuFlowBean.setAdxId(advertiser.getUid());
 		// targetDuFlowBean.setSeat("222");// SeatBid 的标识,由 DSP 生成
-		if (audience.getType().equals("demographic")) {
-			tagIdList.retainAll(audience.getDemographicTagIdSet());
-			targetDuFlowBean.setAudienceuid(tagIdList.get(0));
-		} else {
-			targetDuFlowBean.setAudienceuid(null);
-		}
+//		if (audience.getType().equals("demographic")) {
+//			tagIdList.retainAll(audience.getDemographicTagIdSet());
+//			targetDuFlowBean.setAudienceuid(tagIdList.get(0));
+//		} else {
+//			targetDuFlowBean.setAudienceuid(null);
+//		}
+		targetDuFlowBean.setAudienceuid(audience.getUid());
 		targetDuFlowBean.setAdvertiserUid(advertiser.getUid());
 		targetDuFlowBean.setAgencyUid(advertiser.getAgencyUid());
 		targetDuFlowBean.setCreativeUid(creative.getUid());
