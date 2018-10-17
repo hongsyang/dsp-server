@@ -59,7 +59,7 @@ public class PixelFlowControl {
     	}
     	String adUid = pixel.getAdUid();
     	AdBean ad = mapAd.get(adUid);
-    	double rebate = 0.15;
+    	double rebate = 0.0;
     	if(ad == null){
     		LOG.warn("根据ADUID["+adUid+"]未找到广告!");
     		return null;

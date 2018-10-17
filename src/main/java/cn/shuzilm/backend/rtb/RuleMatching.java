@@ -120,7 +120,7 @@ public class RuleMatching {
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
 			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,
-			Set<String> materialSet) {
+			Set<String> materialSet) throws Exception{
 		// 筛选审核通过的物料
 		if (material.getApproved_adx() != null && !material.getApprovedAdxSet().contains(adxName)) {
 			return false;
@@ -161,7 +161,8 @@ public class RuleMatching {
 	 *            高度误差
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, String extStr) {
+			int widthDeviation, int heightDeviation, String adxName, String extStr) throws Exception{
+		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
@@ -411,7 +412,7 @@ public class RuleMatching {
 	 * 对匹配的广告按照规则进行排序
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
-			TagBean tagBean, String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) {
+			TagBean tagBean, String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) throws Exception{
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -467,7 +468,7 @@ public class RuleMatching {
 	 * @return
 	 */
 	public boolean commonMatch(TagBean tagBean, AudienceBean audience, List<String> appPreferenceIdList,
-			List<String> brandList,List<String> carrierIdList) {
+			List<String> brandList,List<String> carrierIdList) throws Exception{
 		// 匹配收入
 		if (audience.getIncomeLevel() != null && !audience.getIncomeLevelSet().contains(tagBean.getIncomeId())) {
 			return false;
@@ -510,8 +511,8 @@ public class RuleMatching {
 	 * 
 	 * @param machedAdList
 	 */
-	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList, Map<String, AudienceBean> audienceMap) {
-		Collections.sort(machedAdList, new Comparator<AdBean>() {
+	public void gradeOrderByPremiumStrategy(List<AdBean> machedAdList, Map<String, AudienceBean> audienceMap) throws Exception{
+		Collections.sort(machedAdList, new Comparator<AdBean>(){
 
 			@Override
 			public int compare(AdBean o1, AdBean o2) {
@@ -541,7 +542,7 @@ public class RuleMatching {
 	 * 
 	 * @param machedAdList
 	 */
-	public void gradeOrderOtherParaStrategy(List<AdBean> machedAdList) {
+	public void gradeOrderOtherParaStrategy(List<AdBean> machedAdList) throws Exception{
 		Collections.sort(machedAdList, new Comparator<AdBean>() {
 
 			@Override
@@ -572,7 +573,7 @@ public class RuleMatching {
 		});
 	}
 
-	public AdBean gradeByRandom(List<AdBean> machedAdList) {
+	public AdBean gradeByRandom(List<AdBean> machedAdList) throws Exception{
 		AdBean ad = null;
 		int num = tagRandom.nextInt(100);
 		if (num < 70) {
@@ -592,7 +593,7 @@ public class RuleMatching {
 	}
 
 	public DUFlowBean packageDUFlowData(Material material, String deviceId, AdBean ad, TagBean tagBean,
-			String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) {
+			String widthHeightRatio, List<String> tagIdList, Map<String, AudienceBean> audienceMap,String adxName) throws Exception{
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
@@ -674,7 +675,7 @@ public class RuleMatching {
 		return false;
 	}
 
-	public boolean checkInBound(TagBean tagBean, AudienceBean audience) {
+	public boolean checkInBound(TagBean tagBean, AudienceBean audience) throws Exception{
 		boolean isInBoundReturn = false;
 		boolean residenceFlag = true,workFlag = true,activityFlag = true;
 		if(tagBean.getResidence() == null){
@@ -750,8 +751,12 @@ public class RuleMatching {
 	}
 
 	public static void main(String[] args) {
+		try{
 		RuleMatching rule = RuleMatching.getInstance();
 		rule.match("72229B9518E18744620932CB50FC43DC", "feed", 720, 240, true, 5, 5, "2", "jpg,gif");
+		}catch(Exception e){
+			e.getMessage();
+		}
 	}
 
 }
