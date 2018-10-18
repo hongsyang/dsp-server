@@ -5,6 +5,7 @@ import java.util.*;
 
 public class TestSet {
     public static void main(String[] args) {
+        System.out.println(  JedisQueueManager.getLength("Exp"));
 
 
         Date date = new Date();//时间小时数

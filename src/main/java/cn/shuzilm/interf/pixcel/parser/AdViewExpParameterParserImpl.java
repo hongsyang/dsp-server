@@ -81,7 +81,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
-                    element.getCreateTime(), LocalDateTime.now().toString(),
+                    new Date(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAudienceuid(),
                     element.getAgencyUid(), element.getAdvertiserUid(),
