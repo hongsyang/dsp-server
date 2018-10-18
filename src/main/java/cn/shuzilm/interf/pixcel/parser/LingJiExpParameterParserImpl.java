@@ -89,11 +89,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             MDC.put("sift", "LingJiExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Exp");
-            log.debug(        "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
-                    element.getCreateTime(), LocalDateTime.now().toString(),
+                    new Date(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAudienceuid(),
                     element.getAgencyUid(), element.getAdvertiserUid(),
@@ -108,7 +108,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 
         } catch (Exception e) {
             log.error("异常信息：{}", e);
-        }finally {
+        } finally {
             jedis.close();
         }
         boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);

@@ -100,7 +100,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             jedis.close();
         }
         MDC.put("sift", "AdViewExp");
-        boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
+        boolean lingJiClick = JedisQueueManager.putElementToQueue("Exp", element, Priority.MAX_PRIORITY);
         if (lingJiClick) {
             log.debug("发送到Phoenix：{}", lingJiClick);
         } else {

@@ -127,7 +127,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
             MDC.remove("phoenix");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewClick", element, Priority.MAX_PRIORITY);
+            boolean lingJiClick = JedisQueueManager.putElementToQueue("Click", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送到Phoenix：{}", lingJiClick);
             } else {
