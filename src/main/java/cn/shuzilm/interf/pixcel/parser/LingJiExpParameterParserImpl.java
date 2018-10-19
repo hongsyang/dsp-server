@@ -7,6 +7,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.aes.AES;
 import com.alibaba.fastjson.JSON;
@@ -55,7 +56,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
         try {
-            log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
+            log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, elementJson);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
@@ -87,7 +88,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             element.setAdxSource("LingJi");
             MDC.put("sift", "LingJiExp");
-            log.debug("发送到Phoenix的DUFlowBean:{}", element);
+            log.debug("发送到Phoenix的DUFlowBean:{}", elementJson);
             MDC.put("phoenix", "Exp");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
@@ -105,20 +106,27 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
             MDC.remove("phoenix");
+            boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+            MDC.put("sift", "LingJiExp");
+            if (lingJiExp) {
+                log.debug("发送elemen :{}到Phoenix是否成功：{}",elementJson, lingJiExp);
+            } else {
+                log.debug("发送elemen :{}到Phoenix是否成功：{}",elementJson, lingJiExp);
+                throw new RuntimeException();
+            }
 
         } catch (Exception e) {
-            //异常队列，报警机制
-            log.error("异常信息：{}", e);
+            Help.sendAlert("pixcel异常触发报警:LingJiExp");
+            MDC.put("sift", "exception");
+            boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+            log.debug("发送element：{}到EXP_ERROR队列：{}",elementJson, exp_error);
+            log.debug("element:{}", elementJson );
+            log.error("异常信息：{}",e);
+            MDC.remove("sift");
         } finally {
             jedis.close();
         }
-        boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-        MDC.put("sift", "LingJiExp");
-        if (lingJiExp) {
-            log.debug("发送到Phoenix：{}", lingJiExp);
-        } else {
-            log.debug("发送到Phoenix：{}", lingJiExp);
-        }
+
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return requestId;

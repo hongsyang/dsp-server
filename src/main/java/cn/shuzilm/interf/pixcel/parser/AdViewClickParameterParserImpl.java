@@ -8,6 +8,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -19,14 +20,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
-* @Description:    ClickParser 点击解析
-* @Author:         houkp
-* @CreateDate:     2018/7/19 18:44
-* @UpdateUser:     houkp
-* @UpdateDate:     2018/7/19 18:44
-* @UpdateRemark:   修改内容
-* @Version:        1.0
-*/
+ * @Description: ClickParser 点击解析
+ * @Author: houkp
+ * @CreateDate: 2018/7/19 18:44
+ * @UpdateUser: houkp
+ * @UpdateDate: 2018/7/19 18:44
+ * @UpdateRemark: 修改内容
+ * @Version: 1.0
+ */
 public class AdViewClickParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewClickParameterParserImpl.class);
@@ -37,19 +38,19 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
 
     @Override
     public String parseUrl(String url) {
-        this.configs= AppConfigs.getInstance(PIXEL_CONFIG);
+        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "AdViewClick");
         log.debug("AdViewClick点击的curl值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
-        element.setInfoId(requestId+ UUID.randomUUID());
+        element.setInfoId(requestId + UUID.randomUUID());
 
         element.setBidid(urlRequest.get("bidid"));
 
         String impid = urlRequest.get("impid");
-        List<Impression> list =new ArrayList();
+        List<Impression> list = new ArrayList();
         Impression impression = new Impression();
         element.setImpression(list);
         impression.setId(impid);
@@ -129,12 +130,19 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
-                log.debug("发送到Phoenix：{}", lingJiClick);
+                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
             } else {
-                log.debug("发送到Phoenix：{}", lingJiClick);
+                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+                throw new RuntimeException();
             }
-        }catch (Exception e){
-            log.error("异常信息：{}",e);
+        } catch (Exception e) {
+            Help.sendAlert("pixcel异常触发报警: AdViewClick");
+            MDC.put("sift", "exception");
+            boolean click_error = JedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
+            log.debug("发送到CLICK_ERROR队列：{}", click_error);
+            log.debug("element{}", element);
+            log.error("异常信息：{}", e);
+            MDC.remove("sift");
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);

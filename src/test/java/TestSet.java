@@ -1,16 +1,12 @@
 import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.util.Help;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class TestSet {
     public static void main(String[] args) {
-        System.out.println(  JedisQueueManager.getLength("Exp"));
-
-
-        Date date = new Date();//时间小时数
-        System.out.println(LocalDateTime.now().getHour());
-
+        Help.sendAlert("houkp2");
 
 //        BitSet bm = new BitSet();
 //        int randomVal = 1000000;

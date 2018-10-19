@@ -17,7 +17,7 @@ import java.util.Map.Entry;
 
 public class Help {
 	
-	private static final String ALERT_USER = "zhangqian";
+	private static final String ALERT_USER = "houkp";
 	
 	private static final byte ALERT_LEVEL = 1;
 	

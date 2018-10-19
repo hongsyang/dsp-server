@@ -8,6 +8,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -44,12 +45,12 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
-        element.setInfoId(requestId+ UUID.randomUUID());
+        element.setInfoId(requestId + UUID.randomUUID());
 
         element.setBidid(urlRequest.get("bidid"));
 
         String impid = urlRequest.get("impid");
-        List<Impression> list =new ArrayList();
+        List<Impression> list = new ArrayList();
         Impression impression = new Impression();
         element.setImpression(list);
         impression.setId(impid);
@@ -130,15 +131,23 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
             MDC.remove("phoenix");
+            boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
+            if (lingJiClick) {
+                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+            } else {
+                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+                throw new RuntimeException();
+            }
         } catch (Exception e) {
+            Help.sendAlert("pixcel异常触发报警:LingJiClick");
+            MDC.put("sift", "exception");
+            boolean click_error = JedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
+            log.debug("发送element：{}到CLICK_ERROR队列：{}", element, click_error);
+            log.error("element:{}", element);
             log.error("异常信息：{}", e);
+            MDC.remove("sift");
         }
-        boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
-        if (lingJiClick) {
-            log.debug("发送到Phoenix：{}", lingJiClick);
-        } else {
-            log.debug("发送到Phoenix：{}", lingJiClick);
-        }
+
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return requestId;
