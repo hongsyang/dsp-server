@@ -143,7 +143,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
             MDC.put("sift", "exception");
             boolean click_error = JedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送element：{}到CLICK_ERROR队列：{}", element, click_error);
-            log.error("element:{}", element);
+            log.debug("element:{}", element);
             log.error("异常信息：{}", e);
             MDC.remove("sift");
         }
