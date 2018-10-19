@@ -23,6 +23,7 @@ import io.lettuce.core.resource.ClientResources;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.Base64Utils;
 import redis.clients.jedis.Jedis;
+import sun.nio.ch.IOUtil;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -35,12 +36,33 @@ import java.util.*;
 
 
 public class Test {
-    public static void main(String[] args) {
-        AudienceBean audience =new AudienceBean();
-        Set<Integer> carrierIdSet = new HashSet<>();
-        carrierIdSet.add(Integer.parseInt("1"));
-        audience.getCarrierIdSet();
-        System.out.println(carrierIdSet.contains(1));
+    public static void main(String[] args) throws Exception {
+
+        String ekey= "hqvBbhco3nPm5kr0TXgQxaO4Er25qd7n";
+        String ikey= "eKUKpIu1cFDETMSo3CY8RJYxfRpNQSu2";
+
+        File file =new File("C:\\Users\\houkp\\Desktop\\对账\\对账\\9.27号曝光");
+        System.out.println(file.isFile());
+        BufferedReader bufferedReader =new BufferedReader( new FileReader(file));
+        String price=null;
+        String temp=null;
+
+        while ((temp=bufferedReader.readLine())!=null){
+            String[] split = temp.split(",");
+            if (split.length>1){
+            for (String s : split) {
+                if (s.substring(0,6).trim().equals("price")){
+                    String[] strings = s.split("=");
+                    price =strings[1].trim();
+                    System.out.println(price);
+                    Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
+                    System.out.println(aLong);
+                }
+            }
+            }
+        }
+        bufferedReader.close();
+
 
 //        String result = AES.decrypt("1JhqBHCPuAdwdO2OsPom9b758Vn-cov2e6jsjGdWo9o","af36ec6c77c042b5a5e49e6414fb436f" );
 //        System.out.println(result);

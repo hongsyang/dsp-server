@@ -36,13 +36,13 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
     private AppConfigs configs = null;
 
-    private static  PixelFlowControl pixelFlowControl =  PixelFlowControl.getInstance();
+    private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
     private static final String PIXEL_CONFIG = "pixel.properties";
 
     @Override
     public String parseUrl(String url) {
-        this.configs= AppConfigs.getInstance(PIXEL_CONFIG);
+        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "AdViewExp");
         log.debug("AdViewExp曝光的wurl值:{}", urlRequest);
@@ -61,7 +61,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             bean.setHost(configs.getString("HOST"));
             String price = urlRequest.get("price");
             Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
-            bean.setCost(Double.valueOf(priceLong)/10000);
+            bean.setCost(Double.valueOf(priceLong) / 10000);
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
@@ -70,18 +70,18 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-            element.setActualPrice(Double.valueOf(priceLong)/10000);//成本价
+            element.setActualPrice(Double.valueOf(priceLong) / 10000);//成本价
             element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             MDC.put("sift", "AdViewExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Exp");
-            log.debug(       "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
-                    new Date(), LocalDateTime.now().toString(),
+                    new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAudienceuid(),
                     element.getAgencyUid(), element.getAdvertiserUid(),
@@ -91,12 +91,13 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(),element.getImpression().get(0).getId(),element.getDealid() );
+                    element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
 
             MDC.remove("phoenix");
-        }catch (Exception e){
-            log.error("异常信息：{}",e);
-        }finally {
+        } catch (Exception e) {
+            //异常队列，报警机制
+            log.error("异常信息：{}", e);
+        } finally {
             jedis.close();
         }
         MDC.put("sift", "AdViewExp");

@@ -115,7 +115,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
-                    element.getCreateTime(), LocalDateTime.now().toString(),
+                    new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAudienceuid(),
                     element.getAgencyUid(), element.getAdvertiserUid(),
@@ -127,7 +127,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
             MDC.remove("phoenix");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("Click", element, Priority.MAX_PRIORITY);
+            boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送到Phoenix：{}", lingJiClick);
             } else {

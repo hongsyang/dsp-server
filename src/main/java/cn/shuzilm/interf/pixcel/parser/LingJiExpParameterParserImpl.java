@@ -107,6 +107,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             MDC.remove("phoenix");
 
         } catch (Exception e) {
+            //异常队列，报警机制
             log.error("异常信息：{}", e);
         } finally {
             jedis.close();
