@@ -466,6 +466,8 @@ public class RtbFlowControl {
                 default:
                     break;
             }
+        }else{
+        	return false;
         }
 
         // 匹配广告投放时间窗
@@ -495,6 +497,8 @@ public class RtbFlowControl {
                 }
             }
             }
+        }else{
+        	return false;
         }
         return true;
     }
