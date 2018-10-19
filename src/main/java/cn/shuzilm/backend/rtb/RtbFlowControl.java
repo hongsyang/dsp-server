@@ -467,12 +467,14 @@ public class RtbFlowControl {
         // 匹配广告投放时间窗
         AdBean adBean = mapAd.get(auid);
         if (adBean != null) {
+        	//判断广告开始时间和结束时间
         	long startTime = adBean.getStartTime().getTime();
         	long endTime = adBean.getEndTime().getTime();
         	long now = System.currentTimeMillis()/1000;
         	if(startTime > now || endTime < now){
         		return false;
         	}
+        	//判断广告投放时间窗
             int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
             if(timeSchedulingArr != null){
             for (int i = 0; i < timeSchedulingArr.length; i++) {
