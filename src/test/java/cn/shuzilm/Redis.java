@@ -1,5 +1,6 @@
 package cn.shuzilm;
 
+import cn.shuzilm.util.AsyncRedisClient;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 
@@ -12,17 +13,19 @@ public class Redis {
     private  static JedisCluster jedisCluster;
 
     public Redis() {
-        String redisString[] = {"172.17.129.116,7001", "172.17.129.116,7002", "172.17.129.116,7003", "172.17.129.116,7004", "172.17.129.116,7005", "172.17.129.116,7006"};
+        String redisString[] = {"192.168.200.201,7001", "192.168.200.201,7002", "192.168.200.201,7003", "192.168.200.201,7004", "192.168.200.201,7005", "192.168.200.201,7000"};
 
-        Set<HostAndPort> nodes = new HashSet<HostAndPort>();
-
-        //配置redis集群
-        for (String host : redisString) {
-            String[] detail = host.split(",");
-            nodes.add(new HostAndPort(detail[0], Integer.parseInt(detail[1])));
-        }
-
-        jedisCluster = new JedisCluster(nodes);
+        AsyncRedisClient instance = AsyncRedisClient.getInstance(redisString);
+        System.out.println(instance);
+//        Set<HostAndPort> nodes = new HashSet<HostAndPort>();
+//
+//        //配置redis集群
+//        for (String host : redisString) {
+//            String[] detail = host.split(",");
+//            nodes.add(new HostAndPort(detail[0], Integer.parseInt(detail[1])));
+//        }
+//
+//        jedisCluster = new JedisCluster(nodes);
     }
 
     /**

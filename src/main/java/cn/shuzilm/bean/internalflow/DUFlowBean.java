@@ -73,8 +73,10 @@ public class DUFlowBean implements Serializable {
     private String desc;//信息流描述
     private String descShort;//信息流短描述
     private String descLong;//信息流长描述
+
+
     private String mode;//出价模式
     private Integer duration;//视频总时长
-    private String materialId;//物料ID
+    private String materialId;//物料ID  materialId 对应数据库material 的 Uid；
 
 }

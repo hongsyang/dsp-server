@@ -17,6 +17,7 @@ import java.io.Serializable;
 public class Deal implements Serializable {
     private String id;//(T)直接交易的唯一标识。
     private Integer bidfloor;//(建议) CPM 底价，数值为 CPM 价格 *10000，如底价为 0.6 元，则该字段值为 6000
+    private Integer media_source;//流量来源，1-Xtrader 2-GroupM
     private String bidfloorcur;//(F) 价格单位，取值: USD,RMB，缺省RMB
     private Integer at;//(T) 竞拍类型：0 – 最高价格成交 1 – 次高价格成交 2 - 约定价格成交（不参加竞价
     private String[] wseat;//(F) 允许投标交易白名单;省略意味着没有限制。

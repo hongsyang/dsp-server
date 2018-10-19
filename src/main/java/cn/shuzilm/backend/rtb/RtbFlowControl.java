@@ -169,7 +169,7 @@ public class RtbFlowControl {
     /**
      * 检查设备的标签所带的居住地、工作地、活动地坐标
      *
-     * @param lng 0 不限 1 居住地 2 工作地 3 活动地
+     * @param lng 0 不限 1 居住地 2 工作地 3 活动地：q
      * @param lat 0 不限 1 居住地 2 工作地 3 活动地
      * @return
      */

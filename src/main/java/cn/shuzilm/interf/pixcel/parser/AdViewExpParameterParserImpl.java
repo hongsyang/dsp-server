@@ -51,12 +51,13 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
         try {
-            log.debug("AdViewExp曝光的requestid:{},wurl值:{}:[]", requestId, element);
+            log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
                 bean.setAdUid(element.getAdUid());
             }
+            bean.setPremiumFactor(element.getPremiumFactor());
             bean.setHost(configs.getString("HOST"));
             String price = urlRequest.get("price");
             Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
@@ -73,11 +74,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-            Date date = new Date(element.getWinNoticeTime());//时间小时数
-            element.setHour(date.getHours());
             MDC.put("sift", "AdViewExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
-            MDC.put("phoenix", "app");
+            MDC.put("phoenix", "Exp");
             log.debug(       "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",
@@ -96,10 +95,12 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
             MDC.remove("phoenix");
         }catch (Exception e){
-            log.error("adPixelBean获取失败或者超时 ，异常：{}",e);
+            log.error("异常信息：{}",e);
+        }finally {
+            jedis.close();
         }
         MDC.put("sift", "AdViewExp");
-        boolean lingJiClick = JedisQueueManager.putElementToQueue("AdViewExp", element, Priority.MAX_PRIORITY);
+        boolean lingJiClick = JedisQueueManager.putElementToQueue("Exp", element, Priority.MAX_PRIORITY);
         if (lingJiClick) {
             log.debug("发送到Phoenix：{}", lingJiClick);
         } else {
@@ -107,6 +108,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
-        return duFlowBeanJson;
+        return requestId;
     }
 }

@@ -4,6 +4,7 @@ import cn.shuzilm.util.UrlParserUtil;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ public class RequestParser {
 
     public String parseData(String url, String dataStr, String remoteIp) {
         String responseStr = "没有对应的解析器";
+        MDC.put("sift", "pixel");
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
         List<String> urlList = UrlParserUtil.urlParser(url);
         Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");

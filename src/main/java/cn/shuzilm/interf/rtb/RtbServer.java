@@ -12,6 +12,8 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.sql.Connection;
@@ -35,11 +37,13 @@ public class RtbServer {
 
     private static RuleMatching ruleMatching;
 
-    private static JedisManager jedisManager ;
+    private static JedisManager jedisManager;
 
-    private static  AppConfigs configs = null;
+    private static AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
+
+    private static final Logger log = LoggerFactory.getLogger(RtbServer.class);
 
     /**
      * 创建数据库连接
@@ -48,16 +52,22 @@ public class RtbServer {
     public static Connection conn;
 
     public static void main(String[] args) {
-        configs = AppConfigs.getInstance(FILTER_CONFIG);
-        appKeySet = new HashSet<String>();
-        appKeyIdMap = new HashMap<String, String>();
+        try {
+            configs = AppConfigs.getInstance(FILTER_CONFIG);
+            appKeySet = new HashSet<String>();
+            appKeyIdMap = new HashMap<String, String>();
 //		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
-        //初始化redis
-        jedisManager=JedisManager.getInstance();
-        ruleMatching=RuleMatching.getInstance();
-        RtbServer server = new RtbServer();
-        server.start(configs.getInt("RTB_PORT"));
+            //初始化redis
+            jedisManager = JedisManager.getInstance();
+            ruleMatching = RuleMatching.getInstance();
+            RtbServer server = new RtbServer();
+            server.start(configs.getInt("RTB_PORT"));
+
+        } catch (Exception e) {
+            log.error("",e);
+        }
+
     }
 
     public void start(int port) {
@@ -79,9 +89,8 @@ public class RtbServer {
         System.out.println("admin start on " + port);
     }
 
-    private class ServerPipelineFactory implements
-            ChannelPipelineFactory {
-        public ChannelPipeline getPipeline() throws Exception {
+    private class ServerPipelineFactory implements ChannelPipelineFactory {
+        public ChannelPipeline getPipeline() {
             // Create a default pipeline implementation.
             ChannelPipeline pipeline = Channels.pipeline();
 

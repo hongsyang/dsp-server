@@ -55,7 +55,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         String elementJson = jedis.get(requestId);
         DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
         try {
-            log.debug("LingJiExp曝光的requestid:{},nurl值:{}:[]", requestId, element);
+            log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
@@ -71,6 +71,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             bean.setWinNoticeNums(1);
             bean.setPremiumFactor(element.getPremiumFactor());
+            bean.setType(0);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
             AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
@@ -85,16 +86,14 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
             element.setAdxSource("LingJi");
-            Date date = new Date(element.getWinNoticeTime());//时间小时数
-            element.setHour(date.getHours());
             MDC.put("sift", "LingJiExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Exp");
-            log.debug(        "{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
-                    element.getCreateTime(), LocalDateTime.now().toString(),
+                    new Date(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
                     element.getAdUid(), element.getAudienceuid(),
                     element.getAgencyUid(), element.getAdvertiserUid(),
@@ -108,8 +107,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             MDC.remove("phoenix");
 
         } catch (Exception e) {
-            log.error("adPixelBean获取失败或者超时 ，异常：{}", e);
-        }finally {
+            log.error("异常信息：{}", e);
+        } finally {
             jedis.close();
         }
         boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
@@ -121,6 +120,6 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         }
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
-        return duFlowBeanJson;
+        return requestId;
     }
 }
