@@ -376,8 +376,8 @@ public class RtbFlowControl {
 			if(task.getCommand() == TaskBean.COMMAND_STOP){
 				mapAd.remove(adUid);
 				iter.remove();
+				myLog.info("广告ID["+adUid+"]停止,被移除!");
 			}
-			myLog.debug("aduid["+adUid+"]\t任务状态["+task.getCommand()+"]");
 		}
     }
     
