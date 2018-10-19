@@ -95,13 +95,16 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
             MDC.remove("phoenix");
         } catch (Exception e) {
-            //异常队列，报警机制
-            log.error("异常信息：{}", e);
+            MDC.put("sift", "exception");
+            boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+            log.debug("发送到EXP_ERROR队列：{}", exp_error);
+            log.error("element{},异常信息：{}", element, e);
+            MDC.remove("sift");
         } finally {
             jedis.close();
         }
         MDC.put("sift", "AdViewExp");
-        boolean lingJiClick = JedisQueueManager.putElementToQueue("Exp", element, Priority.MAX_PRIORITY);
+        boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
         if (lingJiClick) {
             log.debug("发送到Phoenix：{}", lingJiClick);
         } else {
