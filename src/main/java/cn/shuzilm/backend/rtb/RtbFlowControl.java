@@ -373,6 +373,10 @@ public class RtbFlowControl {
 			Map.Entry<String, TaskBean> entry = (Map.Entry) iter.next();
 			String adUid = entry.getKey();
 			TaskBean task = entry.getValue();
+			if(task.getCommand() == TaskBean.COMMAND_STOP){
+				mapAd.remove(adUid);
+				iter.remove();
+			}
 			myLog.debug("aduid["+adUid+"]\t任务状态["+task.getCommand()+"]");
 		}
     }
