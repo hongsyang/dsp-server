@@ -97,7 +97,6 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
         element.setAdxSource("AdView");
         try {
             log.debug("AdViewClick点击的requestid:{},element值:{}", requestId, element);
-            MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
                 bean.setAdUid(element.getAdUid());

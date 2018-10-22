@@ -98,7 +98,6 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
 
         try {
             log.debug("LingJiClick点击的requestid:{},element值:{}:[]", requestId, element);
-            MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
                 bean.setAdUid(element.getAdUid());
