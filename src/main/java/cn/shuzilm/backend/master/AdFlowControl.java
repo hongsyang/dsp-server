@@ -13,6 +13,7 @@ import org.slf4j.MDC;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -257,7 +258,7 @@ public class AdFlowControl {
                 
                 if(!isLower && mapTask.containsKey(adUid)){
                 	String reason = "["+adUid+"]竞价价格过低，请提升报价";
-                	stopAd(adUid, reason, false);
+                	stopAd(adUid, reason, false,0);
                 }
                 break;
         }
@@ -296,6 +297,7 @@ public class AdFlowControl {
                 AdPixelBean pix = MsgControlCenter.recvPixelStatus(node.getName());
                 if (pix == null)
                     break;
+                myLog.info("广告ID["+pix.getAdUid()+"]的广告状态:"+pix.isLower());
                 updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getFinalCost().toString()), -1,pix.getClickNums(),pix.getType(),pix.isLower());
             }
         }
@@ -309,7 +311,7 @@ public class AdFlowControl {
             String isOk = cpcHandler.checkAvailable(auid);
             if(isOk != null){
                 //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
-                stopAd(auid, isOk, false);
+                stopAd(auid, isOk, false,0);
             }
         	}
             AdFlowStatus threshold = mapThresholdHour.get(auid);
@@ -334,7 +336,7 @@ public class AdFlowControl {
             if(thresholdGroupMoney != 0 && monitorAdGroup.getMoney() >= thresholdGroupMoney){
                 //广告组金额超限，则发送停止命令，终止该广告投放
                 String reason = "#### 广告组 金额 超限，参考指标：" + thresholdGroupMoney + "\t" + monitorAdGroup.getMoney() + " ###";
-                stopAd(auid, reason, false);
+                stopAd(auid, reason, false,0);
                 myLog.error(auid + "\t" + reason);
             }
 
@@ -350,13 +352,13 @@ public class AdFlowControl {
             if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
                 //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                 String reason = "#### 每日金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
-                stopAd(auid, reason, false);
+                stopAd(auid, reason, false,0);
                 myLog.error(monitor.toString() + "\t" + reason);
             }
             
             if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
                 String reason = "#### 每日 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
-                stopAd(auid, reason, true);
+                stopAd(auid, reason, true,0);
                 myLog.error(monitor.toString() + "\t" + reason);
             }
 
@@ -464,6 +466,13 @@ public class AdFlowControl {
                 //如果余额小于 200 块钱，则不进行广告投放
                 if(balance.doubleValue() < 200){
                     lowBalanceAdSet.add(auid);
+                }else{
+                	if(mapTask.containsKey(auid)){
+                		TaskBean task = mapTask.get(auid);
+                		if(task.getCommandResonStatus() == 1){
+                			task.setCommand(TaskBean.COMMAND_START);
+                		}
+                	}
                 }
                 //广告主账户的每日限额
                 BigDecimal quotaMoneyPerDay = balanceMap.getBigDecimal("quota_amount");
@@ -500,11 +509,7 @@ public class AdFlowControl {
                 status4.setWinNumsByThousand(winNumsHour);
                 status4.setMoney(money.floatValue());
                 mapThresholdHour.put(auid, status4);
-                
-                if(mapTask.containsKey(auid)){
-                	TaskBean task = mapTask.get(auid);
-                	task.setCommand(TaskBean.COMMAND_START);
-                }
+
                 //写入广告主每日限额
                 ReportBean report = reportMapHour.get(auid);
                 if(report != null){
@@ -549,7 +554,7 @@ public class AdFlowControl {
 				Map.Entry<String, AdBean> entry = (Map.Entry) iter.next();
 				String adUid = entry.getKey();
 				if(!adUidSet.contains(adUid)){				
-					stopAd(adUid, adUid+"广告被关闭", false);
+					stopAd(adUid, adUid+"广告被关闭", false,0);
 				}
 			}
 		} catch (Exception e) {
@@ -559,6 +564,7 @@ public class AdFlowControl {
     
     /**
      * 每隔5分钟更新广告中有变化的人群包、创意、物料
+     * 每隔5分钟更新广告主、代理商
      */
     public void updateAdMapInterval(){
     	MDC.put("sift", "control"); 
@@ -600,6 +606,19 @@ public class AdFlowControl {
     				}
     			}
     			
+    		}
+    		//开始更新广告主、代理商
+    		List<AdvertiserBean> advertiserList = taskService.queryAdverByUpTime();
+    		for(AdvertiserBean advertiser:advertiserList){
+    			Iterator it = mapAd.entrySet().iterator();
+    			while(it.hasNext()){
+    				Map.Entry<String, AdBean> entry = (Entry<String, AdBean>) it.next();
+    				AdBean ad = entry.getValue();
+    				AdvertiserBean adver = ad.getAdvertiser();
+    				if(advertiser.getUid().equals(adver.getUid())){
+    					ad.setAdvertiser(advertiser);
+    				}
+    			}
     		}
     	}catch(Exception e){
     		myLog.error("更新广告异常:"+e.getMessage());
@@ -644,7 +663,13 @@ public class AdFlowControl {
 
 
             //更新监视器阀值信息
-            HashSet<String> lowBalanceAdList = updateIndicator(adList);
+            HashSet<String> lowBalanceAdList = null;
+            if(isInitial){
+            	lowBalanceAdList = updateIndicator(adList);
+            }else{
+            	ResultList adAllList = taskService.queryAdByUpTime(0);
+            	lowBalanceAdList = updateIndicator(adAllList);
+            }
 
             int counter = 0;
 
@@ -748,11 +773,12 @@ public class AdFlowControl {
                     }
                 }
                 
-              //AdBean 里面的加速投放为 0 ,对应数据库里面 1（ALL） ，匀速相反
                 
+              //AdBean 里面的加速投放为 0 ,对应数据库里面 1（ALL） ，匀速相反
                 TaskBean task = null;
                 if(mapTask.containsKey(adUid)){
                     task = mapTask.get(adUid);
+                    task.setCommand(TaskBean.COMMAND_START);
                     int scope = -1;
                     if(ad.getSpeedMode() == 0)
                         scope = 1;
@@ -766,11 +792,11 @@ public class AdFlowControl {
                 counter++;
 
                 if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
-                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false);
+                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false,1);
 //                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
                     continue;
                 }
-
+                
             }
 
             //计算权重因子
@@ -806,7 +832,7 @@ public class AdFlowControl {
 //            TaskBean task = new TaskBean(adUid);
         	TaskBean task = mapTask.get(adUid);
             AdBean ad = mapAd.get(adUid);
-
+            
             //从小时监控中取出曝光量、点击次数 、点击金额
 //            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
 //            task.setClickNums(statusHour.getClickNums());
@@ -816,10 +842,11 @@ public class AdFlowControl {
 //            //给每一个节点分配自己的 曝光 额度
 //            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
 //            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
-//            task.setCommand(TaskBean.COMMAND_START);
-            adList.add(ad);
-            if(task.getCommand() == TaskBean.COMMAND_START)
+//            task.setCommand(TaskBean.COMMAND_START);            
+            if(task.getCommand() == TaskBean.COMMAND_START){
             	taskList.add(task);
+            	adList.add(ad);
+            }
            
         }
 
@@ -925,7 +952,7 @@ public class AdFlowControl {
      * @param reason
      * @param isHourOrAll 如果是小时，则只停止该小时的投放，如果是全部，则马上停止后续小时的所有的投放
      */
-    public void stopAd(String adUid, String reason, boolean isHourOrAll) {
+    public void stopAd(String adUid, String reason, boolean isHourOrAll,float reasonStatus) {
     	MDC.put("sift", "control");
     	ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
             TaskBean task = mapTask.get(adUid);
@@ -934,6 +961,7 @@ public class AdFlowControl {
             }
             myLog.info(reason);
             task.setCommandMemo(reason);
+            task.setCommandResonStatus(reasonStatus);
             task.setCommand(TaskBean.COMMAND_STOP);
             task.setScope(isHourOrAll ? TaskBean.SCOPE_HOUR : TaskBean.SCOPE_ALL);
             taskList.add(task);
