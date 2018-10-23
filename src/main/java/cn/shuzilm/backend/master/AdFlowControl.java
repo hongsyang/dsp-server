@@ -844,6 +844,7 @@ public class AdFlowControl {
 //            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
 //            task.setCommand(TaskBean.COMMAND_START);            
             if(task.getCommand() == TaskBean.COMMAND_START){
+            	myLog.info("广告["+adUid+"]加入下发队列......");
             	taskList.add(task);
             	adList.add(ad);
             }
