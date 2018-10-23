@@ -55,6 +55,7 @@ public class PixelFlowControl {
 		MDC.put("sift", "pixel");
 		if (pixel.getClickNums() == 1) {
 			pixel.setFinalCost(0.0);
+			pixel.setLower(true);
 			MsgControlCenter.sendPixelStatus(this.nodeName, pixel);
 			return pixel;
 		}
