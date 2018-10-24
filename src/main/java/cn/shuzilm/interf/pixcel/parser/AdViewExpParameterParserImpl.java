@@ -80,7 +80,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             MDC.put("phoenix", "Exp");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
                     new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -92,7 +92,8 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
+                    element.getRequestId(), element.getImpression().get(0).getId(),
+                    element.getDealid(),element.getAppId());
 
             MDC.remove("phoenix");
             MDC.put("sift", "AdViewExp");

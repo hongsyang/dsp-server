@@ -228,6 +228,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                 targetDuFlowBean.setAppName(app.getName());//APP名称
                 targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+                targetDuFlowBean.setAppId(app.getId());//APP包名
                 targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
                 log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
