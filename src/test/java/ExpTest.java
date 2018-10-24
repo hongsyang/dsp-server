@@ -23,9 +23,11 @@ public class ExpTest {
     private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
     public static void main(String[] args) throws InterruptedException {
-        Long exp = JedisQueueManager.getLength("Exp");
-        Long exp_error = JedisQueueManager.getLength("EXP_ERROR");
-        System.out.println(exp);
-        System.out.println(exp_error);
+        DUFlowBean duFlowBean =new DUFlowBean();
+        duFlowBean.setAppId("1");
+        boolean houkp = JedisQueueManager.putElementToQueue("houkp", duFlowBean, Priority.MAX_PRIORITY);
+        System.out.println(houkp);
+        System.out.println(JedisQueueManager.getElementFromQueue("houkp"));;
+
     }
 }
