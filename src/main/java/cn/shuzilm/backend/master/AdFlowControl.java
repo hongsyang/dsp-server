@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.master;
 
+import cn.shuzilm.backend.queue.DataTransQueue;
 import cn.shuzilm.bean.control.*;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.common.jedis.Priority;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.math.BigDecimal;
+import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.Map.Entry;
@@ -31,6 +33,7 @@ public class AdFlowControl {
             control = new AdFlowControl();
             adProperty = new AdPropertyHandler(control);
             cpcHandler = new CPCHandler(control);
+            new Thread(new DataInToDBTask()).start();
         }
         return control;
     }
@@ -122,6 +125,8 @@ public class AdFlowControl {
     private static ConcurrentHashMap<String, AdFlowStatus> adverConsumeMapCurr = null;
     
     private static ConcurrentHashMap<String,Long> nodeStatusMap = null;
+    
+    private DataTransQueue queue;
 
     public AdFlowControl() {
 
@@ -138,6 +143,7 @@ public class AdFlowControl {
         reportMapHour = new ConcurrentHashMap<>();
         mapMonitorAdGroupTotal = new ConcurrentHashMap<>();
         nodeStatusMap = new ConcurrentHashMap<>();
+        queue = DataTransQueue.getInstance();
 //        adviserMap = new HashMap<>();
 
 
@@ -389,6 +395,7 @@ public class AdFlowControl {
             int commandCode = bean.getCommand();
             if (scope == TaskBean.SCOPE_HOUR && commandCode == TaskBean.COMMAND_PAUSE) {
                 bean.setCommand(TaskBean.COMMAND_START);
+                putDataToQueue(auid, "小时计数器清零,广告开启", 1);
             }
         }
     }
@@ -437,6 +444,7 @@ public class AdFlowControl {
                 if(mapTask.containsKey(auid)){
                 	TaskBean task = mapTask.get(auid);
                 	task.setCommand(TaskBean.COMMAND_START);
+                	putDataToQueue(auid, "天计数器清零,广告开启", 1);
                 }
 
             }
@@ -471,6 +479,7 @@ public class AdFlowControl {
                 		TaskBean task = mapTask.get(auid);
                 		if(task.getCommandResonStatus() == 1){
                 			task.setCommand(TaskBean.COMMAND_START);
+                			putDataToQueue(auid, "广告主已充值,广告开启", 1);
                 		}
                 	}
                 }
@@ -771,6 +780,8 @@ public class AdFlowControl {
                             this.updatePixel(adUid, 0, expense.floatValue(), 2,0,0,true);
                         }
                     }
+                    
+                    putDataToQueue(adUid, "广告首次下发,广告开启", 1);
                 }
                 
                 
@@ -779,6 +790,7 @@ public class AdFlowControl {
                 if(mapTask.containsKey(adUid)){
                     task = mapTask.get(adUid);
                     task.setCommand(TaskBean.COMMAND_START);
+                    putDataToQueue(adUid, "广告被修改,广告开启", 1);
                     int scope = -1;
                     if(ad.getSpeedMode() == 0)
                         scope = 1;
@@ -787,6 +799,7 @@ public class AdFlowControl {
                     task.setScope(scope);
                 }else{
                     task = new TaskBean(adUid);
+                    putDataToQueue(adUid, "广告首次下发,广告开启", 1);
                 }
                 mapTask.put(adUid, task);
                 counter++;
@@ -937,6 +950,7 @@ public class AdFlowControl {
             		task.getCommand() == TaskBean.COMMAND_STOP){
             	return;
             }
+            putDataToQueue(adUid, reason, 0);
             myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommand(TaskBean.COMMAND_PAUSE);
@@ -960,6 +974,7 @@ public class AdFlowControl {
             if(task.getCommand() == TaskBean.COMMAND_STOP){           
             	return;
             }
+            putDataToQueue(adUid, reason, 0);
             myLog.info(reason);
             task.setCommandMemo(reason);
             task.setCommandResonStatus(reasonStatus);
@@ -970,6 +985,19 @@ public class AdFlowControl {
             	pushTaskSingleNode(node.getName(), taskList);
             }
 
+    }
+    
+    public void putDataToQueue(String adUid, String reason,int status){
+    	AdLogBean adLog = new AdLogBean();
+        AdBean ad = mapAd.get(adUid);
+        adLog.setAdUid(adUid);
+        adLog.setAdName(ad.getName());
+        adLog.setAdvertiserUid(ad.getAdvertiser().getUid());
+        adLog.setAdvertiserName(ad.getAdvertiser().getName());
+        adLog.setCreatedAt(new Date());
+        adLog.setReason(reason);
+        adLog.setStatus(status);
+        queue.put(adLog);
     }
 
 }
