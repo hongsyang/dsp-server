@@ -50,6 +50,11 @@ public class TaskBean implements ICommand {
      * 金钱
      */
     private float money;
+    /**
+     * 停止原因状态
+     * 暂定余额不超过的状态为1
+     */
+    private float commandResonStatus;
 
     public static final long serialVersionUID = 1123223132123L;
 

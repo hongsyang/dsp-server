@@ -55,6 +55,7 @@ public class PixelFlowControl {
 		MDC.put("sift", "pixel");
 		if (pixel.getClickNums() == 1) {
 			pixel.setFinalCost(0.0);
+			pixel.setLower(true);
 			MsgControlCenter.sendPixelStatus(this.nodeName, pixel);
 			return pixel;
 		}
@@ -117,7 +118,9 @@ public class PixelFlowControl {
 		LOG.info("dsp利润=" + pixel.getDspProfit());
 		LOG.info("代理商利润=" + pixel.getRebateProfit());
 		LOG.info("成本价=" + pixel.getCost());
+		LOG.info("出价=" + price);
 		LOG.info("总消耗金额=" + (pixel.getFinalCost()));
+		LOG.info("广告状态=" + pixel.isLower());
 		MsgControlCenter.sendPixelStatus(this.nodeName, pixel);
 		return pixel;
 	}

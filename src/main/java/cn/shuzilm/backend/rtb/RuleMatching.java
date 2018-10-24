@@ -423,16 +423,23 @@ public class RuleMatching {
 			if (grade >= 1 && grade <= 2) {
 				gradeList.add(ad);
 			} else {
-				// 优先级为3-5的,70%执行分级策略,30%的概率跳出分级,直接参与投放
+				// 优先级为3-5的,30%执行分级策略,70%的概率跳出分级,直接参与投放
 				int num = adRandom.nextInt(100);
-				if (num <= gradeRatio) {
+				if (num > gradeRatio) {
 					ungradeList.add(ad);
 				} else {
 					gradeList.add(ad);
 				}
 			}
 		}
-		if (ungradeList.size() > 0) {
+		boolean gradeFlag = false;
+		int gradeNum = adRandom.nextInt(100);
+		if(gradeNum > gradeRatio){
+			gradeFlag = true;
+		}else{
+			gradeFlag = false;
+		}
+		if (ungradeList.size() == 1 || (ungradeList.size() > 1 && gradeFlag)) {
 			AdBean ad = ungradeList.get(0);// 暂时获取第一个
 			// 封装返回接口引擎数据
 			LOG.debug("广告ID[" + ad.getAdUid() + "]广告主ID["+ad.getAdvertiser().getUid()+"]通过排序获得竞价资格!");

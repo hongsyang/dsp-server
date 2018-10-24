@@ -159,6 +159,32 @@ public class TaskServicve extends Service {
             return null;
         }
     }
+    
+    /**
+     * 查询5分钟内的广告主
+     * @param adverUid
+     * @return
+     */
+    public List<AdvertiserBean> queryAdverByUpTime() throws SQLException{
+    	List<AdvertiserBean> advertiserList = new ArrayList<AdvertiserBean>();
+    	 long timeNow = System.currentTimeMillis();
+         long timeBefore = timeNow - INTERVAL;
+         Object[] arr = new Object[1];
+         arr[0] = timeBefore / 1000;
+        String sql = "select * from advertiser where updated_at >= ?";            
+            ResultList list =  select.select(sql,arr);
+            for(ResultMap rm:list){
+            	AdvertiserBean adver = new AdvertiserBean();
+            	adver.setAgencyUid(rm.getString("agency_uid"));
+            	AgencyBean agencyBean = queryAgencyByAdviserUid(adver.getAgencyUid());
+            	adver.setAgencyBean(agencyBean);
+            	adver.setName(rm.getString("name"));
+            	adver.setUid(rm.getString("uid"));
+            	adver.setGrade(rm.getInteger("priority"));
+            	advertiserList.add(adver);
+            }
+            return advertiserList;
+    }
 
     public AgencyBean queryAgencyByAdviserUid(String agencyUid){
 
@@ -209,7 +235,7 @@ public class TaskServicve extends Service {
             creativeBean.setLanding(cMap.getString("landing_uri"));
             creativeBean.setTracking(cMap.getString("tracking_uri"));
             creativeBean.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
-            creativeBean.setApproved(Integer.parseInt(cMap.getString("approved")));
+            creativeBean.setApproved(cMap.getInteger("approved"));
             //creativeBean.setApproved_adx(cMap.getString("approved_adx"));
             creativeBean.setType(cMap.getString("type"));
             return creativeBean;
@@ -251,7 +277,7 @@ public class TaskServicve extends Service {
                 creativeBean.setLanding(cMap.getString("landing_uri"));
                 creativeBean.setTracking(cMap.getString("tracking_uri"));
                 creativeBean.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
-                creativeBean.setApproved(Integer.parseInt(cMap.getString("approved")));
+                creativeBean.setApproved(cMap.getInteger("approved"));
                 //creativeBean.setApproved_adx(cMap.getString("approved_adx"));
                 creativeBean.setType(cMap.getString("type"));
                 creativeList.add(creativeBean);
