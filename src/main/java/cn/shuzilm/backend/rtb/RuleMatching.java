@@ -161,7 +161,7 @@ public class RuleMatching {
 	 *            高度误差
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, String extStr) throws Exception{
+			int widthDeviation, int heightDeviation, String adxName, String extStr,String ip) throws Exception{
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		if (deviceId == null || deviceId.trim().equals("")) {
@@ -362,7 +362,7 @@ public class RuleMatching {
 					}
 				} else if (audience.getType().equals("ip")) {// 智能设备
 					Set<String> ipSet = audience.getIpSet();
-					if (ipSet != null && checkRetain(ipList,ipSet)) {
+					if ((ipSet != null && checkRetain(ipList,ipSet)) || (ipSet != null && ip != null && ipSet.contains(ip))) {
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						break;
@@ -761,7 +761,7 @@ public class RuleMatching {
 	public static void main(String[] args) {
 		try{
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("72229B9518E18744620932CB50FC43DC", "feed", 720, 240, true, 5, 5, "2", "jpg,gif");
+		rule.match("72229B9518E18744620932CB50FC43DC", "feed", 720, 240, true, 5, 5, "2", "jpg,gif",null);
 		}catch(Exception e){
 			e.getMessage();
 		}

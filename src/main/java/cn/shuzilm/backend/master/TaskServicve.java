@@ -19,6 +19,8 @@ public class TaskServicve extends Service {
 	
 	private SimpleDateFormat dateFm = new SimpleDateFormat("yyyyMM");
 	
+	private SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	
 	private static final int INTERVAL = 5 * 60 * 1000;
     /**
      * 查找 10 分钟前的 人群包条件
@@ -467,5 +469,11 @@ public class TaskServicve extends Service {
         }
     }
 
+    public void insertDataToLog(AdLogBean adLog) throws SQLException{  	
+    	String sql = "insert into ad_log (ad_uid,ad_name,advertiser_uid,advertiser_name,created_at,reason,status) "
+    			+ "values ('"+adLog.getAdUid()+"','"+adLog.getAdName()+"','"+adLog.getAdvertiserUid()+"',"
+    					+ "'"+adLog.getAdvertiserName()+"','"+specDateFM.format(adLog.getCreatedAt())+"','"+adLog.getReason()+"',"+adLog.getStatus()+")";	
+    	update.doUpdate(sql);    	
+    }
 
 }
