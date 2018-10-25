@@ -16,6 +16,8 @@ public class RtbConstants {
 	public static String LOCATION = "LOCATION";
 	public static String DEMOGRAPHIC = "DEMOGRAPHIC";
 	public static String COMPANY = "COMPANY";
+	public static String IP = "IP";
+	public static String DMP = "DMP";
 	public static String REDIS_CLUSTER_URI = "REDIS_CLUSTER_URI";
 	public static String MATERIAL_URL = "MATERIAL_URL";
 	public static String GRADE_RATIO = "GRADE_RATIO";
@@ -45,6 +47,8 @@ public class RtbConstants {
     	rtbMap.put(LOCATION, Double.parseDouble(constant.getConf(LOCATION)));
     	rtbMap.put(DEMOGRAPHIC, Double.parseDouble(constant.getConf(DEMOGRAPHIC)));
     	rtbMap.put(COMPANY, Double.parseDouble(constant.getConf(COMPANY)));
+    	rtbMap.put(IP, Double.parseDouble(constant.getConf(IP)));
+    	rtbMap.put(DMP, Double.parseDouble(constant.getConf(DMP)));
     }
     
     public double getRtbVar(String key){
