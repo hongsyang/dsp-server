@@ -540,7 +540,6 @@ public class RuleMatching {
 				}
 				return 1;
 			}
-
 		});
 	}
 
