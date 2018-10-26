@@ -12,13 +12,6 @@ public class RtbControlTest {
     }
 
     public static void main(String[] args) {
-        List<Object> exp = JedisQueueManager.getAllElement("EXP");
-        Object exp1 = JedisQueueManager.getElementFromQueue("EXP");
-        //        JedisQueueManager.removeAll("EXP");
-        System.out.println(exp1);
-        System.out.println(exp.size());
-        for (Object o : exp) {
-            System.out.println(o+"11111111111111111");
-        }
+        System.out.println(  JedisQueueManager.getLength("EXP"));
     }
 }

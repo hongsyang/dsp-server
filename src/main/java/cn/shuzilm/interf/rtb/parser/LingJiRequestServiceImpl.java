@@ -277,25 +277,25 @@ public class LingJiRequestServiceImpl implements RequestService {
         bid.setNurl(nurl);
 
         String curl = serviceUrl + "lingjiclick?" +
-                "id=" + duFlowBean.getRequestId() +
-                "&bidid=" + bidResponseBean.getBidid() +
+                "id=" + duFlowBean.getRequestId()==null? "":duFlowBean.getRequestId() +
+                "&bidid=" + bidResponseBean.getBidid()+
                 "&impid=" + impression.getId() +
                 "&act=" + format +
-                "&adx=" + duFlowBean.getAdxId() +
-                "&did=" + duFlowBean.getDid() +
-                "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + duFlowBean.getAppName() +
-                "&appn=" + duFlowBean.getAppPackageName() +
-                "&appv=" + duFlowBean.getAppVersion() +
-                "&ddem=" + duFlowBean.getDemographicTagId() + //人群包
-                "&dcuid=" + duFlowBean.getCreativeUid()+ // 创意id
-                "&dpro=" + duFlowBean.getProvince() +// 省
-                "&dcit=" + duFlowBean.getCity() +// 市
-                "&dcou=" + duFlowBean.getCountry() +// 县
-                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid();
+                "&adx=" + duFlowBean.getAdxId()==null? "":duFlowBean.getAdxId() +
+                "&did=" + duFlowBean.getDid()==null? "":duFlowBean.getDid() +
+                "&device=" + duFlowBean.getDeviceId()==null? "":duFlowBean.getDeviceId() +
+                "&app=" + duFlowBean.getAppName()==null? "":duFlowBean.getAppName() +
+                "&appn=" + duFlowBean.getAppPackageName() ==null? "":duFlowBean.getAppPackageName()+
+                "&appv=" + duFlowBean.getAppVersion() ==null? "":duFlowBean.getAppVersion()+
+                "&ddem=" + duFlowBean.getDemographicTagId()==null? "":duFlowBean.getDemographicTagId()+ //人群包
+                "&dcuid=" + duFlowBean.getCreativeUid()==null?"":duFlowBean.getCreativeUid()+ // 创意id
+                "&dpro=" + duFlowBean.getProvince()==null?"":duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity()==null?"":duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry()==null?"":duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid()==null?"":duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid()==null?"":duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid()==null?"":duFlowBean.getAdUid() + // 广告id，
+                "&pmp=" + duFlowBean.getDealid()==null?"":duFlowBean.getDealid();
 
         //人群包，创意id，省，市，广告主id，代理商id，广告id，
 

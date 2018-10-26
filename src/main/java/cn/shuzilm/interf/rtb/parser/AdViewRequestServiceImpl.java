@@ -271,24 +271,24 @@ public class AdViewRequestServiceImpl implements RequestService {
         Integer instl = bidRequestBean.getImp().get(0).getInstl();
         String serviceUrl = configs.getString("SERVICE_URL");
         String curl = serviceUrl + "adviewclick?" +
-                "id=" + duFlowBean.getRequestId() +
+                "id=" + duFlowBean.getRequestId()==null? "":duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
                 "&act=" + format +
-                "&adx=" + duFlowBean.getAdxId() +
-                "&did=" + duFlowBean.getDid() +
-                "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + duFlowBean.getAppName() +
-                "&appn=" + duFlowBean.getAppPackageName() +
-                "&appv=" + duFlowBean.getAppVersion() +
-                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
-                "&dpro=" + duFlowBean.getProvince() +// 省
-                "&dcit=" + duFlowBean.getCity() +// 市
-                "&dcou=" + duFlowBean.getCountry() +// 县
-                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid();
+                "&adx=" + duFlowBean.getAdxId()==null? "":duFlowBean.getAdxId() +
+                "&did=" + duFlowBean.getDid() ==null? "":duFlowBean.getDid()+
+                "&device=" + duFlowBean.getDeviceId()==null? "":duFlowBean.getDeviceId() +
+                "&app=" + duFlowBean.getAppName()==null? "":duFlowBean.getAppName() +
+                "&appn=" + duFlowBean.getAppPackageName()==null? "":duFlowBean.getAppPackageName() +
+                "&appv=" + duFlowBean.getAppVersion()==null? "":duFlowBean.getAppVersion() +
+                "&dcuid=" + duFlowBean.getCreativeUid()==null? "":duFlowBean.getCreativeUid() + // 创意id
+                "&dpro=" + duFlowBean.getProvince()==null? "":duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() ==null? "":duFlowBean.getCity()+// 市
+                "&dcou=" + duFlowBean.getCountry() ==null? "":duFlowBean.getCountry()+// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() ==null? "":duFlowBean.getAdvertiserUid()+// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid()==null? "":duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid()==null? "":duFlowBean.getAdUid() + // 广告id，
+                "&pmp=" + duFlowBean.getDealid()==null? "":duFlowBean.getDealid();
         if (instl == 0 | instl == 4 | instl == 1) {
             bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
             bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid()广告物料 ID
