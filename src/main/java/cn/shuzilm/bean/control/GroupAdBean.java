@@ -9,7 +9,22 @@ public class GroupAdBean implements ICommand {
     private String groupId;
     private String adviserId;
     private String groupName;
+    /**
+     * 每日限额开关
+     */
+    private int quota; 
+    /**
+     * 每日限额
+     */
     private BigDecimal quotaMoney;
+    /**
+     * 总限额开关
+     */
+    private int quota_total;
+    /**
+     * 总限额
+     */
+    private BigDecimal quotaTotalMoney;
 
     public String getGroupId() {
         return groupId;
@@ -42,4 +57,28 @@ public class GroupAdBean implements ICommand {
     public void setQuotaMoney(BigDecimal quotaMoney) {
         this.quotaMoney = quotaMoney;
     }
+
+	public int getQuota() {
+		return quota;
+	}
+
+	public void setQuota(int quota) {
+		this.quota = quota;
+	}
+
+	public int getQuota_total() {
+		return quota_total;
+	}
+
+	public void setQuota_total(int quota_total) {
+		this.quota_total = quota_total;
+	}
+
+	public BigDecimal getQuotaTotalMoney() {
+		return quotaTotalMoney;
+	}
+
+	public void setQuotaTotalMoney(BigDecimal quotaTotalMoney) {
+		this.quotaTotalMoney = quotaTotalMoney;
+	}
 }

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -105,6 +106,22 @@ public class CPCHandler {
         }
         return true;
     }
+    
+    /**
+     * 更新monitor
+     * @return
+     */
+    public boolean updateIndicator(String adUid){
+        
+            try{
+                  AdFlowStatus moniterStatus = new AdFlowStatus();
+                  mapMonitorTotal.put(adUid,moniterStatus);
+            }catch (Exception e){
+                myLog.error("更新阈值失败，广告id: " + adUid, e);
+                return false;
+            }
+        return true;
+    }
 
     /**
      * 判断广告是否可以发放
@@ -148,7 +165,7 @@ public class CPCHandler {
                 // 大于广告主单个CPC报价，则暂停广告发放
                 if(clickPrice >= price) {
                    // myLog.debug("出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放");
-                	reason = "出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放   "+auid;
+                	reason = "出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放  广告ID:"+auid+" 曝光花费:"+money+" 点击单价:"+price;
                     return reason;
                 }else {
                     //myLog.debug("出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放");
