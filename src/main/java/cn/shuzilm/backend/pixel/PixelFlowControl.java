@@ -74,8 +74,8 @@ public class PixelFlowControl {
 		double premiumFactor = pixel.getPremiumFactor();
 		double dspAndRebatePremiumFactor = premiumFactor + rebate;
 		if (dspAndRebatePremiumFactor >= 1) {
-			dspAndRebatePremiumFactor = 1;
-			premiumFactor = 1 - rebate;
+			dspAndRebatePremiumFactor = 1 - 0.01;
+			premiumFactor = 1 - rebate - 0.01;
 		}
 		double price = ad.getPrice();
 		double finalPrice = getResult(cost, getResult(1.0, dspAndRebatePremiumFactor, "-"), "/");

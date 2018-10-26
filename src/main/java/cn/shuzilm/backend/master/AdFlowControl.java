@@ -108,6 +108,7 @@ public class AdFlowControl {
      * 广告组的监视器
      */
     private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorAdGroupTotal = null;
+    private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorAdGroupRealTotal = null;
 
     /**
      * 数据库中设定的设计流控指标（天 最高限）
@@ -142,6 +143,7 @@ public class AdFlowControl {
         mapMonitorTotal = new ConcurrentHashMap<>();
         reportMapHour = new ConcurrentHashMap<>();
         mapMonitorAdGroupTotal = new ConcurrentHashMap<>();
+        mapMonitorAdGroupRealTotal = new ConcurrentHashMap<>();
         nodeStatusMap = new ConcurrentHashMap<>();
         queue = DataTransQueue.getInstance();
 //        adviserMap = new HashMap<>();
@@ -231,6 +233,8 @@ public class AdFlowControl {
                 	String groupId = mapAd.get(adUid).getGroupId();
                 	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
                 	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                	AdFlowStatus statusTotalGroupAll = mapMonitorAdGroupRealTotal.get(groupId);
+                	statusTotalGroupAll.setMoney(statusTotalGroupAll.getMoney() + addMoney);
                 }
                 break;
             case -1:
@@ -260,6 +264,8 @@ public class AdFlowControl {
                 	String groupId = mapAd.get(adUid).getGroupId();
                 	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
                 	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                	AdFlowStatus statusTotalGroupAll = mapMonitorAdGroupRealTotal.get(groupId);
+                	statusTotalGroupAll.setMoney(statusTotalGroupAll.getMoney() + addMoney);
                 }
                 
                 if(!isLower && mapTask.containsKey(adUid)){
@@ -338,10 +344,21 @@ public class AdFlowControl {
 
             String groupId = mapAd.get(auid).getGroupId();
             AdFlowStatus monitorAdGroup = mapMonitorAdGroupTotal.get(groupId);
+            AdFlowStatus monitorTotalAdGroup = mapMonitorAdGroupRealTotal.get(groupId);
             double thresholdGroupMoney = mapAdGroup.get(groupId).getQuotaMoney().doubleValue();
-            if(thresholdGroupMoney != 0 && monitorAdGroup.getMoney() >= thresholdGroupMoney){
-                //广告组金额超限，则发送停止命令，终止该广告投放
-                String reason = "#### 广告组 金额 超限，参考指标：" + thresholdGroupMoney + "\t" + monitorAdGroup.getMoney() + " ###";
+            double thresholdTotalGroupMoney = mapAdGroup.get(groupId).getQuotaTotalMoney().doubleValue();
+            int quota = mapAdGroup.get(groupId).getQuota();
+            int quotaTotal = mapAdGroup.get(groupId).getQuota_total();
+            if(thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney){
+                //广告组每日限额超限，则发送停止命令，终止该广告投放
+                String reason = "#### 广告组 每日限额 超限，参考指标：" + thresholdGroupMoney + "\t" + monitorAdGroup.getMoney() + " ###";
+                stopAd(auid, reason, false,0);
+                myLog.error(auid + "\t" + reason);
+            }
+            
+            if(thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney){
+                //广告组总限额超限，则发送停止命令，终止该广告投放
+                String reason = "#### 广告组 总限额 超限，参考指标：" + thresholdTotalGroupMoney + "\t" + monitorTotalAdGroup.getMoney() + " ###";
                 stopAd(auid, reason, false,0);
                 myLog.error(auid + "\t" + reason);
             }
@@ -756,6 +773,7 @@ public class AdFlowControl {
                     mapMonitorTotal.put(adUid,statusAll);
                     AdFlowStatus statusAdGroup = new AdFlowStatus();
                     mapMonitorAdGroupTotal.put(groupId,statusAdGroup);
+                    mapMonitorAdGroupRealTotal.put(groupId, statusAdGroup);
 
                     if (reportMapHour.size() > 0) {
                         ReportBean report = reportMapHour.get(adUid);
@@ -799,6 +817,7 @@ public class AdFlowControl {
                     task.setScope(scope);
                 }else{
                     task = new TaskBean(adUid);
+                    cpcHandler.updateIndicator(adUid);
                     putDataToQueue(adUid, "广告首次下发,广告开启", 1);
                 }
                 mapTask.put(adUid, task);
@@ -818,7 +837,7 @@ public class AdFlowControl {
             //cpcHandler.updateIndicator(false);
 
             myLog.info("主控： 开始分发任务，此次有 " + counter + " 个广告需要分发。。。 ");
-//            for (int i = 0; i < 1 ; i++) {
+//            for (int i = 0; i < 10 ; i++) {
             dispatchTask();
 //            }
 

@@ -133,7 +133,7 @@ public class TaskServicve extends Service {
         arr[0] = startTime / 1000;
         arr[1] = now / 1000;
         arr[2] = now / 1000;
-        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ? and status = 1";
+        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ? and status = 1 and group_status = 1";
         return select.select(sql,arr);
     }
 
@@ -388,7 +388,10 @@ public class TaskServicve extends Service {
                 g.setGroupId(rm.getString("uid"));
                 g.setAdviserId(rm.getString("advertiser_uid"));
                 g.setGroupName(rm.getString("name"));
+                g.setQuota(rm.getBoolean("quota")==false?0:1);
                 g.setQuotaMoney(rm.getBigDecimal("quota_amount"));
+                g.setQuota_total(rm.getBoolean("quota_total")==false?0:1);
+                g.setQuotaTotalMoney(rm.getBigDecimal("quota_total_amount"));
                 list.add(g);
             }
             return list;
