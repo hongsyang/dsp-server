@@ -46,7 +46,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
 
         String requestId = urlRequest.get("id");
         element.setInfoId(requestId + UUID.randomUUID());
-
+        element.setRequestId(requestId);
         element.setBidid(urlRequest.get("bidid"));
 
         String impid = urlRequest.get("impid");
@@ -57,8 +57,8 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         list.add(impression);
 
 
-//        String act = urlRequest.get("act");
-//        element.setHour(Integer.valueOf(act));
+        String act = urlRequest.get("act");
+        element.setWinNoticeTime(Long.valueOf(act));
 
         String adx = urlRequest.get("adx");
         element.setAdxId(adx);
@@ -69,35 +69,35 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         String device = urlRequest.get("device");
         element.setDeviceId(device);
 
-        String app = urlRequest.get("app");
+        String app = urlRequest.get("app").equals(null) ? "" : urlRequest.get("app");
         element.setAppName(app);
-        String appn = urlRequest.get("appn");
+        String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
-        String appv = urlRequest.get("appv");
+        String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
         element.setAppVersion(appv);
-        String ddem = urlRequest.get("ddem");
+        String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
         element.setDemographicTagId(ddem);
-        String dcuid = urlRequest.get("dcuid");
+        String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
         element.setCreativeUid(dcuid);
-        String dpro = urlRequest.get("dpro");
+        String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
         element.setProvince(dpro);
-        String dcit = urlRequest.get("dcit");
+        String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
         element.setCity(dcit);
-        String dcou = urlRequest.get("dcou");
+        String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
         element.setCountry(dcou);
-        String dade = urlRequest.get("dade");
+        String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
         element.setAdvertiserUid(dade);
-        String dage = urlRequest.get("dage");
+        String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
         element.setAgencyUid(dage);
-        String daduid = urlRequest.get("daduid");
+        String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
         element.setAdUid(daduid);
-        String pmp = urlRequest.get("pmp");
+        String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
         element.setDealid(pmp);
 
         element.setAdxSource("LingJi");
 
         try {
-            log.debug("LingJiClick点击的requestid:{},element值:{}:[]", requestId, element);
+            log.debug("LingJiClick点击的requestid:{},element值:{}", requestId, element);
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
                 bean.setAdUid(element.getAdUid());

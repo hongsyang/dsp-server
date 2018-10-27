@@ -162,7 +162,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                         response = "";
                         return response;
                     }
-                    MDC.put("sift",configs.getString("ADX_REQUEST"));
+                    MDC.put("sift", configs.getString("ADX_REQUEST"));
                     //需要添加到Phoenix中的数据
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                     targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -277,18 +277,18 @@ public class LingJiRequestServiceImpl implements RequestService {
         bid.setNurl(nurl);
 
         String curl = serviceUrl + "lingjiclick?" +
-                "id=" + duFlowBean.getRequestId()+
-                "&bidid=" + bidResponseBean.getBidid()+
+                "id=" + duFlowBean.getRequestId() +
+                "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
                 "&act=" + format +
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
                 "&app=" + duFlowBean.getAppName() +
-                "&appn=" + duFlowBean.getAppPackageName()+
+                "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
-                "&ddem=" + duFlowBean.getDemographicTagId()+ //人群包
-                "&dcuid=" + duFlowBean.getCreativeUid()+ // 创意id
+                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + duFlowBean.getProvince() +// 省
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
@@ -448,7 +448,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         } else if (showtype == 15 | showtype == 12 | showtype == 17) {
             adType = "fullscreen";//开屏
             log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 16 | showtype == 18|showtype == 4) {
+        } else if (showtype == 16 | showtype == 18 | showtype == 4) {
             adType = "interstitial";//插屏
             log.debug("广告类型adType:{}", adType);
         } else {
