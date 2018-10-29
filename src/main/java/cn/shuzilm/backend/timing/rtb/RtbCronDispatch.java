@@ -102,7 +102,7 @@ public class RtbCronDispatch {
                dispatch(RtbRealTask.class,"0/5 * * * * ?");
                break;
            case 1:
-               dispatch(RtbTenMinuteTask.class,"0 0/5 * * * ?");
+               dispatch(RtbTenMinuteTask.class,"0/30 * * * * ?");
                break;
            case 2:
                dispatch(RtbHourTask.class,"0 0 * * * ?");
