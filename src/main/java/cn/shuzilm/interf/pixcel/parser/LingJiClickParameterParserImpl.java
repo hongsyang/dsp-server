@@ -76,7 +76,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
         element.setAppVersion(appv);
         String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
-        element.setDemographicTagId(ddem);
+        element.setAudienceuid(ddem);
         String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
         element.setCreativeUid(dcuid);
         String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
@@ -116,7 +116,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
             MDC.put("phoenix", "Click");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
                     new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -128,7 +128,9 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
+                    element.getRequestId(), element.getImpression().get(0).getId(),
+                    element.getDealid(), element.getAppId(),element.getBidid());
+
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {

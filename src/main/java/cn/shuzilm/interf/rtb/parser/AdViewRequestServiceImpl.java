@@ -10,6 +10,7 @@ import cn.shuzilm.bean.lj.response.LJNativeResponse;
 import cn.shuzilm.bean.lj.response.NativeAD;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.MD5Util;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
@@ -189,14 +190,14 @@ public class AdViewRequestServiceImpl implements RequestService {
                     targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                     targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
                     targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                    targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                    targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
                     targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                     targetDuFlowBean.setAppName(app.getName());//APP名称
                     targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
                     targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
                     log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
                     BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-                    pushRedis(targetDuFlowBean);//上传到redis服务器
+//                    pushRedis(targetDuFlowBean);//上传到redis服务器
                     response = JSON.toJSONString(bidResponseBean);
                     log.debug("过滤通过的bidResponseBean:{}", response);
                 } else {
@@ -228,7 +229,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                 targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
                 targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
                 targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                 targetDuFlowBean.setAppName(app.getName());//APP名称
                 targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
@@ -236,7 +237,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
                 log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-                pushRedis(targetDuFlowBean);//上传到redis服务器
+//                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
             }
@@ -385,6 +386,14 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
+                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid();
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 

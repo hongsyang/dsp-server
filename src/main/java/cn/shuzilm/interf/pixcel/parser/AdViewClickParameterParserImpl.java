@@ -69,29 +69,29 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
         String device = urlRequest.get("device");
         element.setDeviceId(device);
 
-        String app = urlRequest.get("app").equals("null")?"":urlRequest.get("app");
+        String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
         element.setAppName(app);
-        String appn = urlRequest.get("appn").equals("null")?"":urlRequest.get("appn");
+        String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
-        String appv = urlRequest.get("appv").equals("null")?"":urlRequest.get("appv");
+        String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
         element.setAppVersion(appv);
-        String ddem = urlRequest.get("ddem").equals("null")?"":urlRequest.get("ddem");
-        element.setDemographicTagId(ddem);
-        String dcuid = urlRequest.get("dcuid").equals("null")?"":urlRequest.get("dcuid");
+        String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
+        element.setAudienceuid(ddem);
+        String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
         element.setCreativeUid(dcuid);
-        String dpro = urlRequest.get("dpro").equals("null")?"":urlRequest.get("dpro");
+        String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
         element.setProvince(dpro);
-        String dcit = urlRequest.get("dcit").equals("null")?"":urlRequest.get("dcit");
+        String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
         element.setCity(dcit);
-        String dcou = urlRequest.get("dcou").equals("null")?"":urlRequest.get("dcou");
+        String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
         element.setCountry(dcou);
-        String dade = urlRequest.get("dade").equals("null")?"":urlRequest.get("dade");
+        String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
         element.setAdvertiserUid(dade);
-        String dage = urlRequest.get("dage").equals("null")?"":urlRequest.get("dage");
+        String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
         element.setAgencyUid(dage);
-        String daduid = urlRequest.get("daduid").equals("null")?"":urlRequest.get("daduid");
+        String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
         element.setAdUid(daduid);
-        String pmp = urlRequest.get("pmp").equals("null")?"":urlRequest.get("pmp");
+        String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
         element.setDealid(pmp);
 
         element.setAdxSource("AdView");
@@ -113,7 +113,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
             MDC.put("phoenix", "Click");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), element.getHour(),
                     new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -125,7 +125,8 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(), element.getImpression().get(0).getId(), element.getDealid());
+                    element.getRequestId(), element.getImpression().get(0).getId(),
+                    element.getDealid(), element.getAppId(), element.getBidid());
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {

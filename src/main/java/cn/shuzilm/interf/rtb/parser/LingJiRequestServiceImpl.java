@@ -11,6 +11,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.MD5Util;
 import com.alibaba.fastjson.JSON;
 import io.lettuce.core.RedisClient;
 import org.apache.commons.lang.StringUtils;
@@ -170,7 +171,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                     targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
                     targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                    targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                    targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
                     targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                     targetDuFlowBean.setAppName(app.getName());//APP名称
                     targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
@@ -180,7 +181,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                     log.debug("过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
                     BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
-                    pushRedis(targetDuFlowBean);//上传到redis服务器
+//                    pushRedis(targetDuFlowBean);//上传到redis服务器
                     log.debug("json计数");
                     response = JSON.toJSONString(bidResponseBean);
                     log.debug("过滤通过的bidResponseBean:{}", response);
@@ -214,7 +215,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                 targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
                 targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
                 targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                 targetDuFlowBean.setAppName(app.getName());//APP名称
                 targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
@@ -226,7 +227,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
-                pushRedis(targetDuFlowBean);//上传到redis服务器
+//                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
             }
@@ -256,7 +257,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         LJBid bid = new LJBid();
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
-        bid.setId(format + UUID.randomUUID());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
+        bid.setId(duFlowBean.getBidid());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
         String serviceUrl = configs.getString("SERVICE_URL");
         //曝光nurl
@@ -272,7 +273,14 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
-                "&pf=" + duFlowBean.getPremiumFactor() +
+                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid();
         bid.setNurl(nurl);
 
