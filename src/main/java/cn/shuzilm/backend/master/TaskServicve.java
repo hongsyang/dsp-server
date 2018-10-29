@@ -21,6 +21,10 @@ public class TaskServicve extends Service {
 	
 	private SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 	
+	private SimpleDateFormat yydDateFM = new SimpleDateFormat("yyyy-MM-dd");
+	
+	private SimpleDateFormat hourDateFM = new SimpleDateFormat("HH");
+	
 	private static final int INTERVAL = 5 * 60 * 1000;
     /**
      * 查找 10 分钟前的 人群包条件
@@ -402,9 +406,9 @@ public class TaskServicve extends Service {
     }
 
     public ConcurrentHashMap<String,ReportBean> statAdCostTotal(){
-        long startStamp = 0;
-        long nowStamp = System.currentTimeMillis();
-        return statAdCost(startStamp,nowStamp,false);
+//        long startStamp = 0;
+//        long nowStamp = System.currentTimeMillis();
+        return statAdCost(0);
     }
 
     /**
@@ -412,52 +416,69 @@ public class TaskServicve extends Service {
      * @return
      */
     public ConcurrentHashMap<String,ReportBean> statAdCostHour(){
-        int minute = Calendar.getInstance().get(Calendar.MINUTE);
-        Calendar start = Calendar.getInstance();
-        start.set(Calendar.MINUTE,0);
-        //从这个小时的 0 分作为开始时间
-        long startStamp = start.getTimeInMillis();
-        //以当前时间作为结束时间
-        long nowStamp = System.currentTimeMillis();
-        return statAdCost(startStamp,nowStamp,true);
+//        int minute = Calendar.getInstance().get(Calendar.MINUTE);
+//        Calendar start = Calendar.getInstance();
+//        start.set(Calendar.MINUTE,0);
+//        //从这个小时的 0 分作为开始时间
+//        long startStamp = start.getTimeInMillis();
+//        //以当前时间作为结束时间
+//        long nowStamp = System.currentTimeMillis();
+        return statAdCost(1);
     }
 
     public ConcurrentHashMap<String,ReportBean> statAdCostDaily(){
-        Calendar start = Calendar.getInstance();
-        start.set(Calendar.HOUR,0);
-        start.set(Calendar.MINUTE,0);
-        long startStamp = start.getTimeInMillis();
-        long nowStamp = System.currentTimeMillis();
-        return statAdCost(startStamp,nowStamp,false);
+//        Calendar start = Calendar.getInstance();
+//        start.set(Calendar.HOUR,0);
+//        start.set(Calendar.MINUTE,0);
+//        long startStamp = start.getTimeInMillis();
+//        long nowStamp = System.currentTimeMillis();
+        return statAdCost(2);
     }
 
     /**
      * 统计费用实际消耗情况
      * @return
-     * @param startTime
-     * @param endTime
+     * @param reportType:0/总共,1/小时,2/天
      */
-    public ConcurrentHashMap<String,ReportBean> statAdCost(long startTime, long endTime,boolean isHour){
+    public ConcurrentHashMap<String,ReportBean> statAdCost(int reportType){
         // type：
         // 0 : 小时存量费用的统计，对于一个小时前，当天的广告耗费的汇总
         // 1 : 天存量费用的统计，
-        Object [] arr = new Object[2];
-        //转换成秒的时间戳
-        arr[0] = startTime / 1000;
-        arr[1] = endTime / 1000;
-        Date date = new Date();
-		String time = "_"+dateFm.format(date);
+        
         String sql = "";
-        if(isHour)
-            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour"+time+" where created_at >= ? and created_at <= ?  group by ad_uid";
-        else
-            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where created_at >= ? and created_at <= ?  group by ad_uid";
+        Object [] arr = null;
+        if(reportType == 1){
+        	arr = new Object[2];
+            //转换成秒的时间戳
+            //arr[0] = startTime / 1000;
+            //arr[1] = endTime / 1000;
+            Date date = new Date();
+    		String time = "_"+dateFm.format(date);
+    		arr[0] = yydDateFM.format(date);
+    		arr[1] = hourDateFM.format(date);
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour"+time+" where date = ? and hour = ?  group by ad_uid";
+        } else if(reportType == 2){
+        	arr = new Object[1];
+        	Date date = new Date();
+        	arr[0] = yydDateFM.format(date);
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where date = ?  group by ad_uid";
+        }else{
+        	sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports  group by ad_uid";
+        }
         try {
-            ResultList rl = select.select(sql,arr);
+        	ResultList rl = new ResultList();
+        	if(arr == null){
+        		rl = select.select(sql);
+        	}else{
+        		rl = select.select(sql,arr);
+        	}
             ConcurrentHashMap<String,ReportBean> map = new ConcurrentHashMap<>();
             for(ResultMap rm : rl){
                 ReportBean report = new ReportBean();
                 String adUid = rm.getString("ad_uid");
+                if(adUid == null){
+                	continue;
+                }
                 BigDecimal expense = rm.getBigDecimal("expense");
                 BigDecimal cost = rm.getBigDecimal("cost");
                 report.setAdUid(adUid);

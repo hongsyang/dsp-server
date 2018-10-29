@@ -108,6 +108,7 @@ public class AdFlowControl {
      * 广告组的监视器
      */
     private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorAdGroupTotal = null;
+    
     private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorAdGroupRealTotal = null;
 
     /**
@@ -128,6 +129,10 @@ public class AdFlowControl {
     private static ConcurrentHashMap<String,Long> nodeStatusMap = null;
     
     private DataTransQueue queue;
+    
+    private static ConcurrentHashMap<String,Float> cpcClieckRatioMap = null; 
+    
+    private static final float maxCpcClieckRatio = 0.03f;
 
     public AdFlowControl() {
 
@@ -145,6 +150,7 @@ public class AdFlowControl {
         mapMonitorAdGroupTotal = new ConcurrentHashMap<>();
         mapMonitorAdGroupRealTotal = new ConcurrentHashMap<>();
         nodeStatusMap = new ConcurrentHashMap<>();
+        cpcClieckRatioMap = new ConcurrentHashMap<>();
         queue = DataTransQueue.getInstance();
 //        adviserMap = new HashMap<>();
 
@@ -194,7 +200,7 @@ public class AdFlowControl {
     	MDC.put("sift", "control");
     	AdBean adBean = mapAd.get(adUid);
         if(adBean.getMode()!= null && adBean.getMode().equals("cpc")){
-        	cpcHandler.updatePixel(adUid,addWinNoticeNums,addMoney,clickNums,pixelType);
+        	cpcHandler.updatePixel(adBean,adUid,addWinNoticeNums,addMoney,clickNums,pixelType,maxCpcClieckRatio,cpcClieckRatioMap);
         }       
         switch (type) {
             case 0:
@@ -219,6 +225,11 @@ public class AdFlowControl {
                 statusDaily.setUid(adUid);
                 statusDaily.setWinNums(statusDaily.getWinNums() + addWinNoticeNums);
                 statusDaily.setMoney(statusDaily.getMoney() + addMoney);
+                if(mapAd.containsKey(adUid)){
+                	String groupId = mapAd.get(adUid).getGroupId();
+                	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
+                	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                }
                 break;
             case 2:
                 //更新历史全部状态
@@ -229,10 +240,8 @@ public class AdFlowControl {
                 statusAll.setWinNums(statusAll.getWinNums() + addWinNoticeNums);
                 statusAll.setMoney(statusAll.getMoney() + addMoney);
                 //更新广告组金额状态
-                if(mapAd.containsKey(adUid)){
+                if(mapAd.containsKey(adUid)){   
                 	String groupId = mapAd.get(adUid).getGroupId();
-                	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
-                	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
                 	AdFlowStatus statusTotalGroupAll = mapMonitorAdGroupRealTotal.get(groupId);
                 	statusTotalGroupAll.setMoney(statusTotalGroupAll.getMoney() + addMoney);
                 }
@@ -272,6 +281,79 @@ public class AdFlowControl {
                 	String reason = "["+adUid+"]竞价价格过低，请提升报价";
                 	stopAd(adUid, reason, false,0);
                 }
+                
+              //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
+                    
+                if(mapAd.containsKey(adUid)){
+                	AdBean ad = mapAd.get(adUid);
+                	String mode = ad.getMode();
+                	if("cpc".equalsIgnoreCase(mode)){
+                	//监测 CPC 类型的广告是否可以投放
+                    String isOk = cpcHandler.checkAvailable(adUid);
+                    if(isOk != null){
+                        //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
+                        stopAd(adUid, isOk, false,0);
+                    }
+                	}
+                    AdFlowStatus threshold = mapThresholdHour.get(adUid);
+                    AdFlowStatus monitor = mapMonitorHour.get(adUid);
+                    //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
+                    if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
+                        String reason = "#### 小时 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
+                        pauseAd(adUid, reason, true);
+                        myLog.error(monitor.toString() + "\t" + reason);
+                    }
+                    /*if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
+                    //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
+                    String reason = "#### 小时 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
+                    pauseAd(auid, reason, true);
+                    myLog.error(monitor.toString() + "\t" + reason);
+
+                	}*/
+
+                    String groupId = mapAd.get(adUid).getGroupId();
+                    AdFlowStatus monitorAdGroup = mapMonitorAdGroupTotal.get(groupId);
+                    AdFlowStatus monitorTotalAdGroup = mapMonitorAdGroupRealTotal.get(groupId);
+                    double thresholdGroupMoney = mapAdGroup.get(groupId).getQuotaMoney().doubleValue()*1000;
+                    double thresholdTotalGroupMoney = mapAdGroup.get(groupId).getQuotaTotalMoney().doubleValue()*1000;
+                    int quota = mapAdGroup.get(groupId).getQuota();
+                    int quotaTotal = mapAdGroup.get(groupId).getQuota_total();
+                    if(thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney * 0.9){
+                        //广告组每日限额超限，则发送停止命令，终止该广告投放
+                        String reason = "#### 广告组 每日限额 超限，参考指标：" + thresholdGroupMoney + "元\t" + monitorAdGroup.getMoney() + "元 ###";
+                        stopAd(adUid, reason, false,0);
+                        myLog.error(adUid + "\t" + reason);
+                    }
+                    
+                    if(thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney * 0.9){
+                        //广告组总限额超限，则发送停止命令，终止该广告投放
+                        String reason = "#### 广告组 总限额 超限，参考指标：" + thresholdTotalGroupMoney + "元\t" + monitorTotalAdGroup.getMoney() + "元 ###";
+                        stopAd(adUid, reason, false,0);
+                        myLog.error(adUid + "\t" + reason);
+                    }
+
+                //账户的余额和每日的限额都在这里做适配，以最低的为准，
+                //其中来自于三个地方： 2 个是 balance 表的 balance 字段 和 quota_amount 字段 ，
+                // 还有一个地方来自于 广告组限额
+                //跟每日监控作比对
+                    AdFlowStatus thresholdDaily = mapThresholdDaily.get(adUid);
+                    AdFlowStatus monitorDaily = mapMonitorDaily.get(adUid);
+                    if (thresholdDaily.getMoney() != 0 && monitorDaily.getMoney() >= thresholdDaily.getMoney() * 0.9) {
+                        //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
+                        String reason = "#### 每日金额 超限，参考指标：" + thresholdDaily.getMoney() + "元\t" + monitorDaily.getMoney() + "元 ###";
+                        stopAd(adUid, reason, false,0);
+                        myLog.error(monitor.toString() + "\t" + reason);
+                    }
+                    
+                    if (thresholdDaily.getWinNums() != 0 && monitorDaily.getWinNums() >= thresholdDaily.getWinNums() * 0.9) {
+                        String reason = "#### 每日 CPM 超限，参考指标：" + thresholdDaily.getWinNums() + "元\t" + monitorDaily.getWinNums() + "元 ### " ;
+                        stopAd(adUid, reason, true,0);
+                        myLog.error(monitor.toString() + "\t" + reason);
+                    }
+
+                }
+                
+                
                 break;
         }
     }
@@ -305,87 +387,88 @@ public class AdFlowControl {
         //从各个 PIXCEL 节点获得最新 wins 和 金额消费情况， 并更新至内存监控
         for (WorkNodeBean node : nodeList) {
             //持续不断的从队列中获得 pixcel 信息
-            while(true){
+            //while(true){
+        	if(node.getName().equalsIgnoreCase("pixcel")){
                 AdPixelBean pix = MsgControlCenter.recvPixelStatus(node.getName());
                 if (pix == null)
-                    break;
+                    continue;
                 myLog.info("广告ID["+pix.getAdUid()+"]的广告状态:"+pix.isLower());
                 updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getFinalCost().toString()), -1,pix.getClickNums(),pix.getType(),pix.isLower());
             }
         }
 
-        //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
-        for (String auid : mapThresholdHour.keySet()) {
-            //监测 CPC 类型的广告是否可以投放
-        	AdBean ad = mapAd.get(auid);
-        	String mode = ad.getMode();
-        	if("cpc".equalsIgnoreCase(mode)){
-            String isOk = cpcHandler.checkAvailable(auid);
-            if(isOk != null){
-                //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
-                stopAd(auid, isOk, false,0);
-            }
-        	}
-            AdFlowStatus threshold = mapThresholdHour.get(auid);
-            AdFlowStatus monitor = mapMonitorHour.get(auid);
-            //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
-            if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
-                String reason = "#### 小时 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
-                pauseAd(auid, reason, true);
-                myLog.error(monitor.toString() + "\t" + reason);
-            }
-            /*if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
-            //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
-            String reason = "#### 小时 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
-            pauseAd(auid, reason, true);
-            myLog.error(monitor.toString() + "\t" + reason);
-
-        	}*/
-
-            String groupId = mapAd.get(auid).getGroupId();
-            AdFlowStatus monitorAdGroup = mapMonitorAdGroupTotal.get(groupId);
-            AdFlowStatus monitorTotalAdGroup = mapMonitorAdGroupRealTotal.get(groupId);
-            double thresholdGroupMoney = mapAdGroup.get(groupId).getQuotaMoney().doubleValue();
-            double thresholdTotalGroupMoney = mapAdGroup.get(groupId).getQuotaTotalMoney().doubleValue();
-            int quota = mapAdGroup.get(groupId).getQuota();
-            int quotaTotal = mapAdGroup.get(groupId).getQuota_total();
-            if(thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney){
-                //广告组每日限额超限，则发送停止命令，终止该广告投放
-                String reason = "#### 广告组 每日限额 超限，参考指标：" + thresholdGroupMoney + "\t" + monitorAdGroup.getMoney() + " ###";
-                stopAd(auid, reason, false,0);
-                myLog.error(auid + "\t" + reason);
-            }
-            
-            if(thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney){
-                //广告组总限额超限，则发送停止命令，终止该广告投放
-                String reason = "#### 广告组 总限额 超限，参考指标：" + thresholdTotalGroupMoney + "\t" + monitorTotalAdGroup.getMoney() + " ###";
-                stopAd(auid, reason, false,0);
-                myLog.error(auid + "\t" + reason);
-            }
-
-        }
-
-        //账户的余额和每日的限额都在这里做适配，以最低的为准，
-        //其中来自于三个地方： 2 个是 balance 表的 balance 字段 和 quota_amount 字段 ，
-        // 还有一个地方来自于 广告组限额
-        //跟每日监控作比对
-        for (String auid : mapThresholdDaily.keySet()) {
-            AdFlowStatus threshold = mapThresholdDaily.get(auid);
-            AdFlowStatus monitor = mapMonitorDaily.get(auid);
-            if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
-                //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
-                String reason = "#### 每日金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
-                stopAd(auid, reason, false,0);
-                myLog.error(monitor.toString() + "\t" + reason);
-            }
-            
-            if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
-                String reason = "#### 每日 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
-                stopAd(auid, reason, true,0);
-                myLog.error(monitor.toString() + "\t" + reason);
-            }
-
-        }
+//        //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
+//        for (String auid : mapThresholdHour.keySet()) {
+//            //监测 CPC 类型的广告是否可以投放
+//        	AdBean ad = mapAd.get(auid);
+//        	String mode = ad.getMode();
+//        	if("cpc".equalsIgnoreCase(mode)){
+//            String isOk = cpcHandler.checkAvailable(auid);
+//            if(isOk != null){
+//                //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
+//                stopAd(auid, isOk, false,0);
+//            }
+//        	}
+//            AdFlowStatus threshold = mapThresholdHour.get(auid);
+//            AdFlowStatus monitor = mapMonitorHour.get(auid);
+//            //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
+//            if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
+//                String reason = "#### 小时 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
+//                pauseAd(auid, reason, true);
+//                myLog.error(monitor.toString() + "\t" + reason);
+//            }
+//            /*if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney()) {
+//            //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
+//            String reason = "#### 小时 金额 超限，参考指标：" + threshold.getMoney() + "\t" + monitor.getMoney() + " ###";
+//            pauseAd(auid, reason, true);
+//            myLog.error(monitor.toString() + "\t" + reason);
+//
+//        	}*/
+//
+//            String groupId = mapAd.get(auid).getGroupId();
+//            AdFlowStatus monitorAdGroup = mapMonitorAdGroupTotal.get(groupId);
+//            AdFlowStatus monitorTotalAdGroup = mapMonitorAdGroupRealTotal.get(groupId);
+//            double thresholdGroupMoney = mapAdGroup.get(groupId).getQuotaMoney().doubleValue()*1000;
+//            double thresholdTotalGroupMoney = mapAdGroup.get(groupId).getQuotaTotalMoney().doubleValue()*1000;
+//            int quota = mapAdGroup.get(groupId).getQuota();
+//            int quotaTotal = mapAdGroup.get(groupId).getQuota_total();
+//            if(thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney * 0.9){
+//                //广告组每日限额超限，则发送停止命令，终止该广告投放
+//                String reason = "#### 广告组 每日限额 超限，参考指标：" + thresholdGroupMoney + "元\t" + monitorAdGroup.getMoney() + "元 ###";
+//                stopAd(auid, reason, false,0);
+//                myLog.error(auid + "\t" + reason);
+//            }
+//            
+//            if(thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney * 0.9){
+//                //广告组总限额超限，则发送停止命令，终止该广告投放
+//                String reason = "#### 广告组 总限额 超限，参考指标：" + thresholdTotalGroupMoney + "元\t" + monitorTotalAdGroup.getMoney() + "元 ###";
+//                stopAd(auid, reason, false,0);
+//                myLog.error(auid + "\t" + reason);
+//            }
+//
+//        }
+//
+//        //账户的余额和每日的限额都在这里做适配，以最低的为准，
+//        //其中来自于三个地方： 2 个是 balance 表的 balance 字段 和 quota_amount 字段 ，
+//        // 还有一个地方来自于 广告组限额
+//        //跟每日监控作比对
+//        for (String auid : mapThresholdDaily.keySet()) {
+//            AdFlowStatus threshold = mapThresholdDaily.get(auid);
+//            AdFlowStatus monitor = mapMonitorDaily.get(auid);
+//            if (threshold.getMoney() != 0 && monitor.getMoney() >= threshold.getMoney() * 0.9) {
+//                //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
+//                String reason = "#### 每日金额 超限，参考指标：" + threshold.getMoney() + "元\t" + monitor.getMoney() + "元 ###";
+//                stopAd(auid, reason, false,0);
+//                myLog.error(monitor.toString() + "\t" + reason);
+//            }
+//            
+//            if (threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums() * 0.9) {
+//                String reason = "#### 每日 CPM 超限，参考指标：" + threshold.getWinNums() + "元\t" + monitor.getWinNums() + "元 ### " ;
+//                stopAd(auid, reason, true,0);
+//                myLog.error(monitor.toString() + "\t" + reason);
+//            }
+//
+//        }
 
         //根据返回的 winnotice 个数 和金额，重新调节和下发需要提供的 bids 的个数
 
@@ -526,14 +609,14 @@ public class AdFlowControl {
                 status3.setUid(auid);
                 status3.setName(name);
                 status3.setWinNumsByThousand(winNumsDaily);
-                status3.setMoney(money.floatValue());
+                status3.setMoney(money.floatValue()*1000);
                 mapThresholdDaily.put(auid, status3);
                 //重新加载 小时 参考指标
                 AdFlowStatus status4 = new AdFlowStatus();
                 status4.setUid(auid);
                 status4.setName(name);
                 status4.setWinNumsByThousand(winNumsHour);
-                status4.setMoney(money.floatValue());
+                status4.setMoney(money.floatValue()*1000);
                 mapThresholdHour.put(auid, status4);
 
                 //写入广告主每日限额
@@ -737,12 +820,23 @@ public class AdFlowControl {
                 ad.setEndTime(new Date(map.getInteger("e")));
                 ad.setFrqDaily(map.getInteger("frq_daily"));
                 ad.setFrqHour(map.getInteger("frq_hourly"));
-                ad.setPrice(map.getBigDecimal("price").floatValue());
-                ad.setMode(map.getString("mode"));
+                String mode = map.getString("mode");
+                ad.setMode(mode);
                 // 设置广告的可拖欠的额度
                 ad.setMoneyArrears(map.getInteger("money_arrears"));
                 //出价模式
-                ad.setMode(map.getString("mode"));
+                ad.setMode(mode);
+                if("cpc".equalsIgnoreCase(mode)){
+                	if(cpcClieckRatioMap.containsKey(ad.getAdUid())){
+                		float clieckRatio = cpcClieckRatioMap.get(ad.getAdUid());
+                		ad.setPrice(map.getBigDecimal("price").floatValue() * clieckRatio * 1000);
+                	}else{
+                		cpcClieckRatioMap.put(ad.getAdUid(), maxCpcClieckRatio);
+                		ad.setPrice(map.getBigDecimal("price").floatValue() * maxCpcClieckRatio * 1000);
+                	}                	
+                }else{
+                	ad.setPrice(map.getBigDecimal("price").floatValue());
+                }
 
 //                ad.setPriority(map.getInteger("priority"));
                 //限额
@@ -1011,6 +1105,9 @@ public class AdFlowControl {
         AdBean ad = mapAd.get(adUid);
         adLog.setAdUid(adUid);
         adLog.setAdName(ad.getName());
+        if(ad.getAdvertiser() == null){
+        	return;
+        }
         adLog.setAdvertiserUid(ad.getAdvertiser().getUid());
         adLog.setAdvertiserName(ad.getAdvertiser().getName());
         adLog.setCreatedAt(new Date());

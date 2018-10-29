@@ -20,7 +20,7 @@ public class CPCHandler {
     /**
      * 广告永久的指标监控
      */
-    private static HashMap<String, AdFlowStatus> mapMonitorTotal = new HashMap<>();
+    private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorTotal = new ConcurrentHashMap<>();
     /**
      * 数据库中设定的设计流控指标
      */
@@ -57,7 +57,8 @@ public class CPCHandler {
      * @param pixelType  pixcel 类型，曝光 0 和 点击 1
      * @return
      */
-    public boolean updatePixel(String adUid, long addWinNoticeNums, float addMoney, long clickNums , int pixelType) {
+    public boolean updatePixel(AdBean adBean,String adUid, long addWinNoticeNums, float addMoney, long clickNums , int pixelType,
+    		float maxCpcClieckRatio,ConcurrentHashMap<String,Float> cpcClieckRatioMap) {
         AdFlowStatus status = mapMonitorTotal.get(adUid);
         // 如果为空新增广告监视器
         if (status == null){
@@ -70,6 +71,13 @@ public class CPCHandler {
             status.setMoney(status.getMoney() + addMoney);
         }else if(pixelType == 1){
             status.setClickNums(status.getClickNums() +  clickNums);
+        }
+        if(status.getClickNums() != 0 && status.getWinNums() != 0){
+        	float clieckRatio = status.getClickNums() / status.getWinNums();
+        	if(cpcClieckRatioMap.containsKey(adUid) && clieckRatio < cpcClieckRatioMap.get(adUid)){
+        		cpcClieckRatioMap.put(adUid, clieckRatio);
+        		adBean.setPrice(adBean.getPrice() * clieckRatio / cpcClieckRatioMap.get(adUid));
+        	}
         }
         return true;
     }
