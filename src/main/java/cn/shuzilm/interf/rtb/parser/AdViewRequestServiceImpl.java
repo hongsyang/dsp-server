@@ -197,6 +197,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
                     log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
                     BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+                    MDC.remove("sift");
 //                    pushRedis(targetDuFlowBean);//上传到redis服务器
                     response = JSON.toJSONString(bidResponseBean);
                     log.debug("过滤通过的bidResponseBean:{}", response);
@@ -237,6 +238,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                 targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
                 log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+                MDC.remove("sift");
+                MDC.put("sift", "dsp-server");
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
@@ -386,6 +389,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
+                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + duFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + duFlowBean.getProvince() +// 省

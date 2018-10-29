@@ -181,8 +181,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                     log.debug("过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
                     BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
+                    MDC.remove("sift");
 //                    pushRedis(targetDuFlowBean);//上传到redis服务器
-                    log.debug("json计数");
                     response = JSON.toJSONString(bidResponseBean);
                     log.debug("过滤通过的bidResponseBean:{}", response);
                 } else {
@@ -227,6 +227,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
+                MDC.remove("sift");
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 MDC.put("sift", "dsp-server");
@@ -274,6 +275,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&app=" + duFlowBean.getAppName() +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
+                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + duFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + duFlowBean.getProvince() +// 省

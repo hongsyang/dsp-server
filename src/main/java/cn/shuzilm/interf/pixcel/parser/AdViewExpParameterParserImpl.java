@@ -99,9 +99,10 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         element.setAdUid(daduid);
         String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
         element.setDealid(pmp);
-
+        String premiumFactor = urlRequest.get("pf");//溢价系数
+        element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("AdView");
-        if (!MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
+        if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
                 log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
                 MDC.put("sift", "pixel");

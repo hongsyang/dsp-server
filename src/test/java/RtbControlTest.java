@@ -15,11 +15,13 @@ public class RtbControlTest {
     }
 
     public static void main(String[] args) {
-        String code ="20181028-103344_bidreq_175-2460-Ievx-222";
+
+
+//       String code = "y188_8081-t37-1540803733-137-811";
 //        String replace = code.replace("-", "").replace("_", "");
-        System.out.println(MD5Util.MD5(code).equals(MD5Util.MD5("20181028-103344_bidreq_175-2460-Ievx-222")));
-        System.out.println(MD5Util.MD5(MD5Util.MD5(code)));
+//        System.out.println(MD5Util.MD5(code).equals(MD5Util.MD5("&bidid=7a90a45f816a481e54ffdbee7ef8a13e")));
+//        System.out.println(MD5Util.MD5(MD5Util.MD5(code)).equals("7a90a45f816a481e54ffdbee7ef8a13e"));
 //        System.out.println(hashCode);
-//        System.out.println(  JedisQueueManager.getLength("EXP_ERROR"));
+        System.out.println(  JedisQueueManager.getLength("EXP"));
     }
 }

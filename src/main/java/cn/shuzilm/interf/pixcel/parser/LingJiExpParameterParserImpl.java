@@ -102,10 +102,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         element.setAdUid(daduid);
         String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
         element.setDealid(pmp);
-
+        String premiumFactor = urlRequest.get("pf");//溢价系数
+        element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("LingJi");
 
-        if (!MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
+        if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
                 log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
                 MDC.put("sift", "pixel");
@@ -179,9 +180,9 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             }
             String duFlowBeanJson = JSON.toJSONString(element);
             log.debug("duFlowBeanJson:{}", duFlowBeanJson);
-        }else {
+        } else {
             MDC.put("sift", "repeat");
-            log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
+            log.debug("本次请求requestId:{}；bidid:{}", requestId, element.getBidid());
         }
         return requestId;
     }
