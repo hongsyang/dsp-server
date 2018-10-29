@@ -20,7 +20,7 @@ public class CPCHandler {
     /**
      * 广告永久的指标监控
      */
-    private static HashMap<String, AdFlowStatus> mapMonitorTotal = new HashMap<>();
+    private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorTotal = new ConcurrentHashMap<>();
     /**
      * 数据库中设定的设计流控指标
      */

@@ -108,6 +108,7 @@ public class AdFlowControl {
      * 广告组的监视器
      */
     private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorAdGroupTotal = null;
+    
     private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorAdGroupRealTotal = null;
 
     /**
@@ -131,7 +132,7 @@ public class AdFlowControl {
     
     private static ConcurrentHashMap<String,Float> cpcClieckRatioMap = null; 
     
-    private static final float maxCpcClieckRatio = 0.3f;
+    private static final float maxCpcClieckRatio = 0.03f;
 
     public AdFlowControl() {
 
@@ -386,10 +387,11 @@ public class AdFlowControl {
         //从各个 PIXCEL 节点获得最新 wins 和 金额消费情况， 并更新至内存监控
         for (WorkNodeBean node : nodeList) {
             //持续不断的从队列中获得 pixcel 信息
-            while(true){
+            //while(true){
+        	if(node.getName().equalsIgnoreCase("pixcel")){
                 AdPixelBean pix = MsgControlCenter.recvPixelStatus(node.getName());
                 if (pix == null)
-                    break;
+                    continue;
                 myLog.info("广告ID["+pix.getAdUid()+"]的广告状态:"+pix.isLower());
                 updatePixel(pix.getAdUid(), pix.getWinNoticeNums(), Float.valueOf(pix.getFinalCost().toString()), -1,pix.getClickNums(),pix.getType(),pix.isLower());
             }
