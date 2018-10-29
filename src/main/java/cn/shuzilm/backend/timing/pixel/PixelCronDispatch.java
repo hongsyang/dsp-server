@@ -77,7 +77,7 @@ public class PixelCronDispatch {
 //               dispatch(RealTask.class,"0/5 * * * * ?");
                break;
            case 1:
-               dispatch(PixelTenMinuteTask.class,"0 0/5 * * * ?");
+               dispatch(PixelTenMinuteTask.class,"0/1 * * * * ?");
                break;
            case 2:
                dispatch(PixelPushHeartTask.class,"0 0/10 * * * ?");

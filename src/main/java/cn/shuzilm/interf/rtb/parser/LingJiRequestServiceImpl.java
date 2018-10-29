@@ -229,6 +229,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
+                MDC.put("sift", "dsp-server");
                 log.debug("没有过滤的bidResponseBean:{}", response);
             }
             return response;
@@ -412,7 +413,10 @@ public class LingJiRequestServiceImpl implements RequestService {
         seatBid.setBid(bidList);
         seatBidList.add(seatBid);
         bidResponseBean.setSeatbid(seatBidList);
+        MDC.put("sift", "bidResponseBean");
+        log.debug("bidResponseBean:{}",JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
+
     }
 
     /**

@@ -422,6 +422,8 @@ public class AdViewRequestServiceImpl implements RequestService {
         seatBid.setBid(bidList);
         seatBidList.add(seatBid);
         bidResponseBean.setSeatbid(seatBidList);
+        MDC.put("sift", "bidResponseBean");
+        log.debug("bidResponseBean:{}",JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
     }
 
