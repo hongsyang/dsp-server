@@ -9,6 +9,7 @@ import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.MD5Util;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.aes.AES;
 import com.alibaba.fastjson.JSON;
@@ -104,8 +105,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 
         element.setAdxSource("LingJi");
 
-        if (requestId != null) {
-
+        if (!MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
                 log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
                 MDC.put("sift", "pixel");
@@ -156,7 +156,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
-                        element.getDealid(), element.getAppId(),element.getBidid());
+                        element.getDealid(), element.getAppId(), element.getBidid());
 
                 MDC.remove("phoenix");
                 boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
@@ -179,6 +179,9 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             }
             String duFlowBeanJson = JSON.toJSONString(element);
             log.debug("duFlowBeanJson:{}", duFlowBeanJson);
+        }else {
+            MDC.put("sift", "repeat");
+            log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
         }
         return requestId;
     }

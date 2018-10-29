@@ -9,6 +9,7 @@ import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.MD5Util;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.base64.Decrypter;
@@ -100,7 +101,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         element.setDealid(pmp);
 
         element.setAdxSource("AdView");
-        if (requestId != null) {
+        if (!MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
                 log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
                 MDC.put("sift", "pixel");
@@ -166,6 +167,10 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
             String duFlowBeanJson = JSON.toJSONString(element);
             log.debug("duFlowBeanJson:{}", duFlowBeanJson);
+        }else {
+            MDC.put("sift", "repeat");
+            log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
+
         }
         return requestId;
     }
