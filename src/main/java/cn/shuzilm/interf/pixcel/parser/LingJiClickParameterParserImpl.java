@@ -39,9 +39,10 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
     @Override
     public String parseUrl(String url) {
         configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "LingJiClick");
-        log.debug("LingJiClick点击的curl值:{}", urlRequest);
+        log.debug("LingJiClick点击的url值:{}", url);
+        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
+        log.debug("LingJiClick点击转换之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");

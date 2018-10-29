@@ -39,9 +39,10 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
     @Override
     public String parseUrl(String url) {
         this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "AdViewClick");
-        log.debug("AdViewClick点击的curl值:{}", urlRequest);
+        log.debug("AdViewClick点击的url值:{}", url);
+        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
+        log.debug("AdViewClick点击之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");

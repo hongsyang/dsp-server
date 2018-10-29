@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.pixcel.parser;
 
 import cn.shuzilm.backend.pixel.PixelFlowControl;
+import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
@@ -18,9 +19,7 @@ import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @Description: ExposureParser  曝光量解析
@@ -44,16 +43,66 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
     @Override
     public String parseUrl(String url) {
         this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         MDC.put("sift", "AdViewExp");
-        log.debug("AdViewExp曝光的wurl值:{}", urlRequest);
+        log.debug("AdViewExp曝光的url值:{}", url);
+        Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
+        log.debug("AdViewExp曝光转换之后的url值:{}", urlRequest);
+        DUFlowBean element = new DUFlowBean();
+
         String requestId = urlRequest.get("id");
+        element.setInfoId(requestId + UUID.randomUUID());
+        element.setRequestId(requestId);
+        element.setBidid(urlRequest.get("bidid"));
+
+        String impid = urlRequest.get("impid");
+        List<Impression> list = new ArrayList();
+        Impression impression = new Impression();
+        element.setImpression(list);
+        impression.setId(impid);
+        list.add(impression);
+
+
+        String act = urlRequest.get("act");
+        element.setWinNoticeTime(Long.valueOf(act));
+
+        String adx = urlRequest.get("adx");
+        element.setAdxId(adx);
+
+        String did = urlRequest.get("did");
+        element.setDid(did);
+
+        String device = urlRequest.get("device");
+        element.setDeviceId(device);
+
+        String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
+        element.setAppName(app);
+        String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
+        element.setAppPackageName(appn);
+        String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+        element.setAppVersion(appv);
+        String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
+        element.setAudienceuid(ddem);
+        String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
+        element.setCreativeUid(dcuid);
+        String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
+        element.setProvince(dpro);
+        String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
+        element.setCity(dcit);
+        String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
+        element.setCountry(dcou);
+        String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
+        element.setAdvertiserUid(dade);
+        String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
+        element.setAgencyUid(dage);
+        String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
+        element.setAdUid(daduid);
+        String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
+        element.setDealid(pmp);
+
+        element.setAdxSource("AdView");
         if (requestId != null) {
-            Jedis jedis = JedisManager.getInstance().getResource();
-            String elementJson = jedis.get(requestId);
-            DUFlowBean element = JSON.parseObject(elementJson, DUFlowBean.class);//json转换为对象
             try {
-                log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, elementJson);
+                log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
                 MDC.put("sift", "pixel");
                 AdPixelBean bean = new AdPixelBean();
                 if (element != null) {
@@ -77,7 +126,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
                 MDC.put("sift", "AdViewExp");
-                log.debug("发送到Phoenix的DUFlowBean:{}", elementJson);
+                log.debug("发送到Phoenix的DUFlowBean:{}", element);
                 MDC.put("phoenix", "Exp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
@@ -100,9 +149,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 MDC.put("sift", "AdViewExp");
                 boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
                 if (lingJiClick) {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", elementJson, lingJiClick);
+                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 } else {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", elementJson, lingJiClick);
+                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
                 }
             } catch (Exception e) {
@@ -110,11 +159,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 MDC.put("sift", "exception");
                 boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
                 log.debug("发送到EXP_ERROR队列：{}", exp_error);
-                log.debug("element{}", elementJson);
+                log.debug("element{}", element);
                 log.error("异常信息：{}", e);
                 MDC.remove("sift");
-            } finally {
-                jedis.close();
             }
 
             String duFlowBeanJson = JSON.toJSONString(element);
