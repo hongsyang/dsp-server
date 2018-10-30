@@ -7,7 +7,6 @@ import cn.shuzilm.backend.timing.master.DailyTask;
 import cn.shuzilm.backend.timing.master.HourTask;
 import cn.shuzilm.backend.timing.master.RealTask;
 import cn.shuzilm.backend.timing.master.TenMinuteTask;
-import cn.shuzilm.backend.timing.master.Test;
 import cn.shuzilm.backend.timing.master.UpdateAdMapTask;
 
 /**

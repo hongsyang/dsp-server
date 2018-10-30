@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
+import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -76,7 +77,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         element.setDeviceId(device);
 
         String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-        element.setAppName(app);
+        element.setAppName(URLDecoder.decode(app));
         String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
         String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");

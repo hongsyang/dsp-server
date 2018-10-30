@@ -168,7 +168,6 @@ public class TaskServicve extends Service {
     
     /**
      * 查询5分钟内的广告主
-     * @param adverUid
      * @return
      */
     public List<AdvertiserBean> queryAdverByUpTime() throws SQLException{
@@ -253,7 +252,6 @@ public class TaskServicve extends Service {
     
     /**
      * 查找5分钟前的创意
-     * @param creativeUid
      * @return
      */
     public List<CreativeBean> queryCreativeByUpTime() {
