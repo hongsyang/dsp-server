@@ -45,6 +45,7 @@ public class AdFlowControl {
      * 主控定期从数据库中读取的间隔 单位：分钟
      */
     private static final int INTERVAL = 10 * 60 * 1000;
+    
     private static TaskServicve taskService = new TaskServicve();
     
     /**
