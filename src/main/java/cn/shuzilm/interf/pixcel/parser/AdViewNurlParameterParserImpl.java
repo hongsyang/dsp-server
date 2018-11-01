@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * @Description: ExposureParser  曝光量解析
+ * @Description: ExposureParser  曝光检测量解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:57
  * @UpdateUser: houkp
@@ -74,7 +74,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
         element.setDeviceId(device);
 
         String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-        element.setAppName(URLDecoder.decode(app));
+        element.setAppName(app);
         String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
         String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");

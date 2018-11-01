@@ -77,7 +77,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         element.setDeviceId(device);
 
         String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-        element.setAppName(URLDecoder.decode(app));
+        element.setAppName(app);
         String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
         String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
