@@ -261,6 +261,22 @@ public class LingJiRequestServiceImpl implements RequestService {
         Impression impression = imp.get(0);
         bid.setId(duFlowBean.getBidid());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
+        String landingUrlA = duFlowBean.getLandingUrl();//落地页
+        String landingUrl = "";
+        if (landingUrl.contains("?")) {
+            landingUrl = landingUrlA +
+                    "&advertiserUid=" + duFlowBean.getAdvertiserUid() +
+                    "&adUid=" + duFlowBean.getAdUid() +
+                    "&creativeUid=" + duFlowBean.getCreativeUid() +
+                    "&materialId=" + duFlowBean.getMaterialId();
+
+        } else {
+            landingUrl = landingUrlA +
+                    "?advertiserUid=" + duFlowBean.getAdvertiserUid() +
+                    "&adUid=" + duFlowBean.getAdUid() +
+                    "&creativeUid=" + duFlowBean.getCreativeUid() +
+                    "&materialId=" + duFlowBean.getMaterialId();
+        }
         String serviceUrl = configs.getString("SERVICE_URL");
         //曝光nurl
         String nurl = serviceUrl + "lingjiexp?" +
@@ -326,7 +342,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             nativeAD.setImptrackers(urls);// 展示曝光URL数组
 
             LJLink ljLink = new LJLink();//	点击跳转URL地址(落地页)
-            ljLink.setUrl(duFlowBean.getLandingUrl());//落地页
+            ljLink.setUrl(landingUrl);//落地页
             List curls = new ArrayList();
             curls.add(curl);
             ljLink.setClicktrackers(curls);
@@ -398,7 +414,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
         LJResponseExt ljResponseExt = new LJResponseExt();
-        ljResponseExt.setLdp(duFlowBean.getLandingUrl());//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
+
+        ljResponseExt.setLdp(landingUrl);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
         //曝光监测数组
         List pm = new ArrayList();
         pm.add(duFlowBean.getTracking());
@@ -416,7 +433,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         seatBidList.add(seatBid);
         bidResponseBean.setSeatbid(seatBidList);
         MDC.put("sift", "bidResponseBean");
-        log.debug("bidResponseBean:{}",JSON.toJSONString(bidResponseBean));
+        log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
 
     }

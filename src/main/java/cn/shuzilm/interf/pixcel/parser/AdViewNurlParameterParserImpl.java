@@ -5,26 +5,23 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
 import cn.shuzilm.util.MD5Util;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
-import cn.shuzilm.util.base64.Decrypter;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import redis.clients.jedis.Jedis;
 
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * @Description: ExposureParser 赢价通知量解析
+ * @Description: ExposureParser  曝光量解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:57
  * @UpdateUser: houkp
@@ -32,9 +29,9 @@ import java.util.*;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class AdViewExpParameterParserImpl implements ParameterParser {
+public class AdViewNurlParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(AdViewExpParameterParserImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(AdViewNurlParameterParserImpl.class);
 
     private AppConfigs configs = null;
 
@@ -45,10 +42,10 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
     @Override
     public String parseUrl(String url) {
         this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        MDC.put("sift", "AdViewExp");
-        log.debug("AdViewExp曝光的url值:{}", url);
+        MDC.put("sift", "AdViewNurl");
+        log.debug("AdViewNurl曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
-        log.debug("AdViewExp曝光转换之后的url值:{}", urlRequest);
+        log.debug("AdViewNurl曝光转换之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
@@ -105,7 +102,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         element.setAdxSource("AdView");
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
-                log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
+                log.debug("AdViewNurl曝光的requestid:{},element对象:{}", requestId, element);
                 MDC.put("sift", "pixel");
                 AdPixelBean bean = new AdPixelBean();
                 if (element != null) {
@@ -116,9 +113,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 String price = urlRequest.get("price");
                 Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
                 bean.setCost(Double.valueOf(priceLong) / 10000);
-                bean.setWinNoticeNums(0);
+                bean.setWinNoticeNums(1);
                 //pixel服务器发送到主控模块
-                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
+                log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
                 AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
 
                 //pixel服务器发送到Phoenix
@@ -128,9 +125,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-                MDC.put("sift", "AdViewExp");
+                MDC.put("sift", "AdViewNurl");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
-                MDC.put("phoenix", "Exp");
+                MDC.put("phoenix", "Nurl");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
@@ -149,16 +146,16 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                         element.getDealid(), element.getAppId(),element.getBidid());
 
                 MDC.remove("phoenix");
-              /*  MDC.put("sift", "AdViewExp");
+                MDC.put("sift", "AdViewNurl");
                 boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
                 if (lingJiClick) {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 } else {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
-                }*/
+                }
             } catch (Exception e) {
-                Help.sendAlert("pixcel异常触发报警:AdViewExp");
+                Help.sendAlert("pixcel异常触发报警:AdViewNurl");
                 MDC.put("sift", "exception");
                 boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
                 log.debug("发送到EXP_ERROR队列：{}", exp_error);
