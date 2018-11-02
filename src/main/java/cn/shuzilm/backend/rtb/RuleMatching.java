@@ -203,6 +203,7 @@ public class RuleMatching {
 		List<String> carrierIdList = null;
 		List<String> brandList = null;
 		List<String> ipList = null;
+		Set<String> audienceTagIdSet = null;
 		String provinceIdKey = null;
 		String cityIdKey = null;
 		String countryIdKey = null;
@@ -263,6 +264,13 @@ public class RuleMatching {
 		if(brandStr != null){
 			String brands[] = brandStr.split(",");
 			brandList = Arrays.asList(brands);
+		}
+		
+		String audienceTagIdStr = tagBean.getAudienceTagIdList();
+		if(audienceTagIdStr != null){
+			String audienceTagIds[] = audienceTagIdStr.split(",");
+			List<String> audienceTagIdList = Arrays.asList(audienceTagIds);
+			audienceTagIdSet = new HashSet<String>(audienceTagIdList);
 		}
 				
 		
@@ -389,8 +397,8 @@ public class RuleMatching {
 						break;
 					}
 				} else if (tagBean != null && audience.getType().equals("dmp")) {// 定制人群包
-					String dmpId = audience.getDmpId();
-					if (dmpId != null && !dmpId.trim().equals("") && dmpId.equals(deviceId)) {
+					String audienceId = audience.getUid();
+					if(audienceTagIdSet != null && !audienceTagIdSet.isEmpty() && audienceTagIdSet.contains(audienceId)){
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						break;

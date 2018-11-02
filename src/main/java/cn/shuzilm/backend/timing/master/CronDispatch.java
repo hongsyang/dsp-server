@@ -54,9 +54,12 @@ public class CronDispatch {
         AdFlowControl.getInstance().loadAdInterval(true);
         // 初始化CPC结算方式的广告的 阈值和moniter
         CPCHandler.getInstance().updateIndicator(true);
-        //    // 5 s 触发
-        CronDispatch.startTimer(0);
 //        AdFlowControl.getInstance().pullAndUpdateTask();
+        
+        AdFlowControl.getInstance().pullAndUpdateTask(true);
+        
+          // 5 s 触发
+        CronDispatch.startTimer(0);
 //        //  每小时触发
         CronDispatch.startTimer(2);
 //        AdFlowControl.getInstance().resetHourMonitor();
@@ -71,6 +74,8 @@ public class CronDispatch {
         CronDispatch.startTimer(5);
         
         CronDispatch.startTimer(6);
+        
+        CronDispatch.startTimer(7);
     }
 
     /**
@@ -104,6 +109,9 @@ public class CronDispatch {
         	   break;
            case 6:
         	   dispatch(UpdateAdMapTask.class,"0 0/5 * * * ?");
+        	   break;
+           case 7:
+        	   dispatch(PutDetailInDBTask.class,"0 0/10 * * * ?");
            default:
                break;
        }

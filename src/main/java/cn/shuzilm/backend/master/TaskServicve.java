@@ -1,6 +1,5 @@
 package cn.shuzilm.backend.master;
 
-import ch.qos.logback.core.joran.conditional.ElseAction;
 import cn.shuzilm.bean.control.*;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import com.yao.util.db.bean.ResultList;
@@ -24,7 +23,7 @@ public class TaskServicve extends Service {
 	private SimpleDateFormat yydDateFM = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private SimpleDateFormat hourDateFM = new SimpleDateFormat("HH");
-	
+		
 	private static final int INTERVAL = 5 * 60 * 1000;
     /**
      * 查找 10 分钟前的 人群包条件
@@ -261,8 +260,9 @@ public class TaskServicve extends Service {
     	long timeNow = System.currentTimeMillis();
         long timeBefore = timeNow - INTERVAL;
         Object[] arr = new Object[1];
-        arr[0] = timeBefore / 1000;
-        String sql = "select a.uid ad_uid,c.* from creative c JOIN ad a ON c.uid=a.creative_uid where c.updated_at >= ?";
+        //arr[0] = timeBefore / 1000;
+        arr[0] = specDateFM.format(new Date(timeBefore));
+        String sql = "select a.uid ad_uid,c.* from creative c JOIN ad a ON c.uid=a.creative_uid where c.refresh_ts >= ?";
         try {           
             ResultList list =  select.select(sql,arr);
             for(ResultMap cMap : list) {
@@ -493,11 +493,30 @@ public class TaskServicve extends Service {
         }
     }
 
+    /**
+     * 广告日志入库
+     * @param adLog
+     * @throws SQLException
+     */
     public void insertDataToLog(AdLogBean adLog) throws SQLException{  	
     	String sql = "insert into ad_log (ad_uid,ad_name,advertiser_uid,advertiser_name,created_at,reason,status) "
     			+ "values ('"+adLog.getAdUid()+"','"+adLog.getAdName()+"','"+adLog.getAdvertiserUid()+"',"
     					+ "'"+adLog.getAdvertiserName()+"','"+specDateFM.format(adLog.getCreatedAt())+"','"+adLog.getReason()+"',"+adLog.getStatus()+")";	
     	update.doUpdate(sql);    	
     }
-
+    
+    /**
+     * 广告明细入库
+     * @param adNoticeDetail
+     * @throws SQLException
+     */
+    public void insertDataToNoticeDetail(AdNoticeDetailBean adNoticeDetail) throws SQLException{
+    	String sql = "insert into ad_notice_detail (ad_uid,ad_name,advertiser_uid,advertiser_name,win_nums,"
+    			+ "click_nums,bid_nums,win_ratio,click_ratio,indb_time) values ('"+adNoticeDetail.getAdUid()+"','"+
+    			adNoticeDetail.getAdName()+"','"+adNoticeDetail.getAdvertiserUid()+"','"+adNoticeDetail.getAdvertiserName()+
+    			"',"+adNoticeDetail.getWinNums()+","+adNoticeDetail.getClickNums()+","+adNoticeDetail.getBidNums()+","+
+    			adNoticeDetail.getWinRatio()+","+adNoticeDetail.getClickRatio()+",'"+specDateFM.format(new Date())+"')";
+    	update.doUpdate(sql);
+    }
+    
 }

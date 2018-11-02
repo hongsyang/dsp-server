@@ -1,11 +1,12 @@
-package cn.shuzilm.backend.master;
+package cn.shuzilm.backend.master.db;
 
 import java.sql.SQLException;
 
+import cn.shuzilm.backend.master.TaskServicve;
 import cn.shuzilm.backend.queue.DataTransQueue;
 import cn.shuzilm.bean.control.AdLogBean;
 
-public class DataInToDBTask implements Runnable{
+public class LogDataInToDBTask implements Runnable{
 	
 	private static TaskServicve taskService = new TaskServicve();
 

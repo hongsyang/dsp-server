@@ -37,7 +37,7 @@ public class FLowControlTest {
 			e.printStackTrace();
 		}
 //        while(true){
-        AdFlowControl.getInstance().pullAndUpdateTask();
+        AdFlowControl.getInstance().pullAndUpdateTask(false);
 //        }
 
     }
