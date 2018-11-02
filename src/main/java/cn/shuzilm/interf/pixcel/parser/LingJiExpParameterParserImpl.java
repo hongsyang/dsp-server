@@ -148,7 +148,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-                        element.getInfoId(), element.getHour(),
+                        element.getInfoId(), new Date().getHours(),
                         element.getWinNoticeTime(), LocalDateTime.now().toString(),
                         element.getDid(), element.getDeviceId(),
                         element.getAdUid(), element.getAudienceuid(),

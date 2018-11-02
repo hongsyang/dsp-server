@@ -131,7 +131,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-                        element.getInfoId(), element.getHour(),
+                        element.getInfoId(), new Date().getHours(),
                         new Date().getTime(), LocalDateTime.now().toString(),
                         element.getDid(), element.getDeviceId(),
                         element.getAdUid(), element.getAudienceuid(),
