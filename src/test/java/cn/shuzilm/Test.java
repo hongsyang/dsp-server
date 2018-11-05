@@ -1,11 +1,14 @@
 package cn.shuzilm;
 
 
+import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.interf.pixcel.parser.AdViewNurlParameterParserImpl;
 import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.Help;
 import cn.shuzilm.util.aes.AES;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.base64.Base64;
@@ -20,6 +23,8 @@ import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 import io.lettuce.core.cluster.models.partitions.Partitions;
 import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
 import io.lettuce.core.resource.ClientResources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.Base64Utils;
 import redis.clients.jedis.Jedis;
@@ -36,32 +41,38 @@ import java.util.*;
 
 
 public class Test {
-    public static void main(String[] args) throws Exception {
 
-        String ekey= "hqvBbhco3nPm5kr0TXgQxaO4Er25qd7n";
-        String ikey= "eKUKpIu1cFDETMSo3CY8RJYxfRpNQSu2";
+    private static final Logger log = LoggerFactory.getLogger(Test.class);
+    public static void main(String[] args) {
+        AdPixelBean bean = new AdPixelBean();
+        bean.setWinNoticeNums(1);
+        //pixel服务器发送到主控模块
+        log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
 
-        File file =new File("C:\\Users\\houkp\\Desktop\\对账\\对账\\9.27号曝光");
-        System.out.println(file.isFile());
-        BufferedReader bufferedReader =new BufferedReader( new FileReader(file));
-        String price=null;
-        String temp=null;
-
-        while ((temp=bufferedReader.readLine())!=null){
-            String[] split = temp.split(",");
-            if (split.length>1){
-            for (String s : split) {
-                if (s.substring(0,6).trim().equals("price")){
-                    String[] strings = s.split("=");
-                    price =strings[1].trim();
-                    System.out.println(price);
-                    Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
-                    System.out.println(aLong);
-                }
-            }
-            }
-        }
-        bufferedReader.close();
+//        String ekey= "hqvBbhco3nPm5kr0TXgQxaO4Er25qd7n";
+//        String ikey= "eKUKpIu1cFDETMSo3CY8RJYxfRpNQSu2";
+//
+//        File file =new File("C:\\Users\\houkp\\Desktop\\对账\\对账\\9.27号曝光");
+//        System.out.println(file.isFile());
+//        BufferedReader bufferedReader =new BufferedReader( new FileReader(file));
+//        String price=null;
+//        String temp=null;
+//
+//        while ((temp=bufferedReader.readLine())!=null){
+//            String[] split = temp.split(",");
+//            if (split.length>1){
+//            for (String s : split) {
+//                if (s.substring(0,6).trim().equals("price")){
+//                    String[] strings = s.split("=");
+//                    price =strings[1].trim();
+//                    System.out.println(price);
+//                    Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
+//                    System.out.println(aLong);
+//                }
+//            }
+//            }
+//        }
+//        bufferedReader.close();
 
 
 //        String result = AES.decrypt("1JhqBHCPuAdwdO2OsPom9b758Vn-cov2e6jsjGdWo9o","af36ec6c77c042b5a5e49e6414fb436f" );
@@ -300,15 +311,9 @@ public class Test {
     }
 
 
-
-
-
-
-
-
-
     /**
      * 转化为安全Base64内容
+     *
      * @param input
      * @return
      */
