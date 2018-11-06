@@ -59,6 +59,17 @@ public class AdFlowControl {
      * 节点判定宕机时间周期
      */
     private static final int NODE_DOWN_INTERVAL = 30 * 60 * 1000;
+    
+    
+    /**
+     * RTB节点线程数
+     */
+    private static final int RTB_NODE_THREAD_NUMS = 2;
+    
+    /**
+     * PIXCEL节点线程数
+     */
+    private static final int PIXCEL_NODE_THREAD_NUMS = 100;
 
 //    /**
 //     * 广告主对应的广告 MAP
@@ -210,25 +221,27 @@ public class AdFlowControl {
     public void updatePixel(String adUid, long addWinNoticeNums, float addMoney, int type , long clickNums, int pixelType, boolean isLower) {
         //cpc 定价计算逻辑
     	MDC.put("sift", "control");
-    	AdBean adBean = mapAd.get(adUid);
-        if(adBean.getMode()!= null && adBean.getMode().equals("cpc")){
-        	cpcHandler.updatePixel(adBean,adUid,addWinNoticeNums,addMoney,clickNums,pixelType,maxCpcClieckRatio,cpcClieckRatioMap);
-        }       
+    	       
         switch (type) {
             case 0:
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
                 if (statusHour == null)
                     break;
                 //只计算和统计计小时点击率就可以
-                if(pixelType == 0){
-                    statusHour.setUid(adUid);
-                    statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
-                    statusHour.setMoney(statusHour.getMoney() + addMoney);
-                }else if(pixelType == 1){
-                    statusHour.setUid(adUid);
-                    statusHour.setClickNums(statusHour.getClickNums() +  clickNums);
-                }
-
+//                if(pixelType == 0){
+//                    statusHour.setUid(adUid);
+//                    statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
+//                    statusHour.setMoney(statusHour.getMoney() + addMoney);
+//                }else if(pixelType == 1){
+//                    statusHour.setUid(adUid);
+//                    statusHour.setClickNums(statusHour.getClickNums() +  clickNums);
+//                }
+                
+                statusHour.setUid(adUid);
+                statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
+                statusHour.setMoney(statusHour.getMoney() + addMoney);
+                statusHour.setClickNums(statusHour.getClickNums() +  clickNums);
+                
                 break;
             case 1:
                 AdFlowStatus statusDaily = mapMonitorDaily.get(adUid);
@@ -253,12 +266,25 @@ public class AdFlowControl {
                 statusAll.setMoney(statusAll.getMoney() + addMoney);
                 //更新广告组金额状态
                 if(mapAd.containsKey(adUid)){   
-                	String groupId = mapAd.get(adUid).getGroupId();
+                	AdBean adBean = mapAd.get(adUid);
+                	String groupId = adBean.getGroupId();
                 	AdFlowStatus statusTotalGroupAll = mapMonitorAdGroupRealTotal.get(groupId);
                 	statusTotalGroupAll.setMoney(statusTotalGroupAll.getMoney() + addMoney);
+                	
+                	String mode = adBean.getMode();
+                	if("cpc".equals(mode)){
+                		cpcHandler.updatePixel(adBean,adUid,addWinNoticeNums,addMoney,clickNums,-1,maxCpcClieckRatio,cpcClieckRatioMap);
+                	}
                 }
                 break;
             case -1:
+            	long startTime = System.currentTimeMillis();
+            	//CPC模式
+            	AdBean adBean = mapAd.get(adUid);
+                if(adBean != null && adBean.getMode()!= null && adBean.getMode().equals("cpc")){
+                	cpcHandler.updatePixel(adBean,adUid,addWinNoticeNums,addMoney,clickNums,pixelType,maxCpcClieckRatio,cpcClieckRatioMap);
+                }
+                
                 statusHour = mapMonitorHour.get(adUid);
                 if (statusHour != null) {
                     statusHour.setUid(adUid);
@@ -284,9 +310,13 @@ public class AdFlowControl {
                 if(mapAd.containsKey(adUid)){
                 	String groupId = mapAd.get(adUid).getGroupId();
                 	AdFlowStatus statusGroupAll = mapMonitorAdGroupTotal.get(groupId);
-                	statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                	if(statusGroupAll != null){
+                		statusGroupAll.setMoney(statusGroupAll.getMoney() + addMoney);
+                	}
                 	AdFlowStatus statusTotalGroupAll = mapMonitorAdGroupRealTotal.get(groupId);
-                	statusTotalGroupAll.setMoney(statusTotalGroupAll.getMoney() + addMoney);
+                	if(statusTotalGroupAll != null){
+                		statusTotalGroupAll.setMoney(statusTotalGroupAll.getMoney() + addMoney);
+                	}
                 }
                 
                 if(!isLower && mapTask.containsKey(adUid)){
@@ -358,14 +388,14 @@ public class AdFlowControl {
                     }
                     
                     if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getWinNums() != 0 && monitorDaily.getWinNums() >= thresholdDaily.getWinNums() * 0.9) {
-                        String reason = "#### 每日 CPM 超限，参考指标：" + thresholdDaily.getWinNums() + "元(CPM)\t" + monitorDaily.getWinNums() + "元(CPM) ### " ;
+                        String reason = "#### 每日 CPM 超限，参考指标：" + thresholdDaily.getWinNums() + "(CPM)\t" + monitorDaily.getWinNums() + "(CPM) ### " ;
                         stopAd(adUid, reason, true,0);
                         myLog.error(monitorDaily.toString() + "\t" + reason);
                     }
 
                 }
                 
-                
+                myLog.info("监控器监控处理时长:"+(System.currentTimeMillis()-startTime)+"ms");
                 break;
         }
     }
@@ -396,14 +426,20 @@ public class AdFlowControl {
     		}
     	}
     	
+    	//暂时线程启动为如下，后续改为线程池
+    	
     	for(String nodeName: nodeNameList){
     		if(nodeName != null && nodeName.contains("rtb-")){
-    			myLog.info("从"+nodeName+"中获取bids个数线程开启......");
-    			new Thread(new GainDataFromRTBQueue(nodeName)).start();
+    			myLog.info("从"+nodeName+"中获取bids个数线程(线程数:"+RTB_NODE_THREAD_NUMS+")开启......");
+    			for(int i=0;i<RTB_NODE_THREAD_NUMS;i++){
+    				new Thread(new GainDataFromRTBQueue(nodeName)).start();
+    			}
     		}
     		if(nodeName != null && nodeName.contains("pixel-")){
-    			myLog.info("从"+nodeName+"中获取最新 wins 和 金额消费情况线程开启......");
-    			new Thread(new GainDataFromPIXCELQueue(nodeName)).start();
+    			myLog.info("从"+nodeName+"中获取最新 wins 和 金额消费情况线程(线程数:"+PIXCEL_NODE_THREAD_NUMS+")开启......");
+    			for(int i=0;i<PIXCEL_NODE_THREAD_NUMS;i++){
+    				new Thread(new GainDataFromPIXCELQueue(nodeName)).start();
+    			}
     		}
     	}
     	
@@ -453,6 +489,7 @@ public class AdFlowControl {
             for (ResultMap map : rl) {
                 String auid = map.getString("uid");
                 String name = map.getString("name");
+                String groupId = map.getString("group_uid");
 //                int winNumsHour = map.getInteger("cpm_hourly");
 //                int winNumsDaily = map.getInteger("cpm_daily");
 //                BigDecimal money = map.getBigDecimal("quota_amount");
@@ -475,7 +512,7 @@ public class AdFlowControl {
                 status3.reset();
                 status3.setUid(auid);
                 status3.setName(name);
-                mapMonitorAdGroupTotal.put(auid, status3);
+                mapMonitorAdGroupTotal.put(groupId, status3);
 
                 
                 if(mapTask.containsKey(auid)){
@@ -685,7 +722,6 @@ public class AdFlowControl {
         try {
             //加载 主机节点信息
             nodeList = taskService.getWorkNodeAll();
-
             //加载最新广告信息
             if (isInitial) {
                 timeBefore = 0;
@@ -810,7 +846,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapHour.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 0,0,0,true);
+                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 0,0,0,true);
                         }
                     }
 
@@ -818,7 +854,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapDaily.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 1,0,0,true);
+                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 1,0,0,true);
                         }
                     }
 
@@ -826,7 +862,8 @@ public class AdFlowControl {
                         ReportBean report = reportMapTotal.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, 0, expense.floatValue(), 2,0,0,true);
+                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 2,0,0,true);
+                            
                         }
                     }
                     

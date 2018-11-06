@@ -456,14 +456,14 @@ public class TaskServicve extends Service {
     		String time = "_"+dateFm.format(date);
     		arr[0] = yydDateFM.format(date);
     		arr[1] = hourDateFM.format(date);
-            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports_hour"+time+" where date = ? and hour = ?  group by ad_uid";
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost , sum(imp) imp , sum(click) click from reports_hour"+time+" where date = ? and hour = ?  group by ad_uid";
         } else if(reportType == 2){
         	arr = new Object[1];
         	Date date = new Date();
         	arr[0] = yydDateFM.format(date);
-            sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports where date = ?  group by ad_uid";
+            sql = "select ad_uid,sum(amount) expense , sum(cost) cost, sum(imp) imp , sum(click) click from reports where date = ?  group by ad_uid";
         }else{
-        	sql = "select ad_uid,sum(amount) expense , sum(cost) cost from reports  group by ad_uid";
+        	sql = "select ad_uid,sum(amount) expense , sum(cost) cost, sum(imp) imp, sum(click) click from reports  group by ad_uid";
         }
         try {
         	ResultList rl = new ResultList();
@@ -481,9 +481,13 @@ public class TaskServicve extends Service {
                 }
                 BigDecimal expense = rm.getBigDecimal("expense");
                 BigDecimal cost = rm.getBigDecimal("cost");
+                BigDecimal imp = rm.getBigDecimal("imp");
+                BigDecimal click = rm.getBigDecimal("click");
                 report.setAdUid(adUid);
                 report.setExpense(expense);
                 report.setCost(cost);
+                report.setImpNums(imp.intValue());
+                report.setClickNums(click.intValue());
                 map.put(adUid,report);
             }
             return map;

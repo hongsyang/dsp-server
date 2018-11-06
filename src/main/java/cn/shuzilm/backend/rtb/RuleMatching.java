@@ -789,7 +789,7 @@ public class RuleMatching {
 	public static void main(String[] args) {
 		try{
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("123456", "interstitial", 600, 500, true, 5, 5, "1", "jpg,gif","127.0.0.1");
+		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 640, 100, true, 5, 5, "1", "jpg,gif","127.0.0.1");
 		}catch(Exception e){
 			e.getMessage();
 		}

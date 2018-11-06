@@ -31,8 +31,9 @@ public class GainDataFromRTBQueue implements Runnable {
 					AdFlowControl.getInstance().updateBids(bid.getUid(), bid.getBidNums());
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				try {
-					Thread.sleep(5 * 1000);
+					Thread.sleep(5 * 10);
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
