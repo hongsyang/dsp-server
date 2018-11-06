@@ -1,12 +1,18 @@
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.MD5Util;
+import cn.shuzilm.util.aes.AES;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class TestSet {
     public static void main(String[] args) {
-        Help.sendAlert("houkp2");
+//        String s ="xb4i-wntscmk1sosgpnm15bwqstj-fizotzeoabylhg";
+        System.out.println(MD5Util.MD5(MD5Util.MD5("y109_8081-t19-1541435572-96-639")));
+        String s ="EzAXnvO2KYXln_X8HNg2blTVrnOoRY0ob6aVXwaMaTo";
+        System.out.println(AES.decrypt(s.replace("-",""), "af36ec6c77c042b5a5e49e6414fb436f"));
+//        Help.sendAlert("houkp2");
 
 //        BitSet bm = new BitSet();
 //        int randomVal = 1000000;

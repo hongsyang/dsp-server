@@ -1,0 +1,327 @@
+package bidserver;
+
+// 性别
+enum GenderType {
+    GENDER_TYPE_MALE = 1;  // 男性
+    GENDER_TYPE_FEMALE = 2;  // 女性
+    GENDER_TYPE_UNKNOWN = 3; // 未知
+}
+
+// 创意类型
+enum AdzoneType {
+    ADZONE_TYPE_BANNER = 1;
+    ADZONE_TYPE_VIDEO = 2;
+    ADZONE_TYPE_WAP_BANNER = 3;
+    ADZONE_TYPE_WAP_VIDEO = 4;
+    ADZONE_TYPE_INAPP_BANNER = 5;
+    ADZONE_TYPE_INAPP_VIDEO = 6;
+    ADZONE_TYPE_INAPP_NATIVE = 7;
+}
+
+//展示类型
+enum ViewType{
+    VIEW_TYPE_NO = 0;          //无类型， 默认值
+    VIEW_TYPE_FIXED = 1;       //固定位
+    VIEW_TYPE_POPUP = 2;         //弹窗
+    VIEW_TYPE_OPEN_SCREEN = 3;      //开屏
+    VIEW_TYPE_VIDEO_PATCH = 11;     //视频贴片， 包括前贴、后贴
+    VIEW_TYPE_VIDEO_PAUSE = 12;      //视频暂时
+    VIEW_TYPE_VIDEO_OVERLAY = 15;    //视频浮层
+}
+
+enum VideoFormat {
+    //HTML5 VAST创意包括mp4和webm媒体
+    VIDEO_FLASH = 0;
+    VIDEO_HTML5 = 1;
+}
+
+enum PreloadAdzFormat {
+    //OTT 闪屏等类型
+    PRELOAD_ADZ_NO = 0;         // 非预加载类广告，默认值
+    PRELOAD_ADZ_OTT = 1;        // OTT类预加载广告
+    PRELOAD_ADZ_SPLASH = 2;     // 开屏闪屏类预加载广告
+    PRELOAD_ADZ_BRAND_OTT = 3;  // 厂商OTT
+    PRELOAD_ADZ_MONITOR = 4;    // 悠易监测
+}
+
+message BidRequest {
+    // session id,全局唯一的id
+    optional string session_id = 1;
+    // 流量bucket
+    optional string bucket_id = 2;
+    // 所以节点的表示 用|分割
+    optional string host_nodes = 3;
+    // 语言
+    optional string detected_language = 4;
+    // 匿名id
+    optional string anonymous_id = 5;
+    // 时区偏移量
+    optional int32 timezone_offset = 6;
+    // 用户搜索词
+    repeated string keywords = 7;
+
+    message Exchange {
+        //  adx proto version
+        optional string version = 1;
+        // bid id provided by exchange
+        optional string bid_id = 2;
+        // adx id
+        optional int32 adx_id = 3;
+    }
+    optional Exchange exchange = 8;
+
+    message User {
+        // exchange cookie id, 无线时使用device_id
+        optional string user_exid = 1;
+        // 悠易id。进行cookie mapping后得到的id, 无线时使用device_id
+        optional string user_yyid = 2;
+        // ipv4:10.0.2.12
+        optional string user_ip = 3;
+        //exchange tag
+        optional string adx_crowd_tags = 4;
+        // 用户浏览器
+        optional string user_agent = 5;
+        optional GenderType user_gender = 6 [default = GENDER_TYPE_UNKNOWN];
+        // 人群标签。adx标签映射成悠易内部的标签，多个标签之间用逗号分隔开
+        optional string user_crowd_tags = 7;
+        // 当百度mobile流量时，device id写进user_exid，baidu_user_id则写进该字段
+        optional string baidu_user_id = 8;
+        // 当百度mobile流量时，device id写进user_yyid，baidu_user_id_yoyi_cookie则写进该字段
+        optional string baidu_user_id_yoyi_cookie = 9;
+        // 百度用户分类信息
+        repeated string baidu_tag_id = 10;
+        // 广点通流量中标识广告主Boss_qq
+        optional uint64 boss_qq = 11;
+        optional uint64 user_area = 12;
+        // 用户年龄，按照YOYI的标签体系传递值：1~8，表示：<18,18-24,25-29,30-34,35-39,40-44,45-50,50+
+        optional uint64 user_age = 13;
+        // exchange cookie
+        optional string adx_cookie = 14;
+        // yoyi cookie, pc或mob web流量有值
+        optional string yoyi_cookie = 15;
+       /*
+          * user_yyid 类型
+          * 1: yoyi cookie
+          * 2: IDFA原文
+          * 3: imei md5
+          * 4: android id md5
+          * 5: mac md5
+          * 6: exchange user id
+        */
+       optional uint32 user_yyid_type = 16;
+    }
+
+    optional User user = 9;
+
+    message Adzone {
+        // 广告位id
+        optional string pid = 1;
+        // 广告位序列Id
+        optional string adz_id = 2;
+        
+        optional AdzoneType adz_type = 3 [default = ADZONE_TYPE_BANNER];
+        optional int32 view_type = 4;
+        // adzone size
+        optional int32 adz_width = 5;
+        optional int32 adz_height = 6;
+        // 请求的 广告数
+        optional uint32 adz_ad_count = 7;
+        // 广告位位置：1,首屏；0,非首屏
+        optional uint32 adz_position = 8;
+        // 最低竞标价格，货币单位为人民币分，数值含义为分/千次展现
+        optional int32 reserve_price = 9;
+        // 禁止的落地页
+        repeated string exclude_landing_page_url = 10;
+        // 广点通 creative_specs 标识流量来源的位置
+        repeated int32 creative_specs = 11;
+        // 灵集流量中增加竞价席位
+        repeated string seat_ids = 12;
+
+        message Video {
+            // 视频标题
+            optional string title = 1;
+            // 视频时长
+            optional int32 duration = 2;
+            // 关联的关键字
+            repeated string keywords = 3;
+            repeated VideoFormat video_format = 4;
+            // 贴片位置相对于所在视频的起始时间，0 表示前贴片, -1 表示后贴片，大于0的值表示中插
+            optional int32 video_start_delay = 5;
+            //贴片最小播放时间长度,视频创意播放时间不可小于该值，单位秒
+            optional int32 min_ad_duration = 6;
+            //贴片最大播放时间长度，单位秒
+            optional int32 max_ad_duration = 7;
+            // vast 协议版本,取值为:
+            // VAST 1.0
+            // VAST 2.0
+            // VAST 3.0
+            // VAST 1.0 Wrapper
+            // VAST 2.0 Wrapper
+            // VAST 3.0 Wrapper
+            optional string protocol = 8;
+            // 节目id
+            optional string program_id = 9;
+            // 频道id, 以英文逗号分隔
+            optional string channel_id = 10;
+        }
+        optional Video video = 13;
+
+        message ASSET {
+            optional int32 asset_id = 1;
+            // title, shareTitle, longTitle, summary, description, boardCustName, buttonText
+            // video, sharePicture, dynamicPicture, littleSizePicture, icon, logo, picture1, picture2...
+            optional string asset_type = 2;
+            optional int32 width = 3;
+            optional int32 height = 4;
+        }
+
+        message NATIVE {
+            optional int32 native_id = 1;
+            optional bool is_deep_link = 2;
+            optional bool native_use_dimession_filter = 3;
+            repeated ASSET assets = 4;
+            optional int32 width = 5;
+            optional int32 height = 6;
+        }
+        repeated NATIVE native = 14;
+
+        message PMP {
+            optional string deal_id = 1;
+            enum DealType {
+                DEAL_TYPE_PREFER_DEAL = 1;
+                DEAL_TYPE_PRIVATE_AUTION = 2;
+                DEAL_TYPE_PROGRAMMATIC = 3;
+            }
+            optional DealType deal_type = 2 [default = DEAL_TYPE_PREFER_DEAL];
+            optional int32 deal_price = 3;
+            optional int32 return_rate = 4;
+            // 是否支持分发下游dsp
+            optional bool dis_enable = 5;
+        }
+        repeated PMP pmp = 16;
+        optional bool is_deep_link = 17;
+        repeated string billing_id = 18;
+        //素材类型
+        repeated string mimes = 19;
+        message OTT {
+            required bool is_pre_load = 1;  // true：OTT预加载请求广告位；false：OTT真实的竞价请求
+            repeated int32 pre_adid = 2;    // 预存在OTT的订单ID
+        }
+        repeated OTT ott = 20;
+        // 预加载广告位用 请求曝光的日期（闪屏用）格式 YYYY-MM-DD HH:mm:ss
+        optional string imp_date = 21;
+        optional PreloadAdzFormat preload_adz_type = 22 [default = PRELOAD_ADZ_NO];
+        // 标识子媒体
+        optional string sub_media = 23;
+    }
+
+    repeated Adzone adzone = 10;
+    // 页面信息
+    message Site {
+        optional string url = 1;
+        optional string refer = 2;
+        // 站点分类
+        optional string category = 3;
+        // 页面分类
+        repeated string content_category = 4;
+        repeated string inapp_app_category = 5;
+        // 媒体禁止的敏感类目
+        repeated string sensitive_category = 6;
+        // 媒体禁止的广告行业类目
+        repeated string excluded_product_category = 7; 
+    }
+    optional Site site = 11;
+
+    message Mobile {
+        optional bool is_app = 1;
+        // 操作系统(小写)
+        // 例如：android, ios
+        optional string device_os = 2;
+        // 操作系统版本
+        // 例如：7.0.2
+        optional string device_os_version = 3;
+        // 设备型号(小写)
+        // 例如：n70, galaxy.
+        optional string device_model = 4;
+        // 设备品牌(小写)
+        // 例如：nokia, samsung.
+        optional string device_brand = 5;
+        // 设备ID
+        optional string device_id = 6;
+        // 经度 维度
+        optional float longtitude = 7;
+        optional float latitude = 8; 
+        // 设备所处网络环境
+        // 0-未识别, 1-wifi, 2-2g, 3-3g, 4-4g
+        optional uint32 network = 9;
+        // 设备类型(phone pad tv mp3 outdoor_screen)
+        optional  string device_type = 10;
+        // 设备的网络运营商
+        // 0-未知, 1-移动, 2-联通, 3-电信
+        optional  int32 operator = 11;
+        optional bool is_fullscreen = 12;
+        // ios :ituns id  android : package name
+        optional string app_id = 13;
+        // 设备的屏幕分辨率
+        // 例如：1024x768
+        optional string device_resolution = 14;
+        // 下面的字段用于离线数据分析
+        optional string imei = 15;
+        // 原文大写
+        optional string idfa = 16;
+        // 原文去冒号大写
+        optional string mac = 17;
+        // 原文小写
+        optional string android_id = 18;
+        // specific fields for mobile
+        optional string app_name = 19;
+        // 原文md5小写
+        optional string md5_imei = 20;
+        optional string md5_android_id = 21;
+        // 原文去冒号大写后 md5小写
+        optional string md5_mac = 22;
+        optional string md5_duid = 23;
+        optional string duid = 24;
+        optional string phone_num = 25;
+        // new field add
+        // 屏幕PPI
+        optional string device_pixel_ratio = 26;
+        // 屏幕方向，0，home在下，90,180,270，顺时针旋转角度
+        optional string screen_orientation = 27;
+        optional int32 media_quality = 28;
+        optional string app_bundle = 29;
+    }
+
+    optional  Mobile mobile = 12;
+    optional  bool is_https = 13;
+}
+
+message BidResponse {
+    message Ad {
+        // 必填 adx request adz_id
+        optional string adz_id = 1;
+        // 必填 request adz array id, to find adz from bid request, 0,1,2...
+        optional uint32 adz_array_id = 2;   
+        // 必填 bid price, unit cent/CPM
+        optional uint32 bid_price = 3;
+        // pmp订单必填 参与pmp流量报价的dealid
+        optional string dealid = 4;
+        // 必填 dsp返回的yoyi广告主id
+        optional string advertiser_id = 6;
+        // 必填 dsp返回的yoyi创意id
+        optional uint64 creative_id = 9;
+
+        //  ext paramter __PARA__ macro value
+        optional string para = 11;
+        //  ext paramter __WIN_PARA__ macro value
+        optional string win_para = 12;
+        //  ext paramter __IMP_PARA__ macro value
+        optional string imp_para = 13;
+        //  ext paramter __CLK_PARA__ macro value
+        optional string clk_para = 14;
+        //  ext paramter __TRK_PARA__ macro value
+        optional string trk_para = 15;
+    }
+    required string session_id = 1;
+    repeated Ad ads = 2;
+}
