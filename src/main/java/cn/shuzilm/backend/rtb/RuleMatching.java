@@ -159,9 +159,17 @@ public class RuleMatching {
 	 *            宽度误差
 	 * @param heightDeviation
 	 *            高度误差
+	 * @param adxName
+	 * 			  ADX名称    
+	 * @param extStr    
+	 * 			  扩展名
+	 * @param ip
+	 * 			 ip地址
+	 * @param appPackageName
+	 * 			 应用包名称
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, String extStr,String ip) throws Exception{
+			int widthDeviation, int heightDeviation, String adxName, String extStr,String ip,String appPackageName) throws Exception{
 		MDC.put("sift", "rtb");
 		
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
@@ -424,7 +432,7 @@ public class RuleMatching {
 		// 排序
 		if (!machedAdList.isEmpty()) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio,
-					audienceMap,adxName);
+					audienceMap,adxName,ip);
 			if (rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null) {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(),
 						rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) + 1);
@@ -440,7 +448,7 @@ public class RuleMatching {
 	 * 对匹配的广告按照规则进行排序
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
-			TagBean tagBean, String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName) throws Exception{
+			TagBean tagBean, String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName,String ipAddr) throws Exception{
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -473,7 +481,7 @@ public class RuleMatching {
 			LOG.debug("广告ID[" + ad.getAdUid() + "]广告主ID["+ad.getAdvertiser().getUid()+"]通过排序获得竞价资格!");
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio,
-					audienceMap,adxName);
+					audienceMap,adxName,ipAddr);
 		} else {
 			// long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
@@ -489,7 +497,7 @@ public class RuleMatching {
 			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio,
-					audienceMap,adxName);
+					audienceMap,adxName,ipAddr);
 		}
 
 		return targetDuFlowBean;
@@ -628,7 +636,7 @@ public class RuleMatching {
 	}
 
 	public DUFlowBean packageDUFlowData(Material material, String deviceId, AdBean ad, TagBean tagBean,
-			String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName) throws Exception{
+			String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName,String ipAddr) throws Exception{
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
@@ -689,6 +697,7 @@ public class RuleMatching {
 		targetDuFlowBean.setMode(ad.getMode());
 		targetDuFlowBean.setDuration(material.getDuration());
 		targetDuFlowBean.setMaterialId(material.getUid());
+		targetDuFlowBean.setIpAddr(ipAddr);
 		return targetDuFlowBean;
 	}
 
@@ -789,7 +798,7 @@ public class RuleMatching {
 	public static void main(String[] args) {
 		try{
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 640, 100, true, 5, 5, "1", "jpg,gif","127.0.0.1");
+		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 640, 100, true, 5, 5, "1,2", "jpg,gif","127.0.0.1",null);
 		}catch(Exception e){
 			e.getMessage();
 		}
