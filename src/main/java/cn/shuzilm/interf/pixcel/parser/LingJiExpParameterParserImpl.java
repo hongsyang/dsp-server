@@ -147,7 +147,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 MDC.put("phoenix", "Exp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                         element.getInfoId(), new Date().getHours(),
                         element.getWinNoticeTime(), LocalDateTime.now().toString(),
                         element.getDid(), element.getDeviceId(),
@@ -160,7 +160,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
-                        element.getDealid(), element.getAppId(), element.getBidid());
+                        element.getDealid(), element.getAppId(),
+                        element.getBidid(),price);
 
                 MDC.remove("phoenix");
                 boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);

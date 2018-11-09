@@ -60,7 +60,7 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     @Override
     public String parseRequest(String dataStr) throws Exception {
-        String response = "空请求";
+        String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);
             MDC.put("sift", "dsp-server");

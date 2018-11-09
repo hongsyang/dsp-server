@@ -62,7 +62,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
 
 
         String act = urlRequest.get("act");
-        element.setWinNoticeTime(Long.valueOf(act));
+        element.setWinNoticeTime( new Date().getTime());
 
         String adx = urlRequest.get("adx");
         element.setAdxId(adx);
@@ -130,7 +130,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 MDC.put("phoenix", "Nurl");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                         element.getInfoId(), new Date().getHours(),
                         new Date().getTime(), LocalDateTime.now().toString(),
                         element.getDid(), element.getDeviceId(),
@@ -143,7 +143,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
-                        element.getDealid(), element.getAppId(),element.getBidid());
+                        element.getDealid(), element.getAppId(),element.getBidid(),price);
 
                 MDC.remove("phoenix");
                 MDC.put("sift", "AdViewNurl");
