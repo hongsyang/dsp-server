@@ -122,7 +122,7 @@ public class PixelFlowControl {
 		LOG.info("总消耗金额=" + (pixel.getFinalCost()));
 		LOG.info("广告状态=" + pixel.isLower());
 		if(pixel.getWinNoticeNums() > 0){
-			LOG.info("wintoice=0,不上报主控!");
+			LOG.info("wintoice=1,上报主控!");
 			MsgControlCenter.sendPixelStatus(this.nodeName, pixel);
 		}
 		return pixel;

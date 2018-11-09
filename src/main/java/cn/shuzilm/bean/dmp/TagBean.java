@@ -45,8 +45,12 @@ public class TagBean {
     private String companyIdList;
     
     private String ip;
-
-
+    
+    /**
+     * 人群包ID列表
+     */
+    private String audienceTagIdList;
+    
     public static void main(String[] args) {
         TagBean tag = new TagBean();
 //        tag.setActivity();

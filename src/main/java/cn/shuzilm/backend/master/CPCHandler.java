@@ -71,6 +71,10 @@ public class CPCHandler {
             status.setMoney(status.getMoney() + addMoney);
         }else if(pixelType == 1){
             status.setClickNums(status.getClickNums() +  clickNums);
+        }else if(pixelType == -1){
+        	status.setWinNums(status.getWinNums() + addWinNoticeNums);
+            status.setMoney(status.getMoney() + addMoney);
+            status.setClickNums(status.getClickNums() +  clickNums);
         }
         if(status.getClickNums() != 0 && status.getWinNums() != 0){
         	float clieckRatio = status.getClickNums() / status.getWinNums();

@@ -4,19 +4,19 @@ public class TimeUtil {
 
 	public static int weekDayToNum(String weekDay) {
 		switch (weekDay) {
-		case "星期一":
+		case "Monday":
 			return 0;
-		case "星期二":
+		case "Tuesday":
 			return 1;
-		case "星期三":
+		case "Wednesday":
 			return 2;
-		case "星期四":
+		case "Thursday":
 			return 3;
-		case "星期五":
+		case "Friday":
 			return 4;
-		case "星期六":
+		case "Saturday":
 			return 5;
-		case "星期日":
+		case "Sunday":
 			return 6;
 		}
 		return -1;
