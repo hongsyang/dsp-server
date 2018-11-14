@@ -302,7 +302,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid();
+                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&userip=" + duFlowBean.getIpAddr();//用户ip
         bid.setNurl(nurl);
 
         String curl = serviceUrl + "lingjiclick?" +
@@ -324,7 +325,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid();
+                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         //人群包，创意id，省，市，广告主id，代理商id，广告id，
 

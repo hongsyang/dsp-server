@@ -95,6 +95,8 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
         element.setAdUid(daduid);
         String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
         element.setDealid(pmp);
+        String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
+        element.setIpAddr(userip);
 
         element.setAdxSource("AdView");
         try {
