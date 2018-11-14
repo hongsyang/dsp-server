@@ -177,7 +177,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                             5,// 高误差值;
                             ADX_ID,//ADX 服务商ID
                             stringSet,//文件扩展名
-                            userDevice.getIp()//用户ip
+                            userDevice.getIp(),//用户ip
+                            app.getBundle()//APP包名
 
                     );
                     if (targetDuFlowBean == null) {
@@ -215,7 +216,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                         5,// 高误差值;
                         ADX_ID,//ADX 服务商ID
                         stringSet,//文件扩展名
-                        userDevice.getIp()//用户ip
+                        userDevice.getIp(),//用户ip
+                        app.getBundle()//APP包名
 
                 );
                 if (targetDuFlowBean == null) {

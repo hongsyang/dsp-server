@@ -23,6 +23,15 @@ public class ExpTest {
     private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
     public static void main(String[] args) throws InterruptedException {
+//
+//        Jedis jedis = JedisManager.getInstance().getResource();
+////        jedis.set("houkp", "1111");
+//        for (int i = 0; i < 100; i++) {
+////            jedis.rpush("houkplist",  (String.valueOf(i)));
+//            String houkplist = jedis.rpop("houkplist");
+//            System.out.println(houkplist);
+//        }
+
         while (true){
             System.out.println( JedisQueueManager.getLength("EXP_ERROR"));
             System.out.println( JedisQueueManager.getElementFromQueue("EXP_ERROR"));
