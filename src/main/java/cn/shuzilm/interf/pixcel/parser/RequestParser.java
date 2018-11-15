@@ -27,6 +27,7 @@ public class RequestParser {
         String responseStr = "没有对应的解析器";
         MDC.put("sift", "userip");
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
+        MDC.remove("sift");
         List<String> urlList = UrlParserUtil.urlParser(url);
         Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");
         Set<Class<? extends ParameterParser>> monitorClasses = reflections.getSubTypesOf(ParameterParser.class);
