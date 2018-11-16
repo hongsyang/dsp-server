@@ -57,6 +57,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         .toString().split(":")[0].replace("/", "");
 //				System.out.println("remoteIp : "+remoteIp);
                 //接收 POST 请求 , 获取 SDK 回传数据
+//                log.debug(request.getContent().toString());
                 String dataStr = URLDecoder.decode(new String(request.getContent().array(), "utf-8"));
 //				String dataStr = new String(request.getContent().array(),"utf-8");
 //				System.out.println("接收到的原始数据 --- "+dataStr);
