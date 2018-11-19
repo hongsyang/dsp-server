@@ -11,6 +11,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.MD5Util;
 import com.alibaba.fastjson.JSON;
 import io.lettuce.core.RedisClient;
 import org.apache.commons.lang.StringUtils;
@@ -155,13 +156,15 @@ public class LingJiRequestServiceImpl implements RequestService {
                             5,//宽误差值
                             5,// 高误差值;
                             ADX_ID,//ADX 服务商ID
-                            stringSet//文件扩展名
+                            stringSet,//文件扩展名
+                            userDevice.getIp(),//用户ip
+                            app.getBundle()//APP包名
                     );
                     if (targetDuFlowBean == null) {
                         response = "";
                         return response;
                     }
-                    MDC.put("sift",configs.getString("ADX_REQUEST"));
+                    MDC.put("sift", configs.getString("ADX_REQUEST"));
                     //需要添加到Phoenix中的数据
                     targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
                     targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
@@ -169,7 +172,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                     targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
                     targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                    targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                    targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
                     targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                     targetDuFlowBean.setAppName(app.getName());//APP名称
                     targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
@@ -179,8 +182,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                     log.debug("过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
                     BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
-                    pushRedis(targetDuFlowBean);//上传到redis服务器
-                    log.debug("json计数");
+                    MDC.remove("sift");
+//                    pushRedis(targetDuFlowBean);//上传到redis服务器
                     response = JSON.toJSONString(bidResponseBean);
                     log.debug("过滤通过的bidResponseBean:{}", response);
                 } else {
@@ -197,7 +200,9 @@ public class LingJiRequestServiceImpl implements RequestService {
                         5,//宽误差值
                         5,// 高误差值;
                         ADX_ID,//ADX 服务商ID
-                        stringSet//文件扩展名
+                        stringSet,//文件扩展名
+                        userDevice.getIp(),//用户ip
+                        app.getBundle()//APP包名
                 );
                 if (targetDuFlowBean == null) {
                     response = "";
@@ -212,10 +217,11 @@ public class LingJiRequestServiceImpl implements RequestService {
                 targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
                 targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
                 targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                targetDuFlowBean.setBidid(LocalDateTime.now().toString() + UUID.randomUUID());//bid id
+                targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
                 targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
                 targetDuFlowBean.setAppName(app.getName());//APP名称
                 targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+                targetDuFlowBean.setAppId(app.getId());//APP包名
                 if (app.getExt() != null) {
                     targetDuFlowBean.setAppVersion(app.getExt().getSdk() == null ? "" : app.getExt().getSdk());//APP版本
                 }
@@ -223,8 +229,10 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
-                pushRedis(targetDuFlowBean);//上传到redis服务器
+                MDC.remove("sift");
+//                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
+                MDC.put("sift", "dsp-server");
                 log.debug("没有过滤的bidResponseBean:{}", response);
             }
             return response;
@@ -253,8 +261,24 @@ public class LingJiRequestServiceImpl implements RequestService {
         LJBid bid = new LJBid();
         List<Impression> imp = duFlowBean.getImpression();//从bidRequestBean里面取
         Impression impression = imp.get(0);
-        bid.setId(format + UUID.randomUUID());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
+        bid.setId(duFlowBean.getBidid());//duFlowBean.getDspid()////DSP对该次出价分配的ID   时间戳+UUID
         bid.setImpid(impression.getId());//从bidRequestBean里面取
+        String landingUrlA = duFlowBean.getLandingUrl();//落地页
+        String landingUrl = "";
+        if (landingUrl.contains("?")) {
+            landingUrl = landingUrlA +
+                    "&advertiserUid=" + duFlowBean.getAdvertiserUid() +
+                    "&adUid=" + duFlowBean.getAdUid() +
+                    "&creativeUid=" + duFlowBean.getCreativeUid() +
+                    "&materialId=" + duFlowBean.getMaterialId();
+
+        } else {
+            landingUrl = landingUrlA +
+                    "?advertiserUid=" + duFlowBean.getAdvertiserUid() +
+                    "&adUid=" + duFlowBean.getAdUid() +
+                    "&creativeUid=" + duFlowBean.getCreativeUid() +
+                    "&materialId=" + duFlowBean.getMaterialId();
+        }
         String serviceUrl = configs.getString("SERVICE_URL");
         //曝光nurl
         String nurl = serviceUrl + "lingjiexp?" +
@@ -266,11 +290,20 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + duFlowBean.getAppName() +
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
-                "&pf=" + duFlowBean.getPremiumFactor() +
-                "&pmp=" + duFlowBean.getDealid();
+                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
+                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
+                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&userip=" + duFlowBean.getIpAddr();//用户ip
         bid.setNurl(nurl);
 
         String curl = serviceUrl + "lingjiclick?" +
@@ -281,18 +314,19 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + duFlowBean.getAppName() +
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
-                "&ddem=" + duFlowBean.getDemographicTagId() + //人群包
-                "&dcuid=" + duFlowBean.getCreativeUid()+ // 创意id
+                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + duFlowBean.getProvince() +// 省
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid();
+                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         //人群包，创意id，省，市，广告主id，代理商id，广告id，
 
@@ -312,7 +346,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             nativeAD.setImptrackers(urls);// 展示曝光URL数组
 
             LJLink ljLink = new LJLink();//	点击跳转URL地址(落地页)
-            ljLink.setUrl(duFlowBean.getLandingUrl());//落地页
+            ljLink.setUrl(landingUrl);//落地页
             List curls = new ArrayList();
             curls.add(curl);
             ljLink.setClicktrackers(curls);
@@ -384,7 +418,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
         LJResponseExt ljResponseExt = new LJResponseExt();
-        ljResponseExt.setLdp(duFlowBean.getLandingUrl());//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
+
+        ljResponseExt.setLdp(landingUrl);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
         //曝光监测数组
         List pm = new ArrayList();
         pm.add(duFlowBean.getTracking());
@@ -401,7 +436,10 @@ public class LingJiRequestServiceImpl implements RequestService {
         seatBid.setBid(bidList);
         seatBidList.add(seatBid);
         bidResponseBean.setSeatbid(seatBidList);
+        MDC.put("sift", "bidResponseBean");
+        log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
+
     }
 
     /**
@@ -445,7 +483,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         } else if (showtype == 15 | showtype == 12 | showtype == 17) {
             adType = "fullscreen";//开屏
             log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 16 | showtype == 18|showtype == 4) {
+        } else if (showtype == 16 | showtype == 18 | showtype == 4) {
             adType = "interstitial";//插屏
             log.debug("广告类型adType:{}", adType);
         } else {
