@@ -18,6 +18,7 @@ import org.slf4j.MDC;
 import java.math.BigDecimal;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,6 +55,8 @@ public class AdFlowControl {
      */
     private static final int INTERVAL = 10 * 60 * 1000;
     private static TaskServicve taskService = new TaskServicve();
+    
+    private SimpleDateFormat hourDateFM = new SimpleDateFormat("HH");
     
     /**
      * 节点判定宕机时间周期
@@ -101,6 +104,8 @@ public class AdFlowControl {
      * 广告任务管理
      */
     private static ConcurrentHashMap<String, TaskBean> mapTask = null;
+    
+    private static ConcurrentHashMap<String, FlowTaskBean> mapFlowTask = null;
 
     private static ConcurrentHashMap<String, ReportBean> reportMapTotal = null;
     private static ConcurrentHashMap<String, ReportBean> reportMapHour = null;
@@ -147,6 +152,30 @@ public class AdFlowControl {
     
     private static ConcurrentHashMap<String,Long> nodeStatusMap = null;
     
+    private static ConcurrentHashMap<Integer,Long> flowMap = null;
+    
+    /**
+     * adx流控指标
+     */
+    private static ConcurrentHashMap<String,FlowControlBean> adxFlowControlThresholdMap = null;
+    
+    /**
+     * app流控指标
+     */
+    private static ConcurrentHashMap<String,FlowControlBean> appFlowControlThresholdMap = null;
+    
+    /**
+     * adx流量缓存
+     */
+    private static ConcurrentHashMap<String,Long> adxFlowControlMap = null;
+    
+    /**
+     * app流量缓存
+     */
+    private static ConcurrentHashMap<String,Long> appFlowControlMap = null;
+    
+    
+    
     private DataTransQueue queue;
     
     private static ConcurrentHashMap<String,Float> cpcClieckRatioMap = null; 
@@ -157,7 +186,7 @@ public class AdFlowControl {
 
         mapAd = new ConcurrentHashMap<>();
         mapTask = new ConcurrentHashMap<>();
-
+        mapFlowTask = new ConcurrentHashMap<>();
         mapMonitorDaily = new ConcurrentHashMap<>();
         mapMonitorHour = new ConcurrentHashMap<>();
         adverConsumeMapCurr = new ConcurrentHashMap<>();
@@ -170,6 +199,11 @@ public class AdFlowControl {
         mapMonitorAdGroupRealTotal = new ConcurrentHashMap<>();
         nodeStatusMap = new ConcurrentHashMap<>();
         cpcClieckRatioMap = new ConcurrentHashMap<>();
+        flowMap = new ConcurrentHashMap<>();
+        adxFlowControlThresholdMap = new ConcurrentHashMap<>();
+        appFlowControlThresholdMap = new ConcurrentHashMap<>();
+        adxFlowControlMap = new ConcurrentHashMap<>();
+        appFlowControlMap = new ConcurrentHashMap<>();
         queue = DataTransQueue.getInstance();
 //        adviserMap = new HashMap<>();
 
@@ -340,8 +374,8 @@ public class AdFlowControl {
                     AdFlowStatus threshold = mapThresholdHour.get(adUid);
                     AdFlowStatus monitor = mapMonitorHour.get(adUid);
                     //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
-                    if (threshold != null && monitor != null && threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums()) {
-                        String reason = "#### 小时 CPM 超限，参考指标：" + threshold.getWinNums() + "\t" + monitor.getWinNums() + " ### " ;
+                    if (threshold != null && monitor != null && threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums() * 0.85) {
+                        String reason = "#### 小时 CPM 超限，参考指标：" + threshold.getWinNums() + "(CPM)\t" + monitor.getWinNums() + "(CPM) ### " ;
                         pauseAd(adUid, reason, true);
                         myLog.error(monitor.toString() + "\t" + reason);
                     }
@@ -360,14 +394,14 @@ public class AdFlowControl {
                     double thresholdTotalGroupMoney = mapAdGroup.get(groupId).getQuotaTotalMoney().doubleValue()*1000;
                     int quota = mapAdGroup.get(groupId).getQuota();
                     int quotaTotal = mapAdGroup.get(groupId).getQuota_total();
-                    if(monitorAdGroup != null && thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney * 0.9){
+                    if(monitorAdGroup != null && thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney * 0.85){
                         //广告组每日限额超限，则发送停止命令，终止该广告投放
                         String reason = "#### 广告组 每日限额 超限，参考指标：" + thresholdGroupMoney + "元(CPM)\t" + monitorAdGroup.getMoney() + "元 (CPM)###";
                         stopAd(adUid, reason, false,0);
                         myLog.error(adUid + "\t" + reason);
                     }
                     
-                    if(monitorTotalAdGroup != null && thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney * 0.9){
+                    if(monitorTotalAdGroup != null && thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney * 0.85){
                         //广告组总限额超限，则发送停止命令，终止该广告投放
                         String reason = "#### 广告组 总限额 超限，参考指标：" + thresholdTotalGroupMoney + "元(CPM)\t" + monitorTotalAdGroup.getMoney() + "元(CPM) ###";
                         stopAd(adUid, reason, false,0);
@@ -380,14 +414,14 @@ public class AdFlowControl {
                 //跟每日监控作比对
                     AdFlowStatus thresholdDaily = mapThresholdDaily.get(adUid);
                     AdFlowStatus monitorDaily = mapMonitorDaily.get(adUid);
-                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getMoney() != 0 && monitorDaily.getMoney() >= thresholdDaily.getMoney() * 0.9) {
+                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getMoney() != 0 && monitorDaily.getMoney() >= thresholdDaily.getMoney() * 0.85) {
                         //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                         String reason = "#### 每日金额 超限，参考指标：" + thresholdDaily.getMoney() + "元(CPM)\t" + monitorDaily.getMoney() + "元(CPM) ###";
                         stopAd(adUid, reason, false,0);
                         myLog.error(monitorDaily.toString() + "\t" + reason);
                     }
                     
-                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getWinNums() != 0 && monitorDaily.getWinNums() >= thresholdDaily.getWinNums() * 0.9) {
+                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getWinNums() != 0 && monitorDaily.getWinNums() >= thresholdDaily.getWinNums() * 0.85) {
                         String reason = "#### 每日 CPM 超限，参考指标：" + thresholdDaily.getWinNums() + "(CPM)\t" + monitorDaily.getWinNums() + "(CPM) ### " ;
                         stopAd(adUid, reason, true,0);
                         myLog.error(monitorDaily.toString() + "\t" + reason);
@@ -454,6 +488,9 @@ public class AdFlowControl {
     	MDC.put("sift", "control");
         //清理小时计数器
     	myLog.info("开始启动小时计数器清零......");
+    	
+    	putAdDetailIndbPerHour();
+    	
         for (String key : mapMonitorHour.keySet()) {
             AdFlowStatus status = mapMonitorHour.get(key);
             status.setBidNums(0);
@@ -470,6 +507,28 @@ public class AdFlowControl {
                 putDataToAdLogQueue(auid, "小时计数器清零,广告开启", 1);
             }
         }
+        
+        ArrayList<FlowTaskBean> flowTaskList  = new ArrayList<FlowTaskBean>();
+        
+        adxFlowControlMap.clear();
+        appFlowControlMap.clear();
+        
+        for(String aid:mapFlowTask.keySet()){
+        	FlowTaskBean bean = mapFlowTask.get(aid);
+        	if(bean != null && bean.getCommand() == FlowTaskBean.COMMAND_PAUSE){
+        		bean.setCommand(FlowTaskBean.COMMAND_START);
+        		flowTaskList.add(bean);
+        		myLog.info("ADX OR APP ID["+aid+"],小时计数器清零,流控重新清算!");
+        	}
+        }
+        
+        if(!flowTaskList.isEmpty()){
+        	for(WorkNodeBean node:nodeList){
+        		if(node.getName().contains("rtb")){
+        			pushFlowTask(node.getName(), flowTaskList);
+        		}
+        	}
+        }
     }
 
 
@@ -483,9 +542,27 @@ public class AdFlowControl {
         ResultList rl = null;
         try {
             rl = taskService.queryAdByUpTime(time);
-            mapMonitorDaily.clear();
-            mapMonitorHour.clear();
-            mapMonitorAdGroupTotal.clear();
+            for (String key : mapMonitorDaily.keySet()) {
+                AdFlowStatus status = mapMonitorDaily.get(key);
+                status.setBidNums(0);
+                status.setMoney(0);
+                status.setWinNums(0);
+            }
+            for (String key : mapMonitorHour.keySet()) {
+                AdFlowStatus status = mapMonitorHour.get(key);
+                status.setBidNums(0);
+                status.setMoney(0);
+                status.setWinNums(0);
+            }
+            for (String key : mapMonitorAdGroupTotal.keySet()) {
+                AdFlowStatus status = mapMonitorAdGroupTotal.get(key);
+                status.setBidNums(0);
+                status.setMoney(0);
+                status.setWinNums(0);
+            }
+//            mapMonitorDaily.clear();
+//            mapMonitorHour.clear();
+//            mapMonitorAdGroupTotal.clear();
             for (ResultMap map : rl) {
                 String auid = map.getString("uid");
                 String name = map.getString("name");
@@ -546,13 +623,15 @@ public class AdFlowControl {
                 //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
                 //如果余额小于 200 块钱，则不进行广告投放
-                if(balance.doubleValue() < 200){
+                if(balance.doubleValue() <= 0){
                     lowBalanceAdSet.add(auid);
                 }else{
                 	if(mapTask.containsKey(auid)){
                 		TaskBean task = mapTask.get(auid);
-                		if(task.getCommandResonStatus() == 1){
+                		if(task.getCommand() == TaskBean.COMMAND_STOP && task.getCommandResonStatus() == 1){
                 			task.setCommand(TaskBean.COMMAND_START);
+                			task.setCommandResonStatus(0);
+                			myLog.info("广告["+auid+"]广告主已充值,广告开启");
                 			putDataToAdLogQueue(auid, "广告主已充值,广告开启", 1);
                 		}
                 	}
@@ -823,6 +902,7 @@ public class AdFlowControl {
                 ad.setSpeedMode(map.getInteger("speed"));
                 ad.setStartTime(new Date(map.getInteger("s")));
                 String timeScheTxt = map.getString("time");
+                ad.setScheduleTime(timeScheTxt);
                 int[][] timeScheduling = TimeSchedulingUtil.timeTxtToMatrix(timeScheTxt);
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
@@ -846,7 +926,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapHour.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 0,0,0,true);
+                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 0,report.getClickNums(),0,true);
                         }
                     }
 
@@ -854,7 +934,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapDaily.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 1,0,0,true);
+                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 1,report.getClickNums(),0,true);
                         }
                     }
 
@@ -862,7 +942,7 @@ public class AdFlowControl {
                         ReportBean report = reportMapTotal.get(adUid);
                         if (report != null) {
                             BigDecimal expense = report.getExpense();
-                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 2,0,0,true);
+                            this.updatePixel(adUid, report.getImpNums(), expense.floatValue(), 2,report.getClickNums(),0,true);
                             
                         }
                     }
@@ -891,12 +971,21 @@ public class AdFlowControl {
                 mapTask.put(adUid, task);
                 counter++;
 
-                if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
-                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false,1);
-//                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
-                    continue;
-                }
+//                if(lowBalanceAdList!= null && lowBalanceAdList.contains(adUid)){
+//                    stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false,1);
+////                    myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
+//                    continue;
+//                }
                 
+            }
+            
+            if(lowBalanceAdList!= null){
+            	for(String adUid:lowBalanceAdList){
+            		if(mapAd.containsKey(adUid)){
+            		stopAd(adUid,adUid + "\t广告余额不足，请联系广告主充值。。",false,1);
+            		myLog.error(adUid + "\t广告余额不足，请联系广告主充值。。");
+            		}
+            	}
             }
 
             //计算权重因子
@@ -980,16 +1069,16 @@ public class AdFlowControl {
     }
     
     /**
-     * 每隔10分钟记录一次广告曝光、点击、请求明细
+     * 每隔1小时记录一次广告曝光、点击、请求明细
      */
-    public void putAdDetailIndb(){
+    public void putAdDetailIndbPerHour(){
     	MDC.put("sift", "control");
-    	Iterator iter = mapMonitorTotal.entrySet().iterator();
+    	Iterator iter = mapMonitorHour.entrySet().iterator();
     	while (iter.hasNext()) {
     		Map.Entry entry = (Map.Entry) iter.next();
     		String key = (String) entry.getKey();
     		AdFlowStatus status = (AdFlowStatus) entry.getValue();
-    		if(mapAd.containsKey(key) && status.getBidNums() != 0){
+    		if(mapAd.containsKey(key)){
     			AdBean ad = mapAd.get(key);
     			AdNoticeDetailBean adNoticeDetail = new AdNoticeDetailBean();
     			adNoticeDetail.setAdUid(ad.getAdUid());
@@ -1005,6 +1094,225 @@ public class AdFlowControl {
     		}
     		
     	}
+    }
+    
+    /**
+     * 每隔一天获取一次流量小时明细
+     */
+    public void updateFlow(){
+    	MDC.put("sift", "control");
+    	ConcurrentHashMap<Integer,Long> map = taskService.getNoticeDetailByHourPerDay();
+    	
+    	//二十四小时流量明细
+    	for(int i=0;i<24;i++){
+    		if(map.containsKey(i)){
+    			flowMap.put(i, map.get(i));
+    		}else{
+    			flowMap.put(i, 0L);
+    		}
+    	}
+    }
+    
+    /**
+     * 每隔10分钟更新一次ADX和APP流量控制
+     */
+    public void updateAdxAndAppFlowControl(boolean isInit){
+    	MDC.put("sift", "control");
+    	long timeNow = System.currentTimeMillis();
+        long timeBefore = timeNow - INTERVAL;
+        if(isInit)
+        	timeBefore = 0;
+    	ArrayList<FlowTaskBean> flowTaskList = new ArrayList<FlowTaskBean>();
+    	List<FlowControlBean> adxFlowControlList = taskService.getAdxFlowControl(timeBefore);
+    	List<FlowControlBean> appFlowControlList = taskService.getAppFlowControl(timeBefore);
+    	if(adxFlowControlList != null && !adxFlowControlList.isEmpty()){
+    		for(FlowControlBean adxFlowControl:adxFlowControlList){
+    			//首次启动或者缓存中没有ADXID
+    			if(isInit || !mapFlowTask.containsKey(adxFlowControl.getAid())){
+    				FlowTaskBean flowTask = new FlowTaskBean();
+    				flowTask.setAid(adxFlowControl.getAid());
+    				if(adxFlowControl.getPutAdStatus() == 0){
+    					flowTask.setCommand(FlowTaskBean.COMMAND_STOP);
+    				}else{
+    					flowTask.setCommand(FlowTaskBean.COMMAND_START);
+    				}   				
+    				mapFlowTask.put(adxFlowControl.getAid(), flowTask);
+    				flowTaskList.add(flowTask);
+    			}else{
+    				if(adxFlowControl.getPutAdStatus() == 0){//ADX广告投放关闭
+    					FlowTaskBean task = mapFlowTask.get(adxFlowControl.getAid());
+    					if(task.getCommand() != FlowTaskBean.COMMAND_STOP){//缓存中ADX广告任务为未关闭
+    						task.setCommand(FlowTaskBean.COMMAND_STOP);
+    						myLog.info("AID["+adxFlowControl.getAid()+"]ADX投放任务关闭!");
+    						flowTaskList.add(task);
+    					}
+    				}else if(adxFlowControl.getPutAdStatus() == 1){//ADX广告投放开启
+    					FlowTaskBean task = mapFlowTask.get(adxFlowControl.getAid());
+    					if(task.getCommand() != FlowTaskBean.COMMAND_START){//缓存中ADX广告任务为未开启
+    						task.setCommand(FlowTaskBean.COMMAND_START);
+    						myLog.info("AID["+adxFlowControl.getAid()+"]ADX投放任务开启!");
+    						flowTaskList.add(task);
+    					}
+    				}
+    			}
+    			adxFlowControlThresholdMap.put(adxFlowControl.getAid(), adxFlowControl);
+    		}
+    	}
+    	if(appFlowControlList != null && !appFlowControlList.isEmpty()){
+    		for(FlowControlBean appFlowControl:appFlowControlList){
+    			//首次启动或者缓存中没有APPID
+    			if(isInit ||!mapFlowTask.containsKey(appFlowControl.getAid())){
+    				FlowTaskBean flowTask = new FlowTaskBean();
+    				flowTask.setAid(appFlowControl.getAid());
+    				flowTask.setAid(appFlowControl.getAid());
+    				if(appFlowControl.getPutAdStatus() == 0){
+    					flowTask.setCommand(FlowTaskBean.COMMAND_STOP);
+    				}else{
+    					flowTask.setCommand(FlowTaskBean.COMMAND_START);
+    				}
+    				mapFlowTask.put(appFlowControl.getAid(), flowTask);
+    				flowTaskList.add(flowTask);
+    			}else{
+    				if(appFlowControl.getPutAdStatus() == 0){//APP广告投放关闭
+    					FlowTaskBean task = mapFlowTask.get(appFlowControl.getAid());
+    					if(task.getCommand() != FlowTaskBean.COMMAND_STOP){//缓存中APP广告任务为未停止
+    						task.setCommand(FlowTaskBean.COMMAND_STOP);
+    						myLog.info("AID["+appFlowControl.getAid()+"]APP投放任务关闭!");
+    						flowTaskList.add(task);
+    					}
+    				}else if(appFlowControl.getPutAdStatus() == 1){//APP广告投放开启
+    					FlowTaskBean task = mapFlowTask.get(appFlowControl.getAid());
+    					if(task.getCommand() != FlowTaskBean.COMMAND_START){//缓存中APP广告任务为未开启
+    						task.setCommand(FlowTaskBean.COMMAND_START);
+    						myLog.info("AID["+appFlowControl.getAid()+"]APP投放任务开启!");
+    						flowTaskList.add(task);
+    					}
+    				}
+    			}
+    			appFlowControlThresholdMap.put(appFlowControl.getAid(), appFlowControl);
+    		}
+    	}
+    	
+    	if(!flowTaskList.isEmpty()){
+        	for(WorkNodeBean node:nodeList){
+        		if(node.getName().contains("rtb")){
+        			pushFlowTask(node.getName(), flowTaskList);
+        		}
+        	}
+        }
+    	
+    }
+    
+    /**
+     * 每隔30秒获取一次ADX与APP流量,检查流量是否超限
+     */
+    public void pullAndCheckFlowControl(){
+    	MDC.put("sift", "control");
+    	for(WorkNodeBean node:nodeList){
+    		if(node.getName().contains("rtb")){
+    			
+    			//更新ADX流量缓存
+    			Map<String,Long> adxMap = MsgControlCenter.recvAdxFlow(node.getName());
+    			if(adxMap !=null && !adxMap.isEmpty()){    				
+	    			Iterator iterAdx = adxMap.entrySet().iterator();
+	    			while(iterAdx.hasNext()){
+	    				Map.Entry entry = (Map.Entry) iterAdx.next();
+	    				String key = (String) entry.getKey();
+	    				Long value = (Long) entry.getValue();
+	    				Long flows = adxFlowControlMap.get(key);
+	    				if(flows != null){
+	    					adxFlowControlMap.put(key, adxFlowControlMap.get(key) + value);
+	    				}else{
+	    					adxFlowControlMap.put(key, value);
+	    				}
+	    			}
+    			}
+    			
+    			//更新APP流量缓存
+    			Map<String,Long> appMap = MsgControlCenter.recvAppFlow(node.getName());
+    			if(appMap !=null && !appMap.isEmpty()){
+	    			Iterator iterApp = appMap.entrySet().iterator();
+	    			while(iterApp.hasNext()){
+	    				Map.Entry entry = (Map.Entry) iterApp.next();
+	    				String key = (String) entry.getKey();
+	    				Long value = (Long) entry.getValue();
+	    				Long flows = appFlowControlMap.get(key);
+	    				if(flows != null){
+	    					appFlowControlMap.put(key, appFlowControlMap.get(key) + value);
+	    				}else{
+	    					appFlowControlMap.put(key, value);
+	    				}
+	    			}
+    			}
+    		}
+    	}
+    	
+    	//检查流量是否超限
+    	checkFlowQuota();
+    }
+    
+    /**
+     * 检查流量是否超限
+     */
+    public void checkFlowQuota(){
+    	MDC.put("sift", "control");
+    	String hour = hourDateFM.format(new Date());
+    	long totalFlows = flowMap.get(Integer.parseInt(hour));
+    	
+    	ArrayList<FlowTaskBean> flowTaskList = new ArrayList<FlowTaskBean>();
+    	
+    	//检查adx流量是否超限
+    	Iterator iterAdxThreshold = adxFlowControlThresholdMap.entrySet().iterator();
+    	
+    	while(iterAdxThreshold.hasNext()){
+    		Map.Entry entry = (Map.Entry) iterAdxThreshold.next();
+    		String key = (String) entry.getKey();
+    		FlowControlBean flowControlBean = (FlowControlBean) entry.getValue();
+    		int status = flowControlBean.getStatus();
+    		int lowFlows = flowControlBean.getLowFlows();
+    		int ratio = flowControlBean.getFlowControlRatio();
+    		long tempFlows = (long) (totalFlows * (ratio/100.0f));
+    		Long flows = adxFlowControlMap.get(key);
+    		if(flows != null && status == 1 && totalFlows != 0 && ratio != 0 && flows >= lowFlows && flows >= tempFlows){
+    			//停止该ADX的流量
+    			FlowTaskBean bean = mapFlowTask.get(key);
+    			if(bean != null && bean.getCommand() == FlowTaskBean.COMMAND_START){
+    				bean.setCommand(FlowTaskBean.COMMAND_PAUSE);
+    				myLog.info("开始暂停ADX["+key+"]流量");
+    				flowTaskList.add(bean);
+    			}
+    		}
+    	}
+    	
+    	//检查app流量是否超限
+    	Iterator iterAppThreshold = appFlowControlThresholdMap.entrySet().iterator();
+    	while(iterAppThreshold.hasNext()){
+    		Map.Entry entry = (Map.Entry) iterAppThreshold.next();
+    		String key = (String) entry.getKey();
+    		FlowControlBean flowControlBean = (FlowControlBean) entry.getValue();
+    		int status = flowControlBean.getStatus();
+    		int lowFlows = flowControlBean.getLowFlows();
+    		int ratio = flowControlBean.getFlowControlRatio();
+    		long tempFlows = (long) (totalFlows * (ratio/100.0f));
+    		Long flows = appFlowControlMap.get(key);
+    		if(flows != null && status == 1 && totalFlows != 0 && ratio != 0 && flows >= lowFlows && flows >= tempFlows){
+    			//停止该APP的流量
+    			FlowTaskBean bean = mapFlowTask.get(key);
+    			if(bean != null && bean.getCommand() == FlowTaskBean.COMMAND_START){
+    				bean.setCommand(FlowTaskBean.COMMAND_PAUSE);
+    				myLog.info("开始暂停APP["+key+"]流量");
+    				flowTaskList.add(bean);
+    			}
+    		}
+    	}
+    	
+    	if(!flowTaskList.isEmpty()){
+        	for(WorkNodeBean node:nodeList){
+        		if(node.getName().contains("rtb")){
+        			pushFlowTask(node.getName(), flowTaskList);
+        		}
+        	}
+        }
     }
     
     public boolean isNodeDown(String nodeName){
@@ -1051,6 +1359,9 @@ public class AdFlowControl {
         MsgControlCenter.sendAdBean(nodeName, beanList, Priority.NORM_PRIORITY);
     }
 
+    private void pushFlowTask(String nodeName,ArrayList<FlowTaskBean> beanList){
+    	MsgControlCenter.sendFlowTask(nodeName, beanList, Priority.NORM_PRIORITY);
+    }
 
     /**
      * @param adUid

@@ -1,22 +1,22 @@
 package cn.shuzilm.backend.master;
 
+import cn.shuzilm.backend.master.AdFlowControl;
+import cn.shuzilm.backend.master.CPCHandler;
+import cn.shuzilm.backend.timing.master.*;
+
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
-
-import cn.shuzilm.backend.timing.master.DailyTask;
-import cn.shuzilm.backend.timing.master.HourTask;
-import cn.shuzilm.backend.timing.master.PutDetailInDBTask;
-import cn.shuzilm.backend.timing.master.RealTask;
-import cn.shuzilm.backend.timing.master.TenMinuteTask;
-import cn.shuzilm.backend.timing.master.Test;
-import cn.shuzilm.backend.timing.master.UpdateAdMapTask;
-import cn.shuzilm.backend.timing.master.UpdateCloseAdTask;
+import org.slf4j.MDC;
 
 /**
  * Created by thunders on 2018/7/23.
  */
 public class CronDispatch {
     private static AdFlowControl control = new AdFlowControl();
+
+    public  CronDispatch(){
+
+    }
 
     public static void dispatch(Class<? extends Job> myClass , String cronTime){
         try {
@@ -52,23 +52,43 @@ public class CronDispatch {
 
 
     public static void main(String[] args) {
-    	//该类已废除
-//        CronDispatch.startTimer(0);
-//        System.out.println();
-//    	AdFlowControl.getInstance().loadAdInterval(true);
-//        //    // 5 s 触发
+        //程序初始化 加载程序
+        AdFlowControl.getInstance().loadAdInterval(true);
+        // 初始化CPC结算方式的广告的 阈值和moniter
+ //       CPCHandler.getInstance().updateIndicator(true);
 //        AdFlowControl.getInstance().pullAndUpdateTask();
+        
+     //   AdFlowControl.getInstance().pullAndUpdateTask(true);
+        
+        AdFlowControl.getInstance().updateFlow();
+        
+        AdFlowControl.getInstance().updateAdxAndAppFlowControl(true);
+        
+          // 5 s 触发
+       // CronDispatch.startTimer(0);
 //        //  每小时触发
-//        AdFlowControl.getInstance().resetHourMonitor();
-//        //  每天触发
-//        AdFlowControl.getInstance().resetDayMonitor();
-        //  10 min 触发
-    	
-//    	AdFlowControl.getInstance().pullAndUpdateTask(true);
-//    	
-//    	startTimer(0);
-//    	
-//    	startTimer(8);
+//        CronDispatch.startTimer(2);
+////        AdFlowControl.getInstance().resetHourMonitor();
+////        //  每天触发
+//        CronDispatch.startTimer(3);
+////        AdFlowControl.getInstance().resetDayMonitor();
+////        //  10 min 触发
+//        CronDispatch.startTimer(1);
+//        
+//        CronDispatch.startTimer(4);
+////        AdFlowControl.getInstance().loadAdInterval(true);
+//        CronDispatch.startTimer(5);
+//        
+//        CronDispatch.startTimer(6);
+//        
+//        CronDispatch.startTimer(7);
+//        
+        CronDispatch.startTimer(8);
+        
+        CronDispatch.startTimer(9);
+        
+        CronDispatch.startTimer(2);
+//        
     }
 
     /**
@@ -94,27 +114,27 @@ public class CronDispatch {
            case 3:
                dispatch(DailyTask.class,"0 0 0 * * ?");
                break;
+           case 4:
+        	   dispatch(UpdateNodeStatusTask.class,"0 0/5 * * * ?");
+        	   break;
+           case 5:
+        	   dispatch(UpdateCloseAdTask.class,"0 0/10 * * * ?");
+        	   break;
            case 6:
         	   dispatch(UpdateAdMapTask.class,"0 0/5 * * * ?");
         	   break;
            case 7:
-        	   dispatch(UpdateCloseAdTask.class,"0 0/30 * * * ?");
+        	   dispatch(UpdateFlowTask.class,"0 0 0 * * ?");
         	   break;
            case 8:
-        	   dispatch(PutDetailInDBTask.class,"0 0/10 * * * ?");
+        	   dispatch(UpdateAdxAndAppFlowControlTask.class,"0 0/10 * * * ?");
+        	   break;
+           case 9:
+        	   dispatch(PullAndCheckFlowControlTask.class,"0/30 * * * * ?");
+        	   break;
            default:
                break;
        }
     }
-
-
-
-
-
-
-
-
-
-
 
 }

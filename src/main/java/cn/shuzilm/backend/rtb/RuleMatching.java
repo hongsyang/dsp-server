@@ -302,7 +302,7 @@ public class RuleMatching {
 		// 开始遍历符合广告素材尺寸的广告
 		//long startOrder = System.currentTimeMillis();
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum);
+			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum,adxName,appPackageName);
 			// 是否投当前的广告
 			if (!isAvaliable) {
 				LOG.debug("ID[" + adUid + "]广告不参与投放!");
@@ -433,11 +433,28 @@ public class RuleMatching {
 		if (!machedAdList.isEmpty()) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio,
 					audienceMap,adxName,ip);
+			//上传请求数
 			if (rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null) {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(),
 						rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) + 1);
 			} else {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(), 1L);
+			}
+			//上传adx流量数
+			if (rtbIns.getAdxFlowMap().get(adxName) != null) {
+				rtbIns.getAdxFlowMap().put(adxName,
+						rtbIns.getAdxFlowMap().get(adxName) + 1);
+			} else {
+				rtbIns.getAdxFlowMap().put(adxName, 1L);
+			}
+			//上传app流量数
+			if(appPackageName != null){
+			if (rtbIns.getAppFlowMap().get(appPackageName) != null) {
+				rtbIns.getAppFlowMap().put(appPackageName,
+						rtbIns.getAppFlowMap().get(appPackageName) + 1);
+			} else {
+				rtbIns.getAppFlowMap().put(appPackageName, 1L);
+			}
 			}
 		}
 
@@ -798,7 +815,7 @@ public class RuleMatching {
 	public static void main(String[] args) {
 		try{
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 640, 100, true, 5, 5, "1,2", "jpg,gif","127.0.0.1",null);
+		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 640, 100, true, 5, 5, "1", "jpg,gif","127.0.0.1","cn.asm.clweather");
 		}catch(Exception e){
 			e.getMessage();
 		}

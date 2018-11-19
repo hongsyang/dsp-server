@@ -85,6 +85,11 @@ public class RtbCronDispatch {
         RtbCronDispatch.startTimer(4);
         
         RtbCronDispatch.startTimer(5);
+        
+        RtbCronDispatch.startTimer(6);
+        
+        RtbCronDispatch.startTimer(7);
+        
     }
 
     /**
@@ -112,8 +117,16 @@ public class RtbCronDispatch {
                break;
            case 4:
         	   dispatch(RtbPushAdBidNumsTask.class,"0/5 * * * * ?");
+        	   break;
            case 5:
         	   dispatch(RtbPushHeartTask.class,"0 0/10 * * * ?");
+        	   break;
+           case 6:
+        	   dispatch(RtbPushAdxAndAppFlowTask.class,"0 0/1 * * * ?");
+        	   break;
+           case 7:
+        	   dispatch(RtbPullFlowTask.class,"0/5 * * * * ?");
+        	   break;
            default:
                break;
        }

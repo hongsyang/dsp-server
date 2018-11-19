@@ -27,7 +27,7 @@ public class DetailDataInToDBTask implements Runnable{
 			}
 			try{
 				//将广告明细插入库中，为满足实时，暂为一条一条插入
-				taskService.insertDataToNoticeDetail(adNoticeDetail);
+				taskService.insertDataToNoticeDetailPerHour(adNoticeDetail);
 			}catch(SQLException e){
 				e.printStackTrace();
 				continue;
