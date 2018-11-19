@@ -175,6 +175,7 @@ public class RuleMatching {
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		Map<String, Material> metrialMap = new HashMap<String, Material>();
 		Map<String, AudienceBean> audienceMap = new HashMap<String, AudienceBean>();
+		Map<String, Boolean> rtbIpMap = new HashMap<String,Boolean>(); 
 		
 		int divisor = MathTools.division(width, height);
 		String widthHeightRatio = width / divisor + "/" + height / divisor;
@@ -399,9 +400,15 @@ public class RuleMatching {
 					}
 				} else if (audience.getType().equals("ip")) {// 智能设备
 					Set<String> ipSet = audience.getIpSet();
-					if ((ipSet != null && ipList != null && checkRetain(ipList,ipSet)) || (ipSet != null && ip != null && ipSet.contains(ip))) {
+					if ((ipSet != null && ipList != null && checkRetain(ipList,ipSet))) {//通过标签库匹配
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
+						rtbIpMap.put(ad.getAdUid(), false);
+						break;
+					}else if(ipSet != null && ip != null && ipSet.contains(ip)){//通过请求IP匹配
+						machedAdList.add(ad);
+						audienceMap.put(ad.getAdUid(), audience);
+						rtbIpMap.put(ad.getAdUid(), true);
 						break;
 					}
 				} else if (tagBean != null && audience.getType().equals("dmp")) {// 定制人群包
@@ -432,7 +439,7 @@ public class RuleMatching {
 		// 排序
 		if (!machedAdList.isEmpty()) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio,
-					audienceMap,adxName,ip);
+					audienceMap,adxName,ip,rtbIpMap);
 			//上传请求数
 			if (rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null) {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(),
@@ -465,7 +472,7 @@ public class RuleMatching {
 	 * 对匹配的广告按照规则进行排序
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
-			TagBean tagBean, String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName,String ipAddr) throws Exception{
+			TagBean tagBean, String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName,String ipAddr,Map<String,Boolean> rtbIpMap) throws Exception{
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -498,7 +505,7 @@ public class RuleMatching {
 			LOG.debug("广告ID[" + ad.getAdUid() + "]广告主ID["+ad.getAdvertiser().getUid()+"]通过排序获得竞价资格!");
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio,
-					audienceMap,adxName,ipAddr);
+					audienceMap,adxName,ipAddr,rtbIpMap);
 		} else {
 			// long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
@@ -514,7 +521,7 @@ public class RuleMatching {
 			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio,
-					audienceMap,adxName,ipAddr);
+					audienceMap,adxName,ipAddr,rtbIpMap);
 		}
 
 		return targetDuFlowBean;
@@ -653,7 +660,7 @@ public class RuleMatching {
 	}
 
 	public DUFlowBean packageDUFlowData(Material material, String deviceId, AdBean ad, TagBean tagBean,
-			String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName,String ipAddr) throws Exception{
+			String widthHeightRatio, Map<String, AudienceBean> audienceMap,String adxName,String ipAddr,Map<String,Boolean> rtbIpMap) throws Exception{
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
@@ -688,9 +695,23 @@ public class RuleMatching {
 		targetDuFlowBean.setAdvertiserUid(advertiser.getUid());
 		targetDuFlowBean.setAgencyUid(advertiser.getAgencyUid());
 		targetDuFlowBean.setCreativeUid(creative.getUid());
-		targetDuFlowBean.setProvince(tagBean != null?(tagBean.getProvinceId() + ""):null);// 省
-		targetDuFlowBean.setCity(tagBean != null?(tagBean.getCityId() + ""):null);// 市
-		targetDuFlowBean.setCountry(tagBean != null?(tagBean.getCountyId() + ""):null);//县
+		String provinceId = null,cityId = null,countyId = null;
+		if(tagBean != null){
+			if(rtbIpMap.containsKey(ad.getAdUid())){//通过IP匹配的结果
+				if(!rtbIpMap.get(ad.getAdUid())){//标签设备IP匹配的结果
+					provinceId = tagBean.getProvinceId() + "";
+					cityId = tagBean.getCityId() + "";
+					countyId = tagBean.getCountyId() + "";
+				}
+			}else{
+				provinceId = tagBean.getProvinceId() + "";
+				cityId = tagBean.getCityId() + "";
+				countyId = tagBean.getCountyId() + "";
+			}
+		}
+		targetDuFlowBean.setProvince(provinceId);// 省
+		targetDuFlowBean.setCity(cityId);// 市
+		targetDuFlowBean.setCountry(countyId);//县
 		// targetDuFlowBean.setActualPrice(1.0);//成本价
 		String type = audience.getType().toUpperCase();
 		double premiumRatio = constant.getRtbVar(type);
