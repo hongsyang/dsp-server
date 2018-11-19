@@ -58,6 +58,10 @@ public class CronDispatch {
         
         AdFlowControl.getInstance().pullAndUpdateTask(true);
         
+        AdFlowControl.getInstance().updateFlow();
+        
+        AdFlowControl.getInstance().updateAdxAndAppFlowControl(true);
+        
           // 5 s 触发
         CronDispatch.startTimer(0);
 //        //  每小时触发
@@ -76,6 +80,10 @@ public class CronDispatch {
         CronDispatch.startTimer(6);
         
         CronDispatch.startTimer(7);
+        
+        CronDispatch.startTimer(8);
+        
+        CronDispatch.startTimer(9);
     }
 
     /**
@@ -111,7 +119,14 @@ public class CronDispatch {
         	   dispatch(UpdateAdMapTask.class,"0 0/5 * * * ?");
         	   break;
            case 7:
-        	   dispatch(PutDetailInDBTask.class,"0 0/10 * * * ?");
+        	   dispatch(UpdateFlowTask.class,"0 0 0 * * ?");
+        	   break;
+           case 8:
+        	   dispatch(UpdateAdxAndAppFlowControlTask.class,"0 0/10 * * * ?");
+        	   break;
+           case 9:
+        	   dispatch(PullAndCheckFlowControlTask.class,"0/30 * * * * ?");
+        	   break;
            default:
                break;
        }

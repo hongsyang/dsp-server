@@ -508,17 +508,131 @@ public class TaskServicve extends Service {
     }
     
     /**
-     * 广告明细入库
+     * 广告明细入库(每小时)
      * @param adNoticeDetail
      * @throws SQLException
      */
-    public void insertDataToNoticeDetail(AdNoticeDetailBean adNoticeDetail) throws SQLException{
-    	String sql = "insert into ad_notice_detail (ad_uid,ad_name,advertiser_uid,advertiser_name,win_nums,"
-    			+ "click_nums,bid_nums,win_ratio,click_ratio,indb_time) values ('"+adNoticeDetail.getAdUid()+"','"+
+    public void insertDataToNoticeDetailPerHour(AdNoticeDetailBean adNoticeDetail) throws SQLException{
+    	String sql = "insert into ad_notice_detail_hour (ad_uid,ad_name,advertiser_uid,advertiser_name,win_nums,"
+    			+ "click_nums,bid_nums,win_ratio,click_ratio,date,hour) values ('"+adNoticeDetail.getAdUid()+"','"+
     			adNoticeDetail.getAdName()+"','"+adNoticeDetail.getAdvertiserUid()+"','"+adNoticeDetail.getAdvertiserName()+
     			"',"+adNoticeDetail.getWinNums()+","+adNoticeDetail.getClickNums()+","+adNoticeDetail.getBidNums()+","+
-    			adNoticeDetail.getWinRatio()+","+adNoticeDetail.getClickRatio()+",'"+specDateFM.format(new Date())+"')";
+    			adNoticeDetail.getWinRatio()+","+adNoticeDetail.getClickRatio()+",'"+yydDateFM.format(new Date())+"','"
+    					+hourDateFM.format(new Date())+"')";
     	update.doUpdate(sql);
     }
+    
+    /**
+     * 获取前一天广告明细
+     */
+    public ConcurrentHashMap<Integer,Long> getNoticeDetailByHourPerDay(){
+    	Object [] arr = new Object[1];
+    	Calendar c = Calendar.getInstance(); 
+		Date date=new Date(); 
+		c.setTime(date); 
+		int day=c.get(Calendar.DATE); 
+		c.set(Calendar.DATE,day-1);
+    	arr[0] = yydDateFM.format(c.getTime());
+    	String sql = "select sum(bid_nums) bid_nums,hour from ad_notice_detail_hour where date = ? group by hour";  
+    	ConcurrentHashMap<Integer,Long> map = new ConcurrentHashMap<>();
+    	try{    	
+    		ResultList rl = new ResultList();   	
+    		rl = select.select(sql,arr);
+    		for(ResultMap rm : rl){
+    			BigDecimal bidNums = rm.getBigDecimal("bid_nums");
+    			map.put(rm.getInteger("hour"), bidNums.longValue());
+    		}
+    		return map;
+    	}catch(SQLException e){
+    		e.printStackTrace();
+            return map;
+    	}
+    }
+    
+    /**
+     * 获取adx流量控制
+     * @return
+     */
+    public List<FlowControlBean> getAdxFlowControl(long updateTime){
+    	Object arr[] = new Object[1];
+    	arr[0] = specDateFM.format(new Date(updateTime));
+    	String sql = "select adx_id,adx_name,low_flows,flow_control_ratio,status,put_ad_status from adx_flow_control where updated_at >= ?";
+    	List<FlowControlBean> flowControlList = new ArrayList<FlowControlBean>();
+    	ResultList rl = new ResultList(); 
+    	try {
+			rl = select.select(sql,arr);
+			for(ResultMap rm : rl){
+				FlowControlBean bean = new FlowControlBean();
+				bean.setAid(rm.getString("adx_id"));
+				bean.setName(rm.getString("adx_name"));
+				bean.setLowFlows(rm.getInteger("low_flows"));
+				bean.setFlowControlRatio(rm.getInteger("flow_control_ratio"));
+				bean.setStatus(rm.getInteger("status"));
+				bean.setPutAdStatus(rm.getInteger("put_ad_status"));
+				flowControlList.add(bean);
+			}
+			
+			return flowControlList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return flowControlList;
+		}
+    }
+    
+    /**
+     * 获取app流量控制
+     * @return
+     */
+    public List<FlowControlBean> getAppFlowControl(long updateTime){
+    	Object arr[] = new Object[1];
+    	arr[0] = specDateFM.format(new Date(updateTime));
+    	String sql = "select app_package_id,app_package_name,low_flows,flow_control_ratio,status,put_ad_status from app_package_control where updated_at >= ?";
+    	List<FlowControlBean> flowControlList = new ArrayList<FlowControlBean>();
+    	ResultList rl = new ResultList(); 
+    	try {
+			rl = select.select(sql,arr);
+			for(ResultMap rm : rl){
+				FlowControlBean bean = new FlowControlBean();
+				bean.setAid(rm.getString("app_package_id"));
+				bean.setName(rm.getString("app_package_name"));
+				bean.setLowFlows(rm.getInteger("low_flows"));
+				bean.setFlowControlRatio(rm.getInteger("flow_control_ratio"));
+				bean.setStatus(rm.getInteger("status"));
+				bean.setPutAdStatus(rm.getInteger("put_ad_status"));
+				flowControlList.add(bean);
+			}
+			
+			return flowControlList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return flowControlList;
+		}
+    }
+    
+    
+    public static void main(String[] args) {
+    	TaskServicve task = new TaskServicve();
+    	AdNoticeDetailBean adNoticeDetail = new AdNoticeDetailBean();
+    	adNoticeDetail.setAdUid("123");
+    	adNoticeDetail.setAdName("test");
+    	adNoticeDetail.setAdvertiserUid("123");
+    	adNoticeDetail.setAdvertiserName("TEST");
+    	adNoticeDetail.setWinNums(10000);
+    	adNoticeDetail.setClickNums(12);
+    	adNoticeDetail.setBidNums(100000);
+    	adNoticeDetail.setWinRatio(adNoticeDetail.getWinNums()*1.0f/adNoticeDetail.getBidNums());
+    	adNoticeDetail.setClickRatio(adNoticeDetail.getClickNums()*1.0f/adNoticeDetail.getWinNums());
+    	try {
+			//task.insertDataToNoticeDetailPerHour(adNoticeDetail);
+    		//Map map = task.getNoticeDetailByHourPerDay();
+    		long timeNow = System.currentTimeMillis();
+            long timeBefore = timeNow - 10 * 60 *1000;
+    		List<FlowControlBean> list = task.getAdxFlowControl(timeBefore);
+    		System.out.println(list);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
     
 }

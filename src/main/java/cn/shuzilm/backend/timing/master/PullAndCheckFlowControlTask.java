@@ -8,10 +8,10 @@ import org.quartz.JobExecutionException;
 /**
  * Created by thunders on 2018/7/23.
  */
-public class PutDetailInDBTask implements Job {
+public class PullAndCheckFlowControlTask implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        AdFlowControl.getInstance().putAdDetailIndb();
+        AdFlowControl.getInstance().pullAndCheckFlowControl();
 
     }
 }

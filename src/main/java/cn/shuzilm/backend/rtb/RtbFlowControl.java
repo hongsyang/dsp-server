@@ -7,6 +7,7 @@ import cn.shuzilm.bean.control.AdBidBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
+import cn.shuzilm.bean.control.FlowTaskBean;
 import cn.shuzilm.bean.control.Material;
 import cn.shuzilm.bean.control.NodeStatusBean;
 import cn.shuzilm.bean.control.TaskBean;
@@ -34,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -85,6 +87,14 @@ public class RtbFlowControl {
     	return bidMap;
     }
     
+    public ConcurrentHashMap<String,Long> getAdxFlowMap(){
+    	return adxFlowMap;
+    }
+    
+    public ConcurrentHashMap<String,Long> getAppFlowMap(){
+    	return appFlowMap;
+    }
+    
     public ArrayList<AdBidBean> getBidList(){
     	return bidList;
     }
@@ -99,6 +109,8 @@ public class RtbFlowControl {
      * 广告任务管理
      */
     private static ConcurrentHashMap<String, TaskBean> mapTask = null;
+    
+    private static ConcurrentHashMap<String, FlowTaskBean> mapFlowTask = null;
     /**
      * 广告资源的倒置 key: 广告类型 + 广告宽 + 广告高 value: list<aduid>
      */
@@ -129,6 +141,12 @@ public class RtbFlowControl {
     //每个广告5秒内的rtb请求数量
     private static ConcurrentHashMap<String,Long> bidMap = null;
     
+    //5秒内adx流量数
+    private static ConcurrentHashMap<String,Long> adxFlowMap = null;
+    
+    //5秒内app流量数
+    private static ConcurrentHashMap<String,Long> appFlowMap = null;
+    
     private static ArrayList<AdBidBean> bidList = null;
 
     private RtbFlowControl() {
@@ -136,12 +154,15 @@ public class RtbFlowControl {
         nodeName = Constants.getInstance().getConf("HOST");
         mapAd = new ConcurrentHashMap<>();
         mapTask = new ConcurrentHashMap<>();
+        mapFlowTask = new ConcurrentHashMap<>();
         areaMap = new ConcurrentHashMap<>();
         demographicMap = new ConcurrentHashMap<>();
         mapAdMaterial = new ConcurrentHashMap<>();
         mapAdMaterialRatio = new ConcurrentHashMap<>();
         mapMaterialRatio = new ConcurrentHashMap<>();
         bidMap = new ConcurrentHashMap<>();
+        adxFlowMap = new ConcurrentHashMap<>();
+        appFlowMap = new ConcurrentHashMap<>();
         bidList = new ArrayList<AdBidBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
@@ -164,6 +185,12 @@ public class RtbFlowControl {
         
         //10分钟上传一次RTB节点心跳
         pushRtbHeart();
+        
+        //1分钟上报一次ADX与APP流量数
+        pushAdxAndAppFlow();
+        
+        //5秒钟获取一次流量任务
+        pullAndUpdateFlowTask();
     }
 
     /**
@@ -381,6 +408,21 @@ public class RtbFlowControl {
 		}
     }
     
+    
+    /**
+     * 每隔5秒钟获取流量任务
+     */
+    public void pullAndUpdateFlowTask(){
+    	MDC.put("sift", "rtb");
+    	List<FlowTaskBean> flowTaskList = MsgControlCenter.recvFlowTask(nodeName);
+    	if(flowTaskList == null || flowTaskList.isEmpty()){
+    		return;
+    	}
+    	for(FlowTaskBean flowTask:flowTaskList){
+    		mapFlowTask.put(flowTask.getAid(), flowTask);
+    	}
+    }
+    
     /**
      * 每隔 5 秒钟上报rtb引擎中广告的rtb请求数
      */
@@ -410,6 +452,21 @@ public class RtbFlowControl {
     	
     	bidMap.clear();
         
+    }
+    
+    /**
+     * 每隔1分钟上报ADX与APP流量数
+     */
+    public void pushAdxAndAppFlow(){
+    	MDC.put("sift", "rtb");
+    	if(adxFlowMap != null && !adxFlowMap.isEmpty()){
+    		MsgControlCenter.sendAdxFlow(nodeName, adxFlowMap);
+    	}
+    	adxFlowMap.clear();
+    	if(appFlowMap != null && !appFlowMap.isEmpty()){
+    		MsgControlCenter.sendAppFlow(nodeName, appFlowMap);
+    	}
+    	appFlowMap.clear();
     }
     
     /**
@@ -448,7 +505,8 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid,int weekNum,int dayNum) {
+    public boolean checkAvalable(String auid,int weekNum,int dayNum,String adxName,String appPackageName) {
+    	MDC.put("sift", "rtb");
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
             int commandCode = bean.getCommand();
@@ -469,6 +527,22 @@ public class RtbFlowControl {
         }else{
         	return false;
         }
+        
+        FlowTaskBean adxFlowTaskBean = mapFlowTask.get(adxName);
+        if(adxFlowTaskBean != null){
+        	if(adxFlowTaskBean.getCommand() != FlowTaskBean.COMMAND_START){
+        		//myLog.info("adxName["+adxName+"]关闭!");
+        		return false;
+        	}
+        }
+        
+        FlowTaskBean appFlowTaskBean = mapFlowTask.get(appPackageName);
+        if(appFlowTaskBean != null){
+        	if(appFlowTaskBean.getCommand() != FlowTaskBean.COMMAND_START){
+        		//myLog.info("appPackageName["+appPackageName+"]关闭!");
+        		return false;
+        	}
+        }
 
         // 匹配广告投放时间窗
         AdBean adBean = mapAd.get(auid);
@@ -481,11 +555,17 @@ public class RtbFlowControl {
         		return false;
         	}
         	//判断广告投放时间窗
-            int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();
+        	String scheduleTime = adBean.getScheduleTime();
+        	//代表时间窗选择了不限
+        	if(scheduleTime != null && scheduleTime.trim().equals("{}")){
+        		return true;
+        	}
+            int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();           
             if(timeSchedulingArr != null){
             for (int i = 0; i < timeSchedulingArr.length; i++) {
-                if (weekNum != i)
+                if (weekNum != i){
                     continue;
+                }
                 for (int j = 0; j < timeSchedulingArr[i].length; j++) {
                     if (dayNum == j) {
                         if (timeSchedulingArr[i][j] == 1) {

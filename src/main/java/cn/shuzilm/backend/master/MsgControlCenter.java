@@ -7,6 +7,7 @@ import cn.shuzilm.common.jedis.Priority;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,6 +24,9 @@ public class MsgControlCenter {
     public static final String BID_STATUS = "_bid";
     public static final String MASTER_QUEUE_NAME = "_task_queue";
     public static final String NODE_STATUS = "_node_status";
+    public static final String ADX_FLOW = "_adx_flow";
+    public static final String APP_FLOW = "_app_flow";
+    public static final String FLOW_DOWN = "_flow_tdown";
 
     public static ICommand getCommandFromMasterQueue(){
         Object obj = JedisQueueManager.getElementFromQueue(MASTER_QUEUE_NAME);
@@ -75,6 +79,42 @@ public class MsgControlCenter {
             return null;
         else
             return (ArrayList<TaskBean>)obj;
+    }
+    
+    public static boolean sendAdxFlow(String nodeName,ConcurrentHashMap<String,Long> adxFlowMap){
+    	return JedisQueueManager.putElementToQueue(nodeName + ADX_FLOW, adxFlowMap, Priority.NORM_PRIORITY);
+    }
+    
+    public static ConcurrentHashMap<String,Long> recvAdxFlow(String nodeName){
+    	Object obj = JedisQueueManager.getElementFromQueue(nodeName + ADX_FLOW);
+    	if(obj == null)
+    		return null;
+    	else
+    		return (ConcurrentHashMap<String, Long>) obj;
+    }
+    
+    public static boolean sendAppFlow(String nodeName,ConcurrentHashMap<String,Long> appFlowMap){
+    	return JedisQueueManager.putElementToQueue(nodeName + APP_FLOW, appFlowMap, Priority.NORM_PRIORITY);
+    }
+    
+    public static ConcurrentHashMap<String,Long> recvAppFlow(String nodeName){
+    	Object obj = JedisQueueManager.getElementFromQueue(nodeName + APP_FLOW);
+    	if(obj == null)
+    		return null;
+    	else
+    		return (ConcurrentHashMap<String, Long>) obj;
+    }
+    
+    public static boolean sendFlowTask(String nodeName, ArrayList<FlowTaskBean> beanList, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + FLOW_DOWN,beanList,priority);
+    }
+
+    public static ArrayList<FlowTaskBean> recvFlowTask(String nodeName){
+        Object obj = JedisQueueManager.getElementFromQueue(nodeName + FLOW_DOWN);
+        if(obj == null)
+            return null;
+        else
+            return (ArrayList<FlowTaskBean>)obj;
     }
 
     /**

@@ -3,7 +3,9 @@ package cn.shuzilm.util;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -49,5 +51,42 @@ public class TimeSchedulingUtil {
             return null;
         }
     }
+    
+    public static void main(String[] args) {
+    	//String timeScheTxt = "{\"1\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"2\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"3\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"6\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"7\":[11,12,13,14,15,16,17,18,19,20,21,22,23]}";
+    	String timeScheTxt = "{}";
+		int[][] timeSchedulingArr = timeTxtToMatrix(timeScheTxt);
+		for(int i=0;i<timeSchedulingArr.length;i++){
+			for(int j=0;j<timeSchedulingArr[i].length;j++){
+				System.out.print(timeSchedulingArr[i][j]);
+			}
+			System.out.println();
+		}
+		SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
+		Date date = new Date();
+		String time = dateFm.format(date);
+		String splitTime[] = time.split("_");
+		int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
+		int dayNum = Integer.parseInt(splitTime[1]);
+		if (dayNum == 24)
+			dayNum = 0;
+		
+		System.out.println(weekNum+"\t"+dayNum);
+		if(timeSchedulingArr != null){
+            for (int i = 0; i < timeSchedulingArr.length; i++) {
+                if (weekNum != i)
+                    continue;
+                for (int j = 0; j < timeSchedulingArr[i].length; j++) {
+                    if (dayNum == j) {
+                        if (timeSchedulingArr[i][j] == 1) {
+                            System.out.println("yes");
+                        } else {
+                            System.out.println("no");
+                        }
+                    }
+                }
+            }
+            }
+	}
 
 }
