@@ -32,7 +32,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     public RtbHandler() {
 //		wdt = new WriteDataToLog();
         parser = new RtbRequestParser();
-        System.out.println(Thread.currentThread().getName() + " parser 初始化成功。。。");
+        System.out.println(Thread.currentThread().getName() + " rtb parser 初始化成功。。。");
     }
 
     @Override
