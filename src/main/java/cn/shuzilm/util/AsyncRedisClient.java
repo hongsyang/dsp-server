@@ -10,7 +10,10 @@ import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -79,16 +82,16 @@ public class AsyncRedisClient {
     	
     	TagBean tagBean = new TagBean();
 		tagBean.setTagId(123);
-		double[] work = { 116.641f, 22.853f };
-		double[] residence = { 33.11f, 44.22f };
-		double[] activity = { 55.11f, 66.22f };
+		double[] work = { 116.355617f, 39.981743f };
+		double[] residence = { 116.355617f, 39.981743f };
+		double[] activity = { 116.355617f, 39.981743f };
 		tagBean.setWork(work);
 		tagBean.setResidence(residence);
 		tagBean.setActivity(activity);
 
-		tagBean.setProvinceId(6);
-		tagBean.setCityId(62);
-		tagBean.setCountyId(737);
+		tagBean.setProvinceId(2);
+		tagBean.setCityId(36);
+		tagBean.setCountyId(381);
 
 		tagBean.setIncomeId(2);
 		tagBean.setAppPreferenceIds("eat food");
@@ -97,8 +100,8 @@ public class AsyncRedisClient {
 		tagBean.setPhonePrice(3);
 		tagBean.setNetworkId(2);
 		tagBean.setCarrierId("4");
-		tagBean.setTagIdList("2,3");
-		tagBean.setCompanyIdList("123,321,222,2_1196028");
+		tagBean.setTagIdList("3_3");
+		tagBean.setCompanyIdList("2_1133091,2,2_1196028");
 		
 		String ss = JSON.toJSONString(tagBean);
 		String nodeStr = RtbConstants.getInstance().getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
@@ -120,12 +123,25 @@ public class AsyncRedisClient {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-    	 redis1.setAsync("82d4f6b78850978e1a37e13d2bbd69c3", ss);
-//    	redis1.delAsync("72229b9518e18744620932cb50fc43dc");
+//    	 redis1.setAsync("a24e0e337853d4d9da28769d4bf83577", ss);
+    	redis1.delAsync("a24e0e337853d4d9da28769d4bf83577");
 //    	String json = redis1.getAsync("00000e3de16c8a7e80d2cca6976fafcf");
 //    	TagBean tagBean1 = JSON.parseObject(json, TagBean.class);
     	
-    	 System.out.println(redis1.getAsync("82d4f6b78850978e1a37e13d2bbd69c3"));
+    	 System.out.println(redis1.getAsync("a24e0e337853d4d9da28769d4bf83577"));
+    	 
+    	 
+//    	 String tagJson = redis1.getAsync("a24e0e337853d4d9da28769d4bf83577");
+// 		TagBean tagBean1 = JSON.parseObject(tagJson, TagBean.class);
+// 		
+// 		Set<String> audienceTagIdSet = null;
+// 		String audienceTagIdStr = tagBean1.getAudienceTagIdList();
+//		if(audienceTagIdStr != null){
+//			String audienceTagIds[] = audienceTagIdStr.split(",");
+//			List<String> audienceTagIdList = Arrays.asList(audienceTagIds);
+//			audienceTagIdSet = new HashSet<String>(audienceTagIdList);
+//		}
+//		System.out.println(audienceTagIdSet);
     	//commands.set("97C304E-4C8E-4872-8666-03FE67DC15DG", ss);	
     	//System.out.println(commands.get("97C304E-4C8E-4872-8666-03FE67DC15DG"));
     	//commands.set("a", "b");
