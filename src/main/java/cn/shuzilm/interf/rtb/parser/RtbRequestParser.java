@@ -50,9 +50,9 @@ public class RtbRequestParser {
         String responseStr = "没有对应的厂商";
         this.configs = AppConfigs.getInstance(FILTER_CONFIG);
         long start = new Date().getTime();
-        MDC.put("sift", configs.getString("ADX_REQUEST"));
-        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
-        MDC.remove("sift");
+//        MDC.put("sift", configs.getString("ADX_REQUEST"));
+//        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
+//        MDC.remove("sift");
         if (Boolean.valueOf(configs.getString("FILTER_RTB"))) {
             responseStr = "测试请求";
             return responseStr;
@@ -74,8 +74,9 @@ public class RtbRequestParser {
             responseStr = requestService.parseRequest(dataStr);
         }
         long end = new Date().getTime();
-        MDC.put("sift", "time");
+        MDC.put("sift", configs.getString("ADX_REQUEST"));
         log.debug("竞价时长ms：{}，url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+        MDC.remove("sift");
         return responseStr;
     }
 
