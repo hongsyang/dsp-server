@@ -7,6 +7,7 @@ import org.springframework.beans.BeanUtils;
 
 import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
+import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
@@ -369,20 +370,40 @@ public class JedisQueueManager {
 //    	long start = System.currentTimeMillis();
 //    	putElementToQueue("rtb-010","123",null);
 //    	putElementToQueue("rtb-010","456",null);
-//    	ArrayList<TaskBean> taskList = (ArrayList<TaskBean>) getElementFromQueue("rtb-001_tdown");
+//    	temp:while(true){
+//    	List<AdBean> adBeanList = (List<AdBean>) getElementFromQueue("pixel-002_ad");
+//    	for(AdBean ad:adBeanList){
+//    		System.out.println(ad.getAdUid());
+//    		if(ad.getAdUid().equals("438276e7-738d-4b39-9d86-d58d5dd84b77")){
+//    			int a[][] = ad.getTimeSchedulingArr();
+//    			if(a == null){
+//    				System.out.println("空");
+//    			}else{
+//    				for(int i=0;i<a.length;i++){
+//    					for(int j=0;j<a[i].length;j++){
+//    						System.out.print(a[i][j]);
+//    					}
+//    					System.out.println();
+//    				}
+//    			}
+//    			break temp;
+//    		}
+//    	}
+//    	}
+
 //    	System.out.println(taskList.size());
     	//NodeStatusBean node = (NodeStatusBean)getElementFromQueue("rtb-001_node_status");
     	//System.out.println(node);
     	//System.out.println(node.getNodeName());
     	//System.out.println(node.getLastUpdateTime());
     	
-//    	for(int i=100;i<101;i++){
+//    	for(int i=2;i<5;i++){
 //    	removeAll("pixel-00"+i+"_pixel");
-//    	removeAll("rtb-00"+i+"_pixel");
+//    	//removeAll("rtb-00"+"_pixel");
 //    	removeAll("pixel-00"+i+"_ad");
-//    	removeAll("rtb-00"+i+"_ad");
+//    	//removeAll("rtb-00"+"_ad");
 //    	removeAll("pixel-00"+i+"_tdown");
-//    	removeAll("rtb-00"+i+"_tdown");
+//    	//removeAll("rtb-00"+"_tdown");
 //    	}
 	}
 }
