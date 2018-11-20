@@ -75,7 +75,7 @@ public class RtbRequestParser {
         }
         long end = new Date().getTime();
         MDC.put("sift", configs.getString("ADX_REQUEST"));
-        log.debug("竞价时长ms：{}，url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+        log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
         MDC.remove("sift");
         return responseStr;
     }
