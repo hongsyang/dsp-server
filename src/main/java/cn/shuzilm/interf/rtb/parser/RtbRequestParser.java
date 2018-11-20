@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -34,7 +36,6 @@ public class RtbRequestParser {
     private static final String FILTER_CONFIG = "filter.properties";
 
 
-
     private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
 
     /**
@@ -48,12 +49,12 @@ public class RtbRequestParser {
     public String parseData(String url, String dataStr, String remoteIp) throws Exception {
         String responseStr = "没有对应的厂商";
         this.configs = AppConfigs.getInstance(FILTER_CONFIG);
-
-        MDC.put("sift",configs.getString("ADX_REQUEST"));
+        long start = new Date().getTime();
+        MDC.put("sift", configs.getString("ADX_REQUEST"));
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
         MDC.remove("sift");
-        if (Boolean.valueOf(configs.getString("FILTER_RTB"))){
-            responseStr="测试请求";
+        if (Boolean.valueOf(configs.getString("FILTER_RTB"))) {
+            responseStr = "测试请求";
             return responseStr;
         }
         List<String> urlList = UrlParserUtil.urlParser(url);
@@ -72,7 +73,9 @@ public class RtbRequestParser {
             RequestService requestService = RequestServiceFactory.getRequestService(className);
             responseStr = requestService.parseRequest(dataStr);
         }
-
+        long end = new Date().getTime();
+        MDC.put("sift", "time");
+        log.debug("竞价时长ms：{}，url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
         return responseStr;
     }
 

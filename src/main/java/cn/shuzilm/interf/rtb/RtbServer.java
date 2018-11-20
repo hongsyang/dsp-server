@@ -1,7 +1,6 @@
 package cn.shuzilm.interf.rtb;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
-import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -72,7 +71,7 @@ public class RtbServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(300), Executors.newCachedThreadPool(), 300));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(), 50));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀
