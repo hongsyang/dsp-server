@@ -132,8 +132,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
         /**********		POST主业务逻辑		***************/
         String resultData = parser.parseData(url, dataStr, remoteIp);//SDK 2.0.1
 
-//		byte[] content = null;
-//		content = resultData.getBytes("utf-8");
         return resultData;
     }
 
