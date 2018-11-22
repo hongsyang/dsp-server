@@ -78,9 +78,9 @@ public class CPCHandler {
         }
         if(status.getClickNums() != 0 && status.getWinNums() != 0){
         	float clieckRatio = status.getClickNums()*1.0f / status.getWinNums();
-        	if(cpcClieckRatioMap.containsKey(adUid) && clieckRatio < cpcClieckRatioMap.get(adUid)){
-        		cpcClieckRatioMap.put(adUid, clieckRatio);
+        	if(cpcClieckRatioMap.containsKey(adUid) && clieckRatio < cpcClieckRatioMap.get(adUid)){        		
         		adBean.setPrice(adBean.getPrice() * clieckRatio / cpcClieckRatioMap.get(adUid));
+        		cpcClieckRatioMap.put(adUid, clieckRatio);
         	}
         }
         return true;
