@@ -253,6 +253,11 @@ public class AdViewRequestServiceImpl implements RequestService {
         }
     }
 
+    @Override
+    public String parseRequest(byte[] dataStr) {
+        return null;
+    }
+
     /**
      * 内部流转DUFlowBean  转换为  BidResponseBean 输出给 ADX服务器
      *

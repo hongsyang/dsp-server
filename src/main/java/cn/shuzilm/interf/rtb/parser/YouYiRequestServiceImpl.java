@@ -10,6 +10,7 @@ import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.lj.request.*;
 import cn.shuzilm.bean.lj.response.*;
+import cn.shuzilm.bean.youyi.BidserverSsp;
 import cn.shuzilm.bean.youyi.request.YouYiAdzone;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.bean.youyi.request.YouYiMobile;
@@ -20,6 +21,7 @@ import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.MD5Util;
 import com.alibaba.fastjson.JSON;
+import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,6 +242,18 @@ public class YouYiRequestServiceImpl implements RequestService {
         } else {
             return response;
         }
+    }
+
+    @Override
+    public String parseRequest(byte[] dataStr) {
+        try {
+            BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(dataStr);
+            log.debug("SessionId:{}",bidRequest.getSessionId());
+            log.debug("dataStr:{}",new String (dataStr));
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     /**

@@ -1,8 +1,10 @@
 package cn.shuzilm.interf.rtb;
 
 import cn.shuzilm.bean.youyi.BidserverSsp;
+import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.googlecode.protobuf.format.JsonFormat;
+import org.apache.commons.lang.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
@@ -61,33 +63,26 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //				System.out.println("remoteIp : "+remoteIp);
                 //接收 POST 请求 , 获取 SDK 回传数据
 //                log.debug(request.getContent().toString());
-                String dataStr = null;
+                byte[] array = null;
                 String url = request.getUri();
-                if (url.equals("youyi")) {
-                    BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
-                    log.debug("bidRequest:{}", bidRequest.getSessionId());
-                } else {
-                    dataStr = URLDecoder.decode(new String(request.getContent().array(), "utf-8"));
-                }
-//				System.out.println("接收到的原始数据 --- "+dataStr);
-//				dataStr = new String(EncryptionData.decrypt(EKEY, dataStr)
-//						.getBytes(), "UTF-8");
-                //接收 GET 请求
-//				System.out.println("uri : "+url);
+                array = request.getContent().array();
+//                if (url.equals("youyi")) {
+//                    BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
+//                    log.debug("bidRequest:{}", bidRequest.getSessionId());
+//                } else {
+//                    dataStr = URLDecoder.decode(new String(request.getContent().array(), "utf-8"));
+//                }
 
                 HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
                 ChannelBuffer buffer = new DynamicChannelBuffer(2048);
                 //主业务逻辑
                 byte[] content = null;
-                String resultData = parseRequest(url, dataStr, remoteIp);
-
-                content = resultData.getBytes("utf-8");
-
+                content= parseRequest(url, array, remoteIp);
                 response.setHeader("Content-Type", "text/html");
                 response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
                 response.setHeader("Content-Length", content.length);
                 response.setHeader("Accept-Ranges", "bytes");
-                if ("".equals(resultData)) {
+                if (content.length<2) {
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
                 }
                 buffer.writeBytes(content);
@@ -130,11 +125,14 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
      *
      * @throws UnsupportedEncodingException
      */
-    public String parseRequest(String url, String dataStr, String remoteIp) throws Exception {
+    public byte[] parseRequest(String url, byte[] dataStr, String remoteIp) throws Exception {
         /**********		POST主业务逻辑		***************/
         String resultData = parser.parseData(url, dataStr, remoteIp);//SDK 2.0.1
-
-        return resultData;
+        byte[] content = {0};//c初始值
+        if (StringUtils.isNotBlank(resultData)) {
+            content = resultData.getBytes("utf-8");
+        }
+        return content;
     }
 
 

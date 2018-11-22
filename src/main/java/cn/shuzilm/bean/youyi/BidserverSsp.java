@@ -24916,12 +24916,14 @@ public final class BidserverSsp {
             // Construct using cn.shuzilm.bean.youyi.BidserverSsp.BidRequest.newBuilder()
             private Builder() {
                 maybeForceBuilderInitialization();
+                adzone_ = new java.util.ArrayList();
             }
 
             private Builder(
                     com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
                 super(parent);
                 maybeForceBuilderInitialization();
+                adzone_ = new java.util.ArrayList();
             }
             private void maybeForceBuilderInitialization() {
                 if (com.google.protobuf.GeneratedMessageV3
@@ -26160,8 +26162,7 @@ public final class BidserverSsp {
                 return userBuilder_;
             }
 
-            private java.util.List<cn.shuzilm.bean.youyi.BidserverSsp.BidRequest.Adzone> adzone_ =
-                    java.util.Collections.emptyList();
+            private java.util.List<cn.shuzilm.bean.youyi.BidserverSsp.BidRequest.Adzone> adzone_;
             private void ensureAdzoneIsMutable() {
                 if (!((bitField0_ & 0x00000200) == 0x00000200)) {
                     adzone_ = new java.util.ArrayList<cn.shuzilm.bean.youyi.BidserverSsp.BidRequest.Adzone>(adzone_);

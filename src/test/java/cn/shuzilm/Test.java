@@ -10,11 +10,16 @@ import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.interf.pixcel.parser.AdViewNurlParameterParserImpl;
 import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.MessageLiteToStringUtil;
 import cn.shuzilm.util.aes.AES;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.base64.Base64;
 import cn.shuzilm.util.base64.Decrypter;
 import com.alibaba.fastjson.JSON;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.Descriptors;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
 import com.googlecode.protobuf.format.JsonFormat;
 import com.yao.util.bean.BeanUtil;
 import io.lettuce.core.RedisClient;
@@ -45,9 +50,61 @@ import java.util.*;
 public class Test {
 
     private static final Logger log = LoggerFactory.getLogger(Test.class);
+    private static MessageLiteToStringUtil printer = MessageLiteToStringUtil.getInstance();
+
+    public String toJson(){
+        String json = "{\"session_id\":\"WWvuWwoAAg0IAAAA\",\"bucket_id\":\"1\",\"host_nodes\":\"sandboxr1a3.sora.cm2\",\"exchange\":{\"bid_id\":\"0zb-00ZW-04sqWq-038-0Wy\",\"adx_id\":5},\"user\":{\"user_exid\":\"2871ede1da9e403be1b8f265cd764afc\",\"user_yyid\":\"2871ede1da9e403be1b8f265cd764afc\",\"user_ip\":\"113.110.212.166\",\"user_agent\":\"Mozilla/5.0 (Linux; Android 4.4.4; Che1-CL20 Build/Che1-CL20) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/30.0.0.0 Mobile Safari/537.36\",\"user_gender\":\"GENDER_TYPE_UNKNOWN\",\"user_crowd_tags\":\"yob:0,1:0,2:0,3:0,4:0,5:0\",\"user_area\":1156440000,\"user_yyid_type\":3},\"adzone\":[{\"pid\":\"79\",\"adz_id\":\"079fa9ae7550741a85f811f410f67ad0\",\"adz_type\":\"ADZONE_TYPE_INAPP_VIDEO\",\"adz_width\":640,\"adz_height\":480,\"adz_ad_count\":2,\"adz_position\":0,\"reserve_price\":0,\"video\":{\"title\":\"少林足球 国语版\",\"keywords\":[\"少林足球\",\"马爹利516\"],\"video_format\":[],\"video_start_delay\":1,\"min_ad_duration\":13,\"max_ad_duration\":33,\"program_id\":\"23996\",\"channel_id\":\"c\"}}],\"mobile\":{\"is_app\":true,\"device_os\":\"android\",\"device_os_version\":\"4.4.4\",\"device_id\":\"2871ede1da9e403be1b8f265cd764afc\",\"device_type\":\"phone\",\"imei\":\"867102029362510\",\"mac\":\"58:2a:f7:ad:af:23\",\"android_id\":\"30e8d8ee77413ad6\",\"app_name\":\"优酷客户端\",\"md5_imei\":\"2871ede1da9e403be1b8f265cd764afc\",\"md5_android_id\":\"486fea1a5886ac7cbb963768effc3cb4\",\"md5_mac\":\"1bafe64028676a713354dc891f3389d8\"}}";
+//        byte[] bytes = json.getBytes();
+//        try {
+//            BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(bytes);
+//            System.out.println(bidRequest.toBuilder().build().getSessionId());
+//        } catch (InvalidProtocolBufferException e) {
+//            e.printStackTrace();
+//        }
+        BidserverSsp.BidRequest.Builder builder = BidserverSsp.BidRequest.newBuilder();
+        builder.setSessionId("1111111111111111");
+        builder.setBucketId("2222");
+        builder.setExchange(BidserverSsp.BidRequest.Exchange.newBuilder().setAdxId(111).build());
+        builder.setUser(BidserverSsp.BidRequest.User.newBuilder().build());
+        BidserverSsp.BidRequest.Adzone adzone = BidserverSsp.BidRequest.Adzone.newBuilder().setPid("1111111111111111111").setAdzAdCount(1).build();
+        builder.setMobile(BidserverSsp.BidRequest.Mobile.newBuilder().build());
+        builder.addAdzone(adzone);
+        BidserverSsp.BidRequest defaultInstance = BidserverSsp.BidRequest.getDefaultInstance();
+        System.out.println("d"+defaultInstance.getSessionId());
+        BidserverSsp.BidRequest bidRequest = builder.build();
+        String printToString = JsonFormat.printToString(bidRequest);
+        System.out.println("printToString"+printToString);
+        byte[] result = bidRequest.toByteArray();
+        String s = new String(result);
+        System.out.println("s"+s);
+//        BidserverSsp.BidRequest request = null;
+//        try {
+//            request = BidserverSsp.BidRequest.parseFrom(bytes);
+//        } catch (InvalidProtocolBufferException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println(request.getSessionId());
+//        ByteString byteString = bidRequest.toByteString();
+//        for (Byte aByte : byteString) {
+//            System.out.println(aByte.getClass());
+//        }
+//        System.out.println(json);
+//        System.out.println(bidRequest.toByteString().toString());
+        
+        return null;
+    }
+
     public static void main(String[] args) {
-        BidserverSsp.BidRequest bidRequest= BidserverSsp.BidRequest.newBuilder().setSessionId("111").build();
-        System.out.println(bidRequest.getUser());
+        Test test =new Test();
+        test.toJson();
+//        BidserverSsp.BidRequest.Builder builder = BidserverSsp.BidRequest.newBuilder();
+//        builder.setSessionId("1");
+//        System.out.println(builder.toString());
+//        String printToString = JsonFormat.printToString(builder.build());
+//        System.out.println(printToString);
+//        JsonFormat.merge(json,builder);
+//
+//        System.out.println("输出结果:"+(builder.getSessionId()));
 //        AdPixelBean bean = new AdPixelBean();
 //        bean.setWinNoticeNums(1);
 //        //pixel服务器发送到主控模块
