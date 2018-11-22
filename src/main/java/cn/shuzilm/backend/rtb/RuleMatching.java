@@ -5,6 +5,7 @@ import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
+import cn.shuzilm.bean.control.FlowTaskBean;
 import cn.shuzilm.bean.control.Material;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
@@ -198,14 +199,34 @@ public class RuleMatching {
 			LOG.warn("根据DEVICEID["+deviceId+"]查找TAGBEAN[" + tagBean + "]为空!");
 		}
 		// 开始匹配		
-		String materialRatioKey = adType + "_" + widthHeightRatio;
+		//String materialRatioKey = adType + "_" + widthHeightRatio;
+		String materialRatioKey = widthHeightRatio;
 		List<String> auidList = rtbIns.getMaterialRatioMap().get(materialRatioKey);
 		Set<String> materialSet = rtbIns.getMaterialByRatioMap().get(materialRatioKey);
 		if (auidList == null) {
 			LOG.warn("根据[" + materialRatioKey + "]未找到广告!");
 			return null;
 		}
-		
+				
+		if(adxName != null){
+	        FlowTaskBean adxFlowTaskBean = rtbIns.getMapFlowTask().get(adxName);
+	        if(adxFlowTaskBean != null){
+	        	if(adxFlowTaskBean.getCommand() != FlowTaskBean.COMMAND_START){
+	        		//LOG.info("adxName["+adxName+"]关闭!");
+	        		return null;
+	        	}
+	        }
+	     }
+	     if(appPackageName != null){
+	        FlowTaskBean appFlowTaskBean = rtbIns.getMapFlowTask().get(appPackageName);
+	        if(appFlowTaskBean != null){
+	        	if(appFlowTaskBean.getCommand() != FlowTaskBean.COMMAND_START){
+	        		//LOG.info("appPackageName["+appPackageName+"]关闭!");
+	        		return null;
+	        	}
+	        }
+	     }
+	     		
 		List<String> tagIdList = null;
 		List<String> companyIdList = null;
 		List<String> appPreferenceIdList = null;
@@ -220,17 +241,7 @@ public class RuleMatching {
 		String demoProvinceIdKey = null;
 		String demoCityIdKey = null;
 		String demoCountryIdKey = null;
-		
-		
-		
-		Date date = new Date();
-		String time = dateFm.format(date);
-		String splitTime[] = time.split("_");
-		int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
-		int dayNum = Integer.parseInt(splitTime[1]);
-		if (dayNum == 24)
-			dayNum = 0;
-		
+				
 		if(tagBean != null){
 		
 		String ipStr = tagBean.getIp();
@@ -302,8 +313,10 @@ public class RuleMatching {
 
 		// 开始遍历符合广告素材尺寸的广告
 		//long startOrder = System.currentTimeMillis();
+		
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid, weekNum, dayNum,adxName,appPackageName);
+			boolean isAvaliable = rtbIns.checkAvalable(adUid,adxName,appPackageName);
+			
 			// 是否投当前的广告
 			if (!isAvaliable) {
 				LOG.debug("ID[" + adUid + "]广告不参与投放!");
@@ -421,6 +434,7 @@ public class RuleMatching {
 				}
 			}
 		}
+		
 		// 按经纬度匹配
 		// if (geoAdList.size() > 0) {
 		// float[] residenceArray = tagBean.getResidence();
@@ -435,8 +449,8 @@ public class RuleMatching {
 		// }
 		// }
 		// }
-		//LOG.debug("匹配花费时间:" + (System.currentTimeMillis() - startOrder));
 		// 排序
+		
 		if (!machedAdList.isEmpty()) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio,
 					audienceMap,adxName,ip,rtbIpMap);

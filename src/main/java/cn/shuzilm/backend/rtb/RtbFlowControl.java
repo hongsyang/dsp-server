@@ -99,7 +99,11 @@ public class RtbFlowControl {
     	return bidList;
     }
 
-    private String nodeName;
+    public static ConcurrentHashMap<String, FlowTaskBean> getMapFlowTask() {
+		return mapFlowTask;
+	}
+
+	private String nodeName;
     /**
      * 广告资源管理 key: aduid : taskBean
      */
@@ -148,6 +152,8 @@ public class RtbFlowControl {
     private static ConcurrentHashMap<String,Long> appFlowMap = null;
     
     private static ArrayList<AdBidBean> bidList = null;
+    
+    private static ConcurrentHashMap<String,Integer> weekAndDayNumMap = null;
 
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
@@ -164,6 +170,7 @@ public class RtbFlowControl {
         adxFlowMap = new ConcurrentHashMap<>();
         appFlowMap = new ConcurrentHashMap<>();
         bidList = new ArrayList<AdBidBean>();
+        weekAndDayNumMap = new ConcurrentHashMap<String,Integer>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
 //        gridMap = new HashMap<>();
@@ -331,8 +338,11 @@ public class RtbFlowControl {
                         int height = material.getHeight();
                         String materialUid = material.getUid();
                         int divisor = MathTools.division(width, height);
-                        String materialKey = creative.getType() + "_" + width + "_" + +height;
-                        String materialRatioKey = creative.getType() + "_" + width / divisor + "/" + height / divisor;
+//                        String materialKey = creative.getType() + "_" + width + "_" + +height;
+//                        String materialRatioKey = creative.getType() + "_" + width / divisor + "/" + height / divisor;
+                        
+                        String materialKey = width + "_" +height;
+                        String materialRatioKey = width / divisor + "/" + height / divisor;
 
                         if (!mapAdMaterial.containsKey(materialKey)) {
                             List<String> uidList = new ArrayList<String>();
@@ -484,6 +494,18 @@ public class RtbFlowControl {
      */
     public void refreshAdStatus() {
     	MDC.put("sift", "rtb");
+    	
+    	Date date = new Date();
+		String time = dateFm.format(date);
+		String splitTime[] = time.split("_");
+		int weekNum = TimeUtil.weekDayToNum(splitTime[0]);
+		int dayNum = Integer.parseInt(splitTime[1]);
+		if (dayNum == 24)
+			dayNum = 0;
+		
+		weekAndDayNumMap.put("EEEE", weekNum);
+		weekAndDayNumMap.put("HH", dayNum);
+    	
         for (String auid : mapTask.keySet()) {
             TaskBean bean = mapTask.get(auid);
             AdBean ad = mapAd.get(auid);
@@ -505,7 +527,7 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid,int weekNum,int dayNum,String adxName,String appPackageName) {
+    public boolean checkAvalable(String auid,String adxName,String appPackageName) {
     	MDC.put("sift", "rtb");
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
@@ -528,22 +550,6 @@ public class RtbFlowControl {
         	return false;
         }
         
-        FlowTaskBean adxFlowTaskBean = mapFlowTask.get(adxName);
-        if(adxFlowTaskBean != null){
-        	if(adxFlowTaskBean.getCommand() != FlowTaskBean.COMMAND_START){
-        		//myLog.info("adxName["+adxName+"]关闭!");
-        		return false;
-        	}
-        }
-        
-        FlowTaskBean appFlowTaskBean = mapFlowTask.get(appPackageName);
-        if(appFlowTaskBean != null){
-        	if(appFlowTaskBean.getCommand() != FlowTaskBean.COMMAND_START){
-        		//myLog.info("appPackageName["+appPackageName+"]关闭!");
-        		return false;
-        	}
-        }
-
         // 匹配广告投放时间窗
         AdBean adBean = mapAd.get(auid);
         if (adBean != null) {
@@ -560,6 +566,12 @@ public class RtbFlowControl {
         	if(scheduleTime != null && scheduleTime.trim().equals("{}")){
         		return true;
         	}
+        	        	
+        	Integer weekNum = weekAndDayNumMap.get("EEEE");
+        	Integer dayNum = weekAndDayNumMap.get("HH");
+        	if(weekNum == null || dayNum == null){
+        		weekNum = -1;
+        	}        	        	
             int[][] timeSchedulingArr = adBean.getTimeSchedulingArr();           
             if(timeSchedulingArr != null){
             for (int i = 0; i < timeSchedulingArr.length; i++) {
@@ -569,7 +581,7 @@ public class RtbFlowControl {
                 for (int j = 0; j < timeSchedulingArr[i].length; j++) {
                     if (dayNum == j) {
                         if (timeSchedulingArr[i][j] == 1) {
-                            return true;
+                            return true;                            
                         } else {
                             return false;
                         }
@@ -577,6 +589,7 @@ public class RtbFlowControl {
                 }
             }
             }
+            
         }else{
         	return false;
         }
