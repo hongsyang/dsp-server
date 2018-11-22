@@ -2,6 +2,7 @@ package cn.shuzilm.interf.rtb;
 
 import cn.shuzilm.bean.youyi.BidserverSsp;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
+import com.googlecode.protobuf.format.JsonFormat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
@@ -60,13 +61,14 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //				System.out.println("remoteIp : "+remoteIp);
                 //接收 POST 请求 , 获取 SDK 回传数据
 //                log.debug(request.getContent().toString());
-                String dataStr = URLDecoder.decode(new String(request.getContent().array(), "utf-8"));
+                String dataStr = null;
                 String url = request.getUri();
-                if (url.equals("youyi")){
+                if (url.equals("youyi")) {
                     BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
-                    log.debug("bidRequest:{}",bidRequest.getSessionId());
+                    log.debug("bidRequest:{}", bidRequest.getSessionId());
+                } else {
+                    dataStr = URLDecoder.decode(new String(request.getContent().array(), "utf-8"));
                 }
-//				String dataStr = new String(request.getContent().array(),"utf-8");
 //				System.out.println("接收到的原始数据 --- "+dataStr);
 //				dataStr = new String(EncryptionData.decrypt(EKEY, dataStr)
 //						.getBytes(), "UTF-8");
@@ -83,9 +85,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 response.setHeader("Content-Type", "text/html");
                 response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
-                response.setHeader("Content-Length",content.length );
+                response.setHeader("Content-Length", content.length);
                 response.setHeader("Accept-Ranges", "bytes");
-                if ("".equals(resultData)){
+                if ("".equals(resultData)) {
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
                 }
                 buffer.writeBytes(content);

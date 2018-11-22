@@ -5,6 +5,7 @@ import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
+import cn.shuzilm.bean.youyi.BidserverSsp;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.interf.pixcel.parser.AdViewNurlParameterParserImpl;
 import cn.shuzilm.util.AsyncRedisClient;
@@ -14,6 +15,7 @@ import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.base64.Base64;
 import cn.shuzilm.util.base64.Decrypter;
 import com.alibaba.fastjson.JSON;
+import com.googlecode.protobuf.format.JsonFormat;
 import com.yao.util.bean.BeanUtil;
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -44,10 +46,12 @@ public class Test {
 
     private static final Logger log = LoggerFactory.getLogger(Test.class);
     public static void main(String[] args) {
-        AdPixelBean bean = new AdPixelBean();
-        bean.setWinNoticeNums(1);
-        //pixel服务器发送到主控模块
-        log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
+        BidserverSsp.BidRequest bidRequest= BidserverSsp.BidRequest.newBuilder().setSessionId("111").build();
+        System.out.println(bidRequest.getUser());
+//        AdPixelBean bean = new AdPixelBean();
+//        bean.setWinNoticeNums(1);
+//        //pixel服务器发送到主控模块
+//        log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
 
 //        String ekey= "hqvBbhco3nPm5kr0TXgQxaO4Er25qd7n";
 //        String ikey= "eKUKpIu1cFDETMSo3CY8RJYxfRpNQSu2";
