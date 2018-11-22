@@ -46,7 +46,7 @@ public class RtbRequestParser {
      * @param remoteIp
      * @return
      */
-    public String parseData(String url, byte[] dataStr, String remoteIp) throws Exception {
+    public String parseData(String url, String dataStr, String remoteIp) throws Exception {
         String responseStr = "没有对应的厂商";
         this.configs = AppConfigs.getInstance(FILTER_CONFIG);
         long start = new Date().getTime();

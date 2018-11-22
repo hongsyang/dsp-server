@@ -1,16 +1,8 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import bidserver.BidserverSsp;
 import cn.shuzilm.backend.rtb.RuleMatching;
-import cn.shuzilm.bean.adview.request.App;
-import cn.shuzilm.bean.adview.request.BidRequestBean;
-import cn.shuzilm.bean.adview.request.Device;
-import cn.shuzilm.bean.adview.request.Impression;
-import cn.shuzilm.bean.adview.response.BidResponseBean;
-import cn.shuzilm.bean.adview.response.SeatBid;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.bean.lj.request.*;
-import cn.shuzilm.bean.lj.response.*;
-import cn.shuzilm.bean.youyi.BidserverSsp;
 import cn.shuzilm.bean.youyi.request.YouYiAdzone;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.bean.youyi.request.YouYiMobile;
@@ -18,19 +10,13 @@ import cn.shuzilm.bean.youyi.response.YouYiAd;
 import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.filter.FilterRule;
-import cn.shuzilm.util.MD5Util;
 import com.alibaba.fastjson.JSON;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import redis.clients.jedis.Jedis;
 
-import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -71,7 +57,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
             //创建返回结果  bidRequest请求参数保持不变
             YouYiMobile userDevice = bidRequestBean.getMobile();//设备APP信息
-            YouYiAdzone userImpression = bidRequestBean.getAdzone();//曝光信息
+            bidRequestBean.getAdzone();//曝光信息
 
 //            App app = bidRequestBean.getApp();//应用信息
 //            Integer width = null;//广告位的宽
@@ -244,17 +230,6 @@ public class YouYiRequestServiceImpl implements RequestService {
         }
     }
 
-    @Override
-    public String parseRequest(byte[] dataStr) {
-        try {
-            BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(dataStr);
-            log.debug("SessionId:{}",bidRequest.getSessionId());
-            log.debug("dataStr:{}",new String (dataStr));
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-        }
-        return "";
-    }
 
     /**
      * 内部流转DUFlowBean  转换为  BidResponseBean 输出给 ADX服务器

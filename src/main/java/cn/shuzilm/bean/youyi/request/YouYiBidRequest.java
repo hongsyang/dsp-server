@@ -3,6 +3,7 @@ package cn.shuzilm.bean.youyi.request;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 public class YouYiBidRequest implements Serializable {
@@ -14,10 +15,10 @@ public class YouYiBidRequest implements Serializable {
     private String anonymous_id;//否 string 匿名 id
     private String timezone_offset;//否 int32 时区偏移量
     private String keywords;//repeated string 用户搜索词
-    private YouYiExchange Exchange;//否 object
-    private YouYiUser User;//否 object 用户信息
-    private YouYiAdzone Adzone;//否
-    private YouYiSite Site;//否 object 媒体信息
-    private YouYiMobile Mobile;//否 object app 信息
+    private YouYiExchange exchange;//否 object
+    private YouYiUser user;//否 object 用户信息
+    private List<YouYiAdzone> adzone;//否
+    private YouYiSite site;//否 object 媒体信息
+    private YouYiMobile mobile;//否 object app 信息
     private Boolean is_https;//否 bool
 }

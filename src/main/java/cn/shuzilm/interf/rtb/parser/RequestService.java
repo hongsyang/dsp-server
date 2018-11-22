@@ -20,5 +20,4 @@ public interface RequestService {
      */
     public String parseRequest(String dataStr) throws Exception;
 
-    public String  parseRequest(byte[] dataStr);
 }

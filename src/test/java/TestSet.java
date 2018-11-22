@@ -1,12 +1,5 @@
-import cn.shuzilm.bean.youyi.BidserverSsp;
-import cn.shuzilm.common.jedis.JedisQueueManager;
-import cn.shuzilm.util.Help;
-import cn.shuzilm.util.MD5Util;
-import cn.shuzilm.util.aes.AES;
+import bidserver.BidserverSsp;
 import com.google.protobuf.InvalidProtocolBufferException;
-
-import java.time.LocalDateTime;
-import java.util.*;
 
 public class TestSet {
     public static void main(String[] args) throws InvalidProtocolBufferException {
