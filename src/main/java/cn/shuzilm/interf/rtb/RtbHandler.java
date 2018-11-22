@@ -81,15 +81,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 byte[] content = null;
                 String resultData = parseRequest(url, dataStr, remoteIp);
 
-                content = resultData.getBytes("utf-8");
-
+                if ("".equals(resultData)) {
+                    response.setStatus(HttpResponseStatus.NO_CONTENT);
+                } else if (resultData.contains("session_id")) {
+                    BidserverSsp.BidResponse bidResponse = BidserverSsp.BidResponse.parseFrom(resultData.getBytes());
+                    content= bidResponse.toByteArray();
+                }else {
+                    content = resultData.getBytes("utf-8");
+                }
                 response.setHeader("Content-Type", "text/html");
                 response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
                 response.setHeader("Content-Length", content.length);
                 response.setHeader("Accept-Ranges", "bytes");
-                if ("".equals(resultData)) {
-                    response.setStatus(HttpResponseStatus.NO_CONTENT);
-                }
+
                 buffer.writeBytes(content);
                 //设置返回状态
                 response.setContent(buffer);

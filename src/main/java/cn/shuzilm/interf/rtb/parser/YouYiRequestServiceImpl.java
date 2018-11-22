@@ -6,6 +6,7 @@ import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.youyi.request.YouYiAdzone;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.bean.youyi.request.YouYiMobile;
+import cn.shuzilm.bean.youyi.request.YouYiUser;
 import cn.shuzilm.bean.youyi.response.YouYiAd;
 import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.AppConfigs;
@@ -57,7 +58,8 @@ public class YouYiRequestServiceImpl implements RequestService {
             YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
             //创建返回结果  bidRequest请求参数保持不变
             YouYiMobile userDevice = bidRequestBean.getMobile();//设备APP信息
-            bidRequestBean.getAdzone();//曝光信息
+            List<YouYiAdzone> adzone = bidRequestBean.getAdzone();//曝光信息
+            YouYiUser user = bidRequestBean.getUser();//用户信息
 
 //            App app = bidRequestBean.getApp();//应用信息
 //            Integer width = null;//广告位的宽
@@ -228,6 +230,8 @@ public class YouYiRequestServiceImpl implements RequestService {
         } else {
             return response;
         }
+
+
     }
 
 
