@@ -138,7 +138,7 @@ public class YouYiRequestServiceImpl implements RequestService {
      */
     private YouYiBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, YouYiBidRequest bidRequestBean) {
         YouYiBidResponse youYiBidResponse = new YouYiBidResponse();
-        youYiBidResponse.setSession_id("");
+        youYiBidResponse.setSession_id(bidRequestBean.getSession_id());
         youYiBidResponse.setAds(Lists.newArrayList());
         MDC.put("sift", "bidResponseBean");
         log.debug("bidResponseBean:{}", JSON.toJSONString(youYiBidResponse));
