@@ -83,6 +83,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 if ("".equals(resultData)) {
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
+                    content=  resultData.getBytes("utf-8");
                 } else if (resultData.contains("session_id")) {
                     BidserverSsp.BidResponse bidResponse = BidserverSsp.BidResponse.parseFrom(resultData.getBytes());
                     content= bidResponse.toByteArray();
