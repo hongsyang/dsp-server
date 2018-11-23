@@ -62,7 +62,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //                log.debug(request.getContent().toString());
                 String dataStr = null;
                 String url = request.getUri();
-                if (url.equals("youyi")) {
+                if (url.contains("youyi")) {
                     BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
                 } else {
