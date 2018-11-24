@@ -1,10 +1,15 @@
+import bidserver.BidserverSsp;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
+import cn.shuzilm.bean.youyi.response.YouYiAd;
+import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.interf.pixcel.parser.LingJiClickParameterParserImpl;
 import cn.shuzilm.util.AsyncRedisClient;
 import com.alibaba.fastjson.JSON;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.googlecode.protobuf.format.JsonFormat;
 import io.lettuce.core.RedisURI;
 import io.lettuce.core.cluster.RedisClusterClient;
 import org.slf4j.Logger;
@@ -13,16 +18,37 @@ import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ExpTest {
 
     private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws  Exception {
+
+        YouYiBidResponse youYiBidResponse = new YouYiBidResponse();
+        youYiBidResponse.setSession_id("gbP3WwoADDkjd3oB");
+        YouYiAd youYiAd =new YouYiAd();
+        youYiAd.setBid_price(500000);
+        youYiAd.setAdz_id("houkp");
+        youYiAd.setAdz_array_id(0);
+        youYiAd.setAdz_id("houkp");
+        youYiAd.setAdvertiser_id("houkpadv");
+        youYiAd.setWin_para("houkp21");
+        List youYiAdList =new ArrayList();
+        youYiAdList.add(youYiAd);
+        youYiBidResponse.setAds(youYiAdList);
+        String resultData = JSON.toJSONString(youYiBidResponse);
+        System.out.println(resultData);
+        if (resultData.contains("session_id")) {
+            BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+            JsonFormat.merge(resultData, builder);
+            BidserverSsp.BidResponse build = builder.build();
+            byte[] bytes = build.toByteArray();
+            System.out.println( build.toByteArray());
+            System.out.println(new String(bytes));
+
+        }
 //
 //        Jedis jedis = JedisManager.getInstance().getResource();
 ////        jedis.set("houkp", "1111");
@@ -32,10 +58,10 @@ public class ExpTest {
 //            System.out.println(houkplist);
 //        }
 
-        while (true){
-            System.out.println( JedisQueueManager.getLength("EXP_ERROR"));
-            System.out.println( JedisQueueManager.getElementFromQueue("EXP_ERROR"));
-        }
+//        while (true){
+//            System.out.println( JedisQueueManager.getLength("EXP_ERROR"));
+//            System.out.println( JedisQueueManager.getElementFromQueue("EXP_ERROR"));
+//        }
 
 //        String url = "https://fanyi.baidu.com/";
 //        if (url.contains("?")) {
