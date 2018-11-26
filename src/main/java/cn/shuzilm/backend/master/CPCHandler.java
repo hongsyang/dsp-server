@@ -2,6 +2,8 @@ package cn.shuzilm.backend.master;
 
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdFlowStatus;
+import cn.shuzilm.bean.control.TaskBean;
+
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 import org.slf4j.Logger;
@@ -29,16 +31,18 @@ public class CPCHandler {
     /**
      * cpc试投放数量
      */
-    private static int winTotalNums = 5 * 1000;
+    private static int winTotalNums = 15 * 1000;
 
     // 广告信息
     private ConcurrentHashMap<String, AdBean> adMap = null;
 
     private static CPCHandler cpcHandler;
+    
+    private static AdFlowControl adFlowControl;
 
     public static CPCHandler getInstance(){
         if( cpcHandler == null){
-            AdFlowControl adFlowControl = AdFlowControl.getInstance();
+            adFlowControl = AdFlowControl.getInstance();
             cpcHandler = new CPCHandler(adFlowControl);
         }
         return cpcHandler;
@@ -164,7 +168,7 @@ public class CPCHandler {
             // 曝光花费
             float money = statusMonitor.getMoney();
             // 单次cpc报价
-            float price = adBean.getPrice();
+            float price = adBean.getCpcPrice() * 1000;
             // 广告的可拖欠额度
             int moneyArrears = adBean.getMoneyArrears();
 //            myLog.info("CPC结算广告流量控制：点击量：{}，曝光数量：{}，曝光花费：{}，报价：{}，额度： {}",
@@ -177,11 +181,19 @@ public class CPCHandler {
                 // 大于广告主单个CPC报价，则暂停广告发放
                 if(clickPrice >= price) {
                    // myLog.debug("出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放");
-                	reason = "出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放  广告ID:"+auid+" 曝光花费:"+money+" 点击单价:"+price;
+                	reason = "出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放  广告ID:"+auid+" 曝光花费:"+money+" 点击单价:"+price+"(CPM)";
                     return reason;
                 }else {
                     //myLog.debug("出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放");
-                	reason = "出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放   "+auid;
+                	reason = "出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放   "+auid;               	
+                	if(adFlowControl.getMapTask().containsKey(auid)){
+                		TaskBean task = adFlowControl.getMapTask().get(auid);
+                		if(task.getCommand() != TaskBean.COMMAND_START){
+                			myLog.info(reason);
+                			task.setCommand(TaskBean.COMMAND_START);
+                			adFlowControl.putDataToAdLogQueue(auid, reason, 1);
+                		}
+                	}               	
                     return null;
                 }
             }else {
@@ -199,6 +211,15 @@ public class CPCHandler {
                         return reason;
                     }else {
                         //myLog.debug("没有点击，未投放完毕，未超额，继续广告投放");
+                    	reason = "没有点击，未投放完毕，未超额，继续广告投放";
+                    	if(adFlowControl.getMapTask().containsKey(auid)){
+                    		TaskBean task = adFlowControl.getMapTask().get(auid);
+                    		if(task.getCommand() != TaskBean.COMMAND_START){
+                    			myLog.info(reason);
+                    			task.setCommand(TaskBean.COMMAND_START);
+                    			adFlowControl.putDataToAdLogQueue(auid, reason, 1);
+                    		}
+                    	} 
                         return null;
                     }
                 }
