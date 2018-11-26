@@ -92,6 +92,12 @@ public class AdBean implements ICommand  {
      */
     @Setter
     private float price;
+    
+    /**
+     * CPC出价
+     */
+    @Setter
+    private float cpcPrice;
     /**
      * 广告排期时间（对应 二维数组：timeSchedulingArr）
      */

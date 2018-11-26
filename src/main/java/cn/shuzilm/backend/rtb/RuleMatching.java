@@ -463,6 +463,11 @@ public class RuleMatching {
 			}
 			//上传adx流量数
 			if (rtbIns.getAdxFlowMap().get(adxName) != null) {
+				if(adxName.contains("-")){
+					String adxNameSplit[] = adxName.split("-");
+					adxName = adxNameSplit[0];
+					
+				}
 				rtbIns.getAdxFlowMap().put(adxName,
 						rtbIns.getAdxFlowMap().get(adxName) + 1);
 			} else {
