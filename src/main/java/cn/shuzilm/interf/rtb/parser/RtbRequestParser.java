@@ -29,14 +29,14 @@ public class RtbRequestParser {
 
     private static final Object lock = new Object();
 
-    private static volatile Reflections reflections;
+    private static  Reflections reflections;
 
     private AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
 
 
-    private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
+//    private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
 
     /**
      * 根据厂商解析post参数
@@ -58,7 +58,7 @@ public class RtbRequestParser {
             return responseStr;
         }
         List<String> urlList = UrlParserUtil.urlParser(url);
-        Reflections reflections = instance(FILE_NAME);
+        reflections = instance("cn.shuzilm.interf.rtb.parser");
         Set<Class<? extends RequestService>> monitorClasses = reflections.getSubTypesOf(RequestService.class);
         String className = null;
         for (Class<? extends RequestService> monitorClass : monitorClasses) {
@@ -88,12 +88,10 @@ public class RtbRequestParser {
      */
     private Reflections instance(String fileName) {
         if (reflections == null) {
-            synchronized (lock) {
-                if (reflections == null) {
-                    reflections = new Reflections(fileName);
-                }
-            }
+            return new Reflections(fileName);
+        } else {
+
+            return reflections;
         }
-        return reflections;
     }
 }
