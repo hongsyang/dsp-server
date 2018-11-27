@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class Test {
@@ -78,8 +80,9 @@ public class Test {
     }
 
     public static void main(String[] args) throws InvalidProtocolBufferException {
-        Test test =new Test();
-        test.toJson();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+        String format = LocalDateTime.now().format(formatter);//时间戳
+        System.out.println(format);
 //        BidserverSsp.BidRequest.Builder builder = BidserverSsp.BidRequest.newBuilder();
 //        builder.setSessionId("1");
 //        System.out.println(builder.toString());
