@@ -52,7 +52,7 @@ public class TaskBean implements ICommand {
     private float money;
     /**
      * 停止原因状态
-     * 暂定余额不超过的状态为1
+     * 余额不超过的状态为1,广告组超额状态为2
      */
     private float commandResonStatus;
 

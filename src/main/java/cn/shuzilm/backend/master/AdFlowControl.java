@@ -94,6 +94,10 @@ public class AdFlowControl {
     public ConcurrentHashMap<String,Long> getNodeStatusMap(){
     	return nodeStatusMap;
     }
+    
+    public ConcurrentHashMap<String, TaskBean> getMapTask(){
+    	return mapTask;
+    }
 
     /**
      * 广告资源管理
@@ -612,6 +616,9 @@ public class AdFlowControl {
     private HashSet<String> updateIndicator(ResultList adList) {
     	MDC.put("sift", "control");
         HashSet<String> lowBalanceAdSet = new HashSet<>();
+        long timeNow = System.currentTimeMillis();
+        long timeBefore = timeNow - INTERVAL;
+        timeBefore  = timeBefore / 1000;
         try {
             for (ResultMap map : adList) {
                 String auid = map.getString("uid");
@@ -654,7 +661,8 @@ public class AdFlowControl {
                 if (balance.floatValue() != 0 && balance.floatValue() <= money.floatValue()) {
                     money = balance;
                 }
-
+                
+                Integer updatedAt = balanceMap.getInteger("updated_at");
 
                 //重新加载 天 参考指标
                 AdFlowStatus status3 = new AdFlowStatus();
@@ -682,6 +690,16 @@ public class AdFlowControl {
                         report.setMoneyQuota(quotaMoneyPerDay);
                     else
                         report.setMoneyQuota(balance);
+                }
+                
+                if(updatedAt != null && updatedAt != 0 && updatedAt >= timeBefore){
+                	if(mapTask.containsKey(auid)){
+                		TaskBean task = mapTask.get(auid);
+                		if(task.getCommand() != TaskBean.COMMAND_START){
+                			task.setCommand(TaskBean.COMMAND_START);
+                			putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
+                		}
+                	}
                 }
             }
             return lowBalanceAdSet;
@@ -810,6 +828,17 @@ public class AdFlowControl {
             if (groupList != null) {
                 for (GroupAdBean group : groupList) {
                     mapAdGroup.put(group.getGroupId(), group);
+                    if(!isInitial){
+                    List<String> adUidList = taskService.queryAdByGroupId(group.getGroupId());
+                    for(String uid:adUidList){
+                    	if(mapTask.containsKey(uid)){
+                    		TaskBean task = mapTask.get(uid);
+                    		if(task.getCommand() != TaskBean.COMMAND_START){
+                    			task.setCommand(TaskBean.COMMAND_START);
+                    		}
+                    	}
+                    }
+                    }
                 }
             }
             //加载广告信息
@@ -879,6 +908,7 @@ public class AdFlowControl {
                 //出价模式
                 ad.setMode(mode);
                 if("cpc".equalsIgnoreCase(mode)){
+                	ad.setCpcPrice(map.getBigDecimal("price").floatValue());
                 	if(cpcClieckRatioMap.containsKey(ad.getAdUid())){
                 		float clieckRatio = cpcClieckRatioMap.get(ad.getAdUid());
                 		ad.setPrice(map.getBigDecimal("price").floatValue() * clieckRatio * 1000);

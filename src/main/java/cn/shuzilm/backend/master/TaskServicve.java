@@ -133,10 +133,11 @@ public class TaskServicve extends Service {
     public ResultList queryAdByUpTime(long startTime) throws SQLException {
         long now = System.currentTimeMillis() ;
         Object[] arr = new Object[3];
-        arr[0] = startTime / 1000;
+        //arr[0] = startTime / 1000;
+        arr[0] = specDateFM.format(new Date(startTime));
         arr[1] = now / 1000;
         arr[2] = now / 1000;
-        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ? and status = 1 and group_status = 1";
+        String sql = "select * from ad where refresh_ts >= ? and s <= ? and e >= ? and status = 1 and group_status = 1";
         return select.select(sql,arr);
     }
 
@@ -381,7 +382,7 @@ public class TaskServicve extends Service {
         arr[0] = (int)(updateTimeStamp / 1000);
 
 //        String sql = "select a.*, b.uid ad_uid group a join ad b on a.uid = b.group_uid where b.s <= ? and b.e >= ? ";
-        String sql = "select * from ad_group where updated_at >= ?";
+        String sql = "select * from ad_group where updated_at >= ? and status = 1";
         try{
             ArrayList<GroupAdBean> list = new ArrayList<>();
             ResultList rl = select.select(sql,arr);
@@ -395,6 +396,28 @@ public class TaskServicve extends Service {
                 g.setQuota_total(rm.getBoolean("quota_total")==false?0:1);
                 g.setQuotaTotalMoney(rm.getBigDecimal("quota_total_amount"));
                 list.add(g);
+            }
+            return list;
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    
+    /**
+     * 根据广告组查询广告
+     * @param updateTimeStamp
+     * @return
+     */
+    public ArrayList<String> queryAdByGroupId(String groupId){
+       Object[] arr = new Object[1];
+       arr[0] = groupId;
+        String sql = "select uid from ad where group_uid = ? and status = 1";
+        try{
+            ArrayList<String> list = new ArrayList<>();
+            ResultList rl = select.select(sql,arr);
+            for(ResultMap rm : rl){                
+                list.add(rm.getString("uid"));
             }
             return list;
         }catch(Exception ex){
@@ -625,10 +648,21 @@ public class TaskServicve extends Service {
     	try {
 			//task.insertDataToNoticeDetailPerHour(adNoticeDetail);
     		//Map map = task.getNoticeDetailByHourPerDay();
-    		long timeNow = System.currentTimeMillis();
-            long timeBefore = timeNow - 10 * 60 *1000;
-    		List<FlowControlBean> list = task.getAdxFlowControl(timeBefore);
-    		System.out.println(list);
+//    		long timeNow = System.currentTimeMillis();
+//            long timeBefore = timeNow - 10 * 60 *1000;
+//    		List<FlowControlBean> list = task.getAdxFlowControl(timeBefore);
+//    		System.out.println(list);
+//    		ResultMap balanceMap = task.queryAdviserAccountById("1e3ebfc0-db29-49fc-b39f-82543606e887");
+//    		Integer updatedAt = balanceMap.getInteger("updated_at");
+//    		long timeNow = System.currentTimeMillis();
+//            long timeBefore = timeNow - 10 * 60 * 1000;
+//            timeBefore  = timeBefore / 1000;
+//            if(updatedAt != null && updatedAt != 0 && updatedAt >= timeBefore){
+//            	System.out.println("ok");
+//            }
+    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    		String s = specDateFM.format(new Date(0));
+    		System.out.println(s);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
