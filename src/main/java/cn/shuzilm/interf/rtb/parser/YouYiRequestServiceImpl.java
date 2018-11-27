@@ -127,6 +127,10 @@ public class YouYiRequestServiceImpl implements RequestService {
                     user.getUser_ip(),//用户ip
                     userDevice.getApp_bundle()//APP包名
             );
+            if (targetDuFlowBean == null) {
+                response = "";
+                return response;
+            }
             //需要添加到Phoenix中的数据
             targetDuFlowBean.setRequestId(bidRequestBean.getSession_id());//bidRequest id
             //曝光id
