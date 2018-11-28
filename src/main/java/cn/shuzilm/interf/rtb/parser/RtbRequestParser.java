@@ -29,11 +29,10 @@ public class RtbRequestParser {
 
     private static final Object lock = new Object();
 
-    private static  Reflections reflections;
-
-    private AppConfigs configs = null;
+    private static Reflections reflections;
 
     private static final String FILTER_CONFIG = "filter.properties";
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
 
 //    private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
@@ -48,7 +47,6 @@ public class RtbRequestParser {
      */
     public String parseData(String url, String dataStr, String remoteIp) throws Exception {
         String responseStr = "没有对应的厂商";
-        this.configs = AppConfigs.getInstance(FILTER_CONFIG);
         long start = new Date().getTime();
 //        MDC.put("sift", configs.getString("ADX_REQUEST"));
 //        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
@@ -69,6 +67,8 @@ public class RtbRequestParser {
                 }
             }
         }
+
+        //TODO 更换为MAP
         if (className != null) {
             RequestService requestService = RequestServiceFactory.getRequestService(className);
             responseStr = requestService.parseRequest(dataStr);

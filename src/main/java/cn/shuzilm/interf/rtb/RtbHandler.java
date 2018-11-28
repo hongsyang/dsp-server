@@ -28,7 +28,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
     private static final Logger log = LoggerFactory.getLogger(RtbHandler.class);
     //	private WriteDataToLog wdt;
-    RtbRequestParser parser = null;
+    private  RtbRequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
 
     public RtbHandler() {
@@ -62,11 +62,13 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //                log.debug(request.getContent().toString());
                 String dataStr = null;
                 String url = request.getUri();
+                BidserverSsp.BidRequest bidRequest = null;
+                dataStr = new String(request.getContent().array());
                 if (url.contains("youyi")) {
-                    BidserverSsp.BidRequest bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
+                    bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
                 } else {
-                    dataStr = URLDecoder.decode(new String(request.getContent().array(), "utf-8"));
+                    dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
 //				String dataStr = new String(request.getContent().array(),"utf-8");
 //				System.out.println("接收到的原始数据 --- "+dataStr);
@@ -79,17 +81,17 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 ChannelBuffer buffer = new DynamicChannelBuffer(2048);
                 //主业务逻辑
                 byte[] content = null;
-                String resultData = parseRequest(url, dataStr, remoteIp);
-
+//                String resultData = parseRequest(url, dataStr, remoteIp);
+                String resultData = parser.parseData(url, dataStr, remoteIp);
                 if ("".equals(resultData)) {
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
-                    content=  resultData.getBytes("utf-8");
+                    content = resultData.getBytes("utf-8");
                 } else if (resultData.contains("session_id")) {
                     BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                     JsonFormat.merge(resultData, builder);
                     BidserverSsp.BidResponse build = builder.build();
                     content = build.toByteArray();
-                }else {
+                } else {
                     content = resultData.getBytes("utf-8");
                 }
                 response.setHeader("Content-Type", "text/html");
@@ -100,7 +102,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 buffer.writeBytes(content);
                 //设置返回状态
                 response.setContent(buffer);
-
+                content = null;
+                dataStr = null;
+                resultData = null;
+                bidRequest = null;
                 // Write the response.
                 ChannelFuture future2 = e.getChannel().write(response);
                 if (close) {

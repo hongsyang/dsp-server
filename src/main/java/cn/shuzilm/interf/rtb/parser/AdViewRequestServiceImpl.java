@@ -206,6 +206,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                 } else {
                     response = JSON.toJSONString(msg);//过滤规则结果输出
                 }
+                msg.clear();
+                msg = null;
             } else {
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
                         deviceId,//设备mac的MD5
@@ -246,6 +248,8 @@ public class AdViewRequestServiceImpl implements RequestService {
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
+                bidRequestBean = null;
+                targetDuFlowBean =null;
             }
             return response;
         } else {
@@ -313,7 +317,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
         if (instl == 0 | instl == 4 | instl == 1) {
             bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
@@ -407,7 +411,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" +URLEncoder.encode(duFlowBean.getAppName()) +
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
@@ -419,7 +423,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
@@ -447,7 +451,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         Map nurlMap = new HashMap();
@@ -475,7 +479,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         seatBidList.add(seatBid);
         bidResponseBean.setSeatbid(seatBidList);
         MDC.put("sift", "bidResponseBean");
-        log.debug("bidResponseBean:{}",JSON.toJSONString(bidResponseBean));
+        log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
     }
 

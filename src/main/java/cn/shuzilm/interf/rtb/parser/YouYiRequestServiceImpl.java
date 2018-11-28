@@ -111,6 +111,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                 //广告位的宽和高
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
+            }else {
+                response = "pc 不竞价";
+                return response;
             }
 
             //广告匹配规则
@@ -312,3 +315,4 @@ public class YouYiRequestServiceImpl implements RequestService {
 
 
 }
+
