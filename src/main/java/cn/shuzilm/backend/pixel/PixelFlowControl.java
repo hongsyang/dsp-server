@@ -2,6 +2,7 @@ package cn.shuzilm.backend.pixel;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,9 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.BeanUtils;
 
+import com.yao.util.db.bean.ResultList;
+import com.yao.util.db.bean.ResultMap;
+
 import cn.shuzilm.backend.master.MsgControlCenter;
+import cn.shuzilm.backend.master.TaskServicve;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPixelBean;
+import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.NodeStatusBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.common.PixelConstants;
@@ -28,6 +34,8 @@ public class PixelFlowControl {
 	private double dspToleranceRatio = 0.3;
 
 	private double dspToleranceEqualRatio = 0.02;
+	
+	private static TaskServicve taskService = new TaskServicve();
 
 	private static ConcurrentHashMap<String, AdBean> mapAd = null;
 
@@ -129,25 +137,27 @@ public class PixelFlowControl {
 	}
 
 	public static void main(String[] args) {
-		AdPixelBean bean = new AdPixelBean();
-		bean.setCost(15.01);
-		bean.setPremiumFactor(0.6);
-		bean.setAdUid("123");
-		AdPixelBean pixel;
-		try {
-			pixel = PixelFlowControl.getInstance().sendStatus(bean);
-			System.out.println("dsp利润=" + pixel.getDspProfit());
-			System.out.println("代理商利润=" + pixel.getRebateProfit());
-			System.out.println("成本价=" + pixel.getCost());
-			System.out.println("总消耗金额=" + (pixel.getFinalCost()));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}		
+//		AdPixelBean bean = new AdPixelBean();
+//		bean.setCost(15.01);
+//		bean.setPremiumFactor(0.6);
+//		bean.setAdUid("123");
+//		AdPixelBean pixel;
+//		try {
+//			pixel = PixelFlowControl.getInstance().sendStatus(bean);
+//			System.out.println("dsp利润=" + pixel.getDspProfit());
+//			System.out.println("代理商利润=" + pixel.getRebateProfit());
+//			System.out.println("成本价=" + pixel.getCost());
+//			System.out.println("总消耗金额=" + (pixel.getFinalCost()));
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}		
+		PixelFlowControl.getInstance().pullAdFromDB();
+		System.out.println();
 	}
 
 	/**
-	 * 每隔 10 分钟更新一次广告素材或者人群包
+	 * 每隔 1秒钟更新一次广告素材或者人群包
 	 */
 	public void pullTenMinutes() {
 		MDC.put("sift", "pixel");
@@ -158,6 +168,34 @@ public class PixelFlowControl {
 			for (AdBean ad : adBeanList) {
 				mapAd.put(ad.getAdUid(), ad);
 			}
+		}
+	}
+	
+	public void pullAdFromDB(){
+		MDC.put("sift", "pixel");
+		try {
+			ResultList adList = taskService.queryAllAd();
+			for(ResultMap map:adList){
+				try{
+				AdBean ad = new AdBean();
+                ad.setAdUid(map.getString("uid"));
+                String adverUid = map.getString("advertiser_uid");
+                AdvertiserBean adver = taskService.queryAdverByUid(adverUid);
+                ad.setAdvertiser(adver);
+                String mode = map.getString("mode");
+                if("cpc".equalsIgnoreCase(mode)){
+                	ad.setPrice(map.getBigDecimal("price").floatValue() * 0.03f * 1000);               	
+                }else{
+                	ad.setPrice(map.getBigDecimal("price").floatValue());
+                }
+                mapAd.put(ad.getAdUid(), ad);
+				}catch(Exception ex){
+					continue;
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 

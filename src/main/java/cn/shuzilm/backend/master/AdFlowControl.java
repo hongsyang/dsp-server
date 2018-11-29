@@ -67,12 +67,12 @@ public class AdFlowControl {
     /**
      * RTB节点线程数
      */
-    private static final int RTB_NODE_THREAD_NUMS = 2;
+    private static final int RTB_NODE_THREAD_NUMS = 5;
     
     /**
      * PIXCEL节点线程数
      */
-    private static final int PIXCEL_NODE_THREAD_NUMS = 100;
+    private static final int PIXCEL_NODE_THREAD_NUMS = 300;
 
 //    /**
 //     * 广告主对应的广告 MAP
@@ -645,17 +645,22 @@ public class AdFlowControl {
                 }
                 //广告主账户的每日限额
                 BigDecimal quotaMoneyPerDay = balanceMap.getBigDecimal("quota_amount");
-
+                boolean advertiserQuota = balanceMap.getBoolean("quota");
 
 
                 int winNumsHour = map.getInteger("cpm_hourly");
                 int winNumsDaily = map.getInteger("cpm_daily");
                 // 当前广告表中的针对广告的限额
                 BigDecimal money = map.getBigDecimal("quota_amount");
+                
+                boolean adQuota = map.getBoolean("quota");
 
                 // 如果广告主中的每日限额比广告的还小，以小的为准
-                if (quotaMoneyPerDay.floatValue() != 0 && quotaMoneyPerDay.floatValue() <= money.floatValue()) {
+                if (advertiserQuota && adQuota && quotaMoneyPerDay.floatValue() <= money.floatValue()) {
                     money = quotaMoneyPerDay;
+                }
+                if(advertiserQuota && !adQuota){
+                	money = quotaMoneyPerDay;
                 }
                 //如果这个账户的余额比每天或小时的限额还小，则赋予小的值
                 if (balance.floatValue() != 0 && balance.floatValue() <= money.floatValue()) {

@@ -102,7 +102,7 @@ public class AsyncRedisClient {
 		tagBean.setCountyId(381);
 
 		tagBean.setIncomeId(2);
-		tagBean.setAppPreferenceIds("eat food");
+		tagBean.setAppPreferenceIds("4,25");
 		tagBean.setPlatformId(1);
 		tagBean.setBrand("335");
 		tagBean.setPhonePrice(3);
@@ -191,7 +191,7 @@ public class AsyncRedisClient {
         RedisFuture<String> future1 = commands.get(deviceId);
         String value = null;
         try {
-            value = future1.get(50, TimeUnit.MILLISECONDS );//超时时间修改为100秒
+            value = future1.get(30, TimeUnit.MILLISECONDS );//超时时间修改为100秒
         } catch (Exception e) {
             return null;
         }
