@@ -20,9 +20,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import com.alibaba.fastjson.JSON;
 
 import cn.shuzilm.backend.rtb.RtbConstants;
+import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.common.Constants;
 
@@ -34,6 +39,8 @@ import cn.shuzilm.common.Constants;
  * https://github.com/lettuce-io/lettuce-core/wiki/Asynchronous-API
  */
 public class AsyncRedisClient {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(AsyncRedisClient.class);
     private StatefulRedisClusterConnection<String, String> connection = null;
     
     private static AsyncRedisClient redisClient = null;
@@ -59,6 +66,7 @@ public class AsyncRedisClient {
     
 
     public static void main(String[] args) {
+    	MDC.put("sift", "rtb");
 //        RedisClient client = RedisClient.create("redis://192.168.1.241");
 //        RedisAsyncCommands<String, String> commands = client.connect().async();
 //        commands.hset("AA","age","18");
@@ -123,14 +131,22 @@ public class AsyncRedisClient {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-//    	 redis1.setAsync("a24e0e337853d4d9da28769d4bf83577", ss);
-    	redis1.delAsync("a24e0e337853d4d9da28769d4bf83577");
+    	 redis1.setAsync("a24d0y33j853d4d9da28t69d4bf83e77", ss);
+ //   	redis1.delAsync("a24e0e337853d4d9da28769d4bf83577");
 //    	String json = redis1.getAsync("00000e3de16c8a7e80d2cca6976fafcf");
 //    	TagBean tagBean1 = JSON.parseObject(json, TagBean.class);
-    	
-    	 System.out.println(redis1.getAsync("a24e0e337853d4d9da28769d4bf83577"));
-    	 
-    	 
+//    	while(true){   	
+//    	 try {
+//    		 long startTime = System.currentTimeMillis();
+        	 System.out.println(redis1.getAsync("a24d0y33j853d4d9da28t69d4bf83e77"));
+//        	 LOG.info("读取耗时:"+(System.currentTimeMillis()-startTime));
+//			Thread.sleep(5 * 1000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//    	}
+    	    	 
 //    	 String tagJson = redis1.getAsync("a24e0e337853d4d9da28769d4bf83577");
 // 		TagBean tagBean1 = JSON.parseObject(tagJson, TagBean.class);
 // 		
@@ -175,13 +191,9 @@ public class AsyncRedisClient {
         RedisFuture<String> future1 = commands.get(deviceId);
         String value = null;
         try {
-            value = future1.get(100000, TimeUnit.MILLISECONDS );//超时时间修改为100秒
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
+            value = future1.get(50, TimeUnit.MILLISECONDS );//超时时间修改为100秒
+        } catch (Exception e) {
+            return null;
         }
         return value;
     }

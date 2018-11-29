@@ -123,7 +123,7 @@ public class RuleMatching {
 			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,
 			Set<String> materialSet) throws Exception{
 		// 筛选审核通过的物料
-		if (material.getApproved_adx() != null && !material.getApproved_adx().trim().equals("") && !material.getApprovedAdxSet().contains(adxName)) {
+		if (material.getApproved_adx() == null || material.getApproved_adx().trim().equals("") || !material.getApprovedAdxSet().contains(adxName)) {
 			return false;
 		}
 		if (!extStr.equals("") && !extStr.contains(material.getExt())) {
@@ -855,7 +855,7 @@ public class RuleMatching {
 	public static void main(String[] args) {
 		try{
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("a24e0e337853d4d9da28769d4bf83577", "banner", 640, 100, true, 5, 5, "1", "jpg,gif","127.0.0.1","cn.asm.clweather");
+		rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 640, 100, true, 5, 5, "2", "jpg,gif","127.0.0.1","cn.asm.clweather");
 		}catch(Exception e){
 			e.getMessage();
 		}
