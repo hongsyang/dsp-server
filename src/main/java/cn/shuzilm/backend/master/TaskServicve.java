@@ -133,11 +133,27 @@ public class TaskServicve extends Service {
     public ResultList queryAdByUpTime(long startTime) throws SQLException {
         long now = System.currentTimeMillis() ;
         Object[] arr = new Object[3];
-        //arr[0] = startTime / 1000;
-        arr[0] = specDateFM.format(new Date(startTime));
+        arr[0] = startTime / 1000;
+        //arr[0] = specDateFM.format(new Date(startTime));
         arr[1] = now / 1000;
         arr[2] = now / 1000;
-        String sql = "select * from ad where refresh_ts >= ? and s <= ? and e >= ? and status = 1 and group_status = 1";
+        String sql = "select * from ad where updated_at >= ? and s <= ? and e >= ? and status = 1 and group_status = 1";
+        return select.select(sql,arr);
+    }
+    
+    /**
+     * 查找 全部的广告
+     *
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public ResultList queryAllAd() throws SQLException {
+        long now = System.currentTimeMillis() ;
+        Object[] arr = new Object[2];
+        //arr[0] = specDateFM.format(new Date(startTime));
+        arr[0] = now / 1000;
+        arr[1] = now / 1000;
+        String sql = "select * from ad where s <= ? and e >= ?";
         return select.select(sql,arr);
     }
 
@@ -648,8 +664,8 @@ public class TaskServicve extends Service {
     	try {
 			//task.insertDataToNoticeDetailPerHour(adNoticeDetail);
     		//Map map = task.getNoticeDetailByHourPerDay();
-//    		long timeNow = System.currentTimeMillis();
-//            long timeBefore = timeNow - 10 * 60 *1000;
+    		long timeNow = System.currentTimeMillis();
+           long timeBefore = timeNow - 10 * 60 *1000;
 //    		List<FlowControlBean> list = task.getAdxFlowControl(timeBefore);
 //    		System.out.println(list);
 //    		ResultMap balanceMap = task.queryAdviserAccountById("1e3ebfc0-db29-49fc-b39f-82543606e887");
@@ -660,9 +676,11 @@ public class TaskServicve extends Service {
 //            if(updatedAt != null && updatedAt != 0 && updatedAt >= timeBefore){
 //            	System.out.println("ok");
 //            }
-    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-    		String s = specDateFM.format(new Date(0));
-    		System.out.println(s);
+//    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+//    		String s = specDateFM.format(new Date(timeBefore));
+//    		System.out.println(s);
+           ResultList adList = task.queryAdByUpTime(timeBefore);
+           System.out.println(adList.size());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
