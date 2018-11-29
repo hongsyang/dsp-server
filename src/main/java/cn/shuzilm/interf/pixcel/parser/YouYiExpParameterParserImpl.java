@@ -123,7 +123,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-            element.setActualPrice(Double.valueOf(priceLong) / 10000);//成本价
+            element.setActualPrice(Double.valueOf(priceLong) / 100000);//成本价
             element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
@@ -148,14 +148,14 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                     element.getDealid(), element.getAppId(), element.getBidid(), price);
 
             MDC.remove("phoenix");
-              /*  MDC.put("sift", "YouYiExp");
-                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-                if (lingJiClick) {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-                } else {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-                    throw new RuntimeException();
-                }*/
+            MDC.put("sift", "YouYiExp");
+            boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+            if (lingJiClick) {
+                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+            } else {
+                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+                throw new RuntimeException();
+            }
         } catch (Exception e) {
             Help.sendAlert("pixcel异常触发报警:YouYiExp");
             MDC.put("sift", "exception");

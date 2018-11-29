@@ -150,14 +150,14 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
                     element.getDealid(), element.getAppId(), element.getBidid(), price);
 
             MDC.remove("phoenix");
-            MDC.put("sift", "YouYiNurl");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+         /*    MDC.put("sift", "YouYiNurl");
+           boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
             } else {
                 log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 throw new RuntimeException();
-            }
+            }*/
         } catch (Exception e) {
             Help.sendAlert("pixcel异常触发报警:YouYiNurl");
             MDC.put("sift", "exception");
