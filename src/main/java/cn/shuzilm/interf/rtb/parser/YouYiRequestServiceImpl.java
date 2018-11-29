@@ -107,7 +107,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = adzone.getAdz_height();
             } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
                 stringSet = "[image/jpeg, image/png]";
-                adxId = adxId + adzone.getNative().get(0).getNative_id();
+                adxId = adxId + "_"+adzone.getNative().get(0).getNative_id();
                 //广告位的宽和高
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
