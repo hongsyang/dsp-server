@@ -58,7 +58,7 @@ public class PixcelServer{
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(),configs.getInt("N_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
-        bootstrap.setOption("child.keepAlive", true); //注意child前缀
+        bootstrap.setOption("child.keepAlive", false); //注意child前缀
         bootstrap.setOption("reuseAddress", true);
         bootstrap.setOption("child.linger", 60);
         bootstrap.setOption("child.TIMEOUT", 1);

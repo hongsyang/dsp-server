@@ -31,8 +31,7 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
     }
 
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
-			throws Exception {
+	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		try {
 //            System.out.println(Thread.currentThread().getName() + "\t" + counter);
             counter.getAndAdd(1);
@@ -71,7 +70,7 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 				response.setHeader("Content-Type", "text/html");
 				response.setHeader("Content-Length", content.length);
 				response.setHeader("Accept-Ranges", "bytes");
-                response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
+                response.setHeader("Connection", HttpHeaders.Values.CLOSE);
 				buffer.writeBytes(content);
 				response.setContent(buffer);
 

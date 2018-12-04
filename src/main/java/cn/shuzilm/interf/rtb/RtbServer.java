@@ -18,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
@@ -43,6 +44,9 @@ public class RtbServer {
     private static final String FILTER_CONFIG = "filter.properties";
 
     private static final Logger log = LoggerFactory.getLogger(RtbServer.class);
+
+    //超时线程池
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * 创建数据库连接
@@ -71,7 +75,7 @@ public class RtbServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(), configs.getInt("N_THREADS")));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(1), Executors.newCachedThreadPool(), configs.getInt("N_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀
@@ -103,7 +107,7 @@ public class RtbServer {
 //		         pipeline.addLast("streamer", new ChunkedWriteHandler());
             pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
             //http处理handler
-            pipeline.addLast("handler", new RtbHandler());
+            pipeline.addLast("handler", new RtbHandler(executor));
 
             return pipeline;
         }
