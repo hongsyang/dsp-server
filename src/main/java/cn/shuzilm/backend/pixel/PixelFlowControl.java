@@ -3,6 +3,7 @@ package cn.shuzilm.backend.pixel;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +36,8 @@ public class PixelFlowControl {
 
 	private double dspToleranceEqualRatio = 0.02;
 	
+	private static NumberFormat nf = NumberFormat.getNumberInstance();
+	
 	private static TaskServicve taskService = new TaskServicve();
 
 	private static ConcurrentHashMap<String, AdBean> mapAd = null;
@@ -56,7 +59,9 @@ public class PixelFlowControl {
 	public PixelFlowControl(String nodeName) {
 		this.nodeName = nodeName;
 		MDC.put("sift", "pixel");
-		mapAd = new ConcurrentHashMap<String, AdBean>();
+		mapAd = new ConcurrentHashMap<String, AdBean>();		
+		nf.setMaximumFractionDigits(5);
+		nf.setRoundingMode(RoundingMode.DOWN);
 	}
 
 	public AdPixelBean sendStatus(AdPixelBean pixel) throws Exception{
@@ -86,43 +91,43 @@ public class PixelFlowControl {
 			premiumFactor = 1 - rebate - 0.01;
 		}
 		double price = ad.getPrice();
-		double finalPrice = getResult(cost, getResult(1.0, dspAndRebatePremiumFactor, "-"), "/");
+		double finalPrice = cost / (1.0 - dspAndRebatePremiumFactor);
 		if (finalPrice > price) {// 最终消耗金额高于广告出价金额,适当调整DSP平台利润
 			double dspAndRebatePremiumFactorTemp = dspToleranceRatio + rebate;// DSP保守利润率+代理商返点比例
-			double tempPrice = getResult(cost, (getResult(1.0, dspAndRebatePremiumFactorTemp, "-")), "/");
+			double tempPrice = cost / (1.0 - dspAndRebatePremiumFactorTemp);
 			if (tempPrice == price) {
 				double dspAndRebatePremiumEqualFactor = dspToleranceRatio - dspToleranceEqualRatio + rebate;
-				double tempFinalPrice = getResult(cost, (getResult(1.0, dspAndRebatePremiumEqualFactor, "-")), "/");
+				double tempFinalPrice = cost / (1.0 - dspAndRebatePremiumEqualFactor);
 				finalPrice = tempFinalPrice;
-				dspProfit = getResult(finalPrice, dspToleranceRatio - dspToleranceEqualRatio, "*");
-				rebateProfit = getResult(finalPrice, rebate, "*");
+				dspProfit = finalPrice * (dspToleranceRatio - dspToleranceEqualRatio);
+				rebateProfit = finalPrice * rebate;
 				pixel.setLower(true);
 			} else if (tempPrice < price) {
 				finalPrice = tempPrice;
-				dspProfit = getResult(finalPrice, dspToleranceRatio, "*");
-				rebateProfit = getResult(finalPrice, rebate, "*");
+				dspProfit = finalPrice * dspToleranceRatio;
+				rebateProfit = finalPrice * rebate;
 				pixel.setLower(true);
 			} else {
-				dspProfit = getResult(finalPrice, premiumFactor, "*");
-				rebateProfit = getResult(finalPrice, rebate, "*");
+				dspProfit = finalPrice * premiumFactor;
+				rebateProfit = finalPrice * rebate;
 				pixel.setLower(false);
 			}
 		} else if (finalPrice == price) {
 			double dspAndRebatePremiumEqualFactor = dspAndRebatePremiumFactor - dspToleranceEqualRatio;
-			finalPrice = getResult(cost, (getResult(1.0, dspAndRebatePremiumEqualFactor, "-")), "/");
-			dspProfit = getResult(finalPrice, premiumFactor - dspToleranceEqualRatio, "*");
-			rebateProfit = getResult(finalPrice, rebate, "*");
+			finalPrice = cost / (1.0 - dspAndRebatePremiumEqualFactor);
+			dspProfit = finalPrice * (premiumFactor - dspToleranceEqualRatio);
+			rebateProfit = finalPrice * rebate;
 			pixel.setLower(true);
 		} else {
-			dspProfit = getResult(finalPrice, premiumFactor, "*");
-			rebateProfit = getResult(finalPrice, rebate, "*");
+			dspProfit = finalPrice * premiumFactor;
+			rebateProfit = finalPrice * rebate;
 			pixel.setLower(true);
 		}
 
-		pixel.setFinalCost(finalPrice);
-		pixel.setDspProfit(getResult(dspProfit, 1.0, "/"));
-		pixel.setRebateProfit(getResult(rebateProfit, 1.0, "/"));
-
+		pixel.setFinalCost((double) (Math.round(finalPrice * 100000)/100000.0));		
+		pixel.setDspProfit((double) (Math.round(dspProfit * 100000)/100000.0));		
+		pixel.setRebateProfit((double) (Math.round(rebateProfit * 100000)/100000.0));
+		
 		LOG.info("dsp利润=" + pixel.getDspProfit());
 		LOG.info("代理商利润=" + pixel.getRebateProfit());
 		LOG.info("成本价=" + pixel.getCost());
@@ -137,23 +142,33 @@ public class PixelFlowControl {
 	}
 
 	public static void main(String[] args) {
-//		AdPixelBean bean = new AdPixelBean();
-//		bean.setCost(15.01);
-//		bean.setPremiumFactor(0.6);
-//		bean.setAdUid("123");
-//		AdPixelBean pixel;
-//		try {
-//			pixel = PixelFlowControl.getInstance().sendStatus(bean);
+		AdPixelBean bean = new AdPixelBean();
+		bean.setCost(15.01);
+		bean.setPremiumFactor(0.6);
+		bean.setAdUid("123");
+		AdBean ad = new AdBean();
+        ad.setAdUid("123");
+        String adverUid = "123";
+        ad.setPrice(35f);
+        PixelFlowControl pixcel = PixelFlowControl.getInstance();
+        mapAd.put(ad.getAdUid(), ad);
+		AdPixelBean pixel;
+		try {
+			long startTime = System.currentTimeMillis();
+			for(int i=0;i<1;i++){
+			pixel = pixcel.sendStatus(bean);
+			}
+			System.out.println("花费时间:"+(System.currentTimeMillis()-startTime));
 //			System.out.println("dsp利润=" + pixel.getDspProfit());
 //			System.out.println("代理商利润=" + pixel.getRebateProfit());
 //			System.out.println("成本价=" + pixel.getCost());
 //			System.out.println("总消耗金额=" + (pixel.getFinalCost()));
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}		
-		PixelFlowControl.getInstance().pullAdFromDB();
-		System.out.println();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
+//		PixelFlowControl.getInstance().pullAdFromDB();
+//		System.out.println();
 	}
 
 	/**
@@ -224,7 +239,6 @@ public class PixelFlowControl {
 		BigDecimal bigA = new BigDecimal(Double.toString(numA));
 		BigDecimal bigB = new BigDecimal(Double.toString(numB));
 		switch (operate) {
-
 		case "+":
 			res = bigA.add(bigB).doubleValue();
 			break;

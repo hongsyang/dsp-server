@@ -52,6 +52,8 @@ public class CronDispatch {
     public static void main(String[] args) {
         //程序初始化 加载程序
         AdFlowControl.getInstance().loadAdInterval(true);
+        
+        AdFlowControl.getInstance().loadAllAdInterval(true);
         // 初始化CPC结算方式的广告的 阈值和moniter
         CPCHandler.getInstance().updateIndicator(true);
 //        AdFlowControl.getInstance().pullAndUpdateTask();
@@ -84,6 +86,8 @@ public class CronDispatch {
         CronDispatch.startTimer(8);
         
         CronDispatch.startTimer(9);
+        
+        CronDispatch.startTimer(10);
     }
 
     /**
@@ -127,6 +131,9 @@ public class CronDispatch {
            case 9:
         	   dispatch(PullAndCheckFlowControlTask.class,"0/30 * * * * ?");
         	   break;
+           case 10:
+               dispatch(UpdateMonitorTask.class,"0 0/10 * * * ?");
+               break;
            default:
                break;
        }

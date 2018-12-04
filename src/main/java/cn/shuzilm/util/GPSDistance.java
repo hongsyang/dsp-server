@@ -9,16 +9,13 @@ public class GPSDistance {
     static double DEF_R =6370693.5; // radius of earth
 
     public static void main(String [] args) {
-        double a1 = 116.403766;
-        double a2 = 39.915046;
-        double b1 = 116.398052;
-        double b2 = 39.913828;
+        double a1 = 116.3556137084961;
+        double a2 = 39.98174285888672;
+        double b1 = 116.370448;
+        double b2 = 39.989634;
         long start = System.currentTimeMillis();
-        for(int i=0;i<50000;i++){
-        boolean isInArea = isInArea(a1,a2,b1,b2,500);
-        }
-        System.out.println(System.currentTimeMillis()-start);
-        //System.out.println(isInArea);
+        boolean isInArea = isInArea(a1,a2,b1,b2,2000);
+       System.out.println(isInArea);
     }
 
 
