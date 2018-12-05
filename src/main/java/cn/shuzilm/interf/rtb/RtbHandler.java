@@ -14,6 +14,7 @@ import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Date;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -55,7 +56,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-
+        long start = new Date().getTime();
         //返回状态
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
         response.setHeader("Content-Type", "text/html");
@@ -98,8 +99,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             future.cancel(true);// 中断执行此任务的线程
         } catch (TimeoutException e1) {
             // 超时情况
-            log.error("超时{},result:{}", e1, result);
-            response.setStatus(HttpResponseStatus.RESET_CONTENT);
+            long end = new Date().getTime();
+            MDC.put("sift", "timeOut");
+            log.error("timeMs:{},url:{}", end - start, url);
+            MDC.remove("sift");
+            response.setStatus(HttpResponseStatus.NO_CONTENT);
             ChannelFuture future1 = e.getChannel().write(response);
             future1.addListener(ChannelFutureListener.CLOSE);
             future.cancel(true);// 中断执行此任务的线程
