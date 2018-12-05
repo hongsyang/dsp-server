@@ -56,6 +56,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
 
+        //返回状态
+        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+        response.setHeader("Content-Type", "text/html");
+        response.setHeader("Accept-Ranges", "bytes");
+        response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
 
         // 请求状态
         boolean close = true;
@@ -94,24 +99,20 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
         } catch (TimeoutException e1) {
             // 超时情况
             log.error("超时{},result:{}", e1, result);
-            System.out.println("超时状态205");
-            HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
             response.setStatus(HttpResponseStatus.RESET_CONTENT);
             ChannelFuture future1 = e.getChannel().write(response);
             future1.addListener(ChannelFutureListener.CLOSE);
             future.cancel(true);// 中断执行此任务的线程
+            return;
         }
 
         //正常情况 主业务逻辑
         byte[] content = null;
         String resultData = result;
-        System.out.println("resultData:"+resultData);
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
         try {
             if ("".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 content = resultData.getBytes("utf-8");
-                System.out.println("状态204");
             } else if (resultData.contains("session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
@@ -124,11 +125,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.error("转换异常:{},resultData:{}", e2, resultData);
         }
 
-        ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-        response.setHeader("Content-Type", "text/html");
         response.setHeader("Content-Length", content.length);
-        response.setHeader("Accept-Ranges", "bytes");
-        response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
+        ChannelBuffer buffer = new DynamicChannelBuffer(2048);
         buffer.writeBytes(content);
         response.setContent(buffer);
 

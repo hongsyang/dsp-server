@@ -39,14 +39,16 @@ public class RtbServer {
 
     private static JedisManager jedisManager;
 
-    private static AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs =  AppConfigs.getInstance(FILTER_CONFIG);;
+
 
     private static final Logger log = LoggerFactory.getLogger(RtbServer.class);
 
     //超时线程池
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("N_THREADS"));
 
     /**
      * 创建数据库连接
@@ -75,7 +77,7 @@ public class RtbServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(1), Executors.newCachedThreadPool(), configs.getInt("N_THREADS")));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(), configs.getInt("N_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀
