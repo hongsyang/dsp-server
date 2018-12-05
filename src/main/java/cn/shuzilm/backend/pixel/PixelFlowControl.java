@@ -75,7 +75,7 @@ public class PixelFlowControl {
 			LOG.warn("根据ADUID[" + adUid + "]未找到广告!");
 			return null;
 		}
-		if (ad.getAdvertiser().getAgencyBean() != null)
+		if (ad.getAdvertiser() != null && ad.getAdvertiser().getAgencyBean() != null)
 			rebate = ad.getAdvertiser().getAgencyBean().getRebate();// 获取代理商返点比例
 		double dspProfit = 0.0;
 		double rebateProfit = 0.0;
