@@ -35,9 +35,7 @@ public class PixelFlowControl {
 	private double dspToleranceRatio = 0.3;
 
 	private double dspToleranceEqualRatio = 0.02;
-	
-	private static NumberFormat nf = NumberFormat.getNumberInstance();
-	
+		
 	private static TaskServicve taskService = new TaskServicve();
 
 	private static ConcurrentHashMap<String, AdBean> mapAd = null;
@@ -60,8 +58,6 @@ public class PixelFlowControl {
 		this.nodeName = nodeName;
 		MDC.put("sift", "pixel");
 		mapAd = new ConcurrentHashMap<String, AdBean>();		
-		nf.setMaximumFractionDigits(5);
-		nf.setRoundingMode(RoundingMode.DOWN);
 	}
 
 	public AdPixelBean sendStatus(AdPixelBean pixel) throws Exception{
@@ -87,11 +83,12 @@ public class PixelFlowControl {
 		double premiumFactor = pixel.getPremiumFactor();
 		double dspAndRebatePremiumFactor = premiumFactor + rebate;
 		if (dspAndRebatePremiumFactor >= 1) {
-			dspAndRebatePremiumFactor = 1 - 0.01;
-			premiumFactor = 1 - rebate - 0.01;
+			dspAndRebatePremiumFactor = 1 - 0.1;
+			premiumFactor = 1 - rebate - 0.1;
 		}
-		double price = ad.getPrice();
+		
 		double finalPrice = cost / (1.0 - dspAndRebatePremiumFactor);
+		double price = ad.getPrice();
 		if (finalPrice > price) {// 最终消耗金额高于广告出价金额,适当调整DSP平台利润
 			double dspAndRebatePremiumFactorTemp = dspToleranceRatio + rebate;// DSP保守利润率+代理商返点比例
 			double tempPrice = cost / (1.0 - dspAndRebatePremiumFactorTemp);
