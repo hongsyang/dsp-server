@@ -385,8 +385,9 @@ public class RuleMatching {
 						}
 					}
 				} else if (tagBean != null && audience.getType().equals("demographic")) { // 特定人群
-					if (audience.getDemographicTagIdSet() != null
-							&& checkRetain(tagIdList, audience.getDemographicTagIdSet())) {
+					if ((audience.getDemographicTagId() != null && audience.getDemographicTagId().equals("[\"0\"]"))
+							|| (audience.getDemographicTagIdSet() != null
+							&& checkRetain(tagIdList, audience.getDemographicTagIdSet()))) {
 						if (((rtbIns.getDemographicMap().get(chinaKey) != null
 								&& rtbIns.getDemographicMap().get(chinaKey).contains(ad.getAdUid()))
 								|| (rtbIns.getDemographicMap().get(demoProvinceIdKey) != null
@@ -854,7 +855,7 @@ public class RuleMatching {
 	public static void main(String[] args) {
 		try{
 		RuleMatching rule = RuleMatching.getInstance();
-		rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 640, 100, true, 5, 5, "2", "jpg,gif","127.0.0.1","cn.asm.clweather");
+		rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 670, 100, true, 5, 5, "2", "jpg,gif","127.0.0.1","cn.asm.clweather");
 		}catch(Exception e){
 			e.getMessage();
 		}

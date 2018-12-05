@@ -444,11 +444,11 @@ public class AudienceBean implements ICommand {
         }
 	}
     public static void main(String[] args) {
-    	String citys = "";
+    	String demographicTagId = "[\"0\"]";
     	AudienceBean a = new AudienceBean();
-    	a.setCitys(citys);
-    	for(AreaBean s :a.getCityList()){
-    		System.out.println(s.getProvinceId());
+    	a.setDemographicTagId(demographicTagId);
+    	for(String s :a.getDemographicTagIdSet()){
+    		System.out.println(s);
     	}
 	}
     

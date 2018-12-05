@@ -1,6 +1,9 @@
 package cn.shuzilm.util;
 
 import com.alibaba.fastjson.JSONObject;
+
+import cn.shuzilm.bean.control.AdBean;
+
 import org.apache.commons.lang.StringUtils;
 
 import java.text.SimpleDateFormat;
@@ -9,6 +12,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description: TimeSchedulingUtil 广告排期
@@ -40,9 +44,10 @@ public class TimeSchedulingUtil {
             String re = "[";
             String ra = "]";
             for (int i = 0; i < list.size(); i++) {
+            	int key = Integer.parseInt((String) list.get(i).getKey());
                 String[] split = list.get(i).getValue().toString().replace(re, "").trim().replace(ra, "").split(",");
                 for (int i1 = 0; i1 < split.length; i1++) {
-                    timeSchedulingArr[i][Integer.parseInt(split[i1])] = 1;
+                    timeSchedulingArr[key-1][Integer.parseInt(split[i1])] = 1;
                 }
             }
             return timeSchedulingArr;
@@ -53,15 +58,21 @@ public class TimeSchedulingUtil {
     }
     
     public static void main(String[] args) {
-    	//String timeScheTxt = "{\"1\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"2\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"3\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"4\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"5\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"6\":[11,12,13,14,15,16,17,18,19,20,21,22,23],\"7\":[11,12,13,14,15,16,17,18,19,20,21,22,23]}";
-    	String timeScheTxt = "{}";
-		int[][] timeSchedulingArr = timeTxtToMatrix(timeScheTxt);
-		for(int i=0;i<timeSchedulingArr.length;i++){
-			for(int j=0;j<timeSchedulingArr[i].length;j++){
-				System.out.print(timeSchedulingArr[i][j]);
-			}
-			System.out.println();
+    	String timeScheTxt = "{\"2\":[9,10,11,12,13,14,15,16,17,18,19],\"3\":[9,10,11,12,13,14,15,16,17,18,19],\"4\":[9,10,11,12,13,14,15,16,17,18,19],\"5\":[9,10,11,12,13,14,15,16,17,18,19]}";
+    	//String timeScheTxt = "{}";
+		int[][] timeSchedulingArr1 = timeTxtToMatrix(timeScheTxt);
+//		for(int i=0;i<timeSchedulingArr.length;i++){
+//			for(int j=0;j<timeSchedulingArr[i].length;j++){
+//				System.out.print(timeSchedulingArr[i][j]);
+//			}
+//			System.out.println();
+//		}
+		
+		ConcurrentHashMap<String, String> mapFlowTask = new ConcurrentHashMap<String, String>();
+		for(int i=0;i<1000;i++){
+			mapFlowTask.put(i+"", i+"");
 		}
+		mapFlowTask.put("me.ht.local.hot", "4");
 		SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
 		Date date = new Date();
 		String time = dateFm.format(date);
@@ -70,8 +81,18 @@ public class TimeSchedulingUtil {
 		int dayNum = Integer.parseInt(splitTime[1]);
 		if (dayNum == 24)
 			dayNum = 0;
+		dayNum = 16;
+		weekNum = 1;
 		
-		System.out.println(weekNum+"\t"+dayNum);
+		AdBean adBean = new AdBean();
+		adBean.setTimeSchedulingArr(timeSchedulingArr1);
+		
+		long startTime = System.currentTimeMillis();
+		
+		int timeSchedulingArr[][] = adBean.getTimeSchedulingArr();
+		//System.out.println(weekNum+"\t"+dayNum);
+			
+			
 		if(timeSchedulingArr != null){
             for (int i = 0; i < timeSchedulingArr.length; i++) {
                 if (weekNum != i)
@@ -79,14 +100,19 @@ public class TimeSchedulingUtil {
                 for (int j = 0; j < timeSchedulingArr[i].length; j++) {
                     if (dayNum == j) {
                         if (timeSchedulingArr[i][j] == 1) {
+                        	System.out.println(timeSchedulingArr[i][j]);
                             System.out.println("yes");
                         } else {
+                        	System.out.println(i+"\t"+j);
+                        	System.out.println(timeSchedulingArr[i][j]);
                             System.out.println("no");
                         }
                     }
                 }
             }
             }
+		
+		System.out.println("花费时间:"+(System.currentTimeMillis()-startTime));
 	}
 
 }

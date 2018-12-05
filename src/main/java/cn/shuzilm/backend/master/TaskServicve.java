@@ -156,6 +156,19 @@ public class TaskServicve extends Service {
         String sql = "select * from ad where s <= ? and e >= ?";
         return select.select(sql,arr);
     }
+    
+    /**
+     * 查找 全部的广告(包括超时的)
+     *
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public ResultList queryAllAdTotal(long startTime) throws SQLException { 
+    	Object[] arr = new Object[1];
+        arr[0] = startTime / 1000;
+        String sql = "select * from ad where updated_at >= ?";
+        return select.select(sql,arr);
+    }
 
     /**
      * 根据 AD UID 查询广告主
@@ -679,8 +692,41 @@ public class TaskServicve extends Service {
 //    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 //    		String s = specDateFM.format(new Date(timeBefore));
 //    		System.out.println(s);
-           ResultList adList = task.queryAdByUpTime(timeBefore);
-           System.out.println(adList.size());
+           //ResultList adList = task.queryAdByUpTime(timeBefore);
+           //System.out.println(adList.size());
+           ConcurrentHashMap<String,AdBean> mapAd = new ConcurrentHashMap<String,AdBean>();
+           
+           ResultList adList = task.queryAdByUpTime(0);
+           for(ResultMap map:adList){
+        	   AdBean ad = new AdBean();
+               ad.setAdUid(map.getString("uid"));
+               //广告组
+               String groupId = map.getString("group_uid");
+               ad.setGroupId(groupId);
+               mapAd.put(ad.getAdUid(), ad);
+           }
+           ConcurrentHashMap<String, ReportBean> reportMapTotal = task.statAdCostTotal();
+           Map<String, Double> map = new HashMap<>();
+           Iterator iter = reportMapTotal.entrySet().iterator();
+           while (iter.hasNext()) {
+        	   	Map.Entry entry = (Map.Entry) iter.next();
+        	   	String key = (String) entry.getKey();
+        	   	ReportBean value = (ReportBean) entry.getValue();
+        	   	AdBean ad = mapAd.get(key);
+        	   	if(ad != null){
+        	   		String groupId = ad.getGroupId();
+        	   		if(map.containsKey(groupId)){
+        	   			if(groupId.equals("58a38bd5-a8c0-4866-b988-926512c90a2b")){
+        	   				System.out.println(value.getExpense().doubleValue()*1000);
+        	   			}
+        	   			map.put(groupId, map.get(groupId)+value.getExpense().doubleValue()*1000);
+        	   		}else{
+        	   			map.put(groupId, value.getExpense().doubleValue()*1000);
+        	   		}
+        	   	}
+           }
+           System.out.println(map);
+           
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
