@@ -155,6 +155,9 @@ public class RtbFlowControl {
     
     private static ConcurrentHashMap<String,Integer> weekAndDayNumMap = null;
 
+    //广告超投设备
+    private static ConcurrentHashMap<String,HashSet<String>> deviceLimitMap = null;
+
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
         nodeName = Constants.getInstance().getConf("HOST");
@@ -183,6 +186,7 @@ public class RtbFlowControl {
     public void trigger() {
         // 5 s
         pullAndUpdateTask();
+        updateDeviceLimitMap();
         // 10分钟拉取一次最新的广告内容
         pullTenMinutes();
         // 1 hour
@@ -463,6 +467,15 @@ public class RtbFlowControl {
     	bidMap.clear();
         
     }
+
+    /**
+     * 每隔5秒，更新广告的超投设备
+     */
+    public void updateDeviceLimitMap() {
+        MDC.put("sift", "rtb");
+
+    }
+
     
     /**
      * 每隔1分钟上报ADX与APP流量数
