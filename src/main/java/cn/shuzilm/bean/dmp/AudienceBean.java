@@ -137,7 +137,7 @@ public class AudienceBean implements ICommand {
 		String re = "{";
 		String ra = "}";
 		for(String s : split){
-			String replace = s.replace(re, "").trim().replace(ra, "");
+			String replace = s.replace(re, "").trim().replace(ra, "").replace("\"", "");
 			String[] nameAndId = replace.split(":");
 			if(nameAndId.length >1){
 				set.add(nameAndId[1]);
@@ -444,10 +444,10 @@ public class AudienceBean implements ICommand {
         }
 	}
     public static void main(String[] args) {
-    	String demographicTagId = "[\"0\"]";
+    	String appPreferenceIds = "{\"北京数字联盟网络科技有限公司\":1_18106}";
     	AudienceBean a = new AudienceBean();
-    	a.setDemographicTagId(demographicTagId);
-    	for(String s :a.getDemographicTagIdSet()){
+    	a.setCompanyIds((appPreferenceIds));
+    	for(String s :a.getCompanyIdSet()){
     		System.out.println(s);
     	}
 	}
