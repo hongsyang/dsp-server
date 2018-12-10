@@ -444,7 +444,7 @@ public class AudienceBean implements ICommand {
         }
 	}
     public static void main(String[] args) {
-    	String appPreferenceIds = "{\"北京数字联盟网络科技有限公司\":\"1_18106\"}";
+    	String appPreferenceIds = "{\"北京数字联盟网络科技有限公司\":1_18106}";
     	AudienceBean a = new AudienceBean();
     	a.setCompanyIds((appPreferenceIds));
     	for(String s :a.getCompanyIdSet()){
