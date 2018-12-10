@@ -76,6 +76,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             //接收 GET 请求
             url = request.getUri();
             //接收 POST 请求 , 获取 SDK 回传数据
+            dataStr = new String(request.getContent().array());
             try {
                 BidserverSsp.BidRequest bidRequest = null;
                 if (url.contains("youyi")) {
