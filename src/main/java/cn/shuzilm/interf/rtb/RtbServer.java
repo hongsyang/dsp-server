@@ -48,7 +48,7 @@ public class RtbServer {
     private static final Logger log = LoggerFactory.getLogger(RtbServer.class);
 
     //超时线程池
-    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("N_THREADS"));
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("TIME_OUT_THREADS"));
 
     /**
      * 创建数据库连接

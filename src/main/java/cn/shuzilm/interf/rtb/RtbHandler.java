@@ -31,7 +31,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
     private static final String FILTER_CONFIG = "filter.properties";
 
-    private static AppConfigs configs =  AppConfigs.getInstance(FILTER_CONFIG);
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
 
     private static final Logger log = LoggerFactory.getLogger(RtbHandler.class);
@@ -73,11 +73,23 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION)) || request.getProtocolVersion().equals(HttpVersion.HTTP_1_0) && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION));
             // 获取对方的ip地址
             remoteIp = ctx.getChannel().getRemoteAddress().toString().split(":")[0].replace("/", "");
-            //接收 POST 请求 , 获取 SDK 回传数据
-            dataStr = new String(request.getContent().array());
             //接收 GET 请求
             url = request.getUri();
+            //接收 POST 请求 , 获取 SDK 回传数据
+            try {
+                BidserverSsp.BidRequest bidRequest = null;
+                if (url.contains("youyi")) {
+                    bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
+                    dataStr = JsonFormat.printToString(bidRequest);
+                } else {
+                    dataStr = URLDecoder.decode(dataStr, "utf-8");
+                }
+            }catch (Exception e1){
+                log.debug(" 异常：{}，接收 POST 请求",e1, dataStr);
+            }
+
         }
+
         //增加超时线程池
         Future<Object> future = executor.submit(new Callable<Object>() {
             @Override
@@ -87,7 +99,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             }
         });
 
-        log.debug("超时时间设置：{}",configs.getInt("TIME_OUT"));
+        log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
         try {
             result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
             log.debug("线程返回：{}", result);
