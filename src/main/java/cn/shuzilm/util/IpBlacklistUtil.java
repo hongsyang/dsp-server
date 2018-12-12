@@ -1,5 +1,7 @@
 package cn.shuzilm.util;
 
+import cn.shuzilm.common.AppConfigs;
+
 import java.io.*;
 import java.util.HashMap;
 
@@ -16,6 +18,9 @@ public class IpBlacklistUtil {
 
     private static IpBlacklistUtil ipBlacklist = null;
 
+    private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
     private static HashMap<String, Integer> ipBlacklistMap;
 
@@ -27,7 +32,8 @@ public class IpBlacklistUtil {
     }
 
     public IpBlacklistUtil() {
-        File file = new File("C:\\Users\\houkp\\Desktop\\duizhang\\ip_chinese_black_list.txt");
+        String fileTest ="C:\\Users\\houkp\\Desktop\\duizhang\\ip_chinese_black_list.txt";
+        File file = new File(configs.getString("FILE_PATH"));
         ipBlacklistMap = getIpBlacklist(file);
 
     }
