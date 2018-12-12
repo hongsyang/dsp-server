@@ -3,6 +3,7 @@ package cn.shuzilm.interf.rtb;
 import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.IpBlacklistUtil;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -14,12 +15,16 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 /**
@@ -31,24 +36,26 @@ public class RtbServer {
     /**
      * 保存所有的appKey
      */
-    public static HashSet<String> appKeySet;
-
-    public static HashMap<String, String> appKeyIdMap;
-
+//    public static HashSet<String> appKeySet;
+//
+//    public static HashMap<String, String> appKeyIdMap;
+//
     private static RuleMatching ruleMatching;
 
     private static JedisManager jedisManager;
 
+    private static IpBlacklistUtil ipBlacklist;
+
 
     private static final String FILTER_CONFIG = "filter.properties";
 
-    private static AppConfigs configs =  AppConfigs.getInstance(FILTER_CONFIG);;
-
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
     private static final Logger log = LoggerFactory.getLogger(RtbServer.class);
 
     //超时线程池
     private ExecutorService executor = Executors.newCachedThreadPool();
+
 
     /**
      * 创建数据库连接
@@ -59,21 +66,29 @@ public class RtbServer {
     public static void main(String[] args) {
         try {
             configs = AppConfigs.getInstance(FILTER_CONFIG);
-            appKeySet = new HashSet<String>();
-            appKeyIdMap = new HashMap<String, String>();
-//		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
+//            appKeySet = new HashSet<String>();
+//            appKeyIdMap = new HashMap<String, String>();
+//            Set<String> stringSet = ipBlacklistMap.keySet();
+//            System.out.println("key的数量：" + stringSet.size());
+//            System.out.println("ipMap的大小:" + ipBlacklistMap.size());
+// 	mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
-            //初始化redis
+            //初始化
+            File file = new File("C:\\Users\\houkp\\Desktop\\duizhang\\ip_chinese_black_list.txt");
+
+            ipBlacklist = IpBlacklistUtil.getInstance();
+//            IpBlacklistUtil.getIbBlacklist(file);
             jedisManager = JedisManager.getInstance();
             ruleMatching = RuleMatching.getInstance();
             RtbServer server = new RtbServer();
             server.start(configs.getInt("RTB_PORT"));
 
         } catch (Exception e) {
-            log.error("",e);
+            log.error("", e);
         }
 
     }
+
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程

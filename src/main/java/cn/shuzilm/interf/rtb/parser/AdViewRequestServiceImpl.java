@@ -10,6 +10,7 @@ import cn.shuzilm.bean.lj.response.LJNativeResponse;
 import cn.shuzilm.bean.lj.response.NativeAD;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
@@ -40,6 +41,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
+    private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
@@ -71,6 +73,12 @@ public class AdViewRequestServiceImpl implements RequestService {
             String adType = convertAdType(showtype); //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
+            //ip 黑名单规则  在黑名单内直接返回
+            if (ipBlacklist.isIpBlacklist(userDevice.getIp())){
+                log.debug("IP黑名单:{}", userDevice.getIp());
+                response = "";
+                return response;
+            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "";

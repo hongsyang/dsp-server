@@ -56,7 +56,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        long start = new Date().getTime();
+        long start = System.currentTimeMillis();
         //返回状态
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
         response.setHeader("Content-Type", "text/html");
@@ -85,8 +85,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
-            }catch (Exception e1){
-                log.debug(" 异常：{}，接收 POST 请求",e1, dataStr);
+            } catch (Exception e1) {
+                log.debug(" 异常：{}，接收 POST 请求", e1, dataStr);
             }
 
         }
@@ -112,14 +112,16 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             future.cancel(true);// 中断执行此任务的线程
         } catch (TimeoutException e1) {
             // 超时情况
-            long end = new Date().getTime();
+            long end = System.currentTimeMillis();
             MDC.put("sift", "timeOut");
             log.error("timeMs:{},url:{}", end - start, url);
             MDC.remove("sift");
             response.setStatus(HttpResponseStatus.NO_CONTENT);
             ChannelFuture future1 = e.getChannel().write(response);
             future1.addListener(ChannelFutureListener.CLOSE);
+            System.out.println(Thread.currentThread().getName()+"是否执行完毕"+future.isDone());
             future.cancel(true);// 中断执行此任务的线程
+            System.out.println(Thread.currentThread().getName()+"是否执行完毕"+future.isDone());
             return;
         }
 

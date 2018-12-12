@@ -11,6 +11,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import com.alibaba.fastjson.JSON;
 import io.lettuce.core.RedisClient;
@@ -51,6 +52,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
+    private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
+
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
@@ -75,7 +78,12 @@ public class LingJiRequestServiceImpl implements RequestService {
             String adType = convertAdType(showtype); //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
-
+            //ip 黑名单规则  在黑名单内直接返回
+            if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
+                log.debug("IP黑名单:{}", userDevice.getIp());
+                response = "";
+                return response;
+            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";

@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import com.google.common.collect.Lists;
 
@@ -50,6 +51,7 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
+    private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
@@ -75,6 +77,14 @@ public class YouYiRequestServiceImpl implements RequestService {
             String adType = null; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
+            //ip 黑名单规则  在黑名单内直接返回
+            if (ipBlacklist.isIpBlacklist(user.getUser_ip())){
+                log.debug("IP黑名单:{}", user.getUser_ip());
+                response = "";
+                return response;
+            }
+
+
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
 //                return response;
