@@ -99,7 +99,7 @@ public class RtbFlowControl {
     	return bidList;
     }
 
-    public static ConcurrentHashMap<String, FlowTaskBean> getMapFlowTask() {
+    public ConcurrentHashMap<String, FlowTaskBean> getMapFlowTask() {
 		return mapFlowTask;
 	}
 
@@ -230,7 +230,12 @@ public class RtbFlowControl {
 //        ArrayList<GpsBean> gpsResidenceList = new ArrayList<>();
 //        ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
 //        ArrayList<GpsBean> gpsActiveList = new ArrayList<>();
-        if (adBeanList != null) {
+        if (adBeanList != null && !adBeanList.isEmpty()) {
+        	areaMap.clear();
+        	demographicMap.clear();
+        	mapAdMaterial.clear();
+        	mapAdMaterialRatio.clear();
+        	mapMaterialRatio.clear();
             for (AdBean adBean : adBeanList) {
                 // 广告ID
                 String uid = adBean.getAdUid();
@@ -430,6 +435,7 @@ public class RtbFlowControl {
     	}
     	for(FlowTaskBean flowTask:flowTaskList){
     		mapFlowTask.put(flowTask.getAid(), flowTask);
+    		myLog.info(flowTask.getAid()+"\t"+flowTask.getCommand());
     	}
     }
     

@@ -148,11 +148,6 @@ public class TaskServicve extends Service {
      * @throws java.sql.SQLException
      */
     public ResultList queryAllAd() throws SQLException {
-        //long now = System.currentTimeMillis() ;
-        //Object[] arr = new Object[2];
-        //arr[0] = specDateFM.format(new Date(startTime));
-        //arr[0] = now / 1000;
-        //arr[1] = now / 1000;
         String sql = "select * from ad";
         return select.select(sql);
     }

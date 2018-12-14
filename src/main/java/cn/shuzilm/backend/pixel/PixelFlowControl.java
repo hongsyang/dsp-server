@@ -81,45 +81,38 @@ public class PixelFlowControl {
 		double rebateProfit = 0.0;
 		double cost = pixel.getCost();
 		double premiumFactor = pixel.getPremiumFactor();
-		double dspAndRebatePremiumFactor = premiumFactor + rebate;
-		if (dspAndRebatePremiumFactor >= 1) {
-			dspAndRebatePremiumFactor = 1 - 0.1;
-			premiumFactor = 1 - rebate - 0.1;
+		double price = (double) (Math.round(ad.getPrice() * 100000)/100000.0);
+		
+		
+		if(premiumFactor >= 1){
+			dspToleranceRatio = 0.6;
+		}else if(premiumFactor >= 0.6 && premiumFactor < 1){
+			dspToleranceRatio = 0.3;
 		}
 		
-		double finalPrice = cost / (1.0 - dspAndRebatePremiumFactor);
-		double price = ad.getPrice();
-		if (finalPrice > price) {// 最终消耗金额高于广告出价金额,适当调整DSP平台利润
-			double dspAndRebatePremiumFactorTemp = dspToleranceRatio + rebate;// DSP保守利润率+代理商返点比例
-			double tempPrice = cost / (1.0 - dspAndRebatePremiumFactorTemp);
-			if (tempPrice == price) {
-				double dspAndRebatePremiumEqualFactor = dspToleranceRatio - dspToleranceEqualRatio + rebate;
-				double tempFinalPrice = cost / (1.0 - dspAndRebatePremiumEqualFactor);
-				finalPrice = tempFinalPrice;
-				dspProfit = finalPrice * (dspToleranceRatio - dspToleranceEqualRatio);
-				rebateProfit = finalPrice * rebate;
-				pixel.setLower(true);
-			} else if (tempPrice < price) {
-				finalPrice = tempPrice;
-				dspProfit = finalPrice * dspToleranceRatio;
-				rebateProfit = finalPrice * rebate;
-				pixel.setLower(true);
-			} else {
-				dspProfit = finalPrice * premiumFactor;
-				rebateProfit = finalPrice * rebate;
-				pixel.setLower(false);
-			}
-		} else if (finalPrice == price) {
-			double dspAndRebatePremiumEqualFactor = dspAndRebatePremiumFactor - dspToleranceEqualRatio;
-			finalPrice = cost / (1.0 - dspAndRebatePremiumEqualFactor);
-			dspProfit = finalPrice * (premiumFactor - dspToleranceEqualRatio);
+		double finalPrice = 0.0;
+		
+		double rebateProfitTemp = (double) (Math.round(cost * rebate * 100000)/100000.0);
+		
+		double profitTemp = (double) (Math.round((price - cost - rebateProfitTemp) / cost * 100000)/100000.0);
+		
+		if(profitTemp < dspToleranceRatio){
+			finalPrice = cost + rebateProfitTemp + cost * premiumFactor;
 			rebateProfit = finalPrice * rebate;
+			dspProfit = finalPrice - cost - rebateProfit;
+			pixel.setLower(false);			
+		}else if(profitTemp >= dspToleranceRatio && profitTemp <= premiumFactor){
+			finalPrice = cost + rebateProfitTemp + cost * profitTemp;
+			rebateProfit = finalPrice * rebate;
+			dspProfit = finalPrice - cost - rebateProfit;
 			pixel.setLower(true);
-		} else {
-			dspProfit = finalPrice * premiumFactor;
+		}else if(profitTemp > premiumFactor){
+			finalPrice = cost + rebateProfitTemp + cost * premiumFactor;
 			rebateProfit = finalPrice * rebate;
+			dspProfit = finalPrice - cost - rebateProfit;
 			pixel.setLower(true);
 		}
+		
 
 		pixel.setFinalCost((double) (Math.round(finalPrice * 100000)/100000.0));		
 		pixel.setDspProfit((double) (Math.round(dspProfit * 100000)/100000.0));		
@@ -140,13 +133,13 @@ public class PixelFlowControl {
 
 	public static void main(String[] args) {
 		AdPixelBean bean = new AdPixelBean();
-		bean.setCost(15.01);
-		bean.setPremiumFactor(0.6);
+		bean.setCost(5.01);
+		bean.setPremiumFactor(1.0);
 		bean.setAdUid("123");
 		AdBean ad = new AdBean();
         ad.setAdUid("123");
         String adverUid = "123";
-        ad.setPrice(35f);
+        ad.setPrice(8.517F);
         PixelFlowControl pixcel = PixelFlowControl.getInstance();
         mapAd.put(ad.getAdUid(), ad);
 		AdPixelBean pixel;
