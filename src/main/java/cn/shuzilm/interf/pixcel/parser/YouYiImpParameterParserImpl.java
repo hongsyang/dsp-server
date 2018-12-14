@@ -108,7 +108,7 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
 
             log.debug("YouYiNurl曝光的requestid:{},element对象:{}", requestId, element);
             MDC.put("sift", "pixel");
-            AdPixelBean bean = new AdPixelBean();
+//            AdPixelBean bean = new AdPixelBean();
 //            if (element != null) {
 //                bean.setAdUid(element.getAdUid());
 //            }
@@ -119,8 +119,8 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
 //            bean.setCost(Double.valueOf(priceLong) / 10000);
 //            bean.setWinNoticeNums(0);
             //pixel服务器发送到主控模块
-            log.debug("pixel服务器发送到主控模块的YouYiNurlBean：{}", bean);
-            AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+//            log.debug("pixel服务器发送到主控模块的YouYiNurlBean：{}", bean);
+//            AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
 
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
