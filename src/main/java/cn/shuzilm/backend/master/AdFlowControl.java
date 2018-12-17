@@ -1214,17 +1214,7 @@ public class AdFlowControl {
 //            TaskBean task = new TaskBean(adUid);
         	TaskBean task = mapTask.get(adUid);
             AdBean ad = mapAd.get(adUid);
-            
-            //从小时监控中取出曝光量、点击次数 、点击金额
-//            AdFlowStatus statusHour = mapMonitorHour.get(adUid);
-//            task.setClickNums(statusHour.getClickNums());
-//            task.setExposureNums(statusHour.getWinNums());
-//            task.setMoney(statusHour.getMoney());
-//
-//            //给每一个节点分配自己的 曝光 额度
-//            task.setExposureLimitPerHour(ad.getCpmHourLimit() / nodeNums);
-//            task.setExposureLimitPerDay(ad.getCpmDailyLimit() / nodeNums);
-//            task.setCommand(TaskBean.COMMAND_START);            
+                       
             if(task.getCommand() == TaskBean.COMMAND_START){
             	myLog.info("广告["+adUid+"]加入下发队列......");
             	taskList.add(task);
