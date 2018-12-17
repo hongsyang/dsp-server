@@ -812,13 +812,6 @@ public class AdFlowControl {
         }
 
     }
-//
-//    /**
-//     * 统计每一个广告主的消费情况，
-//     */
-//    public void statConsumeByAdver(){
-//
-//    }
     
     /**
      * 每隔10分钟读取库中广告，判断是否有广告被关闭
