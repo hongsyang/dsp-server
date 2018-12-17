@@ -198,7 +198,6 @@ public class RtbFlowControl {
     public void trigger() {
         // 5 s
         pullAndUpdateTask();
-        updateDeviceLimitMap();
         // 10分钟拉取一次最新的广告内容
         pullTenMinutes();
         // 1 hour
@@ -211,7 +210,8 @@ public class RtbFlowControl {
         
         //1分钟上报一次ADX与APP流量数
         pushAdxAndAppFlow();
-        
+        updateDeviceLimitMap();
+
         //5秒钟获取一次流量任务
         pullAndUpdateFlowTask();
     }
@@ -481,7 +481,7 @@ public class RtbFlowControl {
     }
 
     /**
-     * 每隔5秒，更新广告的超投设备
+     * 每隔一分钟，更新广告的超投设备
      */
     public void updateDeviceLimitMap() {
         MDC.put("sift", "rtb");

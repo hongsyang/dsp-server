@@ -1,24 +1,18 @@
 package cn.shuzilm.rtb;
 
-import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.master.TaskServicve;
-import cn.shuzilm.backend.rtb.RtbConstants;
-import cn.shuzilm.backend.rtb.RtbFlowControl;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.util.AsyncRedisClient;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 import io.lettuce.core.ScoredValue;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.sql.SQLException;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -27,13 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by thunders on 2018/7/23.
  */
-@DisallowConcurrentExecution
-public class RtbTaskTest implements Job {
+public class RtbFlowControlTest {
 
     private static AsyncRedisClient redis;
-    private static final org.slf4j.Logger myLog = LoggerFactory.getLogger(RtbTaskTest.class);
+    private static final org.slf4j.Logger myLog = LoggerFactory.getLogger(RtbFlowControlTest.class);
 
-    @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         for(int i=0;i<100;i++) {
             System.out.println(i);
@@ -60,6 +52,22 @@ public class RtbTaskTest implements Job {
         String nodes [] = nodeStr.split(";");
         redis = AsyncRedisClient.getInstance(nodes);
 
+    /*    Double a = new Double(1D);
+        int b = 1;
+        System.out.println(a == b);*/
+
+        /*redis.delAsync("078d9598-cee1-44a3-a6fd-526b84bcd4a6_DAYLY");
+        redis.delAsync("31b3c292-a19d-4747-bf0e-9e012aa60902_DAYLY");
+        redis.delAsync("48146b7a-632f-4d2b-98a9-1339612bc0b0_DAYLY");
+
+        redis.delAsync("078d9598-cee1-44a3-a6fd-526b84bcd4a6_HOURLY");
+        redis.delAsync("31b3c292-a19d-4747-bf0e-9e012aa60902_HOURLY");
+        redis.delAsync("48146b7a-632f-4d2b-98a9-1339612bc0b0_HOURLY");*/
+
+        //Double d = redis.zIncrbyAsync("078d9598-cee1-44a3-a6fd-526b84bcd4a6"+REDIS_KEY_POSTFIX_DAILY, 0, "test");
+        //System.out.println(d);
+
+
         /*List<String> deviceIds = redis.zRangeByScoreAsync("adfanfasdf", 0, -1);
         System.out.println(deviceIds);*/
 
@@ -68,7 +76,7 @@ public class RtbTaskTest implements Job {
         // 广告投放限制
         adLimit();
         // 模拟曝光
-        expOrClick();
+        //expOrClick();
         // 更新超限Map
         updateDeviceLimitMap();
         // 打印redis 数据
@@ -195,7 +203,7 @@ public class RtbTaskTest implements Job {
             limitMap.remove(adUid);
             myLog.info("移除: 广告 {}", adUid);
         }
-        myLog.info("更新: 广告 {}  超投设备 {}", adUid, deviceIdSets.toString());
+        // myLog.info("更新: 广告 {}  超投设备 {}", adUid, deviceIdSets.toString());
     }
 
     public static void incrDeviceExpOrClickTime(String adUid,int amount, String imeiMd5) {
@@ -205,14 +213,15 @@ public class RtbTaskTest implements Job {
         long epochSecond = now.toEpochSecond(zone);
         LocalDateTime expiredTime = null;
         long time = 0L;
-        if (redis.zIncrbyAsync(adUid+REDIS_KEY_POSTFIX_DAILY, amount, imeiMd5) == amount) {
+        Double d = redis.zIncrbyAsync(adUid+REDIS_KEY_POSTFIX_DAILY, amount, imeiMd5);
+        if (d == amount) {
             // 计算到当天24点的秒数
             expiredTime = LocalDateTime.of(now.getYear(),now.getMonth(),now.getDayOfMonth(), 23, 59, 59);
             time = expiredTime.toEpochSecond(zone) - epochSecond;
             redis.expire(adUid+REDIS_KEY_POSTFIX_DAILY, time);
         }
-
-        if (redis.zIncrbyAsync(adUid+REDIS_KEY_POSTFIX_HOURLY, amount, imeiMd5) == amount) {
+        Double h = redis.zIncrbyAsync(adUid+REDIS_KEY_POSTFIX_HOURLY, amount, imeiMd5);
+        if (h == amount) {
             // 计算到前小时结束的秒数
             expiredTime = LocalDateTime.of(now.getYear(),now.getMonth(),now.getDayOfMonth(), now.getHour(), 59, 59);
             time = expiredTime.toEpochSecond(zone) - epochSecond;
@@ -245,6 +254,7 @@ public class RtbTaskTest implements Job {
                     ex.printStackTrace();
                 }
             }
+            mapAd.remove("078d9598-cee1-44a3-a6fd-526b84bcd4a6");
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -259,8 +269,8 @@ public class RtbTaskTest implements Job {
     public static void expOrClick(){
         int i = 0;
         for(String adUid : mapAd.keySet()) {
-            incrDeviceExpOrClickTime(adUid, (int)(Math.random() * 3), "test");
-            incrDeviceExpOrClickTime(adUid, (int)(Math.random() * 3), i+"");
+            incrDeviceExpOrClickTime(adUid, (int)(Math.random() * 10 + 1), "test");
+            incrDeviceExpOrClickTime(adUid, (int)(Math.random() * 10 + 1), (i++) + "");
         }
 
     }
@@ -270,7 +280,9 @@ public class RtbTaskTest implements Job {
         int i = 0;
         System.out.println("----------------- 广告投放限制 --------------------");
         for(String adUid : mapAd.keySet()) {
-            System.out.println(adUid + "    " + mapAd.get(adUid).getFrqDaily());
+            int dayly = mapAd.get(adUid).getFrqDaily() == 0 ? 20 : mapAd.get(adUid).getFrqDaily();
+            int hourly = mapAd.get(adUid).getFrqHour() == 0 ? 5 : mapAd.get(adUid).getFrqHour();
+            System.out.println(adUid + "    day: " + dayly + "  hour: " + hourly);
         }
         System.out.println("----------------- 广告投放限制 --------------------");
 
@@ -294,8 +306,9 @@ public class RtbTaskTest implements Job {
         System.out.println("----------------- Dayly Redis --------------------");
         for(String adUid : mapAd.keySet()) {
             // 测试用 ： 打印redis中 的数据
-            List<ScoredValue<String>> list = redis.zRangeWithScoreAsync(adUid+REDIS_KEY_POSTFIX_DAILY,0, -1);
-            System.out.println(adUid + " : " + redis.ttl(adUid));
+            String key = adUid+REDIS_KEY_POSTFIX_DAILY;
+            List<ScoredValue<String>> list = redis.zRangeWithScoreAsync(key,0, -1);
+            System.out.println(key + " : " + redis.ttl(key));
             for(ScoredValue<String> scoredValue : list) {
                 System.out.print( " value: "+scoredValue.getValue() + "  score: " +  scoredValue.getScore());
             }
@@ -303,18 +316,35 @@ public class RtbTaskTest implements Job {
         }
         System.out.println("----------------- Dayly Redis --------------------");
 
-        System.out.println("----------------- Dayly Hourly --------------------");
+        System.out.println("----------------- Hourly Redis --------------------");
         for(String adUid : mapAd.keySet()) {
             // 测试用 ： 打印redis中 的数据
-            List<ScoredValue<String>> list = redis.zRangeWithScoreAsync(adUid+REDIS_KEY_POSTFIX_HOURLY,0, -1);
-            System.out.println(adUid + " : " + redis.ttl(adUid));
+            String key = adUid+REDIS_KEY_POSTFIX_HOURLY;
+            List<ScoredValue<String>> list = redis.zRangeWithScoreAsync(key,0, -1);
+            System.out.println(key + " : " + redis.ttl(key));
             for(ScoredValue<String> scoredValue : list) {
                 System.out.print( " value: "+scoredValue.getValue() + "  score: " +  scoredValue.getScore());
             }
             System.out.println("\n");
         }
-        System.out.println("----------------- Dayly Hourly --------------------");
+        System.out.println("----------------- Hourly Redisc --------------------");
 
+    }
+
+    public static void printResult () {
+        for (String adUid : mapAd.keySet()) {
+            int dayly = mapAd.get(adUid).getFrqDaily() == 0 ? 20 : mapAd.get(adUid).getFrqDaily();
+            int hourly = mapAd.get(adUid).getFrqHour() == 0 ? 5 : mapAd.get(adUid).getFrqHour();
+
+            System.out.println(adUid + "投放限制： （天："+dayly+"  小时： " + hourly + "）");
+            System.out.println("Redis: ");
+            String key = adUid+REDIS_KEY_POSTFIX_DAILY;
+            List<ScoredValue<String>> list = redis.zRangeWithScoreAsync(key,0, -1);
+            System.out.println(key + " : " + redis.ttl(key));
+            for(ScoredValue<String> scoredValue : list) {
+                System.out.print( " value: "+scoredValue.getValue() + "  score: " +  scoredValue.getScore());
+            }
+        }
     }
 }
 
