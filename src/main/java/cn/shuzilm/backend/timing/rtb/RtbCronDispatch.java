@@ -68,7 +68,6 @@ public class RtbCronDispatch {
         
         RtbCronDispatch.startTimer(5);
 
-
     }
     
     public static void startRtbDispatch() {
@@ -89,7 +88,8 @@ public class RtbCronDispatch {
         RtbCronDispatch.startTimer(6);
         
         RtbCronDispatch.startTimer(7);
-        
+
+        RtbCronDispatch.startTimer(8);
     }
 
     /**
@@ -127,6 +127,9 @@ public class RtbCronDispatch {
            case 7:
         	   dispatch(RtbPullFlowTask.class,"0/5 * * * * ?");
         	   break;
+           case 8:
+               dispatch(FetchDeviceLimitDataTask.class,"0 * * * * ?");
+               break;
            default:
                break;
        }
