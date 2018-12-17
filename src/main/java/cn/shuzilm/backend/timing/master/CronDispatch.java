@@ -50,10 +50,12 @@ public class CronDispatch {
 
 
     public static void main(String[] args) {
-        //程序初始化 加载程序
-        AdFlowControl.getInstance().loadAdInterval(true);
+    	//程序初始化 加载程序
+    	
+    	AdFlowControl.getInstance().loadAllAdInterval(true);
         
-        AdFlowControl.getInstance().loadAllAdInterval(true);
+        AdFlowControl.getInstance().loadAdInterval(true);
+               
         // 初始化CPC结算方式的广告的 阈值和moniter
         CPCHandler.getInstance().updateIndicator(true);
 //        AdFlowControl.getInstance().pullAndUpdateTask();
