@@ -123,7 +123,7 @@ public class HttpClientUtil {
      * @param url 请求地址加参数
      * @return 响应
      */
-    public String get(String url) {
+    public static String get(String url) {
         String result = null;
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet get = new HttpGet(url);
@@ -157,7 +157,7 @@ public class HttpClientUtil {
      * @param map 参数map
      * @return 响应
      */
-    public String getMap(String url,Map<String,String> map)
+    public static String getMap(String url,Map<String,String> map)
     {
         String result = null;
         CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -199,7 +199,7 @@ public class HttpClientUtil {
         return null;
     }
 
-    private String entityToString(HttpEntity entity) throws IOException {
+    private static String entityToString(HttpEntity entity) throws IOException {
         String result = null;
         if (entity != null) {
             long lenth = entity.getContentLength();

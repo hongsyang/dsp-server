@@ -6,6 +6,7 @@ import cn.shuzilm.bean.adview.response.*;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import org.apache.commons.lang.StringUtils;
@@ -282,7 +283,12 @@ public class AdViewRequestServiceImpl implements RequestService {
      * @return
      */
     private Boolean sendGetUrl(String adviewexp) {
-        return null;
+        String s = HttpClientUtil.get(adviewexp);
+        if (s != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 
