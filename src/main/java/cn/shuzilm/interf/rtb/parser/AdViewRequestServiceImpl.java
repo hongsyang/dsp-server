@@ -252,7 +252,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
                 //发送点击和曝光
-                Integer bidfloorcur = Integer.valueOf(userImpression.getBidfloorcur());
+                Double bidfloorcur = Double.valueOf(userImpression.getBidfloorcur());
                 Double v = bidfloorcur * 1.3;
                 String price = "&price=" + v;
 
@@ -262,7 +262,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 String s = serviceUrl + "adviewclick?";
                 if (response.contains(s)) {
                     String substring = response.substring(response.indexOf(s));
-                    String adviewexp = substring.substring(0, substring.indexOf('"'));
+                    String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick","adviewnurl");
                     String adviewexpUrl = adviewexp + price;
                     Boolean flag = sendGetUrl(adviewexpUrl);
                     log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);

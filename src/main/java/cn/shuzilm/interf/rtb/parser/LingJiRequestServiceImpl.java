@@ -235,7 +235,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
                 MDC.remove("sift");
                 //发送点击和曝光
-                Integer bidfloorcur = Integer.valueOf(userImpression.getBidfloorcur());
+                Double bidfloorcur = Double.valueOf(userImpression.getBidfloorcur());
                 Double v = bidfloorcur * 1.3;
                 String price = "&price=" + v;
 
@@ -245,7 +245,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 String s = serviceUrl + "lingjiclick?";
                 if (response.contains(s)){
                     String substring = response.substring(response.indexOf(s));
-                    String  lingjiexp= substring.substring(0, substring.indexOf('"'));
+                    String  lingjiexp= substring.substring(0, substring.indexOf('"')).replace("lingjiclick","lingjiexp");
                     String lingjiexpUrl = lingjiexp + price;
                     Boolean flag  =sendGetUrl(lingjiexpUrl);
                     log.debug("是否曝光成功：{},lingjiexpUrl:{}",flag,lingjiexpUrl);
