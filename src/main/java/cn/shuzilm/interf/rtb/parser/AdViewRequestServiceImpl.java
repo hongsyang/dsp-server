@@ -4,17 +4,12 @@ import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.adview.request.*;
 import cn.shuzilm.bean.adview.response.*;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.bean.lj.request.*;
-import cn.shuzilm.bean.lj.response.LJLink;
-import cn.shuzilm.bean.lj.response.LJNativeResponse;
-import cn.shuzilm.bean.lj.response.NativeAD;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
-import org.springframework.beans.BeanUtils;
 import cn.shuzilm.filter.FilterRule;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -74,7 +69,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
             //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(userDevice.getIp())){
+            if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
                 log.debug("IP黑名单:{}", userDevice.getIp());
                 response = "";
                 return response;
@@ -256,13 +251,38 @@ public class AdViewRequestServiceImpl implements RequestService {
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
+                //发送点击和曝光
+                Integer bidfloorcur = Integer.valueOf(userImpression.getBidfloorcur());
+                Double v = bidfloorcur * 1.3;
+                String price = "&price=" + v;
+
+//                pushRedis(targetDuFlowBean);//上传到redis服务器
+                response = JSON.toJSONString(bidResponseBean);
+                String serviceUrl = configs.getString("SERVICE_URL");
+                String s = serviceUrl + "adviewclick?";
+                if (response.contains(s)) {
+                    String substring = response.substring(response.indexOf(s));
+                    String adviewexp = substring.substring(0, substring.indexOf('"'));
+                    String adviewexpUrl = adviewexp + price;
+                    Boolean flag = sendGetUrl(adviewexpUrl);
+                    log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
+                }
                 bidRequestBean = null;
-                targetDuFlowBean =null;
+                targetDuFlowBean = null;
             }
             return response;
         } else {
             return response;
         }
+    }
+
+    /**
+     * 发送曝光请求
+     * @param adviewexp
+     * @return
+     */
+    private Boolean sendGetUrl(String adviewexp) {
+        return null;
     }
 
 

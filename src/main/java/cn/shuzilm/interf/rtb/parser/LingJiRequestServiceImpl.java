@@ -10,20 +10,15 @@ import cn.shuzilm.bean.lj.response.*;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
-import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import com.alibaba.fastjson.JSON;
-import io.lettuce.core.RedisClient;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
-import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -239,8 +234,23 @@ public class LingJiRequestServiceImpl implements RequestService {
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
                 MDC.remove("sift");
+                //发送点击和曝光
+                Integer bidfloorcur = Integer.valueOf(userImpression.getBidfloorcur());
+                Double v = bidfloorcur * 1.3;
+                String price = "&price=" + v;
+
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
+                String serviceUrl = configs.getString("SERVICE_URL");
+                String s = serviceUrl + "lingjiclick?";
+                if (response.contains(s)){
+                    String substring = response.substring(response.indexOf(s));
+                    String  lingjiexp= substring.substring(0, substring.indexOf('"'));
+                    String lingjiexpUrl = lingjiexp + price;
+                    Boolean flag  =sendGetUrl(lingjiexpUrl);
+                    log.debug("是否曝光成功：{},lingjiexpUrl:{}",flag,lingjiexpUrl);
+                }
+
                 MDC.put("sift", "dsp-server");
                 log.debug("没有过滤的bidResponseBean:{}", response);
             }
@@ -248,6 +258,16 @@ public class LingJiRequestServiceImpl implements RequestService {
         } else {
             return response;
         }
+    }
+
+    /**
+     * 发送曝光请求
+     *
+     * @param lingjiexp
+     */
+    private Boolean sendGetUrl(String lingjiexp) {
+
+        return null;
     }
 
 
