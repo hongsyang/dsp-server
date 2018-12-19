@@ -236,9 +236,10 @@ public class LingJiRequestServiceImpl implements RequestService {
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
                 MDC.remove("sift");
                 //发送点击和曝光
-                Double bidfloorcur = Double.valueOf(userImpression.getBidfloorcur());
+                Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
                 Double v = bidfloorcur * 1.3;
                 String price = "&price=" + v;
+                String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
 
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
@@ -247,7 +248,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 if (response.contains(s)) {
                     String substring = response.substring(response.indexOf(s));
                     String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
-                    String lingjiexpUrl = lingjiexp + price;
+                    String lingjiexpUrl = lingjiexp + price + pf;
                     Boolean flag = sendGetUrl(lingjiexpUrl);
                     log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
                 }

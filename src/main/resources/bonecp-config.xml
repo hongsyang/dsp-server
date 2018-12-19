@@ -19,7 +19,8 @@
     <!--<property name="jdbcUrl">jdbc:mysql://rm-2zer1w1qt6k5nr163.mysql.rds.aliyuncs.com:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>-->
     <!--<property name="username">smdspcindb</property>-->
     <!--<property name="password">m4ds#%@$WWS</property>-->
-    <property name="jdbcUrl">jdbc:mysql://47.93.230.253:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>
+    <!--<property name="jdbcUrl">jdbc:mysql://47.93.230.253:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>-->
+    <property name="jdbcUrl">jdbc:mysql://172.17.129.116:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>
     <property name="username">dsp</property>
     <property name="password">@WFJUYV0xDs$7^v9</property>
 	</default-config>

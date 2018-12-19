@@ -253,18 +253,20 @@ public class AdViewRequestServiceImpl implements RequestService {
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
                 //发送点击和曝光
-                Double bidfloorcur = Double.valueOf(userImpression.getBidfloorcur());
+                Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
                 Double v = bidfloorcur * 1.3;
                 String price = "&price=" + v;
+                String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
 
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
                 String serviceUrl = configs.getString("SERVICE_URL");
                 String s = serviceUrl + "adviewclick?";
+
                 if (response.contains(s)) {
                     String substring = response.substring(response.indexOf(s));
-                    String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick","adviewnurl");
-                    String adviewexpUrl = adviewexp + price;
+                    String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
+                    String adviewexpUrl = adviewexp + price + pf;
                     Boolean flag = sendGetUrl(adviewexpUrl);
                     log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
                 }
@@ -279,6 +281,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     /**
      * 发送曝光请求
+     *
      * @param adviewexp
      * @return
      */
