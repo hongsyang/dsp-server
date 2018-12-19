@@ -83,6 +83,17 @@ public class YouYiRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
+            //竞价请求进来之前对imei和mac做过滤
+            if (userDevice.getMd5_imei() != null && userDevice.getMd5_imei().length() == 32) {
+
+            } else if (userDevice.getMd5_mac() != null && userDevice.getMd5_mac().length() == 32) {
+                userDevice.setMd5_imei(userDevice.getMd5_mac());
+            } else {
+                response = "";
+                return response;
+            }
+
+
 
 
 //            if (StringUtils.isBlank(adType)) {

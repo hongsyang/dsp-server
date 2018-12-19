@@ -80,6 +80,15 @@ public class LingJiRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
+            //竞价请求进来之前对imei和mac做过滤
+            if (userDevice.getDidmd5() != null && userDevice.getDidmd5().length() == 32) {
+
+            } else if (userDevice.getExt().getMacmd5() != null && userDevice.getExt().getMacmd5().length() == 32) {
+                userDevice.setDidmd5(userDevice.getExt().getMacmd5());
+            } else {
+                response = "";
+                return response;
+            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
