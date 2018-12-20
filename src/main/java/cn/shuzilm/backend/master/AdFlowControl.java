@@ -1464,8 +1464,7 @@ public class AdFlowControl {
     public void checkFlowQuota(){
     	MDC.put("sift", "control");
     	String hour = hourDateFM.format(new Date());
-    	long totalFlows = flowMap.get(Integer.parseInt(hour));
-    	
+    	long totalFlows = flowMap.get(Integer.parseInt(hour));  	
     	ArrayList<FlowTaskBean> flowTaskList = new ArrayList<FlowTaskBean>();
     	
     	//检查adx流量是否超限
