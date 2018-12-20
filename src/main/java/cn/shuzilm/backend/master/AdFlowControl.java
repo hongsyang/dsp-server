@@ -1386,6 +1386,31 @@ public class AdFlowControl {
     }
     
     /**
+     * 每隔10分钟下发一次任务关闭的adx或app
+     */
+    public void pushFlowTaskPerTenMinute(){
+    	ArrayList<FlowTaskBean> flowTaskList = new ArrayList<FlowTaskBean>();
+    	Iterator iter = mapFlowTask.entrySet().iterator();
+    	while(iter.hasNext()){
+    		Map.Entry entry = (Map.Entry) iter.next();
+    		String aid = (String) entry.getKey();
+    		FlowTaskBean task = mapFlowTask.get(aid);
+    		if(task.getCommand() != FlowTaskBean.COMMAND_START){
+    			flowTaskList.add(task);
+    		}
+    	}
+    	if(!flowTaskList.isEmpty()){
+    		for(WorkNodeBean node:nodeList){
+        		if(node.getName().contains("rtb")){
+        			pushFlowTask(node.getName(), flowTaskList);
+        		}
+        	}
+    	}
+    	
+    	flowTaskList = null;
+    }
+    
+    /**
      * 每隔30秒获取一次ADX与APP流量,检查流量是否超限
      */
     public void pullAndCheckFlowControl(){

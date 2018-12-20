@@ -90,6 +90,8 @@ public class CronDispatch {
         CronDispatch.startTimer(9);
         
         CronDispatch.startTimer(10);
+        
+        CronDispatch.startTimer(11);
     }
 
     /**
@@ -136,6 +138,9 @@ public class CronDispatch {
            case 10:
                dispatch(UpdateMonitorTask.class,"0 0/10 * * * ?");
                break;
+           case 11:
+               dispatch(PushFlowTaskPerTenMinute.class,"0 0/10 * * * ?");
+               break;              
            default:
                break;
        }

@@ -184,6 +184,7 @@ public class MsgControlCenter {
     public static void removeAll(String nodeId){
     	JedisQueueManager.removeAll(nodeId.concat(DOWN));
     	JedisQueueManager.removeAll(nodeId.concat(AD_BEAN));
+    	JedisQueueManager.removeAll(nodeId.concat(FLOW_DOWN));
     	
     }
     

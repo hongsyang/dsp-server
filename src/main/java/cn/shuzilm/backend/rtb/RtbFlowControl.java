@@ -635,7 +635,7 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid,String adxName,String appPackageName) {
+    public boolean checkAvalable(String auid,String deviceId) {
     	MDC.put("sift", "rtb");
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
@@ -673,6 +673,18 @@ public class RtbFlowControl {
         	//代表时间窗选择了不限
         	if(scheduleTime != null && scheduleTime.trim().equals("{}")){
         		return true;
+        	}
+        	
+        	if(deviceId != null && deviceLimitMapDaiyly.get(auid) != null && 
+        			deviceLimitMapDaiyly.get(auid).contains(deviceId)){
+        		myLog.info("广告["+auid+"]设备ID["+deviceId+"已达到天频次");
+        		return false;
+        	}
+        	
+        	if(deviceId != null && deviceLimitMapHourly.get(auid) != null && 
+        			deviceLimitMapHourly.get(auid).contains(deviceId)){
+        		myLog.info("广告["+auid+"]设备ID["+deviceId+"已达到小时频次");
+        		return false;
         	}
         	        	
         	Integer weekNum = weekAndDayNumMap.get("EEEE");

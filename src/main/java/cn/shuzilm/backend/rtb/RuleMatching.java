@@ -322,7 +322,7 @@ public class RuleMatching {
 		// long startOrder = System.currentTimeMillis();
 
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid, adxName, appPackageName);
+			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId);
 
 			// 是否投当前的广告
 			if (!isAvaliable) {
