@@ -568,7 +568,6 @@ public class RtbFlowControl {
             limitMap.remove(adUid);
             myLog.info("移除: 广告 {}", adUid);
         }
-        myLog.info("更新: 广告 {}  超投设备 {}", adUid, deviceIdSets.toString());
     }
 
     
