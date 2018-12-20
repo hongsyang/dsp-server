@@ -85,8 +85,8 @@ public class PixelFlowControl {
 		
 		
 		if(premiumFactor >= 1){
-			dspToleranceRatio = 0.6;
-		}else if(premiumFactor >= 0.6 && premiumFactor < 1){
+			dspToleranceRatio = 0.5;
+		}else if(premiumFactor >= 0.5 && premiumFactor < 1){
 			dspToleranceRatio = 0.3;
 		}
 		
