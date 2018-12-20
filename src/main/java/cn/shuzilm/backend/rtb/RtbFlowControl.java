@@ -508,16 +508,26 @@ public class RtbFlowControl {
         mapAd.forEach((adUid,adBean) -> {
             try{
                 // 获取广告设置的投放频率限制
-                Integer frqDaily = adBean.getFrqDaily() == 0 ? DEFAULT_LIMIT_DAILY : adBean.getFrqDaily();
-                Integer frqHourly = adBean.getFrqHour() == 0 ? DEFAULT_LIMIT_HOURLY : adBean.getFrqHour();
+               /* Integer frqDaily = adBean.getFrqDaily() == 0 ? DEFAULT_LIMIT_DAILY : adBean.getFrqDaily();
+                Integer frqHourly = adBean.getFrqHour() == 0 ? DEFAULT_LIMIT_HOURLY : adBean.getFrqHour();*/
 
-                // 更新超投设备 Map
-                myLog.info("开始更新天的超投 Map");
-                updateDeviceLimitMap(adUid, frqDaily, deviceLimitMapDaiyly, REDIS_KEY_POSTFIX_DAILY);
+                Integer frqDaily = adBean.getFrqDaily();
+                Integer frqHourly = adBean.getFrqHour();
+                if(frqDaily == 0 && frqHourly == 0) {
+                    frqDaily = DEFAULT_LIMIT_DAILY;
+                    frqHourly = DEFAULT_LIMIT_HOURLY;
+                }
 
-                myLog.info("开始更新小时的超投 Map");
-                updateDeviceLimitMap(adUid, frqHourly, deviceLimitMapHourly, REDIS_KEY_POSTFIX_HOURLY);
+                if (frqDaily != 0) {
+                    // 更新超投设备 Map
+                    myLog.info("开始更新天的超投 Map");
+                    updateDeviceLimitMap(adUid, frqDaily, deviceLimitMapDaiyly, REDIS_KEY_POSTFIX_DAILY);
+                }
 
+                if(frqHourly != 0) {
+                    myLog.info("开始更新小时的超投 Map");
+                    updateDeviceLimitMap(adUid, frqHourly, deviceLimitMapHourly, REDIS_KEY_POSTFIX_HOURLY);
+                }
 
                 /*if(frqDaily != null && frqDaily > 0 ) {
                     // 超投设备id
