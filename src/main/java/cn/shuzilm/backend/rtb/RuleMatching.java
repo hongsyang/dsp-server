@@ -350,6 +350,8 @@ public class RuleMatching {
 			if (!filterFlag) {
 				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
 				continue;
+			}else{
+				LOG.debug("广告ID[" + adUid + "]物料匹配通过,参与人群包匹配!");
 			}
 
 			List<AudienceBean> audienceList = ad.getAudienceList();
