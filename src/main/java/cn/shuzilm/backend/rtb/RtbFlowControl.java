@@ -576,11 +576,11 @@ public class RtbFlowControl {
         });
         if(deviceIds != null && deviceIds.size() > 0) {
             limitMap.put(adUid, deviceIdSets);
-            myLog.info("更新: 广告 {}  超投设备 {}", adUid, deviceIdSets.toString());
+            myLog.info("更新: 广告 {} 投放限制 {} 超投设备 {}", adUid,frq, deviceIdSets.toString());
         }else {
             // 如果没有找到超投设备，则从map中移除
             limitMap.remove(adUid);
-            myLog.info("移除: 广告 {}", adUid);
+            myLog.info("移除: 广告 {} 投放限制 {}", adUid, frq);
         }
     }
 
