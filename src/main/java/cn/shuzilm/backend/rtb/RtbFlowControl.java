@@ -522,11 +522,15 @@ public class RtbFlowControl {
                     // 更新超投设备 Map
                     myLog.info("开始更新天的超投 Map");
                     updateDeviceLimitMap(adUid, frqDaily, deviceLimitMapDaiyly, REDIS_KEY_POSTFIX_DAILY);
+                }else {
+                    deviceLimitMapDaiyly.remove(adUid);
                 }
 
                 if(frqHourly != 0) {
                     myLog.info("开始更新小时的超投 Map");
                     updateDeviceLimitMap(adUid, frqHourly, deviceLimitMapHourly, REDIS_KEY_POSTFIX_HOURLY);
+                }else {
+                    deviceLimitMapHourly.remove(adUid);
                 }
 
                 /*if(frqDaily != null && frqDaily > 0 ) {
