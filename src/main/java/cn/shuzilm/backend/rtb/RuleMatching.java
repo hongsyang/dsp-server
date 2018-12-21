@@ -319,6 +319,7 @@ public class RuleMatching {
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
+		
 		// long startOrder = System.currentTimeMillis();
 
 		for (String adUid : auidList) {
