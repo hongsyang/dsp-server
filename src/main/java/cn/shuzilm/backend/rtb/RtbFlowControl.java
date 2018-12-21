@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 /**
  * Created by thunders on 2018/7/17.
@@ -155,6 +156,20 @@ public class RtbFlowControl {
     
     private static ConcurrentHashMap<String,Integer> weekAndDayNumMap = null;
 
+    /* 广告超投设备 */
+    private static HashMap<String,HashSet<String>> deviceLimitMapDaiyly = new HashMap<>();
+    private static HashMap<String,HashSet<String>> deviceLimitMapHourly = new HashMap<>();
+
+    private static final String REDIS_KEY_POSTFIX_DAILY = "_DAYLY";
+    private static final String REDIS_KEY_POSTFIX_HOURLY = "_HOURLY";
+
+    private static final int DEFAULT_LIMIT_DAILY = 20;
+    private static final int DEFAULT_LIMIT_HOURLY = 5;
+
+
+    private AsyncRedisClient redis;
+    /* end 广告超投设备 */
+
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
         nodeName = Constants.getInstance().getConf("HOST");
@@ -176,8 +191,8 @@ public class RtbFlowControl {
 //        gridMap = new HashMap<>();
         constant = RtbConstants.getInstance();
         String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
-		String nodes [] = nodeStr.split(";");        
-
+        String nodes [] = nodeStr.split(";");
+        redis = AsyncRedisClient.getInstance(nodes);
     }
 
     public void trigger() {
@@ -195,7 +210,8 @@ public class RtbFlowControl {
         
         //1分钟上报一次ADX与APP流量数
         pushAdxAndAppFlow();
-        
+        updateDeviceLimitMap();
+
         //5秒钟获取一次流量任务
         pullAndUpdateFlowTask();
     }
@@ -469,6 +485,105 @@ public class RtbFlowControl {
     	bidMap.clear();
         
     }
+
+    /**
+     * 每隔一分钟，更新广告的超投设备
+     */
+    public void updateDeviceLimitMap() {
+        MDC.put("sift", "rtb");
+        myLog.info("开始更新广告超投设备");
+        // 删除失效的广告数据
+        Iterator<String> iterator = deviceLimitMapDaiyly.keySet().iterator();
+        while (iterator.hasNext()) {
+            String adId = iterator.next();
+            // 清除掉 deviceLimitMap 中不参与投放的广告
+            if(!mapAd.contains(adId)) {
+                iterator.remove();
+                myLog.info("删除不投放的广告： {}", adId);
+            }
+        }
+
+
+        // 更新广告超投设备
+        mapAd.forEach((adUid,adBean) -> {
+            try{
+                // 获取广告设置的投放频率限制
+               /* Integer frqDaily = adBean.getFrqDaily() == 0 ? DEFAULT_LIMIT_DAILY : adBean.getFrqDaily();
+                Integer frqHourly = adBean.getFrqHour() == 0 ? DEFAULT_LIMIT_HOURLY : adBean.getFrqHour();*/
+
+                Integer frqDaily = adBean.getFrqDaily();
+                Integer frqHourly = adBean.getFrqHour();
+                if(frqDaily == 0 && frqHourly == 0) {
+                    frqDaily = DEFAULT_LIMIT_DAILY;
+                    frqHourly = DEFAULT_LIMIT_HOURLY;
+                }
+
+                if (frqDaily != 0) {
+                    // 更新超投设备 Map
+                    myLog.info("开始更新天的超投 Map");
+                    updateDeviceLimitMap(adUid, frqDaily, deviceLimitMapDaiyly, REDIS_KEY_POSTFIX_DAILY);
+                }else {
+                    deviceLimitMapDaiyly.remove(adUid);
+                }
+
+                if(frqHourly != 0) {
+                    myLog.info("开始更新小时的超投 Map");
+                    updateDeviceLimitMap(adUid, frqHourly, deviceLimitMapHourly, REDIS_KEY_POSTFIX_HOURLY);
+                }else {
+                    deviceLimitMapHourly.remove(adUid);
+                }
+
+                /*if(frqDaily != null && frqDaily > 0 ) {
+                    // 超投设备id
+                    HashSet<String> deviceIdSets = new HashSet();
+                    List<String> deviceIds = redis.zRangeByScoreAsync(adUid+REDIS_KEY_POSTFIX_DAILY, frqDaily, 100000000);
+                    // 为了快速随机读取，将list转成HashSet
+                    deviceIds.forEach((value) -> {
+                        deviceIdSets.add(value);
+                    });
+                    if(deviceIds != null && deviceIds.size() > 0) {
+                        deviceLimitMapDaiyly.put(adUid, deviceIdSets);
+                        myLog.info("更新: 广告 {}  超投设备 {}", adUid, deviceIdSets.toString());
+                    }else {
+                        // 如果没有找到超投设备，则从map中移除
+                        deviceLimitMapDaiyly.remove(adUid);
+                        myLog.info("移除: 广告 {}", adUid);
+                    }
+                    myLog.info("更新: 广告 {}  超投设备 {}", adUid, deviceIdSets.toString());
+                }*/
+            }catch (Exception e) {
+                myLog.error("更新广告超投设备出错，广告id： " + adUid ,e);
+            }
+        });
+    }
+
+
+    /**
+     * 单个设备频率控制 —— 更新超投设备 Map
+     * @param adUid     广告id
+     * @param frq       频率限制
+     * @param limitMap  超投设备Map
+     * @param postfix   redis key 后缀：
+     *                  (1). 按天的累计曝光次数，常量： REDIS_KEY_POSTFIX_DAILY
+     *                  (2). 按小时的累计曝光次数，常量： REDIS_KEY_POSTFIX_HOURLY
+     */
+    private void updateDeviceLimitMap (String adUid, int frq, HashMap<String,HashSet<String>> limitMap, String postfix) {
+        HashSet<String> deviceIdSets = new HashSet();
+        List<String> deviceIds = redis.zRangeByScoreAsync(adUid + postfix, frq, 100000000);
+        // 为了快速随机读取，将list转成HashSet
+        deviceIds.forEach((value) -> {
+            deviceIdSets.add(value);
+        });
+        if(deviceIds != null && deviceIds.size() > 0) {
+            limitMap.put(adUid, deviceIdSets);
+            myLog.info("更新: 广告 {} 投放限制 {} 超投设备 {}", adUid,frq, deviceIdSets.toString());
+        }else {
+            // 如果没有找到超投设备，则从map中移除
+            limitMap.remove(adUid);
+            myLog.info("移除: 广告 {} 投放限制 {}", adUid, frq);
+        }
+    }
+
     
     /**
      * 每隔1分钟上报ADX与APP流量数
@@ -533,7 +648,7 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid,String adxName,String appPackageName) {
+    public boolean checkAvalable(String auid,String deviceId) {
     	MDC.put("sift", "rtb");
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
@@ -571,6 +686,18 @@ public class RtbFlowControl {
         	//代表时间窗选择了不限
         	if(scheduleTime != null && scheduleTime.trim().equals("{}")){
         		return true;
+        	}
+        	
+        	if(deviceId != null && deviceLimitMapDaiyly.get(auid) != null && 
+        			deviceLimitMapDaiyly.get(auid).contains(deviceId)){
+        		myLog.info("广告["+auid+"]设备ID["+deviceId+"已达到天频次");
+        		return false;
+        	}
+        	
+        	if(deviceId != null && deviceLimitMapHourly.get(auid) != null && 
+        			deviceLimitMapHourly.get(auid).contains(deviceId)){
+        		myLog.info("广告["+auid+"]设备ID["+deviceId+"已达到小时频次");
+        		return false;
         	}
         	        	
         	Integer weekNum = weekAndDayNumMap.get("EEEE");

@@ -1,36 +1,19 @@
-package cn.shuzilm.util;
-
-import io.lettuce.core.*;
-import io.lettuce.core.api.async.RedisAsyncCommands;
-import io.lettuce.core.cluster.ClusterClientOptions;
+import cn.shuzilm.backend.rtb.RtbConstants;
+import cn.shuzilm.bean.dmp.TagBean;
+import com.alibaba.fastjson.JSON;
+import io.lettuce.core.RedisFuture;
+import io.lettuce.core.RedisURI;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.DoubleBinaryOperator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.alibaba.fastjson.JSON;
-
-import cn.shuzilm.backend.rtb.RtbConstants;
-import cn.shuzilm.backend.rtb.RuleMatching;
-import cn.shuzilm.bean.dmp.TagBean;
-import cn.shuzilm.common.Constants;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by thunders on 2018/7/24.
@@ -39,21 +22,21 @@ import cn.shuzilm.common.Constants;
  *
  * https://github.com/lettuce-io/lettuce-core/wiki/Asynchronous-API
  */
-public class AsyncRedisClient {
-	
-	private static final Logger LOG = LoggerFactory.getLogger(AsyncRedisClient.class);
+public class AsyncRedisClientTest {
+
+	private static final Logger LOG = LoggerFactory.getLogger(AsyncRedisClientTest.class);
     private StatefulRedisClusterConnection<String, String> connection = null;
-    
-    private static AsyncRedisClient redisClient = null;
-    
-    public static AsyncRedisClient getInstance(String[] nodes){
+
+    private static AsyncRedisClientTest redisClient = null;
+
+    public static AsyncRedisClientTest getInstance(String[] nodes){
     	if(redisClient == null){
-    		redisClient = new AsyncRedisClient(nodes);
+    		redisClient = new AsyncRedisClientTest(nodes);
     	}
     	return redisClient;
     }
 
-    public AsyncRedisClient(String[] nodes){
+    public AsyncRedisClientTest(String[] nodes){
         ArrayList<RedisURI> nodeList = new ArrayList<>();
         for(String node : nodes){
             String[] nodeArr = node.split(",");
@@ -116,7 +99,7 @@ public class AsyncRedisClient {
 		String nodeStr = RtbConstants.getInstance().getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
 		System.out.println(nodeStr);
 		String nodes [] = nodeStr.split(";");
-    	AsyncRedisClient redis1 = AsyncRedisClient.getInstance(nodes);
+    	AsyncRedisClientTest redis1 = AsyncRedisClientTest.getInstance(nodes);
     	
     	//Map<String,String> map = new HashMap<String,String>();
 //    	for(int i=0;i<10000;i++){
@@ -248,74 +231,5 @@ public class AsyncRedisClient {
     	
     	return value;
     }
-
-
-	public List<String> zRangeByScoreAsync(String key, int start, int end){
-		RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
-		Range<Integer> range = Range.create(start,end);
-		RedisFuture<List<String>> future = commands.zrangebyscore(key, range);
-		List<String> value = null;
-		try {
-			value = future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-
-		return value;
-	}
-
-	public List<ScoredValue<String>> zRangeWithScoreAsync(String key, long start, long end){
-		RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
-		RedisFuture<List<ScoredValue<String>>> future = commands.zrangeWithScores(key,start, end);
-		List<ScoredValue<String>> value = null;
-		try {
-			value = future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-
-		return value;
-	}
-
-	public Double zIncrbyAsync(String key, long amount, String member){
-		RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
-		RedisFuture<Double> future = commands.zincrby(key, amount, member);
-		Double value = null;
-		try {
-			value = future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-
-		return value;
-	}
-
-	public void expire(String key,long seconds){
-		RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
-		commands.expire(key,seconds);
-	}
-
-	public Long ttl(String key){
-
-		RedisAdvancedClusterAsyncCommands<String, String> commands = connection.async();
-		RedisFuture<Long> future = commands.ttl(key);
-		Long value = null;
-		try {
-			value = future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-
-		return value;
-
-
-	}
+    
 }
