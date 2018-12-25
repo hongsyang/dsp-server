@@ -274,6 +274,24 @@
             <artifactId>guava</artifactId>
             <version>21.0</version>
         </dependency>
+        <!--protobuf  类包引入-->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.5.1</version>
+        </dependency>
+        <!--excel 类包引入-->
+        <dependency>
+            <groupId>org.jxls</groupId>
+            <artifactId>jxls-poi</artifactId>
+            <version>1.0.14</version>
+        </dependency>
+        <!--protobuf与json互相转换 -->
+        <dependency>
+            <groupId>com.googlecode.protobuf-java-format</groupId>
+            <artifactId>protobuf-java-format</artifactId>
+            <version>1.2</version>
+        </dependency>
 
 
     </dependencies>

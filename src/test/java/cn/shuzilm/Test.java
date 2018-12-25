@@ -1,46 +1,126 @@
 package cn.shuzilm;
 
 
-import cn.shuzilm.bean.dmp.AudienceBean;
-import cn.shuzilm.bean.dmp.TagBean;
-import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.util.AsyncRedisClient;
-import cn.shuzilm.util.aes.AES;
-import cn.shuzilm.util.base64.AdViewDecodeUtil;
+import bidserver.BidserverSsp;
+import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
+import cn.shuzilm.util.MessageLiteToStringUtil;
 import cn.shuzilm.util.base64.Base64;
-import cn.shuzilm.util.base64.Decrypter;
 import com.alibaba.fastjson.JSON;
-import com.yao.util.bean.BeanUtil;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.cluster.RedisClusterClient;
-import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
-import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
-import io.lettuce.core.cluster.models.partitions.Partitions;
-import io.lettuce.core.cluster.models.partitions.RedisClusterNode;
-import io.lettuce.core.resource.ClientResources;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.Base64Utils;
-import redis.clients.jedis.Jedis;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.googlecode.protobuf.format.JsonFormat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
-import java.text.DateFormat;
-import java.text.NumberFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.*;
+import java.time.format.DateTimeFormatter;
 
 
 public class Test {
-    public static void main(String[] args) {
-        AudienceBean audience =new AudienceBean();
-        Set<Integer> carrierIdSet = new HashSet<>();
-        carrierIdSet.add(Integer.parseInt("1"));
-        audience.getCarrierIdSet();
-        System.out.println(carrierIdSet.contains(1));
+
+    private static final Logger log = LoggerFactory.getLogger(Test.class);
+
+    public String toJson() throws InvalidProtocolBufferException {
+        String json = "{\"session_id\":\"o6n3WwoADDomPAAA\",\"bucket_id\":\"1\",\"host_nodes\":\"bidr3a6.sora.cm2\",\"exchange\":{\"bid_id\":\"0b88ec18000010805bf7a9a300007791\",\"adx_id\":5},\"user\":{\"user_exid\":\"800f7f3ed7f1bde111f7b8da0283c55d\",\"user_yyid\":\"800f7f3ed7f1bde111f7b8da0283c55d\",\"user_ip\":\"49.92.86.244\",\"user_agent\":\"Mozilla/5.0 (Linux; Android 8.1.0; vivo Y85A Build/OPM1.171019.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Mobile Safari/537.36\",\"user_gender\":\"GENDER_TYPE_UNKNOWN\",\"user_crowd_tags\":\"yob:0,1:0,2:0,3:0,4:0,5:0\",\"user_area\":1156320000,\"user_yyid_type\":3},\"adzone\":[{\"pid\":\"273\",\"adz_id\":\"2734b512556d9e88c80ec0cb022e54bd\",\"adz_type\":\"ADZONE_TYPE_INAPP_NATIVE\",\"adz_width\":640,\"adz_height\":360,\"adz_ad_count\":1,\"adz_position\":0,\"reserve_price\":0,\"native\":[{\"native_id\":1}]}],\"mobile\":{\"is_app\":true,\"device_os\":\"android\",\"device_os_version\":\"8.1.0\",\"device_id\":\"800f7f3ed7f1bde111f7b8da0283c55d\",\"device_type\":\"phone\",\"imei\":\"869701033753966\",\"mac\":\"4CC00AC21C63\",\"android_id\":\"2730171220e15186\",\"app_name\":\"优酷客户端\",\"md5_imei\":\"800f7f3ed7f1bde111f7b8da0283c55d\",\"md5_android_id\":\"0d2456cffdd9f0466dd2229b61f871da\",\"md5_mac\":\"e02d62079c5351894cf99aa7c6a0ef7f\"}}";
+        BidserverSsp.BidRequest.Builder builder1 = BidserverSsp.BidRequest.newBuilder();
+        try {
+            JsonFormat.merge(json,builder1);
+            System.out.println(builder1.getSessionId());
+
+        } catch (JsonFormat.ParseException e) {
+            e.printStackTrace();
+        }
+        BidserverSsp.BidRequest.Builder builder = BidserverSsp.BidRequest.newBuilder();
+        builder.setSessionId("1111111111111111");
+        builder.setBucketId("2222");
+        builder.setExchange(BidserverSsp.BidRequest.Exchange.newBuilder().setAdxId(111).build());
+        builder.setUser(BidserverSsp.BidRequest.User.newBuilder().build());
+        BidserverSsp.BidRequest.Adzone adzone = BidserverSsp.BidRequest.Adzone.newBuilder().setPid("1111111111111111111").setAdzAdCount(1).build();
+        builder.setMobile(BidserverSsp.BidRequest.Mobile.newBuilder().build());
+        builder.addAdzone(adzone);
+        BidserverSsp.BidRequest bidRequest = builder.build();
+        String printToString = JsonFormat.printToString(bidRequest);
+        System.out.println("printToString"+printToString);
+        byte[] byteArray = builder1.build().toByteArray();
+        BidserverSsp.BidRequest request = BidserverSsp.BidRequest.parseFrom(byteArray);
+        System.out.println(request.getSessionId());
+        String print = JsonFormat.printToString(request);
+        //输出json串
+        System.out.println(print);
+        //快友json
+        String adview ="{\"app\":{\"ext\":{},\"ver\":\"1.1.3\",\"storeurl\":\"https:\\/\\/play.google.com\\/store\\/apps\\/details?id=com.commsource.beautyplus\",\"cat\":[0],\"name\":\"Beautyplus\",\"paid\":0,\"id\":\"4967162ec2fae7b1c162587d99b5c635\",\"bundle\":\"com.commsource.beautyplus\"},\"at\":1,\"tmax\":300,\"regs\":{\"ext\":{\"gdpr\":0},\"coppa\":1},\"id\":\"20181122-200000_bidreq_179-1272-XXAM-2020\",\"imp\":[{\"tagid\":\"POSID8r10nbz39851\",\"banner\":{\"pos\":1,\"w\":300,\"h\":250},\"bidfloor\":15000,\"bidfloorcur\":\"RMB\",\"id\":\"20181122-200000_reqimp_179-948539-qfbd-1899\",\"instl\":1}],\"device\":{\"ext\":{\"uuid\":\"aa704205-20e9-45e0-b2fc-da233765530a\"},\"orientation\":0,\"os\":\"Android\",\"sw\":720,\"didmd5\":\"a8793c01e0217fa9b0146de6f6af18ad\",\"ifa\":\"aa704205-20e9-45e0-b2fc-da233765530a\",\"ip\":\"217.64.110.214\",\"js\":1,\"language\":\"fr\",\"ua\":\"Mozilla\\/5.0 (Linux; Android 8.0.0; SM-G935F Build\\/R16NW; wv) AppleWebKit\\/537.36 (KHTML, like Gecko) Version\\/4.0 Chrome\\/70.0.3538.80 Mobile Safari\\/537.36\",\"devicetype\":2,\"geo\":{\"country\":\"MLI\"},\"carrier\":\"\",\"osv\":\"OSVER\",\"sh\":1280,\"didsha1\":\"d61ba77bd070cc5c63ca2d2d863c8aaab6338c8e\",\"model\":\"\",\"connectiontype\":3,\"make\":\"\"},\"user\":{\"ext\":{\"consent\":\"0\"},\"gender\":\"Null\"}}"  ;
+        BidRequestBean adviewRequestBean = JSON.parseObject(adview, BidRequestBean.class);
+        System.out.println(adviewRequestBean);
+        YouYiBidRequest bidRequestBean = JSON.parseObject(json, YouYiBidRequest.class);
+        System.out.println(bidRequestBean);
+//        try {
+//            BidserverSsp.BidRequest parseFrom = BidserverSsp.BidRequest.parseFrom(result);
+//            System.out.println(parseFrom);
+//        } catch (InvalidProtocolBufferException e) {
+//            e.printStackTrace();
+//        }
+//        String s = new String(result);
+//        System.out.println("s"+s);
+//        BidserverSsp.BidRequest request = null;
+//        try {
+//            request = BidserverSsp.BidRequest.parseFrom(bytes);
+//        } catch (InvalidProtocolBufferException e) {
+//            e.printStackTrace();
+//        }
+//        System.out.println(request.getSessionId());
+//        ByteString byteString = bidRequest.toByteString();
+//        for (Byte aByte : byteString) {
+//            System.out.println(aByte.getClass());
+//        }
+//        System.out.println(json);
+//        System.out.println(bidRequest.toByteString().toString());
+
+        return null;
+    }
+
+    public static void main(String[] args) throws InvalidProtocolBufferException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+        String format = LocalDateTime.now().format(formatter);//时间戳
+        System.out.println(format);
+//        BidserverSsp.BidRequest.Builder builder = BidserverSsp.BidRequest.newBuilder();
+//        builder.setSessionId("1");
+//        System.out.println(builder.toString());
+//        String printToString = JsonFormat.printToString(builder.build());
+//        System.out.println(printToString);
+//        JsonFormat.merge(json,builder);
+//
+//        System.out.println("输出结果:"+(builder.getSessionId()));
+//        AdPixelBean bean = new AdPixelBean();
+//        bean.setWinNoticeNums(1);
+//        //pixel服务器发送到主控模块
+//        log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
+
+//        String ekey= "hqvBbhco3nPm5kr0TXgQxaO4Er25qd7n";
+//        String ikey= "eKUKpIu1cFDETMSo3CY8RJYxfRpNQSu2";
+//
+//        File file =new File("C:\\Users\\houkp\\Desktop\\对账\\对账\\9.27号曝光");
+//        System.out.println(file.isFile());
+//        BufferedReader bufferedReader =new BufferedReader( new FileReader(file));
+//        String price=null;
+//        String temp=null;
+//
+//        while ((temp=bufferedReader.readLine())!=null){
+//            String[] split = temp.split(",");
+//            if (split.length>1){
+//            for (String s : split) {
+//                if (s.substring(0,6).trim().equals("price")){
+//                    String[] strings = s.split("=");
+//                    price =strings[1].trim();
+//                    System.out.println(price);
+//                    Long aLong = AdViewDecodeUtil.priceDecode(price, ekey, ikey);
+//                    System.out.println(aLong);
+//                }
+//            }
+//            }
+//        }
+//        bufferedReader.close();
+
 
 //        String result = AES.decrypt("1JhqBHCPuAdwdO2OsPom9b758Vn-cov2e6jsjGdWo9o","af36ec6c77c042b5a5e49e6414fb436f" );
 //        System.out.println(result);
@@ -278,15 +358,9 @@ public class Test {
     }
 
 
-
-
-
-
-
-
-
     /**
      * 转化为安全Base64内容
+     *
      * @param input
      * @return
      */

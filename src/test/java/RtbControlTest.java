@@ -1,4 +1,7 @@
 import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.util.MD5Util;
+import com.google.common.hash.HashCode;
+import org.python.modules._hashlib;
 
 import java.util.List;
 
@@ -12,13 +15,13 @@ public class RtbControlTest {
     }
 
     public static void main(String[] args) {
-        List<Object> exp = JedisQueueManager.getAllElement("EXP");
-        Object exp1 = JedisQueueManager.getElementFromQueue("EXP");
-        //        JedisQueueManager.removeAll("EXP");
-        System.out.println(exp1);
-        System.out.println(exp.size());
-        for (Object o : exp) {
-            System.out.println(o+"11111111111111111");
-        }
+
+
+//       String code = "y188_8081-t37-1540803733-137-811";
+//        String replace = code.replace("-", "").replace("_", "");
+//        System.out.println(MD5Util.MD5(code).equals(MD5Util.MD5("&bidid=7a90a45f816a481e54ffdbee7ef8a13e")));
+//        System.out.println(MD5Util.MD5(MD5Util.MD5(code)).equals("7a90a45f816a481e54ffdbee7ef8a13e"));
+//        System.out.println(hashCode);
+        System.out.println(  JedisQueueManager.getLength("EXP"));
     }
 }

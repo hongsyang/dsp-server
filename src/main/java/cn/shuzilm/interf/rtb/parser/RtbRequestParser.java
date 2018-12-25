@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -27,15 +29,13 @@ public class RtbRequestParser {
 
     private static final Object lock = new Object();
 
-    private static volatile Reflections reflections;
-
-    private AppConfigs configs = null;
+    private static Reflections reflections;
 
     private static final String FILTER_CONFIG = "filter.properties";
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
 
-
-    private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
+//    private static String FILE_NAME = "cn.shuzilm.interf.rtb.parser";
 
     /**
      * 根据厂商解析post参数
@@ -47,16 +47,16 @@ public class RtbRequestParser {
      */
     public String parseData(String url, String dataStr, String remoteIp) throws Exception {
         String responseStr = "没有对应的厂商";
-        this.configs = AppConfigs.getInstance(FILTER_CONFIG);
-        MDC.put("sift",configs.getString("ADX_REQUEST"));
-        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
-        MDC.remove("sift");
-        if (Boolean.valueOf(configs.getString("FILTER_RTB"))){
-            responseStr="测试请求";
+        long start = new Date().getTime();
+//        MDC.put("sift", configs.getString("ADX_REQUEST"));
+//        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
+//        MDC.remove("sift");
+        if (Boolean.valueOf(configs.getString("FILTER_RTB"))) {
+            responseStr = "测试请求";
             return responseStr;
         }
         List<String> urlList = UrlParserUtil.urlParser(url);
-        Reflections reflections = instance(FILE_NAME);
+        reflections = instance("cn.shuzilm.interf.rtb.parser");
         Set<Class<? extends RequestService>> monitorClasses = reflections.getSubTypesOf(RequestService.class);
         String className = null;
         for (Class<? extends RequestService> monitorClass : monitorClasses) {
@@ -67,10 +67,16 @@ public class RtbRequestParser {
                 }
             }
         }
+
+        //TODO 更换为MAP
         if (className != null) {
             RequestService requestService = RequestServiceFactory.getRequestService(className);
             responseStr = requestService.parseRequest(dataStr);
         }
+        long end = new Date().getTime();
+        MDC.put("sift", configs.getString("ADX_REQUEST"));
+        log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+        MDC.remove("sift");
         return responseStr;
     }
 
@@ -82,12 +88,10 @@ public class RtbRequestParser {
      */
     private Reflections instance(String fileName) {
         if (reflections == null) {
-            synchronized (lock) {
-                if (reflections == null) {
-                    reflections = new Reflections(fileName);
-                }
-            }
+            return new Reflections(fileName);
+        } else {
+
+            return reflections;
         }
-        return reflections;
     }
 }

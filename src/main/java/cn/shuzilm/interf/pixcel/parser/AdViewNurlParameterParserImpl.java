@@ -5,29 +5,23 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
 import cn.shuzilm.util.MD5Util;
 import cn.shuzilm.util.UrlParserUtil;
-import cn.shuzilm.util.aes.AES;
+import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import redis.clients.jedis.Jedis;
 
-import javax.xml.crypto.Data;
-import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
-import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * @Description: LingJiExpParameterParserImpl  曝光量解析
+ * @Description: ExposureParser  曝光检测量解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:57
  * @UpdateUser: houkp
@@ -35,25 +29,23 @@ import java.util.*;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class LingJiExpParameterParserImpl implements ParameterParser {
+public class AdViewNurlParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(LingJiExpParameterParserImpl.class);
-
-    private static final String PIXEL_CONFIG = "pixel.properties";
-
-
-    private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
-
+    private static final Logger log = LoggerFactory.getLogger(AdViewNurlParameterParserImpl.class);
 
     private AppConfigs configs = null;
 
+    private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
+
+    private static final String PIXEL_CONFIG = "pixel.properties";
+
     @Override
     public String parseUrl(String url) {
-        configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        MDC.put("sift", "LingJiExp");
-        log.debug("LingJiExp曝光的nurl值:{}", url);
+        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+        MDC.put("sift", "AdViewNurl");
+        log.debug("AdViewNurl曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
-        log.debug("LingJiExp转换之后曝光的nurl值:{}", urlRequest);
+        log.debug("AdViewNurl曝光转换之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
@@ -70,7 +62,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 
 
         String act = urlRequest.get("act");
-        element.setWinNoticeTime(Long.valueOf(act));
+        element.setWinNoticeTime( new Date().getTime());
 
         String adx = urlRequest.get("adx");
         element.setAdxId(adx);
@@ -81,7 +73,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         String device = urlRequest.get("device");
         element.setDeviceId(device);
 
-        String app = urlRequest.get("app").equals(null) ? "" : urlRequest.get("app");
+        String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
         element.setAppName(URLDecoder.decode(app));
         String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
@@ -107,51 +99,43 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         element.setDealid(pmp);
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
+
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
-        element.setAdxSource("LingJi");
-
+        element.setAdxSource("AdView");
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
-                log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
+                log.debug("AdViewNurl曝光的requestid:{},element对象:{}", requestId, element);
                 MDC.put("sift", "pixel");
                 AdPixelBean bean = new AdPixelBean();
                 if (element != null) {
                     bean.setAdUid(element.getAdUid());
                 }
+                bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setHost(configs.getString("HOST"));
                 String price = urlRequest.get("price");
-                String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
-                log.debug("price解析结果：{}", result);
-                String[] split = result.split("_");
-                Double money = Double.valueOf(split[0]) / 100;
-                bean.setCost(money);
-                bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
+                Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
+                bean.setCost(Double.valueOf(priceLong) / 10000);
                 bean.setWinNoticeNums(1);
-                bean.setPremiumFactor(element.getPremiumFactor());
-                bean.setType(0);
                 //pixel服务器发送到主控模块
-                log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
+                log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
                 AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
-                NumberFormat numberFormat = NumberFormat.getNumberInstance();
-                numberFormat.setMaximumFractionDigits(5);
+
                 //pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
                 element.setRequestId(requestId);
-                element.setActualPrice(money);//成本价
+                element.setActualPrice(Double.valueOf(priceLong) / 10000);//成本价
                 element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-                element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
-                element.setAdxSource("LingJi");
-                MDC.put("sift", "LingJiExp");
+                MDC.put("sift", "AdViewNurl");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
-                MDC.put("phoenix", "Exp");
+                MDC.put("phoenix", "Nurl");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                         element.getInfoId(), new Date().getHours(),
-                        element.getWinNoticeTime(), LocalDateTime.now().toString(),
+                        new Date().getTime(), LocalDateTime.now().toString(),
                         element.getDid(), element.getDeviceId(),
                         element.getAdUid(), element.getAudienceuid(),
                         element.getAgencyUid(), element.getAdvertiserUid(),
@@ -162,33 +146,33 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
-                        element.getDealid(), element.getAppId(),
-                        element.getBidid(),price);
+                        element.getDealid(), element.getAppId(),element.getBidid(),price);
 
                 MDC.remove("phoenix");
-                boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-                MDC.put("sift", "LingJiExp");
-                if (lingJiExp) {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiExp);
+                MDC.put("sift", "AdViewNurl");
+                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+                if (lingJiClick) {
+                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 } else {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiExp);
+                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
                 }
-
             } catch (Exception e) {
-                Help.sendAlert("pixcel异常触发报警:LingJiExp");
+                Help.sendAlert("pixcel异常触发报警:AdViewNurl");
                 MDC.put("sift", "exception");
                 boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
-                log.debug("发送element：{}到EXP_ERROR队列：{}", element, exp_error);
-                log.debug("element:{}", element);
+                log.debug("发送到EXP_ERROR队列：{}", exp_error);
+                log.debug("element{}", element);
                 log.error("异常信息：{}", e);
                 MDC.remove("sift");
             }
+
             String duFlowBeanJson = JSON.toJSONString(element);
             log.debug("duFlowBeanJson:{}", duFlowBeanJson);
-        } else {
+        }else {
             MDC.put("sift", "repeat");
-            log.debug("本次请求requestId:{}；bidid:{}", requestId, element.getBidid());
+            log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
+
         }
         return requestId;
     }

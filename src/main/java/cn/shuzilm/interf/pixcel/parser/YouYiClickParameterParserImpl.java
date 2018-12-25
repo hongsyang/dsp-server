@@ -5,7 +5,6 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
@@ -14,7 +13,6 @@ import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import redis.clients.jedis.Jedis;
 
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
@@ -29,9 +27,9 @@ import java.util.*;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class LingJiClickParameterParserImpl implements ParameterParser {
+public class YouYiClickParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(YouYiClickParameterParserImpl.class);
 
     private AppConfigs configs = null;
 
@@ -39,11 +37,11 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
 
     @Override
     public String parseUrl(String url) {
-        configs = AppConfigs.getInstance(PIXEL_CONFIG);
-        MDC.put("sift", "LingJiClick");
-        log.debug("LingJiClick点击的url值:{}", url);
+        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+        MDC.put("sift", "YouYiClick");
+        log.debug("YouYiClick点击的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
-        log.debug("LingJiClick点击转换之后的url值:{}", urlRequest);
+        log.debug("YouYiClick点击之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
@@ -71,7 +69,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         String device = urlRequest.get("device");
         element.setDeviceId(device);
 
-        String app = urlRequest.get("app").equals(null) ? "" : urlRequest.get("app");
+        String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
         element.setAppName(URLDecoder.decode(app));
         String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
@@ -97,10 +95,10 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         element.setDealid(pmp);
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
-        element.setAdxSource("LingJi");
 
+        element.setAdxSource("YouYi");
         try {
-            log.debug("LingJiClick点击的requestid:{},element值:{}", requestId, element);
+            log.debug("YouYiClick点击的requestid:{},element值:{}", requestId, element);
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
                 bean.setAdUid(element.getAdUid());
@@ -110,12 +108,10 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
             bean.setClickTime(new Date().getTime());
             bean.setType(1);
             //pixel服务器发送到主控模块
-            log.debug("pixel服务器发送到主控模块的LingJiClickBean：{}", bean);
+            log.debug("pixel服务器发送到主控模块的YouYiClickBean：{}", bean);
             PixelFlowControl.getInstance().sendStatus(bean);
 
             //pixel服务器发送到Phoenix
-            MDC.put("sift", "LingJiClick");
-            log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Click");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
@@ -132,9 +128,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(),
-                    element.getBidid());
-
+                    element.getDealid(), element.getAppId(), element.getBidid());
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
@@ -144,15 +138,14 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("pixcel异常触发报警:LingJiClick");
+            Help.sendAlert("pixcel异常触发报警: YouYiClick");
             MDC.put("sift", "exception");
             boolean click_error = JedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
-            log.debug("发送element：{}到CLICK_ERROR队列：{}", element, click_error);
-            log.debug("element:{}", element);
+            log.debug("发送到CLICK_ERROR队列：{}", click_error);
+            log.debug("element{}", element);
             log.error("异常信息：{}", e);
             MDC.remove("sift");
         }
-
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return requestId;

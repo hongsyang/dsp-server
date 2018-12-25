@@ -189,7 +189,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 } else {
                     response = JSON.toJSONString(msg);//过滤规则结果输出
                 }
-
+                msg.clear();
+                msg = null;
             } else {
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
                         deviceId,//设备mac的MD5
@@ -240,6 +241,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             return response;
         }
     }
+
 
     /**
      * 内部流转DUFlowBean  转换为  BidResponseBean 输出给 ADX服务器
@@ -302,7 +304,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
         bid.setNurl(nurl);
 
@@ -325,7 +327,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid()+ //私有交易
+                "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         //人群包，创意id，省，市，广告主id，代理商id，广告id，

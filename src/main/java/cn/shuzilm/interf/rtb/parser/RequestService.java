@@ -19,4 +19,5 @@ public interface RequestService {
      * @return
      */
     public String parseRequest(String dataStr) throws Exception;
+
 }

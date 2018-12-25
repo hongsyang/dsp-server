@@ -1,8 +1,4 @@
-/bin/
-/logs/
-/target/
-/.idea/
-/.settings/
-/.classpath
-/.project
-/.gitignore
+# Created by .ignore support plugin (hsz.mobi)
+.gitignore
+.idea/
+target/
