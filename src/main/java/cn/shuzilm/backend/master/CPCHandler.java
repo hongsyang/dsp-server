@@ -23,6 +23,7 @@ public class CPCHandler {
      * 广告永久的指标监控
      */
     private static ConcurrentHashMap<String, AdFlowStatus> mapMonitorTotal = new ConcurrentHashMap<>();
+    
     /**
      * 数据库中设定的设计流控指标
      */
@@ -32,6 +33,11 @@ public class CPCHandler {
      * cpc试投放数量
      */
     private static int winTotalNums = 15 * 1000;
+    
+    /**
+     * cpc投放限额
+     */
+    private static int winTotalQuota = 50 * 1000;
 
     // 广告信息
     private ConcurrentHashMap<String, AdBean> adMap = null;
@@ -51,8 +57,14 @@ public class CPCHandler {
     public CPCHandler(AdFlowControl controlIns){
         adMap = controlIns.getMapAd();
     }
+    
+    
 
-    /**
+    public ConcurrentHashMap<String, AdFlowStatus> getMapMonitorTotal() {
+		return mapMonitorTotal;
+	}
+
+	/**
      * 更新按CPC结算的广告的监控器
      * @param adUid 广告id
      * @param addWinNoticeNums  增加的winNotice数量
@@ -199,7 +211,7 @@ public class CPCHandler {
             }else {
                 // 没有点击
                 // 如果投放完毕
-                if(winNum >= winTotalNums) {
+                if(winNum >= winTotalNums || money >= winTotalQuota) {
                     //myLog.debug("没有点击，投放完毕，暂停发放");
                 	reason = "没有点击，投放完毕，暂停发放   "+auid;
                     return reason;
