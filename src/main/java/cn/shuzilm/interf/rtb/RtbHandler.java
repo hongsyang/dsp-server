@@ -4,6 +4,7 @@ import bidserver.BidserverSsp;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.googlecode.protobuf.format.JsonFormat;
+import gdt.adx.GdtRtb;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
@@ -79,9 +80,15 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             dataStr = new String(request.getContent().array());
             try {
                 BidserverSsp.BidRequest bidRequest = null;
+                GdtRtb.BidRequest  tencentBidRequest = null;
+
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
+                }else if(url.contains("tencent")){
+                    tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
+                    dataStr = JsonFormat.printToString(tencentBidRequest);
+                    log.debug(" 接收 tencentBidRequest 请求：{}", dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
