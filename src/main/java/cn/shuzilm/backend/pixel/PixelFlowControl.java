@@ -157,8 +157,6 @@ public class PixelFlowControl {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-//		PixelFlowControl.getInstance().pullAdFromDB();
-//		System.out.println();
 	}
 
 	/**
