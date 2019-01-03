@@ -36,7 +36,7 @@ public class TaskServicve extends Service {
 
         Object[] arr = new Object[1];
         arr[0] = adUid;
-        String sql = "SELECT c.* FROM ad JOIN map_ad_audience b ON ad.uid = b.ad_uid JOIN audience c ON b.audience_uid = c.uid WHERE b.ad_uid = ?";
+        String sql = "SELECT c.* FROM ad JOIN map_ad_audience b ON ad.uid = b.ad_uid JOIN audience c ON b.audience_uid = c.uid WHERE b.ad_uid = ? and c.deleted = 0";
         ResultList list =  select.select(sql,arr);
         for(ResultMap rm : list) {
             AudienceBean bean = new AudienceBean();
@@ -86,7 +86,7 @@ public class TaskServicve extends Service {
         long timeBefore = timeNow - INTERVAL;
         Object[] arr = new Object[1];
         arr[0] = timeBefore / 1000;
-        String sql = "SELECT m.ad_uid,a.* FROM audience a JOIN map_ad_audience m ON m.audience_uid = uid where updated_at >= ?";
+        String sql = "SELECT m.ad_uid,a.* FROM audience a JOIN map_ad_audience m ON m.audience_uid = uid where updated_at >= ? and a.deleted = 0";
         ResultList list =  select.select(sql,arr);
         for(ResultMap rm : list) {
         	AudienceBean bean = new AudienceBean();
@@ -243,7 +243,7 @@ public class TaskServicve extends Service {
      * @return
      */
     public CreativeBean queryCreativeUidByAid(String creativeUid){
-        String sql = "select * from creative where uid = '"+ creativeUid +"'";
+        String sql = "select * from creative where uid = '"+ creativeUid +"' and deleted = 0";
         try {
             CreativeBean creativeBean = new CreativeBean();
             ResultMap cMap = select.selectSingle(sql);
@@ -285,7 +285,7 @@ public class TaskServicve extends Service {
         Object[] arr = new Object[1];
         //arr[0] = timeBefore / 1000;
         arr[0] = specDateFM.format(new Date(timeBefore));
-        String sql = "select a.uid ad_uid,c.* from creative c JOIN ad a ON c.uid=a.creative_uid where c.refresh_ts >= ?";
+        String sql = "select a.uid ad_uid,c.* from creative c JOIN ad a ON c.uid=a.creative_uid where c.refresh_ts >= ? and c.deleted = 0";
         try {           
             ResultList list =  select.select(sql,arr);
             for(ResultMap cMap : list) {
@@ -324,7 +324,7 @@ public class TaskServicve extends Service {
      * @return
      */
     public ArrayList<Material> queryMaterialByCreativeId(String creativeUid){
-        String sql = "select * from material where creative_uid = '"+ creativeUid +"'";
+        String sql = "select * from material where creative_uid = '"+ creativeUid +"' and deleted = 0";
         ResultList rl = null;
         try {
             rl = select.select(sql);
