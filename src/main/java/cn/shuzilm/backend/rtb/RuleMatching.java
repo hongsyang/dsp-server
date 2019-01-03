@@ -474,7 +474,7 @@ public class RuleMatching {
 
 		if (!machedAdList.isEmpty()) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, audienceMap,
-					adxName, ip, rtbIpMap, demographicMap);
+					adxName, ip, rtbIpMap, demographicMap,appPackageName);
 			// 上传请求数
 			if (rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null) {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(),
@@ -522,7 +522,7 @@ public class RuleMatching {
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
 			TagBean tagBean, String widthHeightRatio, Map<String, AudienceBean> audienceMap, String adxName,
-			String ipAddr, Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap) throws Exception {
+			String ipAddr, Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap,String appPackageName) throws Exception {
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -555,7 +555,7 @@ public class RuleMatching {
 			LOG.debug("广告ID[" + ad.getAdUid() + "]广告主ID[" + ad.getAdvertiser().getUid() + "]通过排序获得竞价资格!");
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, audienceMap,
-					adxName, ipAddr, rtbIpMap, demographicMap);
+					adxName, ipAddr, rtbIpMap, demographicMap,appPackageName);
 		} else {
 			// long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
@@ -571,7 +571,7 @@ public class RuleMatching {
 			// 封装返回接口引擎数据
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, audienceMap,
-					adxName, ipAddr, rtbIpMap, demographicMap);
+					adxName, ipAddr, rtbIpMap, demographicMap,appPackageName);
 		}
 
 		return targetDuFlowBean;
@@ -715,7 +715,7 @@ public class RuleMatching {
 
 	public DUFlowBean packageDUFlowData(Material material, String deviceId, AdBean ad, TagBean tagBean,
 			String widthHeightRatio, Map<String, AudienceBean> audienceMap, String adxName, String ipAddr,
-			Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap) throws Exception {
+			Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap,String appPackageName) throws Exception {
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 		CreativeBean creative = ad.getCreativeList().get(0);
 		AudienceBean audience = audienceMap.get(ad.getAdUid());
@@ -739,13 +739,7 @@ public class RuleMatching {
 		targetDuFlowBean.setDid(deviceId);
 		targetDuFlowBean.setDeviceId(deviceId);
 		targetDuFlowBean.setAdxId(advertiser.getUid());
-		// targetDuFlowBean.setSeat("222");// SeatBid 的标识,由 DSP 生成
-		// if (audience.getType().equals("demographic")) {
-		// tagIdList.retainAll(audience.getDemographicTagIdSet());
-		// targetDuFlowBean.setAudienceuid(tagIdList.get(0));
-		// } else {
-		// targetDuFlowBean.setAudienceuid(null);
-		// }
+
 		targetDuFlowBean.setAudienceuid(audience.getUid());
 		targetDuFlowBean.setAdvertiserUid(advertiser.getUid());
 		targetDuFlowBean.setAgencyUid(advertiser.getAgencyUid());
@@ -776,8 +770,12 @@ public class RuleMatching {
 		// targetDuFlowBean.setActualPrice(1.0);//成本价
 		String type = audience.getType().toUpperCase();
 		double premiumRatio = constant.getRtbVar(type);
-		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价
-		targetDuFlowBean.setBiddingPrice((double) ad.getPrice());
+		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价		
+		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
+			targetDuFlowBean.setBiddingPrice((double) ad.getPrice()*0.6);
+		}else{
+			targetDuFlowBean.setBiddingPrice((double) ad.getPrice());
+		}
 		targetDuFlowBean.setPremiumFactor(premiumRatio);
 		targetDuFlowBean.setLandingUrl(creative.getLink());
 		targetDuFlowBean.setLinkUrl(creative.getClickTrackingUrl());
@@ -895,17 +893,22 @@ public class RuleMatching {
 	}
 
 	public static void main(String[] args) {
-		try {
-			RuleMatching rule = RuleMatching.getInstance();
-			while(true){
-			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 670, 100, true, 5, 5, "1,2", "jpg,gif", "127.0.0.1",
-					"cn.asm.clweather");
-			System.out.println(duflowBean);
-			Thread.sleep(60 * 1000);
-			}
-		} catch (Exception e) {
-			e.getMessage();
-		}
+//		try {
+//			RuleMatching rule = RuleMatching.getInstance();
+//			while(true){
+//			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 670, 100, true, 5, 5, "1,2", "jpg,gif", "127.0.0.1",
+//					"cn.asm.clweather");
+//			System.out.println(duflowBean);
+//			Thread.sleep(60 * 1000);
+//			}
+//			DUFlowBean duflowBean = new DUFlowBean();
+//			AdBean adBean = new AdBean();
+//			adBean.setPrice(50.2f);
+//			duflowBean.setBiddingPrice((double) adBean.getPrice()*0.6);
+//			System.out.println(duflowBean.getBiddingPrice());
+//		} catch (Exception e) {
+//			e.getMessage();
+//		}
 	}
 
 }

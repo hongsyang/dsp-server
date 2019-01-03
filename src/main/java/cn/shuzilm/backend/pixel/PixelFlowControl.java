@@ -157,8 +157,6 @@ public class PixelFlowControl {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}		
-//		PixelFlowControl.getInstance().pullAdFromDB();
-//		System.out.println();
 	}
 
 	/**
@@ -189,7 +187,7 @@ public class PixelFlowControl {
                 ad.setAdvertiser(adver);
                 String mode = map.getString("mode");
                 if("cpc".equalsIgnoreCase(mode)){
-                	ad.setPrice(map.getBigDecimal("price").floatValue() * 0.03f * 1000);               	
+                	ad.setPrice(map.getBigDecimal("price").floatValue() * 0.006f * 1000);               	
                 }else{
                 	ad.setPrice(map.getBigDecimal("price").floatValue());
                 }

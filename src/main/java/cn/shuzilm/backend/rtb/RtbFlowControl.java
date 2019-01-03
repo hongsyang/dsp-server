@@ -103,6 +103,7 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String, FlowTaskBean> getMapFlowTask() {
 		return mapFlowTask;
 	}
+    
 
 	private String nodeName;
     /**
@@ -159,6 +160,7 @@ public class RtbFlowControl {
     /* 广告超投设备 */
     private static HashMap<String,HashSet<String>> deviceLimitMapDaiyly = new HashMap<>();
     private static HashMap<String,HashSet<String>> deviceLimitMapHourly = new HashMap<>();
+    
 
     private static final String REDIS_KEY_POSTFIX_DAILY = "_DAYLY";
     private static final String REDIS_KEY_POSTFIX_HOURLY = "_HOURLY";
@@ -697,6 +699,13 @@ public class RtbFlowControl {
         	if(deviceId != null && deviceLimitMapHourly.get(auid) != null && 
         			deviceLimitMapHourly.get(auid).contains(deviceId)){
         		myLog.info("广告["+auid+"]设备ID["+deviceId+"已达到小时频次");
+        		return false;
+        	}
+        	
+        	//限制广告5秒内的竞价次数
+        	Long bidNums = bidMap.get(auid);	
+        	if(bidNums != null && bidNums > 10){
+        		myLog.info("广告["+auid+"]已达到5秒10次的竞价数,停止投放");
         		return false;
         	}
         	        	
