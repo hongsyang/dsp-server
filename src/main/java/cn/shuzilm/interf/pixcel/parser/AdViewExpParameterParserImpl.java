@@ -127,9 +127,9 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
                 element.setRequestId(requestId);
                 element.setActualPrice(Double.valueOf(priceLong) / 10000);//成本价
-                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
-                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
-                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
+//                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
+//                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
+//                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
                 MDC.put("sift", "AdViewExp");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
                 MDC.put("phoenix", "Exp");
