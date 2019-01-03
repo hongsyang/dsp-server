@@ -176,6 +176,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
 
         }
-        return requestId;
+        return    "wurl:"+requestId;
     }
 }

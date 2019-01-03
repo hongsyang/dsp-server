@@ -63,14 +63,19 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 
 				HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
 				ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+//				长连接和短连接 修改
+                String data = parser.parseData(url, dataStr, remoteIp);
+                if (data.contains("wurl")){
+                    response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
+                }else {
+                    response.setHeader("Connection", HttpHeaders.Values.CLOSE);
+                }
+                //主业务逻辑
+                byte[] content = data.getBytes("utf-8");
 
-				//主业务逻辑
-				byte[] content = parseRequest(url,dataStr, remoteIp);
-
-				response.setHeader("Content-Type", "text/html");
-				response.setHeader("Content-Length", content.length);
-				response.setHeader("Accept-Ranges", "bytes");
-                response.setHeader("Connection", HttpHeaders.Values.CLOSE);
+                response.setHeader("Content-Type", "text/html");
+                response.setHeader("Content-Length", content.length);
+                response.setHeader("Accept-Ranges", "bytes");
 				buffer.writeBytes(content);
 				response.setContent(buffer);
 
