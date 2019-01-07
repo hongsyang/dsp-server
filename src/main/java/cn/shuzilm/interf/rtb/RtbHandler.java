@@ -151,8 +151,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             }
         } catch (Exception e) {
             long end = System.currentTimeMillis();
-            MDC.put("sift","rtb-exception" );
-            log.debug("timeMs:{},Exception:{}", end - start, e);
+            MDC.put("sift", "rtb-exception");
+            log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
             MDC.remove("sift");
             response.setStatus(HttpResponseStatus.NO_CONTENT);
             ChannelFuture future1 = messageEvent.getChannel().write(response);
