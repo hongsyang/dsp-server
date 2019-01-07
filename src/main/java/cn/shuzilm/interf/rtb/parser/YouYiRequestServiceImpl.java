@@ -83,16 +83,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
-            //竞价请求进来之前对imei和mac做过滤
-            if (userDevice.getMd5_imei() != null & userDevice.getMd5_imei().length() == 32) {
 
-            } else if (userDevice.getMd5_mac() != null & userDevice.getMd5_mac().length() == 32) {
-                userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
-            } else {
-                log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
-                response = "";
-                return response;
-            }
 
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
@@ -107,7 +98,19 @@ public class YouYiRequestServiceImpl implements RequestService {
                 if ("ios".equals(userDevice.getDevice_os().toLowerCase())) {
                     deviceId = userDevice.getIdfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getDevice_os().toLowerCase())) {
-//                    deviceId = userDevice.getExt().getMac();
+                    //竞价请求进来之前对imei和mac做过滤
+                    if (userDevice.getMd5_imei() != null) {
+                        if (userDevice.getMd5_imei().length() == 32) {
+                        }
+                    } else if (userDevice.getMd5_mac() != null) {
+                        if (userDevice.getMd5_mac().length() == 32) {
+                            userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
+                        }
+                    } else {
+                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(),userDevice.getMd5_mac());
+                        response = "";
+                        return response;
+                    }
                     deviceId = userDevice.getMd5_imei();
                 }
             }
