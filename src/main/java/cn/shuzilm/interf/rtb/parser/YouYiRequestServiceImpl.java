@@ -137,6 +137,11 @@ public class YouYiRequestServiceImpl implements RequestService {
                 response = "pc 不竞价";
                 return response;
             }
+            //通过广告id获取长宽
+            if (width==null|height==null){
+                width=1;
+                height=1;
+            }
 
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
