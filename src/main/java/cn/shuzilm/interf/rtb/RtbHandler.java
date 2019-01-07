@@ -56,7 +56,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent) {
         long start = System.currentTimeMillis();
         //返回状态
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
@@ -68,74 +68,64 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
         boolean close = true;
         log.debug("线程名称：{}，counter：{}", Thread.currentThread().getName(), counter);
         counter.getAndAdd(1);
-        if (e.getMessage() instanceof HttpRequest) {
-            HttpRequest request = (HttpRequest) e.getMessage();
-            // 请求状态
-            close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION)) || request.getProtocolVersion().equals(HttpVersion.HTTP_1_0) && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION));
-            // 获取对方的ip地址
-            remoteIp = ctx.getChannel().getRemoteAddress().toString().split(":")[0].replace("/", "");
-            //接收 GET 请求
-            url = request.getUri();
-            //接收 POST 请求 , 获取 SDK 回传数据
-            dataStr = new String(request.getContent().array());
-            try {
+        try {
+            if (messageEvent.getMessage() instanceof HttpRequest) {
+                HttpRequest request = (HttpRequest) messageEvent.getMessage();
+                // 请求状态
+                close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION)) || request.getProtocolVersion().equals(HttpVersion.HTTP_1_0) && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION));
+                // 获取对方的ip地址
+                remoteIp = ctx.getChannel().getRemoteAddress().toString().split(":")[0].replace("/", "");
+                //接收 GET 请求
+                url = request.getUri();
+                //接收 POST 请求 , 获取 SDK 回传数据
+                dataStr = new String(request.getContent().array());
+
                 BidserverSsp.BidRequest bidRequest = null;
-                GdtRtb.BidRequest  tencentBidRequest = null;
+                GdtRtb.BidRequest tencentBidRequest = null;
 
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
-                }else if(url.contains("tencent")){
+                } else if (url.contains("tencent")) {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
                     log.debug(" 接收 tencentBidRequest 请求：{}", dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
-            } catch (Exception e1) {
-                log.debug(" 异常：{}，接收 POST 请求", e1, dataStr);
+
+
             }
 
-        }
+            //增加超时线程池
+            Future<Object> future = executor.submit(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    //主业务逻辑
+                    return parser.parseData(url, dataStr, remoteIp);
+                }
+            });
 
-        //增加超时线程池
-        Future<Object> future = executor.submit(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                //主业务逻辑
-                return parser.parseData(url, dataStr, remoteIp);
+            log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
+            try {
+                result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
+                log.debug("线程返回：{}", result);
+            } catch (TimeoutException e) {
+                // 超时情况
+                long end = System.currentTimeMillis();
+                MDC.put("sift", "timeOut");
+                log.error("timeMs:{},url:{}", end - start, url);
+                MDC.remove("sift");
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                ChannelFuture future1 = messageEvent.getChannel().write(response);
+                future1.addListener(ChannelFutureListener.CLOSE);
+                future.cancel(true);// 中断执行此任务的线程
+                return;
             }
-        });
 
-        log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
-        try {
-            result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
-            log.debug("线程返回：{}", result);
-        } catch (InterruptedException e1) {
-            log.error("线程中断出错：{}", e1);
-            future.cancel(true);// 中断执行此任务的线程
-        } catch (ExecutionException e1) {
-            log.error("线程服务出错{}", e1);
-            future.cancel(true);// 中断执行此任务的线程
-        } catch (TimeoutException e1) {
-            // 超时情况
-            long end = System.currentTimeMillis();
-            MDC.put("sift", "timeOut");
-            log.error("timeMs:{},url:{}", end - start, url);
-            MDC.remove("sift");
-            response.setStatus(HttpResponseStatus.NO_CONTENT);
-            ChannelFuture future1 = e.getChannel().write(response);
-            future1.addListener(ChannelFutureListener.CLOSE);
-            System.out.println(Thread.currentThread().getName()+"是否执行完毕"+future.isDone());
-            future.cancel(true);// 中断执行此任务的线程
-            System.out.println(Thread.currentThread().getName()+"是否执行完毕"+future.isDone());
-            return;
-        }
-
-        //正常情况 主业务逻辑
-        byte[] content = null;
-        String resultData = result;
-        try {
+            //正常情况 主业务逻辑
+            byte[] content = null;
+            String resultData = result;
             if ("".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 content = resultData.getBytes("utf-8");
@@ -147,19 +137,29 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             } else {
                 content = resultData.getBytes("utf-8");
             }
-        } catch (Exception e2) {
-            log.error("转换异常:{},resultData:{}", e2, resultData);
-        }
 
-        response.setHeader("Content-Length", content.length);
-        ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-        buffer.writeBytes(content);
-        response.setContent(buffer);
 
-        //正常返回
-        ChannelFuture future2 = e.getChannel().write(response);
-        if (close) {
-            future2.addListener(ChannelFutureListener.CLOSE);
+            response.setHeader("Content-Length", content.length);
+            ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+            buffer.writeBytes(content);
+            response.setContent(buffer);
+
+            //正常返回
+            ChannelFuture future2 = messageEvent.getChannel().write(response);
+            if (close) {
+                future2.addListener(ChannelFutureListener.CLOSE);
+            }
+        } catch (Exception e) {
+            long end = System.currentTimeMillis();
+            MDC.put("sift","rtb-exception" );
+            log.debug("timeMs:{},Exception:{}", end - start, e);
+            MDC.remove("sift");
+
+        } finally {
+            long end = System.currentTimeMillis();
+            MDC.put("sift", configs.getString("ADX_REQUEST"));
+            log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+            MDC.remove("sift");
         }
 
     }

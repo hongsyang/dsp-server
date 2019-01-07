@@ -118,17 +118,17 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 bean.setCost(Double.valueOf(price)/ 10000);
                 bean.setWinNoticeNums(1);
                 //pixel服务器发送到主控模块
-                log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
-                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
-
-                //pixel服务器发送到Phoenix
-                element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
-                element.setRequestId(requestId);
-                element.setActualPrice(Double.valueOf(price)/ 10000);//成本价
-                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
-                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
-                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-                MDC.put("sift", "AdViewNurl");
+//                log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
+//                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+//
+//                pixel服务器发送到Phoenix
+//                element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
+//                element.setRequestId(requestId);
+//                element.setActualPrice(Double.valueOf(price)/ 10000);//成本价
+//                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
+//                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
+//                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
+//                MDC.put("sift", "AdViewNurl");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
                 MDC.put("phoenix", "Nurl");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
@@ -150,13 +150,13 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
 
                 MDC.remove("phoenix");
                 MDC.put("sift", "AdViewNurl");
-                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+/*                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
                 if (lingJiClick) {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 } else {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
-                }
+                }*/
             } catch (Exception e) {
                 Help.sendAlert("pixcel异常触发报警:AdViewNurl");
                 MDC.put("sift", "exception");
