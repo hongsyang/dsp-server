@@ -87,7 +87,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
                 } else if (url.contains("tencent")) {
-                    log.debug(" 接收 tencentBidRequest 请求：{}", dataStr);
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
                 } else {
