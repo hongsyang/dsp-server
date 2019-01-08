@@ -1,4 +1,4 @@
-package cn.shuzilm.util;
+package cn.shuzilm.util.tencent;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
