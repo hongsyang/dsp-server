@@ -35,6 +35,8 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
     private String remoteIp = null;
     private String dataStr = null;
     private String url = null;
+    //返回结果
+    private String result = null;
 
 
     public PixcelHandler(ExecutorService executor) {
@@ -108,6 +110,20 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
         // super.exceptionCaught(ctx, e);//不打印堆栈日志
     }
 
+    /**
+     * 解析进来的请求数据
+     *
+     * @throws UnsupportedEncodingException
+     */
+    public byte[] parseRequest(String url, String dataStr, String remoteIp) throws UnsupportedEncodingException {
+        /**********		GET主业务逻辑		***************/
+        String resultData = parser.parseData(url, dataStr, remoteIp);//SDK 2.0.1
+        byte[] content = {0};//c初始值
+        if (StringUtils.isNotBlank(resultData)) {
+            content = resultData.getBytes("utf-8");
+        }
+        return content;
+    }
 
 
 }

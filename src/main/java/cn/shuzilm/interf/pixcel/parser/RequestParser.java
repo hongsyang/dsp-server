@@ -30,6 +30,7 @@ public class RequestParser {
     private static Reflections reflections;
 
     public String parseData(String url, String dataStr, String remoteIp) {
+        log.debug("RequestParser",Thread.currentThread().getName(),Thread.currentThread().getId());
         String responseStr = "没有对应的解析器";
         MDC.put("sift", "userip");
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
