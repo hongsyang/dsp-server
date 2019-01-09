@@ -15,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
@@ -37,6 +38,9 @@ public class PixcelServer{
     private static AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
+
+    //超时线程池
+    private ExecutorService executor = Executors.newFixedThreadPool(3000);
 
     /** 创建数据库连接*/
 //	public static MySqlConnection mySqlConnection ;
@@ -86,7 +90,7 @@ public class PixcelServer{
 //		         pipeline.addLast("streamer", new ChunkedWriteHandler());
             pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
             //http处理handler
-            pipeline.addLast("handler", new PixcelHandler());
+            pipeline.addLast("handler", new PixcelHandler(executor));
 
             return pipeline;
         }

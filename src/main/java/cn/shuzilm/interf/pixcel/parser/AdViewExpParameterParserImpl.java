@@ -119,9 +119,10 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
                 bean.setCost(Double.valueOf(priceLong) / 10000);
                 bean.setWinNoticeNums(0);
+                Thread.sleep(500);
                 //pixel服务器发送到主控模块
-                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
-                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+//                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
+//                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
 
                 //pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
@@ -160,13 +161,13 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                     throw new RuntimeException();
                 }*/
             } catch (Exception e) {
-                Help.sendAlert("pixcel异常触发报警:AdViewExp");
-                MDC.put("sift", "exception");
-                boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
-                log.debug("发送到EXP_ERROR队列：{}", exp_error);
-                log.debug("element{}", element);
-                log.error("异常信息：{}", e);
-                MDC.remove("sift");
+//                Help.sendAlert("pixcel异常触发报警:AdViewExp");
+//                MDC.put("sift", "exception");
+//                boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+//                log.debug("发送到EXP_ERROR队列：{}", exp_error);
+//                log.debug("element{}", element);
+//                log.error("异常信息：{}", e);
+//                MDC.remove("sift");
             }
 
             String duFlowBeanJson = JSON.toJSONString(element);
