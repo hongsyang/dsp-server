@@ -1,14 +1,21 @@
 package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.interf.pixcel.parser.RequestParser;
+import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -21,20 +28,37 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author
  */
 public class PixcelHandler extends SimpleChannelUpstreamHandler {
-//	private WriteDataToLog wdt;
+	//	private WriteDataToLog wdt;
 	RequestParser parser = null;
-    private static AtomicInteger counter = new AtomicInteger();
+	private static AtomicInteger counter = new AtomicInteger();
+
+
+	private ExecutorService executor = null;
+
+	private String remoteIp = null;
+	private String dataStr = null;
+	private String url = null;
+
+
+	private static final Logger log = LoggerFactory.getLogger(PixcelHandler.class);
 
 	public PixcelHandler() {
-        parser = new RequestParser();
-        System.out.println(Thread.currentThread().getName() + " parser 初始化成功。。。");
-    }
+		parser = new RequestParser();
+		this.executor = executor;
+		System.out.println(Thread.currentThread().getName() + " rtb parser 初始化成功。。。");
+	}
+
+	public PixcelHandler(ExecutorService executor) {
+		parser = new RequestParser();
+		this.executor = executor;
+		System.out.println(Thread.currentThread().getName() + " rtb parser 初始化成功。。。");
+	}
+
 
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 		try {
-//            System.out.println(Thread.currentThread().getName() + "\t" + counter);
-            counter.getAndAdd(1);
+			counter.getAndAdd(1);
 			if (e.getMessage() instanceof HttpRequest) {
 				HttpRequest request = (HttpRequest) e.getMessage();
 //				System.out.println("------------\r\n" + request.getUri());
@@ -42,46 +66,44 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 						.equalsIgnoreCase(request
 								.getHeader(HttpHeaders.Names.CONNECTION))
 						|| request.getProtocolVersion().equals(
-								HttpVersion.HTTP_1_0)
+						HttpVersion.HTTP_1_0)
 						&& !HttpHeaders.Values.KEEP_ALIVE
-								.equalsIgnoreCase(request
-										.getHeader(HttpHeaders.Names.CONNECTION));
+						.equalsIgnoreCase(request
+								.getHeader(HttpHeaders.Names.CONNECTION));
 				// 获取对方的ip地址
-
-				String remoteIp = ctx.getChannel().getRemoteAddress()
+				remoteIp = ctx.getChannel().getRemoteAddress()
 						.toString().split(":")[0].replace("/", "");
-//				System.out.println("remoteIp : "+remoteIp);
-				//接收 POST 请求 , 获取 SDK 回传数据
-				String dataStr = URLDecoder.decode(new String(request.getContent().array(),"utf-8"));
-//				String dataStr = new String(request.getContent().array(),"utf-8");
-//				System.out.println("接收到的原始数据 --- "+dataStr);
-//				dataStr = new String(EncryptionData.decrypt(EKEY, dataStr)
-//						.getBytes(), "UTF-8");
 				//接收 GET 请求
-				String url = request.getUri();
-//				System.out.println("uri : "+url);
+				url = request.getUri();
+				MDC.put("sift", "url");
+				log.debug("url：{}",url);
+				//主业务逻辑  增加超时线程池
+				Future<Object> future = executor.submit(new Callable<Object>() {
+					@Override
+					public Object call() throws Exception {
+						//主业务逻辑
+						return parser.parseData(url, dataStr, remoteIp);
+					}
+				});
 
-				HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+				//不接受内容，直接处理
+				byte[] content = url.getBytes("utf-8");
 				ChannelBuffer buffer = new DynamicChannelBuffer(2048);
 
-				//主业务逻辑
-				byte[] content = parseRequest(url,dataStr, remoteIp);
-
+				HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
 				response.setHeader("Content-Type", "text/html");
+				response.setHeader("Connection", HttpHeaders.Values.CLOSE);
 				response.setHeader("Content-Length", content.length);
 				response.setHeader("Accept-Ranges", "bytes");
-                response.setHeader("Connection", HttpHeaders.Values.CLOSE);
 				buffer.writeBytes(content);
 				response.setContent(buffer);
 
 				// Write the response.
 				ChannelFuture future2 = e.getChannel().write(response);
 				if (close) {
-                    future2.addListener(ChannelFutureListener.CLOSE);
-                }
+					future2.addListener(ChannelFutureListener.CLOSE);
+				}
 
-//				Channel ch = e.getChannel();
-				// ch.write(response);
 			}
 		} catch (Exception e2) {
 			e2.printStackTrace();
@@ -96,20 +118,6 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 		System.out.println(e.toString());
 
 		// super.exceptionCaught(ctx, e);//不打印堆栈日志
-	}
-
-	/**
-	 * 解析进来的请求数据
-	 * @throws UnsupportedEncodingException
-	 */
-	public byte[] parseRequest(String url, String dataStr, String remoteIp) throws UnsupportedEncodingException {
-		/**********		GET主业务逻辑		***************/
-		String resultData = parser.parseData(url, dataStr,remoteIp);//SDK 2.0.1
-        byte[] content ={0};//c初始值
-        if (StringUtils.isNotBlank(resultData)){
-            content = resultData.getBytes("utf-8");
-        }
-        return content;
 	}
 
 

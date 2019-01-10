@@ -15,17 +15,18 @@ import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
-* @Description:    PixcelServer 用于监听曝光量和点击量
-* @Author:         houkp
-* @CreateDate:     2018/7/19 15:18
-* @UpdateUser:     houkp
-* @UpdateDate:     2018/7/19 15:18
-* @UpdateRemark:   修改内容
-* @Version:        1.0
-*/
+ * @Description:    PixcelServer 用于监听曝光量和点击量
+ * @Author:         houkp
+ * @CreateDate:     2018/7/19 15:18
+ * @UpdateUser:     houkp
+ * @UpdateDate:     2018/7/19 15:18
+ * @UpdateRemark:   修改内容
+ * @Version:        1.0
+ */
 public class PixcelServer{
 
 
@@ -37,6 +38,9 @@ public class PixcelServer{
     private static AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
+
+    //超时线程池
+    private ExecutorService executor = Executors.newFixedThreadPool(3000);
 
     /** 创建数据库连接*/
 //	public static MySqlConnection mySqlConnection ;
@@ -58,7 +62,7 @@ public class PixcelServer{
         ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(),configs.getInt("N_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
-        bootstrap.setOption("child.keepAlive", false); //注意child前缀
+        bootstrap.setOption("child.keepAlive", true); //注意child前缀
         bootstrap.setOption("reuseAddress", true);
         bootstrap.setOption("child.linger", 60);
         bootstrap.setOption("child.TIMEOUT", 1);
@@ -86,7 +90,7 @@ public class PixcelServer{
 //		         pipeline.addLast("streamer", new ChunkedWriteHandler());
             pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
             //http处理handler
-            pipeline.addLast("handler", new PixcelHandler());
+            pipeline.addLast("handler", new PixcelHandler(executor));
 
             return pipeline;
         }
