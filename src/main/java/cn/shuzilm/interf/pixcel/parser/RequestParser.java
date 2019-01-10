@@ -35,7 +35,9 @@ public class RequestParser {
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
         MDC.remove("sift");
         List<String> urlList = UrlParserUtil.urlParser(url);
+        //TODO 放在初始化 放在MAP里面
         reflections = instance("cn.shuzilm.interf.pixcel.parser");
+        //TODO 放在初始化 放在MAP里面
         Set<Class<? extends ParameterParser>> monitorClasses = reflections.getSubTypesOf(ParameterParser.class);
         String className = null;
         for (Class<? extends ParameterParser> monitorClass : monitorClasses) {
@@ -46,6 +48,7 @@ public class RequestParser {
                 }
             }
         }
+        //TODO 放在初始化 放在MAP里面
         ParameterParser parameterParser = ParameterParserFactory.getParameterParser(className);
         responseStr = parameterParser.parseUrl(url);
         return responseStr;

@@ -9,9 +9,10 @@ package cn.shuzilm.interf.pixcel.parser;
 * @Version:        1.0
 */
 public class ParameterParserFactory {
+   static ParameterParser parameterParser = null;
 
     public static ParameterParser getParameterParser(String className) {
-        ParameterParser parameterParser = null;
+
 
         try {
             parameterParser= (ParameterParser) Class.forName(className).newInstance();
