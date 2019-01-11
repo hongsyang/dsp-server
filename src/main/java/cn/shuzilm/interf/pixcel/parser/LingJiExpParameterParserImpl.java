@@ -176,12 +176,12 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 }
 
             } catch (Exception e) {
-                Help.sendAlert("pixcel异常触发报警:LingJiExp");
+                Help.sendAlert("发送到" + configs.getString("HOST")+"失败,LingJiExp");
                 MDC.put("sift", "exception");
                 boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
                 log.debug("发送element：{}到EXP_ERROR队列：{}", element, exp_error);
-                log.debug("element:{}", element);
-                log.error("异常信息：{}", e);
+                log.debug("element:{}", JSON.toJSONString(element));
+                log.error("异常信息:{}", e);
                 MDC.remove("sift");
             }
             String duFlowBeanJson = JSON.toJSONString(element);

@@ -3,12 +3,13 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 public class TestSet {
     public static void main(String[] args) throws InvalidProtocolBufferException {
-        BidserverSsp.BidResponse.Builder builder =  BidserverSsp.BidResponse.newBuilder();
-        builder.setSessionId("1111");
-        BidserverSsp.BidResponse build = builder.build();
-        byte[] buff =  build.toByteArray();
-        BidserverSsp.BidResponse bidResponse = BidserverSsp.BidResponse.parseFrom(buff);
-        System.out.println(bidResponse.getSessionId());
+
+//        BidserverSsp.BidResponse.Builder builder =  BidserverSsp.BidResponse.newBuilder();
+//        builder.setSessionId("1111");
+//        BidserverSsp.BidResponse build = builder.build();
+//        byte[] buff =  build.toByteArray();
+//        BidserverSsp.BidResponse bidResponse = BidserverSsp.BidResponse.parseFrom(buff);
+//        System.out.println(bidResponse.getSessionId());
 //        BitSet bm = new BitSet();
 //        int randomVal = 1000000;
 //        System.out.println(new Random().nextInt(randomVal));
