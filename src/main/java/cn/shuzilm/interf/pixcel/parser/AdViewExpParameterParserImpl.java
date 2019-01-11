@@ -119,7 +119,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
                 bean.setCost(Double.valueOf(priceLong) / 10000);
                 bean.setWinNoticeNums(0);
-                Thread.sleep(100);
+                Thread.sleep(10);
                 //pixel服务器发送到主控模块
 //                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
 //                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
