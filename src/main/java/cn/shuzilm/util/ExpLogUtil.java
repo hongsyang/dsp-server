@@ -16,7 +16,7 @@ public class ExpLogUtil {
                 while (bufferedRead.read() != -1) {
                     String readLine = bufferedRead.readLine();
                     if (readLine.contains("elementDUFlowBean")) {
-                        System.out.println(readLine);
+                        System.out.println(readLine.substring(readLine.indexOf("DUFlowBean")));
                     }
                 }
             } catch (FileNotFoundException e) {
