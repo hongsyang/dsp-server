@@ -51,7 +51,7 @@ public class PixcelServer {
     //加载所有的实现接口的类
     private static   Set<Class<? extends ParameterParser>>  subTypesOf;
     //超时线程池
-    private ExecutorService executor = Executors.newFixedThreadPool(3000);
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("N_THREADS"));
 
     /**
      * 创建数据库连接
@@ -91,7 +91,7 @@ public class PixcelServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(300), Executors.newCachedThreadPool(),300));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(),configs.getInt("N_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀

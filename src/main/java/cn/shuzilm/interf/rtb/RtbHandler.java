@@ -101,7 +101,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 @Override
                 public Object call() throws Exception {
                     //主业务逻辑
-                    return parser.parseData(url, dataStr, remoteIp);
+                    Thread.sleep(20);
+//                    return parser.parseData(url, dataStr, remoteIp);
+                    return "";
                 }
             });
 
