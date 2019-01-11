@@ -1,6 +1,10 @@
 package cn.shuzilm.util;
 
 
+import cn.shuzilm.bean.internalflow.DUFlowBean;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.*;
 
 public class ExpLogUtil {
@@ -16,7 +20,8 @@ public class ExpLogUtil {
                 while (bufferedRead.read() != -1) {
                     String readLine = bufferedRead.readLine();
                     if (readLine.contains("elementDUFlowBean")) {
-                        System.out.println(readLine.substring(readLine.indexOf("DUFlowBean")));
+                        String duFlowBean = readLine.substring(readLine.indexOf("DUFlowBean"));
+                        
                     }
                 }
             } catch (FileNotFoundException e) {
