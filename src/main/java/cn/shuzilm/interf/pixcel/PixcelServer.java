@@ -3,6 +3,9 @@ package cn.shuzilm.interf.pixcel;
 import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.common.AppConfigs;
+import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.interf.pixcel.parser.AdViewClickParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -44,16 +47,43 @@ public class PixcelServer {
     //加载所有的实现接口的类
     private static Set<Class<? extends ParameterParser>> subTypesOf;
     //超时线程池
-    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("N_THREADS"));
+    private static ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("EXECUTOR_THREADS"));
     //创建requestParser 解析的map
     private static ConcurrentHashMap<String, Object> requestParser = null;
 
     public static void main(String[] args) {
         subTypesOf = reflections.getSubTypesOf(ParameterParser.class);
         requestParser = createMap(subTypesOf);
+        //从redis中取数据
+        startPixcelPaeser();
+        System.out.println("开始启动服务");
         PixelCronDispatch.startPixelDispatch();
         PixcelServer server = new PixcelServer();
         server.start(configs.getInt("PIXCEL_PORT"));
+    }
+
+    private static void startPixcelPaeser() {
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    Object adviewclick = JedisQueueManager.getElementFromQueue("adviewclick");
+                    Object adviewexp = JedisQueueManager.getElementFromQueue("adviewexp");
+                    Object adviewnurl = JedisQueueManager.getElementFromQueue("adviewnurl");
+                    Object lingjiclick = JedisQueueManager.getElementFromQueue("lingjiclick");
+                    Object lingjiexp = JedisQueueManager.getElementFromQueue("lingjiexp");
+                    Object youyiclick = JedisQueueManager.getElementFromQueue("youyiclick");
+                    Object youyiexp = JedisQueueManager.getElementFromQueue("youyiexp");
+                    Object youyiimp = JedisQueueManager.getElementFromQueue("youyiimp");
+                    System.out.println(1);
+                    if (adviewclick != null) {
+
+                    }
+                }
+
+            }
+        });
+
     }
 
     /**

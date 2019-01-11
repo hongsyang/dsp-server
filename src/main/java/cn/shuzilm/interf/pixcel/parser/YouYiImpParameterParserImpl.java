@@ -33,15 +33,14 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(YouYiImpParameterParserImpl.class);
 
-    private AppConfigs configs = null;
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
     private static final String PIXEL_CONFIG = "pixel.properties";
 
-    @Override
-    public String parseUrl(String url) {
-        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
+
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "YouYiNurl");
         log.debug("YouYiNurl曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -171,5 +170,10 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }

@@ -36,15 +36,14 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewExpParameterParserImpl.class);
 
-    private AppConfigs configs = null;
+    private static final String PIXEL_CONFIG = "pixel.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
-    private static final String PIXEL_CONFIG = "pixel.properties";
 
-    @Override
-    public String parseUrl(String url) {
-        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "AdViewExp");
         log.debug("AdViewExp曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -177,5 +176,10 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
         }
         return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }

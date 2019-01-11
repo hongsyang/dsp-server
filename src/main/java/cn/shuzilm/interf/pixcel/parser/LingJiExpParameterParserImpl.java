@@ -39,17 +39,13 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(LingJiExpParameterParserImpl.class);
 
-    private static final String PIXEL_CONFIG = "pixel.properties";
-
-
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
+    private static final String PIXEL_CONFIG = "pixel.properties";
 
-    private AppConfigs configs = null;
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
 
-    @Override
-    public String parseUrl(String url) {
-        configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "LingJiExp");
         log.debug("LingJiExp曝光的nurl值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -191,5 +187,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             log.debug("本次请求requestId:{}；bidid:{}", requestId, element.getBidid());
         }
         return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }

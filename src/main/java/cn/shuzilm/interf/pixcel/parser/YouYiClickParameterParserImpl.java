@@ -31,13 +31,11 @@ public class YouYiClickParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(YouYiClickParameterParserImpl.class);
 
-    private AppConfigs configs = null;
-
     private static final String PIXEL_CONFIG = "pixel.properties";
 
-    @Override
-    public String parseUrl(String url) {
-        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
+
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "YouYiClick");
         log.debug("YouYiClick点击的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -149,5 +147,10 @@ public class YouYiClickParameterParserImpl implements ParameterParser {
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }
