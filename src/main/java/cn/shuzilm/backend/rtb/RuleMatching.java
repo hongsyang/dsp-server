@@ -171,7 +171,8 @@ public class RuleMatching {
 	 *            应用包名称
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, String appPackageName)
+			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, 
+			String appPackageName,List<String> widthAndHeightList)
 			throws Exception {
 		MDC.put("sift", "rtb");
 
@@ -769,7 +770,7 @@ public class RuleMatching {
 		String type = audience.getType().toUpperCase();
 		double premiumRatio = constant.getRtbVar(type);
 		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价		
-		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
+		if(appPackageName != null && appPackageName.contains("com.moji")){
 			targetDuFlowBean.setBiddingPrice((double) ad.getPrice()*0.6);
 		}else{
 			targetDuFlowBean.setBiddingPrice((double) ad.getPrice());
