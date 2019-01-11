@@ -7,9 +7,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -40,14 +37,6 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 	private String url = null;
 
 
-	private static final Logger log = LoggerFactory.getLogger(PixcelHandler.class);
-
-	public PixcelHandler() {
-		parser = new RequestParser();
-		this.executor = executor;
-		System.out.println(Thread.currentThread().getName() + " rtb parser 初始化成功。。。");
-	}
-
 	public PixcelHandler(ExecutorService executor) {
 		parser = new RequestParser();
 		this.executor = executor;
@@ -75,16 +64,15 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 						.toString().split(":")[0].replace("/", "");
 				//接收 GET 请求
 				url = request.getUri();
-				MDC.put("sift", "url");
-				log.debug("url：{}",url);
-				//主业务逻辑  增加超时线程池
-				Future<Object> future = executor.submit(new Callable<Object>() {
-					@Override
-					public Object call() throws Exception {
-						//主业务逻辑
-						return parser.parseData(url, dataStr, remoteIp);
-					}
-				});
+
+//				//主业务逻辑  增加超时线程池
+//				Future<Object> future = executor.submit(new Callable<Object>() {
+//					@Override
+//					public Object call() throws Exception {
+//						//主业务逻辑
+//						return parser.parseData(url, dataStr, remoteIp);
+//					}
+//				});
 
 				//不接受内容，直接处理
 				byte[] content = url.getBytes("utf-8");
