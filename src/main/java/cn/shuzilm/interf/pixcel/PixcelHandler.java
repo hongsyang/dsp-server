@@ -4,9 +4,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
-import cn.shuzilm.interf.pixcel.parser.ParameterParserFactory;
 import cn.shuzilm.interf.pixcel.parser.RequestParser;
-import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
 import org.apache.commons.lang.StringUtils;
@@ -19,14 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -72,11 +65,11 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent) throws Exception {
         try {
             counter.getAndAdd(1);
-            if (e.getMessage() instanceof HttpRequest) {
-                HttpRequest request = (HttpRequest) e.getMessage();
+            if (messageEvent.getMessage() instanceof HttpRequest) {
+                HttpRequest request = (HttpRequest) messageEvent.getMessage();
 //				System.out.println("------------\r\n" + request.getUri());
                 boolean close = HttpHeaders.Values.CLOSE
                         .equalsIgnoreCase(request
@@ -119,14 +112,17 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 response.setContent(buffer);
 
                 // Write the response.
-                ChannelFuture future2 = e.getChannel().write(response);
+                ChannelFuture future2 = messageEvent.getChannel().write(response);
                 if (close) {
                     future2.addListener(ChannelFutureListener.CLOSE);
                 }
 
             }
-        } catch (Exception e2) {
-            e2.printStackTrace();
+        } catch (Exception e) {
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,PixcelHandler");
+            MDC.put("sift", "pixcelException");
+            log.debug("url:{}，remoteIp:{}", url, remoteIp,e);
+            log.debug("异常信息e:{}", e);
         }
 
     }
