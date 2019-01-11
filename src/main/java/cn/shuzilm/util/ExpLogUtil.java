@@ -2,6 +2,8 @@ package cn.shuzilm.util;
 
 
 import cn.shuzilm.bean.internalflow.DUFlowBean;
+import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.jedis.Priority;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
@@ -20,13 +22,29 @@ public class ExpLogUtil {
                 while (bufferedRead.read() != -1) {
                     String readLine = bufferedRead.readLine();
                     if (readLine.contains("elementDUFlowBean")) {
-                        String duFlowBean = readLine.substring(readLine.indexOf("DUFlowBean"));
-                        
+                        String exp_error = readLine.substring(readLine.indexOf("DUFlowBean"));
+                        System.out.println(exp_error);
+                        Object obj = null;
+                        byte[] bytes = exp_error.getBytes();
+                        ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
+                        ObjectInputStream oi = new ObjectInputStream(bi);
+                        obj = oi.readObject();
+                        bi.close();
+                        oi.close();
+                        System.out.println(obj);
+                        DUFlowBean duFlowBean=new DUFlowBean();
+                        duFlowBean.setRequestId("1");
+                        byte[] bytes1 = duFlowBean.toString().getBytes();
+//                        System.out.println(duFlowBean.toString().getBytes());
+//                        JedisQueueManager.putElementToQueue("EXP", exp_error, Priority.MAX_PRIORITY);
+//                        JSON.parse(duFlowBean);
                     }
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }
