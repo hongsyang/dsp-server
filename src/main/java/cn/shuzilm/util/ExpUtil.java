@@ -13,14 +13,13 @@ import cn.shuzilm.common.jedis.JedisQueueManager;
 * @Version:        1.0
 */
 public class ExpUtil {
-
     public static void main(String[] args) {
         AdPixelBean bean = new AdPixelBean();
-        DUFlowBean exp_error = (DUFlowBean) JedisQueueManager.getElementFromQueue("EXP_ERROR");
-        String adxId = exp_error.getAdxId();
-        if (adxId.equals(2)){
+        while (true){
 
+            DUFlowBean exp_error = (DUFlowBean) JedisQueueManager.getElementFromQueue("EXP_ERROR");
+            System.out.println(exp_error);
         }
-        System.out.println(exp_error);
     }
+
 }
