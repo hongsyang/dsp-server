@@ -3,8 +3,10 @@ package cn.shuzilm.backend.timing.rtb;
 import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.rtb.RtbFlowControl;
 import cn.shuzilm.backend.timing.pixel.PixelTenMinuteTask;
+import cn.shuzilm.util.AppBlackListUtil;
 import cn.shuzilm.util.AsyncRedisClient;
 
+import cn.shuzilm.util.DeviceBlackListUtil;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -91,7 +93,11 @@ public class RtbCronDispatch {
 
         RtbCronDispatch.startTimer(8);
 
-//        RtbCronDispatch.startTimer(9);
+        // 项目启动时候加载黑名单
+        AppBlackListUtil.updateAppBlackList();
+        DeviceBlackListUtil.updateDeviceBlackList();
+
+        RtbCronDispatch.startTimer(9);
 
     }
 
