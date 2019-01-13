@@ -73,21 +73,24 @@ public class LingJiRequestServiceImpl implements RequestService {
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
             //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
-                log.debug("IP黑名单:{}", userDevice.getIp());
-                response = "ipBlackList";
-                return response;
-            }
-            // 过滤媒体黑名单
-            if(app != null) {
-                String bundle = app.getBundle();
-                if(AppBlackListUtil.inAppBlackList(bundle)) {
-                    log.debug("媒体黑名单:{}", bundle);
-                    response = "bundleBlackList";
+            if (Boolean.valueOf(configs.getString("IP_BLACK_LIST"))) {
+                if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
+                    log.debug("IP黑名单:{}", userDevice.getIp());
+                    response = "ipBlackList";
                     return response;
                 }
             }
-
+            // 过滤媒体黑名单
+            if (Boolean.valueOf(configs.getString("BUNDLE_BLACK_LIST"))) {
+                if (app != null) {
+                    String bundle = app.getBundle();
+                    if (AppBlackListUtil.inAppBlackList(bundle)) {
+                        log.debug("媒体黑名单:{}", bundle);
+                        response = "bundleBlackList";
+                        return response;
+                    }
+                }
+            }
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
 //                return response;
@@ -103,8 +106,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                         if (userDevice.getDidmd5().length() == 32) {
                         }
                     } else if (userDevice.getMacmd5() != null) {
-                        if ( userDevice.getExt().getMacmd5().length() == 32) {
-                            userDevice.setDidmd5("mac-" +  userDevice.getExt().getMacmd5());
+                        if (userDevice.getExt().getMacmd5().length() == 32) {
+                            userDevice.setDidmd5("mac-" + userDevice.getExt().getMacmd5());
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getExt().getMacmd5());
@@ -119,25 +122,26 @@ public class LingJiRequestServiceImpl implements RequestService {
             }
 
             // 过滤设备黑名单
-            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
-                log.debug("设备黑名单:{}", deviceId);
-                response = "deviceIdBlackList";
-                return response;
+            if (Boolean.valueOf(configs.getString("DEVICE_ID_BLACK_LIST"))) {
+                if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                    log.debug("设备黑名单:{}", deviceId);
+                    response = "deviceIdBlackList";
+                    return response;
+                }
             }
-
             //支持的文件类型
 
             List<LJAssets> assets = new ArrayList<>();
             if (userImpression.getVideo() != null) {
-                    width = userImpression.getVideo().getW();
-                    height = userImpression.getVideo().getH();
-                    String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
-                    stringSet = Arrays.toString(mimes);
-                } else if (userImpression.getBanner() != null) {
-                    width = userImpression.getBanner().getW();
-                    height = userImpression.getBanner().getH();
-                    String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
-                    stringSet = Arrays.toString(mimes);
+                width = userImpression.getVideo().getW();
+                height = userImpression.getVideo().getH();
+                String[] mimes = userImpression.getVideo().getMimes();//文件扩展名列表
+                stringSet = Arrays.toString(mimes);
+            } else if (userImpression.getBanner() != null) {
+                width = userImpression.getBanner().getW();
+                height = userImpression.getBanner().getH();
+                String[] mimes = userImpression.getBanner().getMimes();//文件扩展名列表
+                stringSet = Arrays.toString(mimes);
             } else if (userImpression.getNativead() != null) {
                 assets = userImpression.getNativead().getAssets();
                 for (LJAssets asset : assets) {
@@ -256,49 +260,49 @@ public class LingJiRequestServiceImpl implements RequestService {
 //            MDC.put("sift", "rtb-lingji");
 //            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,ADX_ID,stringSet, userDevice.getIp(),app.getBundle() );
 //            MDC.put("sift", "dsp-server");
-                DUFlowBean targetDuFlowBean = ruleMatching.match(
-                        deviceId,//设备mac的MD5
-                        adType,//广告类型
-                        width,//广告位的宽
-                        height,//广告位的高
-                        true,// 是否要求分辨率
-                        5,//宽误差值
-                        5,// 高误差值;
-                        ADX_ID,//ADX 服务商ID
-                        stringSet,//文件扩展名
-                        userDevice.getIp(),//用户ip
-                        app.getBundle(),//APP包名
-                        bidRequestBean.getId()
-                );
-                if (targetDuFlowBean == null) {
-                    response = "";
-                    return response;
-                }
-                MDC.put("sift", "dsp-server");
-                log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
-                //需要添加到Phoenix中的数据
-                targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
-                targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
-                targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-                targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-                targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
-                targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
-                targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
-                targetDuFlowBean.setAppName(app.getName());//APP名称
-                targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
-                targetDuFlowBean.setAppId(app.getId());//APP包名
-                if (app.getExt() != null) {
-                    targetDuFlowBean.setAppVersion(app.getExt().getSdk() == null ? "" : app.getExt().getSdk());//APP版本
-                }
+            DUFlowBean targetDuFlowBean = ruleMatching.match(
+                    deviceId,//设备mac的MD5
+                    adType,//广告类型
+                    width,//广告位的宽
+                    height,//广告位的高
+                    true,// 是否要求分辨率
+                    5,//宽误差值
+                    5,// 高误差值;
+                    ADX_ID,//ADX 服务商ID
+                    stringSet,//文件扩展名
+                    userDevice.getIp(),//用户ip
+                    app.getBundle(),//APP包名
+                    bidRequestBean.getId()
+            );
+            if (targetDuFlowBean == null) {
+                response = "";
+                return response;
+            }
+            MDC.put("sift", "dsp-server");
+            log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
+            //需要添加到Phoenix中的数据
+            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+            targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
+            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+            targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+            targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
+            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+            targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
+            targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
+            targetDuFlowBean.setAppName(app.getName());//APP名称
+            targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+            targetDuFlowBean.setAppId(app.getId());//APP包名
+            if (app.getExt() != null) {
+                targetDuFlowBean.setAppVersion(app.getExt().getSdk() == null ? "" : app.getExt().getSdk());//APP版本
+            }
 
 
-                log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
-                MDC.remove("sift");
-                response = JSON.toJSONString(bidResponseBean);
-                MDC.put("sift", "dsp-server");
-                log.debug("没有过滤的bidResponseBean:{}", response);
+            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
+            MDC.remove("sift");
+            response = JSON.toJSONString(bidResponseBean);
+            MDC.put("sift", "dsp-server");
+            log.debug("没有过滤的bidResponseBean:{}", response);
 //            }
             return response;
         } else {
@@ -387,7 +391,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         bid.setNurl(nurl);
 
         //曝光检测地址
-        String  lingjieimp = serviceUrl + "lingjiimp?" +
+        String lingjieimp = serviceUrl + "lingjiimp?" +
                 "id=" + "${AUCTION_ID}" +
                 "&bidid=" + "${AUCTION_BID_ID}" +
                 "&impid=" + "${AUCTION_IMP_ID}" +

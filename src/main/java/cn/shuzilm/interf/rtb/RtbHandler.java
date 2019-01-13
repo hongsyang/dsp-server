@@ -127,7 +127,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
             try {
                 result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
-                log.debug("线程返回：{}", result);
+                log.debug("线程返回:{}", result.toString());
             } catch (TimeoutException e) {
                 exceptionFlag = 0;
                 // 超时情况
@@ -181,6 +181,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
 
         } finally {
+            String resultData = result;
             long end = System.currentTimeMillis();
             MDC.put("sift", configs.getString("ADX_REQUEST"));
             log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
@@ -198,18 +199,18 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     appName = bidRequestBean.getApp().getName();
                     appPackageName = bidRequestBean.getApp().getBundle();
                 }
-                if (result.contains("ipBlackList")) {
+                if (resultData.contains("ipBlackList")) {
                     ipBlackListFlag = 0;
                 }
-                if (result.contains("bundleBlackList")) {
+                if (resultData.contains("bundleBlackList")) {
                     bundleBlackListFlag = 0;
                 }
-                if (result.contains("deviceIdBlackList")) {
+                if (resultData.contains("deviceIdBlackList")) {
                     deviceIdBlackListFlag = 0;
                 }
-                if (result.contains("price\":")) {
+                if (resultData.contains("price\":")) {
                     bidPriceFlag = 1;
-                    String substring = result.substring(result.indexOf("price\":"));
+                    String substring = resultData.substring(resultData.indexOf("price\":"));
                     price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
                 }
             } else if (url.contains("adview")) {
@@ -220,18 +221,18 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     appName = bidRequestBean.getApp().getName();
                     appPackageName = bidRequestBean.getApp().getBundle();
                 }
-                if (result.contains("ipBlackList")) {
+                if (resultData.contains("ipBlackList")) {
                     ipBlackListFlag = 0;
                 }
-                if (result.contains("bundleBlackList")) {
+                if (resultData.contains("bundleBlackList")) {
                     bundleBlackListFlag = 0;
                 }
-                if (result.contains("deviceIdBlackList")) {
+                if (resultData.contains("deviceIdBlackList")) {
                     deviceIdBlackListFlag = 0;
                 }
-                if (result.contains("price\":")) {
+                if (resultData.contains("price\":")) {
                     bidPriceFlag = 1;
-                    String substring = result.substring(result.indexOf("price\":"));
+                    String substring = resultData.substring(resultData.indexOf("price\":"));
                     price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
                 }
             } else if (url.contains("youyi")) {
@@ -242,18 +243,18 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     appName = bidRequestBean.getMobile().getApp_name();
                     appPackageName = bidRequestBean.getMobile().getApp_bundle();
                 }
-                if (result.contains("ipBlackList")) {
+                if (resultData.contains("ipBlackList")) {
                     ipBlackListFlag = 0;
                 }
-                if (result.contains("bundleBlackList")) {
+                if (resultData.contains("bundleBlackList")) {
                     bundleBlackListFlag = 0;
                 }
-                if (result.contains("deviceIdBlackList")) {
+                if (resultData.contains("deviceIdBlackList")) {
                     deviceIdBlackListFlag = 0;
                 }
-                if (result.contains("price\":")) {
+                if (resultData.contains("price\":")) {
                     bidPriceFlag = 1;
-                    String substring = result.substring(result.indexOf("price\":"));
+                    String substring = resultData.substring(resultData.indexOf("price\":"));
                     price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
                 }
             } else if (url.contains("tencent")) {
