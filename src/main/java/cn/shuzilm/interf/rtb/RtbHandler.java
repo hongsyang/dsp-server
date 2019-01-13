@@ -58,6 +58,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     private String appName = "";
     private String appPackageName = "";
     private Integer ipBlackListFlag = 1;
+    private Integer bundleBlackListFlag = 1;
+    private Integer deviceIdBlackListFlag = 1;
     private Integer timeOutFlag = 1;
     private Integer bidPriceFlag = 0;
     private String price = "-1";
@@ -199,6 +201,12 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 if (result.contains("ipBlackList")) {
                     ipBlackListFlag = 0;
                 }
+                if (result.contains("bundleBlackList")) {
+                    bundleBlackListFlag = 0;
+                }
+                if (result.contains("deviceIdBlackList")) {
+                    deviceIdBlackListFlag = 0;
+                }
                 if (result.contains("price\":")) {
                     bidPriceFlag = 1;
                     String substring = result.substring(result.indexOf("price\":"));
@@ -214,6 +222,12 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 }
                 if (result.contains("ipBlackList")) {
                     ipBlackListFlag = 0;
+                }
+                if (result.contains("bundleBlackList")) {
+                    bundleBlackListFlag = 0;
+                }
+                if (result.contains("deviceIdBlackList")) {
+                    deviceIdBlackListFlag = 0;
                 }
                 if (result.contains("price\":")) {
                     bidPriceFlag = 1;
@@ -231,6 +245,12 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 if (result.contains("ipBlackList")) {
                     ipBlackListFlag = 0;
                 }
+                if (result.contains("bundleBlackList")) {
+                    bundleBlackListFlag = 0;
+                }
+                if (result.contains("deviceIdBlackList")) {
+                    deviceIdBlackListFlag = 0;
+                }
                 if (result.contains("price\":")) {
                     bidPriceFlag = 1;
                     String substring = result.substring(result.indexOf("price\":"));
@@ -247,12 +267,13 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             }
             MDC.put("phoenix", "rtb-houkp");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}",
                     LocalDateTime.now().toString(), new Date().getTime(),
                     LocalDate.now().toString(), LocalTime.now().getHour(),
                     LocalTime.now().getMinute(), requestId,
                     adxId, appName,
                     appPackageName, ipBlackListFlag,
+                    bundleBlackListFlag,deviceIdBlackListFlag,
                     timeOutFlag, bidPriceFlag,
                     price, exceptionFlag
             );

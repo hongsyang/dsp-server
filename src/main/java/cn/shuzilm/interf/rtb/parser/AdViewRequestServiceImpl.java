@@ -74,19 +74,19 @@ public class AdViewRequestServiceImpl implements RequestService {
                 return response;
             }
             // 过滤媒体黑名单
-//            if(app != null) {
-//                String bundle = app.getBundle();
-//                if(AppBlackListUtil.inAppBlackList(bundle)) {
-//                    log.debug("媒体黑名单:{}", bundle);
-//                    response = "";
-//                    return response;
-//                }
-//            }
-
-            if (StringUtils.isBlank(adType)) {
-                response = "";
-                return response;
+            if(app != null) {
+                String bundle = app.getBundle();
+                if(AppBlackListUtil.inAppBlackList(bundle)) {
+                    log.debug("媒体黑名单:{}", bundle);
+                    response = "bundleBlackList";
+                    return response;
+                }
             }
+
+//            if (StringUtils.isBlank(adType)) {
+//                response = "";
+//                return response;
+//            }
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
@@ -102,7 +102,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getMacmd5());
-                        response = "";
+                        response = "deviceIdBlackList";
                         return response;
                     }
                     deviceId = userDevice.getDidmd5();
@@ -112,11 +112,11 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
             // 过滤设备黑名单
-//            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
-//                log.debug("设备黑名单:{}", deviceId);
-//                response = "";
-//                return response;
-//            }
+            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                log.debug("设备黑名单:{}", deviceId);
+                response = "deviceIdBlackList";
+                return response;
+            }
 
             //支持的文件类型
             List<Assets> assets = new ArrayList<>();
