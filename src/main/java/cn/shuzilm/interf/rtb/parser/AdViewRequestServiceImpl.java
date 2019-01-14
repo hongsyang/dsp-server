@@ -375,6 +375,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
+                "&dmat=" + duFlowBean.getMaterialId() + //素材id
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
         if (instl == 0 | instl == 4 | instl == 1) {
             bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
@@ -481,6 +482,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
+                "&dmat=" + duFlowBean.getMaterialId() + //素材id
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
@@ -509,6 +511,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
+                "&dmat=" + duFlowBean.getMaterialId() + //素材id
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         Map nurlMap = new HashMap();

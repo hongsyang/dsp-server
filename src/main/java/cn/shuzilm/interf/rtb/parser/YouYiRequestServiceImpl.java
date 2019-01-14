@@ -264,6 +264,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
@@ -288,6 +289,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setImp_para(nurl);//曝光通知
         String curl = "id=" + targetDuFlowBean.getRequestId() +
@@ -309,6 +311,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setClk_para(curl);//点击通知
         ads.add(youYiAd);
