@@ -2,6 +2,7 @@ package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.interf.pixcel.parser.*;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +30,6 @@ public class PixcelRedisTask implements Runnable{
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
-
                     Object adviewclick = JedisQueueManager.getElementFromQueue("adviewclick");
                     Object adviewexp = JedisQueueManager.getElementFromQueue("adviewexp");
                     Object adviewnurl = JedisQueueManager.getElementFromQueue("adviewnurl");
@@ -38,9 +38,32 @@ public class PixcelRedisTask implements Runnable{
                     Object youyiclick = JedisQueueManager.getElementFromQueue("youyiclick");
                     Object youyiexp = JedisQueueManager.getElementFromQueue("youyiexp");
                     Object youyiimp = JedisQueueManager.getElementFromQueue("youyiimp");
-                    if (adviewclick != null) {
 
+                    if (adviewclick != null) {
+                        AdViewClickParameterParserImpl.parseUrlStr(adviewclick.toString());
                     }
+                    if (adviewexp != null) {
+                        AdViewExpParameterParserImpl.parseUrlStr(adviewexp.toString());
+                    }
+                    if (adviewnurl != null) {
+                        AdViewNurlParameterParserImpl.parseUrlStr(adviewnurl.toString());
+                    }
+                    if (lingjiclick != null) {
+                        LingJiClickParameterParserImpl.parseUrlStr(lingjiclick.toString());
+                    }
+                    if (lingjiexp != null) {
+                        LingJiExpParameterParserImpl.parseUrlStr(lingjiexp.toString());
+                    }
+                    if (youyiclick != null) {
+                        YouYiClickParameterParserImpl.parseUrlStr(youyiclick.toString());
+                    }
+                    if (youyiexp != null) {
+                        YouYiExpParameterParserImpl.parseUrlStr(youyiexp.toString());
+                    }
+                    if (youyiimp != null) {
+                        YouYiImpParameterParserImpl.parseUrlStr(youyiimp.toString());
+                    }
+
                 }
             });
         }
