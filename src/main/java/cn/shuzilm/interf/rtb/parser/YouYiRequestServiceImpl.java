@@ -164,7 +164,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 return response;
             }
             //通过广告id获取长宽
-            if (width == null | height == null) {
+            if (width == null||width == 0| height == null||height == 0) {
                 width = -1;
                 height = -1;
             }

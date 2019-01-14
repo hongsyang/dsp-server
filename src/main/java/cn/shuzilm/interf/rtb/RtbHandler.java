@@ -133,7 +133,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 // 超时情况
                 long end = System.currentTimeMillis();
                 MDC.put("sift", "timeOut");
-                log.error("timeMs:{},url:{}", end - start, url);
+                log.error("超时timeMs:{},url:{}", end - start, url);
                 MDC.remove("sift");
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 ChannelFuture future1 = messageEvent.getChannel().write(response);
@@ -181,104 +181,114 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
 
         } finally {
-            String resultData = result;
-            long end = System.currentTimeMillis();
-            MDC.put("sift", configs.getString("ADX_REQUEST"));
-            log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
-            MDC.remove("sift");
-            //是否在50毫秒内
-            Long timeOut = end - start;
-            if (timeOut > 50) {
-                timeOutFlag = 0;
+            try {
+                String resultData = "";
+                if (result != null) {
+                    resultData = result.toString();
+                }
+                long end = System.currentTimeMillis();
+                MDC.put("sift", configs.getString("ADX_REQUEST"));
+                log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+                MDC.remove("sift");
+                //是否在50毫秒内
+                Long timeOut = end - start;
+                if (timeOut > 50) {
+                    timeOutFlag = 0;
+                }
+                if (url.contains("lingji")) {
+                    adxId = 1;
+                    BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
+                    requestId = bidRequestBean.getId();
+                    if (bidRequestBean.getApp() != null) {
+                        appName = bidRequestBean.getApp().getName();
+                        appPackageName = bidRequestBean.getApp().getBundle();
+                    }
+                    if (resultData.contains("ipBlackList")) {
+                        ipBlackListFlag = 0;
+                    }
+                    if (resultData.contains("bundleBlackList")) {
+                        bundleBlackListFlag = 0;
+                    }
+                    if (resultData.contains("deviceIdBlackList")) {
+                        deviceIdBlackListFlag = 0;
+                    }
+                    if (resultData.contains("price\":")) {
+                        bidPriceFlag = 1;
+                        String substring = resultData.substring(resultData.indexOf("price\":"));
+                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf("}"));
+                    }
+                } else if (url.contains("adview")) {
+                    adxId = 2;
+                    BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
+                    requestId = bidRequestBean.getId();
+                    if (bidRequestBean.getApp() != null) {
+                        appName = bidRequestBean.getApp().getName();
+                        appPackageName = bidRequestBean.getApp().getBundle();
+                    }
+                    if (resultData.contains("ipBlackList")) {
+                        ipBlackListFlag = 0;
+                    }
+                    if (resultData.contains("bundleBlackList")) {
+                        bundleBlackListFlag = 0;
+                    }
+                    if (resultData.contains("deviceIdBlackList")) {
+                        deviceIdBlackListFlag = 0;
+                    }
+                    if (resultData.contains("price\":")) {
+                        bidPriceFlag = 1;
+                        String substring = resultData.substring(resultData.indexOf("price\":"));
+                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                    }
+                } else if (url.contains("youyi")) {
+                    adxId = 3;
+                    YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
+                    requestId = bidRequestBean.getSession_id();
+                    if (bidRequestBean.getMobile() != null) {
+                        appName = bidRequestBean.getMobile().getApp_name();
+                        appPackageName = bidRequestBean.getMobile().getApp_bundle();
+                    }
+                    if (resultData.contains("ipBlackList")) {
+                        ipBlackListFlag = 0;
+                    }
+                    if (resultData.contains("bundleBlackList")) {
+                        bundleBlackListFlag = 0;
+                    }
+                    if (resultData.contains("deviceIdBlackList")) {
+                        deviceIdBlackListFlag = 0;
+                    }
+                    if (resultData.contains("price\":")) {
+                        bidPriceFlag = 1;
+                        String substring = resultData.substring(resultData.indexOf("price\":"));
+                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                    }
+                } else if (url.contains("tencent")) {
+                    adxId = 4;
+                    JSONObject jsonObject = JSON.parseObject(dataStr);
+                    requestId = jsonObject.getString("id");
+                    if (jsonObject.getJSONObject("app") != null) {
+                        JSONObject app = jsonObject.getJSONObject("app");
+                        appPackageName = app.getString("app_bundle_id");
+                    }
+                }
+                MDC.put("phoenix", "rtb-houkp");
+                log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                                "\t{}\t{}\t{}\t{}\t{}\t{}",
+                        LocalDateTime.now().toString(), new Date().getTime(),
+                        LocalDate.now().toString(), LocalTime.now().getHour(),
+                        LocalTime.now().getMinute(), requestId,
+                        adxId, appName,
+                        appPackageName, ipBlackListFlag,
+                        bundleBlackListFlag, deviceIdBlackListFlag,
+                        timeOutFlag, bidPriceFlag,
+                        price, exceptionFlag
+                );
+                MDC.remove("phoenix");
+            } catch (Exception e1) {
+                MDC.put("sift", "rtb-exception");
+                log.debug("最后的异常Exception:{}", e1);
+                MDC.remove("sift");
             }
-            if (url.contains("lingji")) {
-                adxId = 1;
-                BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
-                requestId = bidRequestBean.getId();
-                if (bidRequestBean.getApp() != null) {
-                    appName = bidRequestBean.getApp().getName();
-                    appPackageName = bidRequestBean.getApp().getBundle();
-                }
-                if (resultData.contains("ipBlackList")) {
-                    ipBlackListFlag = 0;
-                }
-                if (resultData.contains("bundleBlackList")) {
-                    bundleBlackListFlag = 0;
-                }
-                if (resultData.contains("deviceIdBlackList")) {
-                    deviceIdBlackListFlag = 0;
-                }
-                if (resultData.contains("price\":")) {
-                    bidPriceFlag = 1;
-                    String substring = resultData.substring(resultData.indexOf("price\":"));
-                    price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
-                }
-            } else if (url.contains("adview")) {
-                adxId = 2;
-                BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
-                requestId = bidRequestBean.getId();
-                if (bidRequestBean.getApp() != null) {
-                    appName = bidRequestBean.getApp().getName();
-                    appPackageName = bidRequestBean.getApp().getBundle();
-                }
-                if (resultData.contains("ipBlackList")) {
-                    ipBlackListFlag = 0;
-                }
-                if (resultData.contains("bundleBlackList")) {
-                    bundleBlackListFlag = 0;
-                }
-                if (resultData.contains("deviceIdBlackList")) {
-                    deviceIdBlackListFlag = 0;
-                }
-                if (resultData.contains("price\":")) {
-                    bidPriceFlag = 1;
-                    String substring = resultData.substring(resultData.indexOf("price\":"));
-                    price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
-                }
-            } else if (url.contains("youyi")) {
-                adxId = 3;
-                YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
-                requestId = bidRequestBean.getSession_id();
-                if (bidRequestBean.getMobile() != null) {
-                    appName = bidRequestBean.getMobile().getApp_name();
-                    appPackageName = bidRequestBean.getMobile().getApp_bundle();
-                }
-                if (resultData.contains("ipBlackList")) {
-                    ipBlackListFlag = 0;
-                }
-                if (resultData.contains("bundleBlackList")) {
-                    bundleBlackListFlag = 0;
-                }
-                if (resultData.contains("deviceIdBlackList")) {
-                    deviceIdBlackListFlag = 0;
-                }
-                if (resultData.contains("price\":")) {
-                    bidPriceFlag = 1;
-                    String substring = resultData.substring(resultData.indexOf("price\":"));
-                    price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
-                }
-            } else if (url.contains("tencent")) {
-                adxId = 4;
-                JSONObject jsonObject = JSON.parseObject(dataStr);
-                requestId = jsonObject.getString("id");
-                if (jsonObject.getJSONObject("app") != null) {
-                    JSONObject app = jsonObject.getJSONObject("app");
-                    appPackageName = app.getString("app_bundle_id");
-                }
-            }
-            MDC.put("phoenix", "rtb-houkp");
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}\t{}",
-                    LocalDateTime.now().toString(), new Date().getTime(),
-                    LocalDate.now().toString(), LocalTime.now().getHour(),
-                    LocalTime.now().getMinute(), requestId,
-                    adxId, appName,
-                    appPackageName, ipBlackListFlag,
-                    bundleBlackListFlag,deviceIdBlackListFlag,
-                    timeOutFlag, bidPriceFlag,
-                    price, exceptionFlag
-            );
-            MDC.remove("phoenix");
+
         }
 
     }

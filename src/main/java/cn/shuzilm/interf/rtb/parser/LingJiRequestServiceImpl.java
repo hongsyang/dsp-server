@@ -72,6 +72,10 @@ public class LingJiRequestServiceImpl implements RequestService {
             String adType = convertAdType(showtype); //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
+            String appPackageName = null;
+            if (app != null) {
+                appPackageName = app.getBundle();
+            }
             //ip 黑名单规则  在黑名单内直接返回
             if (Boolean.valueOf(configs.getString("IP_BLACK_LIST"))) {
                 if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
@@ -98,26 +102,28 @@ public class LingJiRequestServiceImpl implements RequestService {
 //            }
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
-                if ("ios".equals(userDevice.getOs().toLowerCase())) {
-                    deviceId = userDevice.getExt().getIdfa();
-                } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
-                    //竞价请求进来之前对imei和mac做过滤
-                    if (userDevice.getDidmd5() != null) {
-                        if (userDevice.getDidmd5().length() == 32) {
+                if (userDevice.getOs() != null) {
+                    if ("ios".equals(userDevice.getOs().toLowerCase())) {
+                        deviceId = userDevice.getExt().getIdfa();
+                    } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
+                        //竞价请求进来之前对imei和mac做过滤
+                        if (userDevice.getDidmd5() != null) {
+                            if (userDevice.getDidmd5().length() == 32) {
+                            }
+                        } else if (userDevice.getMacmd5() != null) {
+                            if (userDevice.getExt().getMacmd5().length() == 32) {
+                                userDevice.setDidmd5("mac-" + userDevice.getExt().getMacmd5());
+                            }
+                        } else {
+                            log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getExt().getMacmd5());
+                            response = "deviceIdBlackList";
+                            return response;
                         }
-                    } else if (userDevice.getMacmd5() != null) {
-                        if (userDevice.getExt().getMacmd5().length() == 32) {
-                            userDevice.setDidmd5("mac-" + userDevice.getExt().getMacmd5());
-                        }
-                    } else {
-                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getExt().getMacmd5());
-                        response = "deviceIdBlackList";
-                        return response;
-                    }
-                    deviceId = userDevice.getDidmd5();
-                } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
+                        deviceId = userDevice.getDidmd5();
+                    } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
 //                    deviceId = userDevice.getExt().getMac();
-                    deviceId = userDevice.getDidmd5();
+                        deviceId = userDevice.getDidmd5();
+                    }
                 }
             }
 
@@ -156,7 +162,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     }
                 }
             }
-            if (width == null | height == null) {
+            if (width == null||width == 0| height == null||height == 0) {
                 width = -1;
                 height = -1;
             }
@@ -271,7 +277,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     ADX_ID,//ADX 服务商ID
                     stringSet,//文件扩展名
                     userDevice.getIp(),//用户ip
-                    app.getBundle(),//APP包名
+                    appPackageName,//APP包名
                     bidRequestBean.getId()
             );
             if (targetDuFlowBean == null) {

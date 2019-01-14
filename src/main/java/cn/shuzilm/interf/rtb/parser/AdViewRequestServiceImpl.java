@@ -199,7 +199,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
                 }
             }
-            if (width == null | height == null) {
+            if (width == null||width == 0| height == null||height == 0) {
                 width = -1;
                 height = -1;
             }
