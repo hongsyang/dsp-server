@@ -40,14 +40,13 @@ public class PixcelServer {
     private static final String FILTER_CONFIG = "filter.properties";
 
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
-
+    //业务线程池
+    private static ExecutorService executor = Executors.newFixedThreadPool(2);
 
     //扫描包
     private static Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");
     //加载所有的实现接口的类
     private static Set<Class<? extends ParameterParser>> subTypesOf;
-    //超时线程池
-    private static ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("EXECUTOR_THREADS"));
     //创建requestParser 解析的map
     private static ConcurrentHashMap<String, Object> requestParser = null;
 
@@ -55,36 +54,13 @@ public class PixcelServer {
         subTypesOf = reflections.getSubTypesOf(ParameterParser.class);
         requestParser = createMap(subTypesOf);
         //从redis中取数据
-        startPixcelPaeser();
-        System.out.println("开始启动服务");
-        PixelCronDispatch.startPixelDispatch();
+//        PixelCronDispatch.startPixelDispatch();
         PixcelServer server = new PixcelServer();
+        PixcelRedisTask.startPixcelPaeser();
+        System.out.println("开始启动服务--------------------------------");
         server.start(configs.getInt("PIXCEL_PORT"));
     }
 
-    private static void startPixcelPaeser() {
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    Object adviewclick = JedisQueueManager.getElementFromQueue("adviewclick");
-                    Object adviewexp = JedisQueueManager.getElementFromQueue("adviewexp");
-                    Object adviewnurl = JedisQueueManager.getElementFromQueue("adviewnurl");
-                    Object lingjiclick = JedisQueueManager.getElementFromQueue("lingjiclick");
-                    Object lingjiexp = JedisQueueManager.getElementFromQueue("lingjiexp");
-                    Object youyiclick = JedisQueueManager.getElementFromQueue("youyiclick");
-                    Object youyiexp = JedisQueueManager.getElementFromQueue("youyiexp");
-                    Object youyiimp = JedisQueueManager.getElementFromQueue("youyiimp");
-                    System.out.println(1);
-                    if (adviewclick != null) {
-
-                    }
-                }
-
-            }
-        });
-
-    }
 
     /**
      * 创建requestParser 解析的map
@@ -105,7 +81,7 @@ public class PixcelServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(), configs.getInt("N_THREADS")));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("BOSS_THREADS")), Executors.newCachedThreadPool(), configs.getInt("WORK_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀
