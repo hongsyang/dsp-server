@@ -3,6 +3,9 @@ package cn.shuzilm.interf.pixcel;
 import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.common.AppConfigs;
+import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.interf.pixcel.parser.AdViewClickParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -34,43 +37,29 @@ import java.util.stream.Collectors;
 public class PixcelServer {
 
 
-    /**
-     * 保存所有的appKey
-     */
-    public static HashSet<String> appKeySet;
-
-    public static HashMap<String, String> appKeyIdMap;
-
-    private static AppConfigs configs = null;
-
-    private static ConcurrentHashMap<String, Object> requestParser = null;
-
     private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
+    //业务线程池
+    private static ExecutorService executor = Executors.newFixedThreadPool(2);
+
     //扫描包
     private static Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");
     //加载所有的实现接口的类
-    private static   Set<Class<? extends ParameterParser>>  subTypesOf;
-    //超时线程池
-    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("N_THREADS"));
-
-    /**
-     * 创建数据库连接
-     */
-//	public static MySqlConnection mySqlConnection ;
-    public static Connection conn;
+    private static Set<Class<? extends ParameterParser>> subTypesOf;
+    //创建requestParser 解析的map
+    private static ConcurrentHashMap<String, Object> requestParser = null;
 
     public static void main(String[] args) {
-        configs = AppConfigs.getInstance(FILTER_CONFIG);
-        appKeySet = new HashSet<String>();
-        appKeyIdMap = new HashMap<String, String>();
         subTypesOf = reflections.getSubTypesOf(ParameterParser.class);
         requestParser = createMap(subTypesOf);
-//		mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
-//		conn = mySqlConnection.getConn();
+        //从redis中取数据
+        PixcelRedisTask.startPixcelPaeser();
         PixelCronDispatch.startPixelDispatch();
         PixcelServer server = new PixcelServer();
         server.start(configs.getInt("PIXCEL_PORT"));
     }
+
 
     /**
      * 创建requestParser 解析的map
@@ -79,10 +68,10 @@ public class PixcelServer {
      * @return
      */
     private static ConcurrentHashMap<String, Object> createMap(Set subTypesOf) {
-        ConcurrentHashMap map =new  ConcurrentHashMap() ;
-        String  oldChar ="class cn.shuzilm.interf.pixcel.parser.";
+        ConcurrentHashMap map = new ConcurrentHashMap();
+        String oldChar = "class cn.shuzilm.interf.pixcel.parser.";
         for (Object o : subTypesOf) {
-            map.put(o.toString().replace(oldChar,"").toLowerCase().replace("parameterparserimpl",""),o.toString().replace("class ",""));
+            map.put(o.toString().replace(oldChar, "").toLowerCase().replace("parameterparserimpl", ""), o.toString().replace("class ", ""));
         }
         System.out.println("map:" + map.toString());
         return map;
@@ -91,7 +80,7 @@ public class PixcelServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(),configs.getInt("N_THREADS")));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("BOSS_THREADS")), Executors.newCachedThreadPool(), configs.getInt("WORK_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀

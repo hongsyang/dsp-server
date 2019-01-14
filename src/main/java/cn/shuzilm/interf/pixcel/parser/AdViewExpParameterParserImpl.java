@@ -36,15 +36,14 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewExpParameterParserImpl.class);
 
-    private AppConfigs configs = null;
+    private static final String PIXEL_CONFIG = "pixel.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
-    private static final String PIXEL_CONFIG = "pixel.properties";
 
-    @Override
-    public String parseUrl(String url) {
-        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "AdViewExp");
         log.debug("AdViewExp曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -119,18 +118,17 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
                 bean.setCost(Double.valueOf(priceLong) / 10000);
                 bean.setWinNoticeNums(0);
-                Thread.sleep(10);
                 //pixel服务器发送到主控模块
-//                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
-//                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
+                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
 
                 //pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
                 element.setRequestId(requestId);
                 element.setActualPrice(Double.valueOf(priceLong) / 10000);//成本价
-//                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
-//                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
-//                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
+                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
+                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
+                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
                 MDC.put("sift", "AdViewExp");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
                 MDC.put("phoenix", "Exp");
@@ -161,13 +159,13 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                     throw new RuntimeException();
                 }*/
             } catch (Exception e) {
-//                Help.sendAlert("pixcel异常触发报警:AdViewExp");
-//                MDC.put("sift", "exception");
-//                boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
-//                log.debug("发送到EXP_ERROR队列：{}", exp_error);
-//                log.debug("element{}", element);
-//                log.error("异常信息：{}", e);
-//                MDC.remove("sift");
+                Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewExp");
+                MDC.put("sift", "exception");
+                boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+                log.debug("发送到EXP_ERROR队列：{}", exp_error);
+                log.debug("element:{}", JSON.toJSONString(element));
+                log.error("异常信息:{}", e);
+                MDC.remove("sift");
             }
 
             String duFlowBeanJson = JSON.toJSONString(element);
@@ -177,6 +175,11 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
 
         }
-        return    "wurl:"+requestId;
+        return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }

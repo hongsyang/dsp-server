@@ -1,11 +1,11 @@
 package cn.shuzilm.interf.pixcel;
 
+import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
-import cn.shuzilm.interf.pixcel.parser.ParameterParserFactory;
 import cn.shuzilm.interf.pixcel.parser.RequestParser;
-import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
+import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -17,14 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -37,11 +32,17 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author
  */
 public class PixcelHandler extends SimpleChannelUpstreamHandler {
-    //	private WriteDataToLog wdt;
+
     RequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
 
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
+
+
+    private static final String PIXEL_CONFIG = "pixel.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
+
 
     private static ConcurrentHashMap<String, Object> requestParser;
 
@@ -64,11 +65,11 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent) throws Exception {
         try {
             counter.getAndAdd(1);
-            if (e.getMessage() instanceof HttpRequest) {
-                HttpRequest request = (HttpRequest) e.getMessage();
+            if (messageEvent.getMessage() instanceof HttpRequest) {
+                HttpRequest request = (HttpRequest) messageEvent.getMessage();
 //				System.out.println("------------\r\n" + request.getUri());
                 boolean close = HttpHeaders.Values.CLOSE
                         .equalsIgnoreCase(request
@@ -84,28 +85,22 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 //接收 GET 请求
                 url = request.getUri();
                 MDC.put("sift", "url");
-                log.debug("url:{}", url);
+                log.debug("url:{}，remoteIp:{}", url, remoteIp);
                 //主业务逻辑  增加超时线程池
                 List<String> urlParser = UrlParserUtil.urlParser(url);
-                String redis = urlParser.get(0);
-//                JedisQueueManager.putElementToQueue(redis,url, Priority.NORM_PRIORITY);
-                Object o = requestParser.get(urlParser.get(0));
-                if (o != null) {
-                    parameterParser = ParameterParserFactory.getParameterParser(o.toString());
-//
-                    Future<Object> future = executor.submit(new Callable<Object>() {
-                        @Override
-                        public Object call() throws Exception {
-//                            主业务逻辑
-                            return parameterParser.parseUrl(url);
-                        }
-                    });
+                String redisStr = urlParser.get(0);
+                //是否发送到redis
+                boolean b = JedisQueueManager.putElementToQueue(redisStr, url, Priority.NORM_PRIORITY);
+                if (b) {
+
                 } else {
-                    url = "没有对应的解析器";
+                    Help.sendAlert("发送到" + configs.getString("HOST")+"失败,PixcelHandler");
+                    MDC.put("sift", "urlRedisError");
+                    log.debug("url:{}，remoteIp:{}", url, remoteIp);
                 }
 
-                //不接受内容，直接处理
-                byte[] content = url.getBytes("utf-8");
+                //不做处理直接返回
+                byte[] content = redisStr.getBytes("utf-8");
                 ChannelBuffer buffer = new DynamicChannelBuffer(2048);
 
                 HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
@@ -117,14 +112,17 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 response.setContent(buffer);
 
                 // Write the response.
-                ChannelFuture future2 = e.getChannel().write(response);
+                ChannelFuture future2 = messageEvent.getChannel().write(response);
                 if (close) {
                     future2.addListener(ChannelFutureListener.CLOSE);
                 }
 
             }
-        } catch (Exception e2) {
-            e2.printStackTrace();
+        } catch (Exception e) {
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,PixcelHandler");
+            MDC.put("sift", "pixcelException");
+            log.debug("url:{}，remoteIp:{}", url, remoteIp,e);
+            log.debug("异常信息e:{}", e);
         }
 
     }

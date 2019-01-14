@@ -89,6 +89,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 } else if (url.contains("tencent")) {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
+//                    log.debug(" 接收 tencentBidRequest 请求：{}", dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
@@ -101,9 +102,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 @Override
                 public Object call() throws Exception {
                     //主业务逻辑
-                    Thread.sleep(20);
-//                    return parser.parseData(url, dataStr, remoteIp);
-                    return "";
+                    return parser.parseData(url, dataStr, remoteIp);
                 }
             });
 
@@ -154,7 +153,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             long end = System.currentTimeMillis();
             MDC.put("sift", "rtb-exception");
             log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
-            log.debug("timeMs:{},Exception:{}", end - start, e);
             MDC.remove("sift");
             response.setStatus(HttpResponseStatus.NO_CONTENT);
             ChannelFuture future1 = messageEvent.getChannel().write(response);

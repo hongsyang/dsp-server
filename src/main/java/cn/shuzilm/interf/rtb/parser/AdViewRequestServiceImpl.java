@@ -95,6 +95,19 @@ public class AdViewRequestServiceImpl implements RequestService {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getIfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
+                    //竞价请求进来之前对imei和mac做过滤
+                    if (userDevice.getDidmd5() != null) {
+                        if (userDevice.getDidmd5().length() == 32) {
+                        }
+                    } else if (userDevice.getMacmd5() != null) {
+                        if (userDevice.getMacmd5().length() == 32) {
+                            userDevice.setDidmd5("mac-" + userDevice.getMacmd5());
+                        }
+                    } else {
+                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getMacmd5());
+                        response = "";
+                        return response;
+                    }
                     deviceId = userDevice.getDidmd5();
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getDidmd5();

@@ -9,6 +9,7 @@ package cn.shuzilm.interf.pixcel.parser;
 * @Version:        1.0
 */
 public class ParameterParserFactory {
+   static ParameterParser parameterParser = null;
 
     public static ParameterParser parameterParser = null;
 
