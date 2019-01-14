@@ -57,14 +57,13 @@ public class PixelCronDispatch {
     
     public static void startPixelDispatch() {
     	//第一次启动加载全部缓存
-        PixelFlowControl.getInstance();
-    	//PixelFlowControl.getInstance().pullAdFromDB();
+    	PixelFlowControl.getInstance().pullAdFromDB();
     	
-    	//PixelFlowControl.getInstance().pullTenMinutes();
+    	PixelFlowControl.getInstance().pullTenMinutes();
     	
-        //PixelCronDispatch.startTimer(1);
+        PixelCronDispatch.startTimer(1);
         
-        //PixelCronDispatch.startTimer(2);
+        PixelCronDispatch.startTimer(2);
     }
 
     /**
