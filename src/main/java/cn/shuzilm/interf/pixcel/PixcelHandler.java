@@ -36,7 +36,7 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
     RequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
 
-    private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
+    private static final Logger log = LoggerFactory.getLogger(PixcelHandler.class);
 
 
     private static final String PIXEL_CONFIG = "pixel.properties";

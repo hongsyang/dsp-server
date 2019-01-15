@@ -3,6 +3,8 @@ package cn.shuzilm.interf.pixcel;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,6 +12,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class PixcelRedisTask implements Runnable {
+
+    private static final Logger log = LoggerFactory.getLogger(PixcelRedisTask.class);
 
 
     private static final String FILTER_CONFIG = "filter.properties";
@@ -28,9 +32,10 @@ public class PixcelRedisTask implements Runnable {
             @Override
             public void run() {
 
-                System.out.println(Thread.currentThread().getName() + "---------从redis中取出数据");
+                log.debug(Thread.currentThread().getName() + "---------从redis中取出数据");
 
                 if (JedisQueueManager.getLength("adviewclick") > 1) {
+                    log.debug("adviewclick=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object adviewclick = JedisQueueManager.getElementFromQueue("adviewclick");
                         if (adviewclick != null) {
@@ -42,6 +47,7 @@ public class PixcelRedisTask implements Runnable {
                     }
                 }
                 if (JedisQueueManager.getLength("adviewexp") > 1) {
+                    log.debug("adviewexp=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object adviewexp = JedisQueueManager.getElementFromQueue("adviewexp");
                         if (adviewexp != null) {
@@ -53,6 +59,7 @@ public class PixcelRedisTask implements Runnable {
                     }
                 }
                 if (JedisQueueManager.getLength("adviewnurl") > 1) {
+                    log.debug("adviewnurl=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object adviewnurl = JedisQueueManager.getElementFromQueue("adviewnurl");
                         if (adviewnurl != null) {
@@ -64,6 +71,7 @@ public class PixcelRedisTask implements Runnable {
                     }
                 }
                 if (JedisQueueManager.getLength("lingjiclick") > 1) {
+                    log.debug("lingjiclick=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object lingjiclick = JedisQueueManager.getElementFromQueue("lingjiclick");
                         if (lingjiclick != null) {
@@ -75,6 +83,7 @@ public class PixcelRedisTask implements Runnable {
                     }
                 }
                 if (JedisQueueManager.getLength("lingjiexp") > 1) {
+                    log.debug("lingjiexp=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object lingjiexp = JedisQueueManager.getElementFromQueue("lingjiexp");
                         if (lingjiexp != null) {
@@ -86,6 +95,7 @@ public class PixcelRedisTask implements Runnable {
                     }
                 }
                 if (JedisQueueManager.getLength("youyiclick") > 1) {
+                    log.debug("youyiclick=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object youyiclick = JedisQueueManager.getElementFromQueue("youyiclick");
                         if (youyiclick != null) {
@@ -97,6 +107,8 @@ public class PixcelRedisTask implements Runnable {
                     }
                 }
                 if (JedisQueueManager.getLength("youyiexp") > 1) {
+                    log.debug("youyiexp=线程数--------------------" + Thread.currentThread().getName());
+
                     while (true) {
                         Object youyiexp = JedisQueueManager.getElementFromQueue("youyiexp");
                         if (youyiexp != null) {
@@ -108,6 +120,7 @@ public class PixcelRedisTask implements Runnable {
                     }
                 }
                 if (JedisQueueManager.getLength("youyiimp") > 1) {
+                    log.debug("youyiimp=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object youyiimp = JedisQueueManager.getElementFromQueue("youyiimp");
                         if (youyiimp != null) {
