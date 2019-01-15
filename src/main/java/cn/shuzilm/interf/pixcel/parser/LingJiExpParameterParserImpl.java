@@ -122,7 +122,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 String[] split = result.split("_");
                 Double money = Double.valueOf(split[0]) / 100;
                 bean.setCost(money);
-                bean.setWinNoticeTime(System.currentTimeMillis());//设置对账时间
+                bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
                 bean.setWinNoticeNums(1);
                 bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setType(0);

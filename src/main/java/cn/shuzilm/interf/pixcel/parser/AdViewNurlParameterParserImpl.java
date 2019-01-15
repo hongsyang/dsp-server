@@ -123,7 +123,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
 //                pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
                 element.setRequestId(requestId);
-                element.setActualPrice(Double.valueOf(price)/ 10000);//成本价
+                element.setActualPrice(Double.valueOf(priceLong)/ 10000);//成本价
                 element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
