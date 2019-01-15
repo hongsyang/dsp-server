@@ -34,79 +34,93 @@ public class PixcelRedisTask implements Runnable {
 
                 log.debug(Thread.currentThread().getName() + "---------从redis中取出数据");
 
-                if (JedisQueueManager.getLength("adviewclick") > 1) {
+                if (JedisQueueManager.getLength("adviewclick") > 0) {
                     log.debug("adviewclick=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
+                        long start = System.currentTimeMillis();
                         Object adviewclick = JedisQueueManager.getElementFromQueue("adviewclick");
                         if (adviewclick != null) {
                             AdViewClickParameterParserImpl.parseUrlStr(adviewclick.toString());
+                            long end = System.currentTimeMillis();
+                            log.debug("正常耗时：{}",end - start);
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
+                        long end1 = System.currentTimeMillis();
+                        log.debug("取到耗时：{}",end1 -start );
                     }
                 }
-                if (JedisQueueManager.getLength("adviewexp") > 1) {
+                if (JedisQueueManager.getLength("adviewexp") > 0) {
                     log.debug("adviewexp=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
+                        long start = System.currentTimeMillis();
                         Object adviewexp = JedisQueueManager.getElementFromQueue("adviewexp");
+                        long end1 = System.currentTimeMillis();
+                        log.debug("redis取值耗时：{}，线程数：{}",end1 - start,Thread.currentThread().getName());
                         if (adviewexp != null) {
+                            long end = System.currentTimeMillis();
                             AdViewExpParameterParserImpl.parseUrlStr(adviewexp.toString());
+                            log.debug("正常耗时：{}",end - start);
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
+                        long end2 = System.currentTimeMillis();
+                        log.debug("取到耗时：{}",end2 -start );
                     }
                 }
-                if (JedisQueueManager.getLength("adviewnurl") > 1) {
+                if (JedisQueueManager.getLength("adviewnurl") > 0) {
                     log.debug("adviewnurl=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
+                        long start = System.currentTimeMillis();
                         Object adviewnurl = JedisQueueManager.getElementFromQueue("adviewnurl");
+
                         if (adviewnurl != null) {
                             AdViewNurlParameterParserImpl.parseUrlStr(adviewnurl.toString());
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
                     }
                 }
-                if (JedisQueueManager.getLength("lingjiclick") > 1) {
+                if (JedisQueueManager.getLength("lingjiclick") > 0) {
                     log.debug("lingjiclick=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object lingjiclick = JedisQueueManager.getElementFromQueue("lingjiclick");
                         if (lingjiclick != null) {
                             LingJiClickParameterParserImpl.parseUrlStr(lingjiclick.toString());
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
                     }
                 }
-                if (JedisQueueManager.getLength("lingjiexp") > 1) {
+                if (JedisQueueManager.getLength("lingjiexp") > 0) {
                     log.debug("lingjiexp=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object lingjiexp = JedisQueueManager.getElementFromQueue("lingjiexp");
                         if (lingjiexp != null) {
                             LingJiExpParameterParserImpl.parseUrlStr(lingjiexp.toString());
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
                     }
                 }
-                if (JedisQueueManager.getLength("youyiclick") > 1) {
+                if (JedisQueueManager.getLength("youyiclick") > 0) {
                     log.debug("youyiclick=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object youyiclick = JedisQueueManager.getElementFromQueue("youyiclick");
                         if (youyiclick != null) {
                             YouYiClickParameterParserImpl.parseUrlStr(youyiclick.toString());
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
                     }
                 }
-                if (JedisQueueManager.getLength("youyiexp") > 1) {
+                if (JedisQueueManager.getLength("youyiexp") > 0) {
                     log.debug("youyiexp=线程数--------------------" + Thread.currentThread().getName());
 
                     while (true) {
@@ -114,19 +128,19 @@ public class PixcelRedisTask implements Runnable {
                         if (youyiexp != null) {
                             YouYiExpParameterParserImpl.parseUrlStr(youyiexp.toString());
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
                     }
                 }
-                if (JedisQueueManager.getLength("youyiimp") > 1) {
+                if (JedisQueueManager.getLength("youyiimp") > 0) {
                     log.debug("youyiimp=线程数--------------------" + Thread.currentThread().getName());
                     while (true) {
                         Object youyiimp = JedisQueueManager.getElementFromQueue("youyiimp");
                         if (youyiimp != null) {
                             YouYiImpParameterParserImpl.parseUrlStr(youyiimp.toString());
                         } else {
-                            System.out.println("跳出循环");
+                            log.debug("跳出循环");
                             break;
                         }
                     }
@@ -134,7 +148,7 @@ public class PixcelRedisTask implements Runnable {
 
             }
 
-        }, 1, 3, TimeUnit.SECONDS);
+        }, 1, 1, TimeUnit.SECONDS);
 
     }
 }

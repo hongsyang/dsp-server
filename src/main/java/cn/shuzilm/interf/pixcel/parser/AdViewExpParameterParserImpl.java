@@ -44,6 +44,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
 
     public static String parseUrlStr(String url) {
+        long start = System.currentTimeMillis();
         MDC.put("sift", "AdViewExp");
         log.debug("AdViewExp曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -104,6 +105,8 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("AdView");
+        long end1 = System.currentTimeMillis();
+        log.debug("AdViewExp曝光的解析耗时：{}", end1-start);
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
                 log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
@@ -120,7 +123,11 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 bean.setWinNoticeNums(0);
                 //pixel服务器发送到主控模块
                 log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
+                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
+                long start2 = System.currentTimeMillis();
                 AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+                long end2 = System.currentTimeMillis();
+                log.debug("AdViewExp计算价格耗时：{}", end2-start2);
 
                 //pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
@@ -150,14 +157,20 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                         element.getDealid(), element.getAppId(),element.getBidid(),price);
 
                 MDC.remove("phoenix");
-              /*  MDC.put("sift", "AdViewExp");
+                MDC.put("sift", "AdViewExp");
+                long l = System.currentTimeMillis();
                 boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+                long l2 = System.currentTimeMillis();
+                log.debug("发送elemen耗时 :{}", l2-l);
+
                 if (lingJiClick) {
+
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 } else {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
-                }*/
+                }
+
             } catch (Exception e) {
                 Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewExp");
                 MDC.put("sift", "exception");
@@ -175,6 +188,8 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
             log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
 
         }
+        long end3 = System.currentTimeMillis();
+        log.debug("AdViewExp总耗时:{}",end3-start );
         return requestId;
     }
 
