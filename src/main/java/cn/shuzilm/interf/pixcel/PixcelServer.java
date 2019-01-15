@@ -41,7 +41,10 @@ public class PixcelServer {
 
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
     //业务线程池
-    private static ExecutorService executor = Executors.newFixedThreadPool(2);
+    private static ExecutorService executor1 = Executors.newFixedThreadPool(configs.getInt("CLICK_THREADS"));
+    private static ExecutorService executor2 = Executors.newFixedThreadPool(configs.getInt("LINGJI_THREADS"));
+    private static ExecutorService executor3 = Executors.newFixedThreadPool(configs.getInt("YOUYI_THREADS"));
+    private static ExecutorService executor4 = Executors.newFixedThreadPool(configs.getInt("ADVIEW_THREADS"));
 
     //扫描包
     private static Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");
@@ -53,13 +56,22 @@ public class PixcelServer {
     public static void main(String[] args) {
         subTypesOf = reflections.getSubTypesOf(ParameterParser.class);
         requestParser = createMap(subTypesOf);
-        //从redis中取数据
-        PixcelRedisTask pixcelRedisTask =new PixcelRedisTask();
-        executor.execute(pixcelRedisTask);
         PixelCronDispatch.startPixelDispatch();
         PixcelServer server = new PixcelServer();
         System.out.println("服务开始---------------------");
         server.start(configs.getInt("PIXCEL_PORT"));
+        //从redis中取数据
+
+        ClickRedisTask clickRedisTask = new ClickRedisTask();
+        LingJiRedisTask lingJiRedisTask = new LingJiRedisTask();
+        AdviewRedisTask adviewRedisTask = new AdviewRedisTask();
+        YouYiRedisTask youYIRedisTask = new YouYiRedisTask();
+        for (int i = 0; i < configs.getInt("EXECUTOR_THREADS"); i++) {
+            executor1.execute(clickRedisTask);
+            executor2.execute(lingJiRedisTask);
+            executor3.execute(youYIRedisTask);
+            executor4.execute(adviewRedisTask);
+        }
     }
 
 
@@ -110,7 +122,7 @@ public class PixcelServer {
 //		         pipeline.addLast("streamer", new ChunkedWriteHandler());
             pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
             //http处理handler
-            pipeline.addLast("handler", new PixcelHandler(executor, requestParser));
+            pipeline.addLast("handler", new PixcelHandler(executor1, requestParser));
             return pipeline;
         }
     }
