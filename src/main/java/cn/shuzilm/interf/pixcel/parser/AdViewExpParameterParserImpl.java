@@ -156,19 +156,19 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                         element.getDealid(), element.getAppId(),element.getBidid(),price);
 
                 MDC.remove("phoenix");
-                MDC.put("sift", "AdViewExp");
-                long l = System.currentTimeMillis();
-                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-                long l2 = System.currentTimeMillis();
-                log.debug("发送elemen耗时 :{}", l2-l);
-
-                if (lingJiClick) {
-
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-                } else {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-                    throw new RuntimeException();
-                }
+//                MDC.put("sift", "AdViewExp");
+//                long l = System.currentTimeMillis();
+//                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+//                long l2 = System.currentTimeMillis();
+//                log.debug("发送elemen耗时 :{}", l2-l);
+//
+//                if (lingJiClick) {
+//
+//                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+//                } else {
+//                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+//                    throw new RuntimeException();
+//                }
 
             } catch (Exception e) {
                 Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewExp");

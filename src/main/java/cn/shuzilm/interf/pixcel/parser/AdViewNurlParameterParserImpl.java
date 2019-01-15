@@ -149,13 +149,13 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
 
                 MDC.remove("phoenix");
                 MDC.put("sift", "AdViewNurl");
-/*                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
                 if (lingJiClick) {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 } else {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
-                }*/
+                }
             } catch (Exception e) {
                 Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewNurl");
                 MDC.put("sift", "exception");
