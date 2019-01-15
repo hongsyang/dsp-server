@@ -123,7 +123,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 bean.setWinNoticeNums(0);
                 //pixel服务器发送到主控模块
                 log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
-                log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
                 long start2 = System.currentTimeMillis();
                 AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
                 long end2 = System.currentTimeMillis();
