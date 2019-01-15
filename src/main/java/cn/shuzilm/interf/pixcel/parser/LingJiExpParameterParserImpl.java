@@ -117,11 +117,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 }
                 bean.setHost(configs.getString("HOST"));
                 String price = urlRequest.get("price");
-//                String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
+                String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
                 log.debug("price解析结果：{}", price);
-//                String[] split = result.split("_");
-//                Double money = Double.valueOf(split[0]) / 100;
-                Double money = Double.valueOf(price)/ 100;
+                String[] split = result.split("_");
+                Double money = Double.valueOf(split[0]) / 100;
                 bean.setCost(money);
                 bean.setWinNoticeTime(System.currentTimeMillis());//设置对账时间
                 bean.setWinNoticeNums(1);
