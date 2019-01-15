@@ -54,9 +54,11 @@ public class PixcelServer {
         subTypesOf = reflections.getSubTypesOf(ParameterParser.class);
         requestParser = createMap(subTypesOf);
         //从redis中取数据
-        PixcelRedisTask.startPixcelPaeser();
+        PixcelRedisTask pixcelRedisTask =new PixcelRedisTask();
+        executor.execute(pixcelRedisTask);
         PixelCronDispatch.startPixelDispatch();
         PixcelServer server = new PixcelServer();
+        System.out.println("服务开始---------------------");
         server.start(configs.getInt("PIXCEL_PORT"));
     }
 
