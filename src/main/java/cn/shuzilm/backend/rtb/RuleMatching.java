@@ -171,7 +171,8 @@ public class RuleMatching {
 	 *            应用包名称
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, String appPackageName)
+			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, 
+			String appPackageName)
 			throws Exception {
 		MDC.put("sift", "rtb");
 
@@ -322,7 +323,7 @@ public class RuleMatching {
 		// long startOrder = System.currentTimeMillis();
 
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId);
+			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName);
 
 			// 是否投当前的广告
 			if (!isAvaliable) {
@@ -769,6 +770,7 @@ public class RuleMatching {
 		String type = audience.getType().toUpperCase();
 		double premiumRatio = constant.getRtbVar(type);
 		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价		
+		//if(appPackageName != null && appPackageName.contains("com.moji")){
 		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
 			targetDuFlowBean.setBiddingPrice((double) ad.getPrice()*0.6);
 		}else{
