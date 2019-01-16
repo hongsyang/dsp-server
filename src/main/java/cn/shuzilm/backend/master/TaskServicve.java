@@ -36,7 +36,7 @@ public class TaskServicve extends Service {
 
         Object[] arr = new Object[1];
         arr[0] = adUid;
-        String sql = "SELECT c.* FROM ad JOIN map_ad_audience b ON ad.uid = b.ad_uid JOIN audience c ON b.audience_uid = c.uid WHERE b.ad_uid = ?";
+        String sql = "SELECT c.* FROM ad JOIN map_ad_audience b ON ad.uid = b.ad_uid JOIN audience c ON b.audience_uid = c.uid WHERE b.ad_uid = ? and c.deleted = 0";
         ResultList list =  select.select(sql,arr);
         for(ResultMap rm : list) {
             AudienceBean bean = new AudienceBean();
@@ -86,7 +86,7 @@ public class TaskServicve extends Service {
         long timeBefore = timeNow - INTERVAL;
         Object[] arr = new Object[1];
         arr[0] = timeBefore / 1000;
-        String sql = "SELECT m.ad_uid,a.* FROM audience a JOIN map_ad_audience m ON m.audience_uid = uid where updated_at >= ?";
+        String sql = "SELECT m.ad_uid,a.* FROM audience a JOIN map_ad_audience m ON m.audience_uid = uid where updated_at >= ? and a.deleted = 0";
         ResultList list =  select.select(sql,arr);
         for(ResultMap rm : list) {
         	AudienceBean bean = new AudienceBean();
@@ -148,12 +148,20 @@ public class TaskServicve extends Service {
      * @throws java.sql.SQLException
      */
     public ResultList queryAllAd() throws SQLException {
-        long now = System.currentTimeMillis() ;
-        Object[] arr = new Object[2];
-        //arr[0] = specDateFM.format(new Date(startTime));
-        arr[0] = now / 1000;
-        arr[1] = now / 1000;
-        String sql = "select * from ad where s <= ? and e >= ?";
+        String sql = "select * from ad";
+        return select.select(sql);
+    }
+    
+    /**
+     * 查找 全部的广告(包括超时的)
+     *
+     * @return
+     * @throws java.sql.SQLException
+     */
+    public ResultList queryAllAdTotal(long startTime) throws SQLException { 
+    	Object[] arr = new Object[1];
+        arr[0] = startTime / 1000;
+        String sql = "select * from ad where updated_at >= ?";
         return select.select(sql,arr);
     }
 
@@ -235,7 +243,7 @@ public class TaskServicve extends Service {
      * @return
      */
     public CreativeBean queryCreativeUidByAid(String creativeUid){
-        String sql = "select * from creative where uid = '"+ creativeUid +"'";
+        String sql = "select * from creative where uid = '"+ creativeUid +"' and deleted = 0";
         try {
             CreativeBean creativeBean = new CreativeBean();
             ResultMap cMap = select.selectSingle(sql);
@@ -277,7 +285,7 @@ public class TaskServicve extends Service {
         Object[] arr = new Object[1];
         //arr[0] = timeBefore / 1000;
         arr[0] = specDateFM.format(new Date(timeBefore));
-        String sql = "select a.uid ad_uid,c.* from creative c JOIN ad a ON c.uid=a.creative_uid where c.refresh_ts >= ?";
+        String sql = "select a.uid ad_uid,c.* from creative c JOIN ad a ON c.uid=a.creative_uid where c.refresh_ts >= ? and c.deleted = 0";
         try {           
             ResultList list =  select.select(sql,arr);
             for(ResultMap cMap : list) {
@@ -316,7 +324,7 @@ public class TaskServicve extends Service {
      * @return
      */
     public ArrayList<Material> queryMaterialByCreativeId(String creativeUid){
-        String sql = "select * from material where creative_uid = '"+ creativeUid +"'";
+        String sql = "select * from material where creative_uid = '"+ creativeUid +"' and deleted = 0";
         ResultList rl = null;
         try {
             rl = select.select(sql);
@@ -679,8 +687,41 @@ public class TaskServicve extends Service {
 //    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 //    		String s = specDateFM.format(new Date(timeBefore));
 //    		System.out.println(s);
-           ResultList adList = task.queryAdByUpTime(timeBefore);
-           System.out.println(adList.size());
+           //ResultList adList = task.queryAdByUpTime(timeBefore);
+           //System.out.println(adList.size());
+           ConcurrentHashMap<String,AdBean> mapAd = new ConcurrentHashMap<String,AdBean>();
+           
+           ResultList adList = task.queryAdByUpTime(0);
+           for(ResultMap map:adList){
+        	   AdBean ad = new AdBean();
+               ad.setAdUid(map.getString("uid"));
+               //广告组
+               String groupId = map.getString("group_uid");
+               ad.setGroupId(groupId);
+               mapAd.put(ad.getAdUid(), ad);
+           }
+           ConcurrentHashMap<String, ReportBean> reportMapTotal = task.statAdCostTotal();
+           Map<String, Double> map = new HashMap<>();
+           Iterator iter = reportMapTotal.entrySet().iterator();
+           while (iter.hasNext()) {
+        	   	Map.Entry entry = (Map.Entry) iter.next();
+        	   	String key = (String) entry.getKey();
+        	   	ReportBean value = (ReportBean) entry.getValue();
+        	   	AdBean ad = mapAd.get(key);
+        	   	if(ad != null){
+        	   		String groupId = ad.getGroupId();
+        	   		if(map.containsKey(groupId)){
+        	   			if(groupId.equals("58a38bd5-a8c0-4866-b988-926512c90a2b")){
+        	   				System.out.println(value.getExpense().doubleValue()*1000);
+        	   			}
+        	   			map.put(groupId, map.get(groupId)+value.getExpense().doubleValue()*1000);
+        	   		}else{
+        	   			map.put(groupId, value.getExpense().doubleValue()*1000);
+        	   		}
+        	   	}
+           }
+           System.out.println(map);
+           
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
