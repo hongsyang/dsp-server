@@ -168,7 +168,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
                 }
             }
-
+            //             长宽列表 目前只支持悠易和广点通
+            List widthAndHeightList = new ArrayList();
 
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
                         deviceId,//设备mac的MD5
@@ -181,7 +182,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                         ADX_ID,//ADX 服务商ID
                         stringSet,//文件扩展名
                         userDevice.getIp(),//用户ip
-                        app.getBundle()//APP包名
+                        app.getBundle(),//APP包名
+                        widthAndHeightList
                 );
                 if (targetDuFlowBean == null) {
                     response = "";

@@ -46,7 +46,6 @@ public class TencentRequestServiceImpl implements RequestService {
 
     private static final String ADX_ID = "4";
 
-    private static JedisManager jedisManager = JedisManager.getInstance();
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
@@ -80,36 +79,33 @@ public class TencentRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
-            //竞价请求进来之前对imei和mac做过滤
-            if (userDevice.getMd5_imei() != null && userDevice.getMd5_imei().length() == 32) {
-
-            } else if (userDevice.getMd5_mac() != null && userDevice.getMd5_mac().length() == 32) {
-                userDevice.setMd5_imei(userDevice.getMd5_mac());
-            } else {
-                response = "";
-                return response;
-            }
-
-
-
-
-//            if (StringUtils.isBlank(adType)) {
-//                response = "没有对应的广告类型";
-//                return response;
-//
-//            }
-
-
-//            //设备的设备号：用于匹配数盟库中的数据
-
+            //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if ("ios".equals(userDevice.getDevice_os().toLowerCase())) {
                     deviceId = userDevice.getIdfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getDevice_os().toLowerCase())) {
-//                    deviceId = userDevice.getExt().getMac();
+                    //竞价请求进来之前对imei和mac做过滤
+                    if (userDevice.getMd5_imei() != null) {
+                        if (userDevice.getMd5_imei().length() == 32) {
+                        }
+                    } else if (userDevice.getMd5_mac() != null) {
+                        if (userDevice.getMd5_mac().length() == 32) {
+                            userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
+                        }
+                    } else {
+                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(),userDevice.getMd5_mac());
+                        response = "";
+                        return response;
+                    }
                     deviceId = userDevice.getMd5_imei();
                 }
             }
+
+
+
+
+
+
 
 //            //支持的文件类型
             String adz_type = adzone.getAdz_type();
@@ -134,6 +130,9 @@ public class TencentRequestServiceImpl implements RequestService {
                 return response;
             }
 
+            //             长宽列表
+            List widthAndHeightList = new ArrayList();
+
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
@@ -146,7 +145,8 @@ public class TencentRequestServiceImpl implements RequestService {
                     adxId,//ADX 服务商ID
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
-                    userDevice.getApp_bundle()//APP包名
+                    userDevice.getApp_bundle(),//APP包名
+                    widthAndHeightList//长宽列表
             );
             if (targetDuFlowBean == null) {
                 response = "";

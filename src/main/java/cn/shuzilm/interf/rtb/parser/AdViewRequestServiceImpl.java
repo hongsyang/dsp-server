@@ -192,63 +192,65 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
 
+//             长宽列表 目前只支持悠易和广点通
+            List widthAndHeightList = new ArrayList();
+            DUFlowBean targetDuFlowBean = ruleMatching.match(
+                    deviceId,//设备mac的MD5
+                    adType,//广告类型
+                    width,//广告位的宽
+                    height,//广告位的高
+                    true,// 是否要求分辨率
+                    5,//宽误差值
+                    5,// 高误差值;
+                    ADX_ID,//ADX 服务商ID
+                    stringSet,//文件扩展名
+                    userDevice.getIp(),//用户ip
+                    app.getBundle(),//APP包名
+                    widthAndHeightList
 
-                DUFlowBean targetDuFlowBean = ruleMatching.match(
-                        deviceId,//设备mac的MD5
-                        adType,//广告类型
-                        width,//广告位的宽
-                        height,//广告位的高
-                        true,// 是否要求分辨率
-                        5,//宽误差值
-                        5,// 高误差值;
-                        ADX_ID,//ADX 服务商ID
-                        stringSet,//文件扩展名
-                        userDevice.getIp(),//用户ip
-                        app.getBundle()//APP包名
-
-                );
-                if (targetDuFlowBean == null) {
-                    response = "";
-                    return response;
-                }
-                MDC.put("sift", "dsp-server");
-                //需要添加到Phoenix中的数据
-                targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
-                targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
-                targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-                targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-                targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
-                targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
-                targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
-                targetDuFlowBean.setAppName(app.getName());//APP名称
-                targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
-                targetDuFlowBean.setAppId(app.getId());//APP包名
-                targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
-                log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-                MDC.remove("sift");
-                MDC.put("sift", "dsp-server");
+            );
+            if (targetDuFlowBean == null) {
+                response = "";
+                return response;
+            }
+            MDC.put("sift", "dsp-server");
+            //需要添加到Phoenix中的数据
+            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+            targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
+            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+            targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+            targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
+            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+            targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
+            targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
+            targetDuFlowBean.setAppName(app.getName());//APP名称
+            targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+            targetDuFlowBean.setAppId(app.getId());//APP包名
+            targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
+            log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+            MDC.remove("sift");
+            MDC.put("sift", "dsp-server");
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
-                response = JSON.toJSONString(bidResponseBean);
-                log.debug("没有过滤的bidResponseBean:{}", response);
-                //发送点击和曝光
-                Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
-                Double v = bidfloorcur * 1.3;
-                String price = "&price=" + v;
-                String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+            response = JSON.toJSONString(bidResponseBean);
+            log.debug("没有过滤的bidResponseBean:{}", response);
+            //发送点击和曝光
+            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
+            Double v = bidfloorcur * 1.3;
+            String price = "&price=" + v;
+            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
 
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
-                response = JSON.toJSONString(bidResponseBean);
-                String serviceUrl = configs.getString("SERVICE_URL");
-                String s = serviceUrl + "adviewclick?";
+            response = JSON.toJSONString(bidResponseBean);
+            String serviceUrl = configs.getString("SERVICE_URL");
+            String s = serviceUrl + "adviewclick?";
 
-                if (response.contains(s)) {
-                    String substring = response.substring(response.indexOf(s));
-                    String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
-                    String adviewexpUrl = adviewexp + price + pf;
-                    Boolean flag = sendGetUrl(adviewexpUrl);
-                    log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
+            if (response.contains(s)) {
+                String substring = response.substring(response.indexOf(s));
+                String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
+                String adviewexpUrl = adviewexp + price + pf;
+                Boolean flag = sendGetUrl(adviewexpUrl);
+                log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
 
                 bidRequestBean = null;
                 targetDuFlowBean = null;
