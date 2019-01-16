@@ -192,50 +192,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
 
-            //初步过滤规则开关
-            if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
-                if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "adview")) {
-                    DUFlowBean targetDuFlowBean = ruleMatching.match(
-                            deviceId,//设备mac的MD5
-                            adType,//广告类型
-                            width,//广告位的宽
-                            height,//广告位的高
-                            true,// 是否要求分辨率
-                            5,//宽误差值
-                            5,// 高误差值;
-                            ADX_ID,//ADX 服务商ID
-                            stringSet,//文件扩展名
-                            userDevice.getIp(),//用户ip
-                            app.getBundle()//APP包名
 
-                    );
-                    if (targetDuFlowBean == null) {
-                        response = "";
-                        return response;
-                    }
-                    targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
-                    targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
-                    targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-                    targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-                    targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
-                    targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                    targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
-                    targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
-                    targetDuFlowBean.setAppName(app.getName());//APP名称
-                    targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
-                    targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
-                    log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
-                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-                    MDC.remove("sift");
-//                    pushRedis(targetDuFlowBean);//上传到redis服务器
-                    response = JSON.toJSONString(bidResponseBean);
-                    log.debug("过滤通过的bidResponseBean:{}", response);
-                } else {
-                    response = JSON.toJSONString(msg);//过滤规则结果输出
-                }
-                msg.clear();
-                msg = null;
-            } else {
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
                         deviceId,//设备mac的MD5
                         adType,//广告类型
@@ -292,7 +249,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     String adviewexpUrl = adviewexp + price + pf;
                     Boolean flag = sendGetUrl(adviewexpUrl);
                     log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
-                }
+
                 bidRequestBean = null;
                 targetDuFlowBean = null;
             }
