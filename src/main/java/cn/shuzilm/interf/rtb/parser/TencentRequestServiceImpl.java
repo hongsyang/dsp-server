@@ -38,7 +38,6 @@ public class TencentRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(TencentRequestServiceImpl.class);
 
-    private AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
 
@@ -46,6 +45,7 @@ public class TencentRequestServiceImpl implements RequestService {
 
     private static final String ADX_ID = "4";
 
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
@@ -57,7 +57,6 @@ public class TencentRequestServiceImpl implements RequestService {
         String adxId = "4";
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
-            this.configs = AppConfigs.getInstance(FILTER_CONFIG);
             MDC.put("sift", "dsp-server");
             log.debug(" BidRequest参数入参：{}", dataStr);
             //请求报文解析
@@ -174,6 +173,9 @@ public class TencentRequestServiceImpl implements RequestService {
             response = JSON.toJSONString(bidResponseBean);
             MDC.put("sift", "dsp-server");
             log.debug("bidResponseBean:{}", response);
+
+            bidRequestBean = null;
+            targetDuFlowBean = null;
             return response;
         } else {
             return response;

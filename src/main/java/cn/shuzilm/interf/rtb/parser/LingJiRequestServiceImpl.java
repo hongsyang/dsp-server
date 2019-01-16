@@ -106,8 +106,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                         if (userDevice.getDidmd5().length() == 32) {
                         }
                     } else if (userDevice.getMacmd5() != null) {
-                        if ( userDevice.getExt().getMacmd5().length() == 32) {
-                            userDevice.setDidmd5("mac-" +  userDevice.getExt().getMacmd5());
+                        if (userDevice.getExt().getMacmd5().length() == 32) {
+                            userDevice.setDidmd5("mac-" + userDevice.getExt().getMacmd5());
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getExt().getMacmd5());
@@ -171,67 +171,52 @@ public class LingJiRequestServiceImpl implements RequestService {
             //             长宽列表 目前只支持悠易和广点通
             List widthAndHeightList = new ArrayList();
 
-                DUFlowBean targetDuFlowBean = ruleMatching.match(
-                        deviceId,//设备mac的MD5
-                        adType,//广告类型
-                        width,//广告位的宽
-                        height,//广告位的高
-                        true,// 是否要求分辨率
-                        5,//宽误差值
-                        5,// 高误差值;
-                        ADX_ID,//ADX 服务商ID
-                        stringSet,//文件扩展名
-                        userDevice.getIp(),//用户ip
-                        app.getBundle(),//APP包名
-                        widthAndHeightList
-                );
-                if (targetDuFlowBean == null) {
-                    response = "";
-                    return response;
-                }
-                MDC.put("sift", "dsp-server");
-                log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
-                //需要添加到Phoenix中的数据
-                targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
-                targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
-                targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-                targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-                targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
-                targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
-                targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
-                targetDuFlowBean.setAppName(app.getName());//APP名称
-                targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
-                targetDuFlowBean.setAppId(app.getId());//APP包名
-                if (app.getExt() != null) {
-                    targetDuFlowBean.setAppVersion(app.getExt().getSdk() == null ? "" : app.getExt().getSdk());//APP版本
-                }
+            DUFlowBean targetDuFlowBean = ruleMatching.match(
+                    deviceId,//设备mac的MD5
+                    adType,//广告类型
+                    width,//广告位的宽
+                    height,//广告位的高
+                    true,// 是否要求分辨率
+                    5,//宽误差值
+                    5,// 高误差值;
+                    ADX_ID,//ADX 服务商ID
+                    stringSet,//文件扩展名
+                    userDevice.getIp(),//用户ip
+                    app.getBundle(),//APP包名
+                    widthAndHeightList
+            );
+            if (targetDuFlowBean == null) {
+                response = "";
+                return response;
+            }
+            MDC.put("sift", "dsp-server");
+            log.debug("bidRequestBean.id:{}", bidRequestBean.getId());
+            //需要添加到Phoenix中的数据
+            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+            targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
+            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+            targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+            targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
+            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+            targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
+            targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
+            targetDuFlowBean.setAppName(app.getName());//APP名称
+            targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+            targetDuFlowBean.setAppId(app.getId());//APP包名
+            if (app.getExt() != null) {
+                targetDuFlowBean.setAppVersion(app.getExt().getSdk() == null ? "" : app.getExt().getSdk());//APP版本
+            }
 
 
-                log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-                BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
-                MDC.remove("sift");
-                //发送点击和曝光
-                Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
-                Double v = bidfloorcur * 1.3;
-                String price = "&price=" + v;
-                String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
+            MDC.remove("sift");
+            response = JSON.toJSONString(bidResponseBean);
+            MDC.put("sift", "dsp-server");
+            log.debug("没有过滤的bidResponseBean:{}", response);
 
-//                pushRedis(targetDuFlowBean);//上传到redis服务器
-                response = JSON.toJSONString(bidResponseBean);
-                String serviceUrl = configs.getString("SERVICE_URL");
-                String s = serviceUrl + "lingjiclick?";
-                if (response.contains(s)) {
-                    String substring = response.substring(response.indexOf(s));
-                    String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
-                    String lingjiexpUrl = lingjiexp + price + pf;
-                    Boolean flag = sendGetUrl(lingjiexpUrl);
-                    log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
-                }
-
-                MDC.put("sift", "dsp-server");
-                log.debug("没有过滤的bidResponseBean:{}", response);
-
+            bidRequestBean = null;
+            targetDuFlowBean = null;
             return response;
         } else {
             return response;

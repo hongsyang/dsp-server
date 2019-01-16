@@ -193,6 +193,8 @@ public class YouYiRequestServiceImpl implements RequestService {
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
+            targetDuFlowBean = null;
+            bidRequestBean = null;
             MDC.put("sift", "dsp-server");
             log.debug("bidResponseBean:{}", response);
             return response;
