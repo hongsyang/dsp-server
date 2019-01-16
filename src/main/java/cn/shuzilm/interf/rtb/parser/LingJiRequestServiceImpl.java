@@ -267,13 +267,13 @@ public class LingJiRequestServiceImpl implements RequestService {
                 response = JSON.toJSONString(bidResponseBean);
                 String serviceUrl = configs.getString("SERVICE_URL");
                 String s = serviceUrl + "lingjiclick?";
-                if (response.contains(s)) {
-                    String substring = response.substring(response.indexOf(s));
-                    String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
-                    String lingjiexpUrl = lingjiexp + price + pf;
-                    Boolean flag = sendGetUrl(lingjiexpUrl);
-                    log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
-                }
+//                if (response.contains(s)) {
+//                    String substring = response.substring(response.indexOf(s));
+//                    String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+//                    String lingjiexpUrl = lingjiexp + price + pf;
+//                    Boolean flag = sendGetUrl(lingjiexpUrl);
+//                    log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
+//                }
 
                 MDC.put("sift", "dsp-server");
                 log.debug("没有过滤的bidResponseBean:{}", response);
