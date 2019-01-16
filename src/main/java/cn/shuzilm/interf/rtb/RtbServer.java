@@ -74,12 +74,11 @@ public class RtbServer {
 // 	mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
 //		conn = mySqlConnection.getConn();
             //初始化
-            File file = new File("C:\\Users\\houkp\\Desktop\\duizhang\\ip_chinese_black_list.txt");
 
             ipBlacklist = IpBlacklistUtil.getInstance();
 //            IpBlacklistUtil.getIbBlacklist(file);
             jedisManager = JedisManager.getInstance();
-            ruleMatching = RuleMatching.getInstance();
+//            ruleMatching = RuleMatching.getInstance();
             RtbServer server = new RtbServer();
             server.start(configs.getInt("RTB_PORT"));
 
@@ -92,7 +91,7 @@ public class RtbServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("N_THREADS")), Executors.newCachedThreadPool(), configs.getInt("N_THREADS")));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(3000), Executors.newCachedThreadPool(), 3000));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀

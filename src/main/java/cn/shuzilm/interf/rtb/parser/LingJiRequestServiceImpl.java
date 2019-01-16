@@ -10,20 +10,16 @@ import cn.shuzilm.bean.lj.response.*;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
-import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import com.alibaba.fastjson.JSON;
-import io.lettuce.core.RedisClient;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
 
-import java.net.URL;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -81,6 +77,16 @@ public class LingJiRequestServiceImpl implements RequestService {
             //ip 黑名单规则  在黑名单内直接返回
             if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
                 log.debug("IP黑名单:{}", userDevice.getIp());
+                response = "";
+                return response;
+            }
+            //竞价请求进来之前对imei和mac做过滤
+            if (userDevice.getDidmd5() != null & userDevice.getDidmd5().length() == 32) {
+
+            } else if (userDevice.getExt().getMacmd5() != null & userDevice.getExt().getMacmd5().length() == 32) {
+                userDevice.setDidmd5("mac-" + userDevice.getExt().getMacmd5());
+            } else {
+                log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getExt().getMacmd5());
                 response = "";
                 return response;
             }
@@ -251,14 +257,44 @@ public class LingJiRequestServiceImpl implements RequestService {
                 log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
                 BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
                 MDC.remove("sift");
+                //发送点击和曝光
+                Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
+                Double v = bidfloorcur * 1.3;
+                String price = "&price=" + v;
+                String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+
 //                pushRedis(targetDuFlowBean);//上传到redis服务器
                 response = JSON.toJSONString(bidResponseBean);
+                String serviceUrl = configs.getString("SERVICE_URL");
+                String s = serviceUrl + "lingjiclick?";
+                if (response.contains(s)) {
+                    String substring = response.substring(response.indexOf(s));
+                    String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+                    String lingjiexpUrl = lingjiexp + price + pf;
+                    Boolean flag = sendGetUrl(lingjiexpUrl);
+                    log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
+                }
+
                 MDC.put("sift", "dsp-server");
                 log.debug("没有过滤的bidResponseBean:{}", response);
             }
             return response;
         } else {
             return response;
+        }
+    }
+
+    /**
+     * 发送曝光请求
+     *
+     * @param lingjiexp
+     */
+    private Boolean sendGetUrl(String lingjiexp) {
+        String s = HttpClientUtil.get(lingjiexp);
+        if (s != null) {
+            return true;
+        } else {
+            return false;
         }
     }
 
