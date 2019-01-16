@@ -104,7 +104,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("AdView");
-        long end1 = System.currentTimeMillis();
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
                 log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
@@ -122,7 +121,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 //pixel服务器发送到主控模块
                 log.debug("pixel服务器发送到主控模块的AdViewExpBean：{}", bean);
                 AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
-                long end2 = System.currentTimeMillis();
 
                 //pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
