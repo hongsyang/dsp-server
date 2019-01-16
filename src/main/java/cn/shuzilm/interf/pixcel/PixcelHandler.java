@@ -87,14 +87,15 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 MDC.put("sift", "url");
                 log.debug("url:{}，remoteIp:{}", url, remoteIp);
                 //主业务逻辑  增加超时线程池
+                String remote = "&remoteIp=" + remoteIp;
                 List<String> urlParser = UrlParserUtil.urlParser(url);
                 String redisStr = urlParser.get(0);
                 //是否发送到redis
-                boolean b = JedisQueueManager.putElementToQueue(redisStr, url, Priority.NORM_PRIORITY);
+                boolean b = JedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
                 if (b) {
 
                 } else {
-                    Help.sendAlert("发送到" + configs.getString("HOST")+"失败,PixcelHandler");
+                    Help.sendAlert("发送到" + configs.getString("HOST") + "失败,PixcelHandler");
                     MDC.put("sift", "urlRedisError");
                     log.debug("url:{}，remoteIp:{}", url, remoteIp);
                 }
@@ -119,9 +120,9 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 
             }
         } catch (Exception e) {
-            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,PixcelHandler");
+            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,PixcelHandler");
             MDC.put("sift", "pixcelException");
-            log.debug("url:{}，remoteIp:{}", url, remoteIp,e);
+            log.debug("url:{}，remoteIp:{}", url, remoteIp, e);
             log.debug("异常信息e:{}", e);
         }
 
