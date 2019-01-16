@@ -33,13 +33,11 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
-    private AppConfigs configs = null;
-
     private static final String PIXEL_CONFIG = "pixel.properties";
 
-    @Override
-    public String parseUrl(String url) {
-        configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
+
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "LingJiClick");
         log.debug("LingJiClick点击的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -144,17 +142,22 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("pixcel异常触发报警:LingJiClick");
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,LingJiClick");
             MDC.put("sift", "exception");
             boolean click_error = JedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送element：{}到CLICK_ERROR队列：{}", element, click_error);
-            log.debug("element:{}", element);
-            log.error("异常信息：{}", e);
+            log.debug("element:{}", JSON.toJSONString(element));
+            log.error("异常信息:{}", e);
             MDC.remove("sift");
         }
 
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }

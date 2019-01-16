@@ -1,5 +1,6 @@
 package cn.shuzilm.interf.pixcel.parser;
 
+import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.util.UrlParserUtil;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -20,8 +21,13 @@ import java.util.Set;
  */
 public class RequestParser {
 
+
+    private static final String FILTER_CONFIG = "filter.properties";
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
+
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
 
+    private static Reflections reflections;
 
     public String parseData(String url, String dataStr, String remoteIp) {
         String responseStr = "没有对应的解析器";
@@ -29,7 +35,9 @@ public class RequestParser {
         log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
         MDC.remove("sift");
         List<String> urlList = UrlParserUtil.urlParser(url);
-        Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");
+        //TODO 放在初始化 放在MAP里面
+        reflections = instance("cn.shuzilm.interf.pixcel.parser");
+        //TODO 放在初始化 放在MAP里面
         Set<Class<? extends ParameterParser>> monitorClasses = reflections.getSubTypesOf(ParameterParser.class);
         String className = null;
         for (Class<? extends ParameterParser> monitorClass : monitorClasses) {
@@ -40,10 +48,24 @@ public class RequestParser {
                 }
             }
         }
+        //TODO 放在初始化 放在MAP里面
         ParameterParser parameterParser = ParameterParserFactory.getParameterParser(className);
         responseStr = parameterParser.parseUrl(url);
         return responseStr;
     }
 
+    /**
+     * 实例化扫描器
+     *
+     * @param fileName
+     * @return
+     */
+    private Reflections instance(String fileName) {
+        if (reflections == null) {
+            return new Reflections(fileName);
+        } else {
 
+            return reflections;
+        }
+    }
 }

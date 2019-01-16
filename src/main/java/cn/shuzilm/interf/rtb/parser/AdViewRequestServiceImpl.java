@@ -10,6 +10,7 @@ import cn.shuzilm.bean.lj.response.LJNativeResponse;
 import cn.shuzilm.bean.lj.response.NativeAD;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
@@ -40,6 +41,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
+    private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
@@ -71,6 +73,12 @@ public class AdViewRequestServiceImpl implements RequestService {
             String adType = convertAdType(showtype); //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
+            //ip 黑名单规则  在黑名单内直接返回
+            if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
+                log.debug("IP黑名单:{}", userDevice.getIp());
+                response = "";
+                return response;
+            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "";
@@ -81,6 +89,19 @@ public class AdViewRequestServiceImpl implements RequestService {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getIfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getOs().toLowerCase())) {
+                    //竞价请求进来之前对imei和mac做过滤
+                    if (userDevice.getDidmd5() != null) {
+                        if (userDevice.getDidmd5().length() == 32) {
+                        }
+                    } else if (userDevice.getMacmd5() != null) {
+                        if (userDevice.getMacmd5().length() == 32) {
+                            userDevice.setDidmd5("mac-" + userDevice.getMacmd5());
+                        }
+                    } else {
+                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getMacmd5());
+                        response = "";
+                        return response;
+                    }
                     deviceId = userDevice.getDidmd5();
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getDidmd5();
@@ -249,7 +270,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 response = JSON.toJSONString(bidResponseBean);
                 log.debug("没有过滤的bidResponseBean:{}", response);
                 bidRequestBean = null;
-                targetDuFlowBean =null;
+                targetDuFlowBean = null;
             }
             return response;
         } else {

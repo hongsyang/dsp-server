@@ -31,7 +31,6 @@ public class TimeOut {
             System.out.println("线程服务出错。");
             future.cancel(true);// 中断执行此任务的线程
         } catch (TimeoutException e) {// 超时异常
-
             System.out.println("超时。");
             future.cancel(true);// 中断执行此任务的线程
         }finally{
