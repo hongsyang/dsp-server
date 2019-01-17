@@ -113,26 +113,26 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setHost(configs.getString("HOST"));
                 String price = urlRequest.get("price");
-//                Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
-                bean.setCost(Double.valueOf(price)/ 10000);
+                Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
+                bean.setCost(Double.valueOf(priceLong)/ 10000);
                 bean.setWinNoticeNums(1);
                 //pixel服务器发送到主控模块
-//                log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
-//                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
-//
+                log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
+                AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+
 //                pixel服务器发送到Phoenix
-//                element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
-//                element.setRequestId(requestId);
-//                element.setActualPrice(Double.valueOf(price)/ 10000);//成本价
-//                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
-//                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
-//                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-//                MDC.put("sift", "AdViewNurl");
+                element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
+                element.setRequestId(requestId);
+                element.setActualPrice(Double.valueOf(priceLong)/ 10000);//成本价
+                element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
+                element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
+                element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
+                MDC.put("sift", "AdViewNurl");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
                 MDC.put("phoenix", "Nurl");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                         element.getInfoId(), new Date().getHours(),
                         new Date().getTime(), LocalDateTime.now().toString(),
                         element.getDid(), element.getDeviceId(),
@@ -145,17 +145,17 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
-                        element.getDealid(), element.getAppId(),element.getBidid(),price);
+                        element.getDealid(), element.getAppId(),element.getBidid(),price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
                 MDC.remove("phoenix");
                 MDC.put("sift", "AdViewNurl");
-/*                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
                 if (lingJiClick) {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                 } else {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
-                }*/
+                }
             } catch (Exception e) {
                 Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewNurl");
                 MDC.put("sift", "exception");
