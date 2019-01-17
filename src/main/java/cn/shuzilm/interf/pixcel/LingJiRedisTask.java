@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 public class LingJiRedisTask implements Runnable {
 
 
-    private static final Logger log = LoggerFactory.getLogger(YouYiExpParameterParserImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(LingJiRedisTask.class);
 
     @Override
     public void run() {
