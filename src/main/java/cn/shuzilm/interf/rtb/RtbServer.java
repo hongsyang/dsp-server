@@ -46,7 +46,7 @@ public class RtbServer {
     private static final Logger log = LoggerFactory.getLogger(RtbServer.class);
 
     //超时线程池
-    private ExecutorService executor = Executors.newCachedThreadPool();
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("WORK_THREADS"));
 
 
     public static void main(String[] args) {
@@ -67,7 +67,7 @@ public class RtbServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(3000), Executors.newCachedThreadPool(), 3000));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("BOSS_THREADS")), Executors.newCachedThreadPool(), configs.getInt("WORK_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀
