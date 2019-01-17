@@ -172,7 +172,7 @@ public class RuleMatching {
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
 			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, 
-			String appPackageName)
+			String appPackageName,List<String> widthAndHeightList)
 			throws Exception {
 		MDC.put("sift", "rtb");
 
