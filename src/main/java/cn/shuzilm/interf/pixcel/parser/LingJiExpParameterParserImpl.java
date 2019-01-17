@@ -103,7 +103,6 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         element.setDealid(pmp);
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
-        String remoteIp = urlRequest.get("remoteIp");
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("LingJi");
@@ -160,7 +159,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
                         element.getDealid(), element.getAppId(),
-                        element.getBidid(),price,element.getIpAddr(),remoteIp);
+                        element.getBidid(),price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
                 MDC.remove("phoenix");
                 boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);

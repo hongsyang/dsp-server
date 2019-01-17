@@ -95,7 +95,6 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
         element.setDealid(pmp);
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
-        String remoteIp = urlRequest.get("remoteIp");
         element.setAdxSource("LingJi");
 
         try {
@@ -132,7 +131,7 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
                     element.getDealid(), element.getAppId(),
-                    element.getBidid(),element.getIpAddr(),remoteIp);
+                    element.getBidid(),element.getIpAddr(),urlRequest.get("remoteIp"));
 
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);

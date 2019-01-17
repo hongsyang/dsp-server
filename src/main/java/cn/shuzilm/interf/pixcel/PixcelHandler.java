@@ -87,16 +87,13 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 MDC.put("sift", "url");
                 log.debug("url:{}，remoteIp:{}", url, remoteIp);
                 //主业务逻辑  增加超时线程池
-                String remote = url + "&remoteIp=" + remoteIp;
-                MDC.put("sift", "remoteIp");
-                log.debug("remote:{}", remote);
+                String remote = "&remoteIp=" + remoteIp;
                 List<String> urlParser = UrlParserUtil.urlParser(url);
-
-                String redisStr = "";
-                if (urlParser.size() > 0) {
+                String redisStr="";
+                if (urlParser.size()>0){
                     redisStr = urlParser.get(0);
                     //是否发送到redis
-                    boolean b = JedisQueueManager.putElementToQueue(redisStr, remote, Priority.NORM_PRIORITY);
+                    boolean b = JedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
                     if (b) {
 
                     } else {

@@ -104,8 +104,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("AdView");
-        String remoteIp = urlRequest.get("remoteIp");
-
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
                 log.debug("AdViewExp曝光的requestid:{},element对象:{}", requestId, element);
@@ -149,7 +147,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
-                        element.getDealid(), element.getAppId(), element.getBidid(), price,element.getIpAddr(),remoteIp);
+                        element.getDealid(), element.getAppId(), element.getBidid(), price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
                 MDC.remove("phoenix");
             } catch (Exception e) {

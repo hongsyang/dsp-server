@@ -93,7 +93,7 @@ public class YouYiClickParameterParserImpl implements ParameterParser {
         element.setDealid(pmp);
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
-        String remoteIp = urlRequest.get("remoteIp");
+
         element.setAdxSource("YouYi");
         try {
             log.debug("YouYiClick点击的requestid:{},element值:{}", requestId, element);
@@ -126,7 +126,7 @@ public class YouYiClickParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(), element.getBidid(),element.getIpAddr(),remoteIp);
+                    element.getDealid(), element.getAppId(), element.getBidid(),element.getIpAddr(),urlRequest.get("remoteIp"));
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
