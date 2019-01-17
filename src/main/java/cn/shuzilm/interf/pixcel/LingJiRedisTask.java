@@ -1,10 +1,7 @@
 package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.common.jedis.JedisQueueManager;
-import cn.shuzilm.interf.pixcel.parser.AdViewExpParameterParserImpl;
-import cn.shuzilm.interf.pixcel.parser.LingJiExpParameterParserImpl;
-import cn.shuzilm.interf.pixcel.parser.YouYiExpParameterParserImpl;
-import cn.shuzilm.interf.pixcel.parser.YouYiImpParameterParserImpl;
+import cn.shuzilm.interf.pixcel.parser.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,9 +24,13 @@ public class LingJiRedisTask implements Runnable {
         while (true) {
             try {
                 Object lingjiexp = JedisQueueManager.getElementFromQueue("lingjiexp");
+                Object lingjiimp = JedisQueueManager.getElementFromQueue("lingjiimp");
                 if (lingjiexp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     LingJiExpParameterParserImpl.parseUrlStr(lingjiexp.toString());
+                } else if (lingjiimp != null) {
+                    log.debug("线程号" + Thread.currentThread().getName());
+                    LingJiImpParameterParserImpl.parseUrlStr(lingjiimp.toString());
                 } else {
                     log.debug("等待中" + Thread.currentThread().getName());
                     Thread.currentThread().join(1000);
