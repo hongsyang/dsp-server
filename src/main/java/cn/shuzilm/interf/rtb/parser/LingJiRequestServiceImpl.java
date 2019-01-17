@@ -321,7 +321,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     "&materialId=" + duFlowBean.getMaterialId();
         }
         String serviceUrl = configs.getString("SERVICE_URL");
-        //曝光nurl
+        //winnotice 链接
         String nurl = serviceUrl + "lingjiexp?" +
                 "id=" + "${AUCTION_ID}" +
                 "&bidid=" + "${AUCTION_BID_ID}" +
@@ -346,6 +346,32 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
         bid.setNurl(nurl);
+
+        //曝光检测地址
+        String  lingjieimp = serviceUrl + "lingjieimp?" +
+                "id=" + "${AUCTION_ID}" +
+                "&bidid=" + "${AUCTION_BID_ID}" +
+                "&impid=" + "${AUCTION_IMP_ID}" +
+                "&price=" + "${AUCTION_PRICE}" +
+                "&act=" + format +
+                "&adx=" + duFlowBean.getAdxId() +
+                "&did=" + duFlowBean.getDid() +
+                "&device=" + duFlowBean.getDeviceId() +
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
+                "&appn=" + duFlowBean.getAppPackageName() +
+                "&appv=" + duFlowBean.getAppVersion() +
+                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
+                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
+                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
+                "&pmp=" + duFlowBean.getDealid() + //私有交易
+                "&userip=" + duFlowBean.getIpAddr();//用户ip
+
 
         String curl = serviceUrl + "lingjiclick?" +
                 "id=" + duFlowBean.getRequestId() +
@@ -383,6 +409,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             NativeAD nativeAD = new NativeAD();
             List urls = new ArrayList();
+            urls.add(lingjieimp);
             urls.add(nurl);
             nativeAD.setImptrackers(urls);// 展示曝光URL数组
 
@@ -463,6 +490,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         ljResponseExt.setLdp(landingUrl);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
         //曝光监测数组
         List pm = new ArrayList();
+        pm.add(lingjieimp);
         pm.add(duFlowBean.getTracking());
         ljResponseExt.setPm(pm);//注意曝光监测url是数组
         //点击监测数组
