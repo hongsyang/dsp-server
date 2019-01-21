@@ -93,7 +93,7 @@ public class TencentRequestServiceImpl implements RequestService {
 
 //            //支持的文件类型
             if (bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list()!=null){
-                stringSet =bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list().toString();
+                stringSet =adzone.getMultimedia_type_white_list().toString();
             }else {
                 stringSet="[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
             }
@@ -101,6 +101,9 @@ public class TencentRequestServiceImpl implements RequestService {
             //             长宽列表
             List widthList = new ArrayList();//宽列表
             List heightList = new ArrayList();//高列表
+            widthList= widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
+            heightList =widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
+
 
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(

@@ -24,7 +24,7 @@ public class WidthAndHeightListUtil {
 
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
-    private static HashMap<String, String> widthAndHeightListUtilMap;
+    private static HashMap<Integer, String> widthAndHeightListUtilMap;
 
     public static WidthAndHeightListUtil getInstance() {
         if (widthAndHeightListUtil == null) {
@@ -47,9 +47,9 @@ public class WidthAndHeightListUtil {
      * @param file
      * @return
      */
-    private static HashMap<String, String> getwidthAndHeightListUtil(File file) {
+    private static HashMap<Integer, String> getwidthAndHeightListUtil(File file) {
         System.out.println("widthAndHeightList:" + file.isFile());
-        HashMap<String, String> widthAndHeightMap = new HashMap<String, String>();
+        HashMap<Integer, String> widthAndHeightMap = new HashMap<Integer, String>();
         BufferedReader bufferedReader = null;
         try {
             bufferedReader = new BufferedReader(new FileReader(file));
@@ -58,7 +58,7 @@ public class WidthAndHeightListUtil {
             while ((line = bufferedReader.readLine()) != null) {
                 System.out.println(i++ + "行：" + line);
                 String[] split = line.split("-");
-                widthAndHeightMap.put(split[0], split[1]);
+                widthAndHeightMap.put(Integer.valueOf(split[0]), split[1]);
             }
 
             bufferedReader.close();
@@ -77,10 +77,10 @@ public class WidthAndHeightListUtil {
      * @param creativeSpecList
      * @return
      */
-    public static List getWidthList(List<String> creativeSpecList) {
+    public  List getWidthList(List<Integer> creativeSpecList) {
 
         List widthList = new ArrayList();
-        for (String s : creativeSpecList) {
+        for (Integer s : creativeSpecList) {
             String widthAndHeight = widthAndHeightListUtilMap.get(s);
             if (widthAndHeight != null) {
                 String[] split = widthAndHeight.split("x");
@@ -96,10 +96,10 @@ public class WidthAndHeightListUtil {
      * @param creativeSpecList
      * @return
      */
-    public static List getHeightList(List<String> creativeSpecList) {
+    public  List getHeightList(List<Integer> creativeSpecList) {
 
         List heightList = new ArrayList();
-        for (String s : creativeSpecList) {
+        for (Integer s : creativeSpecList) {
             String heights = widthAndHeightListUtilMap.get(s);
             System.out.println(heights);
             if (heightList != null) {
@@ -116,14 +116,14 @@ public class WidthAndHeightListUtil {
 //        File fileTxt = new File(fileTest);
 //        System.out.println(WidthAndHeightListUtil.getwidthAndHeightListUtil(fileTxt));
         List  creativeSpecList = new ArrayList();
-        creativeSpecList.add("2");
-        creativeSpecList.add("10");
-        creativeSpecList.add("28");
-        creativeSpecList.add("2");
-        creativeSpecList.add("2");
-        List heightList = WidthAndHeightListUtil.getHeightList(creativeSpecList);
+        creativeSpecList.add(2);
+        creativeSpecList.add(10);
+        creativeSpecList.add(28);
+        creativeSpecList.add(2);
+        creativeSpecList.add(2);
+        List heightList = instance.getHeightList(creativeSpecList);
         System.out.println(heightList);
-        List widthList = WidthAndHeightListUtil.getWidthList(creativeSpecList);
+        List widthList = instance.getWidthList(creativeSpecList);
         System.out.println(widthList);
 //        System.out.println(instance.iswidthAndHeightListUtil("39.167.203"));
 
