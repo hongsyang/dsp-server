@@ -36,8 +36,8 @@ public class WidthAndHeightListUtil {
     public WidthAndHeightListUtil() {
         String fileTest = "C:\\Users\\houkp\\Desktop\\tencent\\tencent.txt";
         File fileTxt = new File(fileTest);
-        File file = new File(configs.getString("FILE_PATH"));
-        widthAndHeightListUtilMap = getwidthAndHeightListUtil(fileTxt);
+        File file = new File(configs.getString("SIZE_FILE_PATH"));
+        widthAndHeightListUtilMap = getwidthAndHeightListUtil(file);
 
     }
 
