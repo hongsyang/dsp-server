@@ -121,7 +121,7 @@ public class RuleMatching {
 	 */
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
 			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,
-			Set<String> materialSet) throws Exception {
+			Set<String> materialSet,List<Integer> widthList,List<Integer> heightList) throws Exception {
 		// 筛选审核通过的物料
 		if (material.getApproved_adx() == null || material.getApproved_adx().trim().equals("")
 				|| !material.getApprovedAdxSet().contains(adxName)) {
@@ -133,14 +133,32 @@ public class RuleMatching {
 		if (!materialSet.contains(material.getUid())) {
 			return false;
 		}
-		if (isResolutionRatio) {
-			if (adWidth >= width && adHeight >= height) {
-				return true;
+		//多尺寸
+		if(width == -1){
+			for(int i=0;i<widthList.size();i++){
+				int gWidth = widthList.get(i);
+				int gHeight = heightList.get(i);
+				if (isResolutionRatio) {
+					if (adWidth >= gWidth && adHeight >= gHeight) {
+						return true;
+					}
+				} else {
+					if ((gWidth + widthDeviation >= adWidth && gWidth - widthDeviation <= adWidth)
+							&& (gHeight + heightDeviation >= adHeight && gHeight - heightDeviation <= adHeight)) {
+						return true;
+					}
+				}
 			}
-		} else {
-			if ((width + widthDeviation >= adWidth && width - widthDeviation <= adWidth)
-					&& (height + heightDeviation >= adHeight && height - heightDeviation <= adHeight)) {
-				return true;
+		}else{
+			if (isResolutionRatio) {
+				if (adWidth >= width && adHeight >= height) {
+					return true;
+				}
+			} else {
+				if ((width + widthDeviation >= adWidth && width - widthDeviation <= adWidth)
+						&& (height + heightDeviation >= adHeight && height - heightDeviation <= adHeight)) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -171,7 +189,8 @@ public class RuleMatching {
 	 *            应用包名称
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
-			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, String appPackageName)
+			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, 
+			String appPackageName,List<Integer> widthList,List<Integer> heightList)
 			throws Exception {
 		MDC.put("sift", "rtb");
 
@@ -180,9 +199,7 @@ public class RuleMatching {
 		Map<String, AudienceBean> audienceMap = new HashMap<String, AudienceBean>();
 		Map<String, Boolean> rtbIpMap = new HashMap<String, Boolean>();
 		Map<String, Boolean> demographicMap = new HashMap<String, Boolean>();
-
-		int divisor = MathTools.division(width, height);
-		String widthHeightRatio = width / divisor + "/" + height / divisor;
+		
 		// 匹配
 		DUFlowBean targetDuFlowBean = null;
 		TagBean tagBean = null;
@@ -203,11 +220,31 @@ public class RuleMatching {
 		}
 		// 开始匹配
 		// String materialRatioKey = adType + "_" + widthHeightRatio;
-		String materialRatioKey = widthHeightRatio;
-		List<String> auidList = rtbIns.getMaterialRatioMap().get(materialRatioKey);
-		Set<String> materialSet = rtbIns.getMaterialByRatioMap().get(materialRatioKey);
-		if (auidList == null) {
-			LOG.warn("根据[" + materialRatioKey + "]未找到广告!");
+		List<String> auidList = null;
+		Set<String> materialSet = null;
+		String widthHeightRatio =null;
+		//多尺寸
+		if(width == -1){
+			//多尺寸不按尺寸筛选广告
+			auidList = (List<String>) rtbIns.getAdMap().keys();
+			for(int i=0;i<widthList.size();i++){
+				int gWidth = widthList.get(i);
+				int gHeight = heightList.get(i);
+				int divisor = MathTools.division(width, height);
+				widthHeightRatio = width / divisor + "/" + height / divisor;
+				if(rtbIns.getMaterialByRatioMap().get(widthHeightRatio) != null){
+					materialSet.addAll(rtbIns.getMaterialByRatioMap().get(widthHeightRatio));
+				}
+			}
+		}else{
+			int divisor = MathTools.division(width, height);
+			widthHeightRatio = width / divisor + "/" + height / divisor;
+			//materialRatioKey = widthHeightRatio;
+			auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
+			materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
+		}
+		if (auidList == null || auidList.isEmpty()) {
+			LOG.warn("根据[" + widthHeightRatio + "]未找到广告!");
 			return null;
 		}
 		String adxNameTemp = adxName;
@@ -322,7 +359,7 @@ public class RuleMatching {
 		// long startOrder = System.currentTimeMillis();
 
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId);
+			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName);
 
 			// 是否投当前的广告
 			if (!isAvaliable) {
@@ -341,7 +378,7 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			for (Material material : materialList) {
 				if (filter(width, height, material.getWidth(), material.getHeight(), isResolutionRatio, widthDeviation,
-						heightDeviation, adxName, material, extStr, materialSet)) {
+						heightDeviation, adxName, material, extStr, materialSet,widthList,heightList)) {
 					metrialMap.put(ad.getAdUid(), material);
 					filterFlag = true;
 					break;
@@ -769,6 +806,7 @@ public class RuleMatching {
 		String type = audience.getType().toUpperCase();
 		double premiumRatio = constant.getRtbVar(type);
 		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价		
+		//if(appPackageName != null && appPackageName.contains("com.moji")){
 		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
 			targetDuFlowBean.setBiddingPrice((double) ad.getPrice()*0.6);
 		}else{

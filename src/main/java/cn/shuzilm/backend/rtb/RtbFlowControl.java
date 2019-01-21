@@ -650,7 +650,7 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid,String deviceId) {
+    public boolean checkAvalable(String auid,String deviceId,String adxName) {
     	MDC.put("sift", "rtb");
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
@@ -676,6 +676,7 @@ public class RtbFlowControl {
         // 匹配广告投放时间窗
         AdBean adBean = mapAd.get(auid);
         if (adBean != null) {
+        	
         	//判断广告开始时间和结束时间
         	long startTime = adBean.getStartTime().getTime();
         	long endTime = adBean.getEndTime().getTime();
@@ -706,6 +707,12 @@ public class RtbFlowControl {
         	Long bidNums = bidMap.get(auid);	
         	if(bidNums != null && bidNums > 10){
         		myLog.info("广告["+auid+"]已达到5秒10次的竞价数,停止投放");
+        		return false;
+        	}
+        	
+        	String advertiserUid = adBean.getAdvertiser().getUid();
+        	//针对推啊过滤快友广告
+        	if("c5d2db7e-f356-4f78-970a-ccddd4259860".equals(advertiserUid) && "2".equals(adxName)){
         		return false;
         	}
         	        	

@@ -4,6 +4,7 @@ import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.IpBlacklistUtil;
+import cn.shuzilm.util.WidthAndHeightListUtil;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -33,18 +34,13 @@ import java.util.concurrent.ThreadPoolExecutor;
  **/
 public class RtbServer {
 
-    /**
-     * 保存所有的appKey
-     */
-//    public static HashSet<String> appKeySet;
-//
-//    public static HashMap<String, String> appKeyIdMap;
-//
     private static RuleMatching ruleMatching;
 
     private static JedisManager jedisManager;
 
     private static IpBlacklistUtil ipBlacklist;
+
+    private static WidthAndHeightListUtil widthAndHeightListUtil;
 
 
     private static final String FILTER_CONFIG = "filter.properties";
@@ -57,28 +53,14 @@ public class RtbServer {
     private ExecutorService executor = Executors.newCachedThreadPool();
 
 
-    /**
-     * 创建数据库连接
-     */
-//	public static MySqlConnection mySqlConnection ;
-    public static Connection conn;
 
     public static void main(String[] args) {
         try {
             configs = AppConfigs.getInstance(FILTER_CONFIG);
-//            appKeySet = new HashSet<String>();
-//            appKeyIdMap = new HashMap<String, String>();
-//            Set<String> stringSet = ipBlacklistMap.keySet();
-//            System.out.println("key的数量：" + stringSet.size());
-//            System.out.println("ipMap的大小:" + ipBlacklistMap.size());
-// 	mySqlConnection = new MySqlConnection("192.168.0.112", "distinguish", "root", "root");
-//		conn = mySqlConnection.getConn();
-            //初始化
-
+            widthAndHeightListUtil =WidthAndHeightListUtil.getInstance();
             ipBlacklist = IpBlacklistUtil.getInstance();
-//            IpBlacklistUtil.getIbBlacklist(file);
             jedisManager = JedisManager.getInstance();
-//            ruleMatching = RuleMatching.getInstance();
+            ruleMatching = RuleMatching.getInstance();
             RtbServer server = new RtbServer();
             server.start(configs.getInt("RTB_PORT"));
 
