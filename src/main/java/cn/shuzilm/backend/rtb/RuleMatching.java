@@ -134,7 +134,7 @@ public class RuleMatching {
 			return false;
 		}
 		//多尺寸
-		if(width == -1){
+		if(!widthList.isEmpty()){
 			for(int i=0;i<widthList.size();i++){
 				int gWidth = widthList.get(i);
 				int gHeight = heightList.get(i);
@@ -227,6 +227,7 @@ public class RuleMatching {
 		if(width == -1){
 			//多尺寸不按尺寸筛选广告
 			auidList = (List<String>) rtbIns.getAdMap().keys();
+			materialSet = new HashSet<String>();
 			for(int i=0;i<widthList.size();i++){
 				int gWidth = widthList.get(i);
 				int gHeight = heightList.get(i);
@@ -373,6 +374,8 @@ public class RuleMatching {
 				LOG.debug("广告ID[" + adUid + "]创意未在ADX[" + adxName + "]通过,不参与投放!");
 				continue;
 			}
+			
+			LOG.debug("广告ID[" + adUid + "]开始物料过滤!");
 
 			List<Material> materialList = creative.getMaterialList();
 			boolean filterFlag = false;
@@ -387,6 +390,8 @@ public class RuleMatching {
 			if (!filterFlag) {
 				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
 				continue;
+			}else{
+				LOG.debug("广告ID[" + adUid + "]匹配到满足要求的物料,参与投放!");
 			}
 
 			List<AudienceBean> audienceList = ad.getAudienceList();
