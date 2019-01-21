@@ -134,7 +134,7 @@ public class RuleMatching {
 			return false;
 		}
 		//多尺寸
-		if(width == -1){
+		if(!widthList.isEmpty()){
 			for(int i=0;i<widthList.size();i++){
 				int gWidth = widthList.get(i);
 				int gHeight = heightList.get(i);
@@ -224,7 +224,7 @@ public class RuleMatching {
 		Set<String> materialSet = null;
 		String widthHeightRatio =null;
 		//多尺寸
-		if(width == -1){
+		if(!widthList.isEmpty()){
 			//多尺寸不按尺寸筛选广告
 			auidList = (List<String>) rtbIns.getAdMap().keys();
 			for(int i=0;i<widthList.size();i++){
