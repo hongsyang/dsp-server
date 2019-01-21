@@ -4,6 +4,7 @@ import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.IpBlacklistUtil;
+import cn.shuzilm.util.WidthAndHeightListUtil;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -39,6 +40,8 @@ public class RtbServer {
 
     private static IpBlacklistUtil ipBlacklist;
 
+    private static WidthAndHeightListUtil widthAndHeightListUtil;
+
 
     private static final String FILTER_CONFIG = "filter.properties";
 
@@ -54,7 +57,7 @@ public class RtbServer {
     public static void main(String[] args) {
         try {
             configs = AppConfigs.getInstance(FILTER_CONFIG);
-
+            widthAndHeightListUtil =WidthAndHeightListUtil.getInstance();
             ipBlacklist = IpBlacklistUtil.getInstance();
             jedisManager = JedisManager.getInstance();
             ruleMatching = RuleMatching.getInstance();

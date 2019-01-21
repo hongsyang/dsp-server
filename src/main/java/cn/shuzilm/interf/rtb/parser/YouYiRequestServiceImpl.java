@@ -93,8 +93,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 return response;
             }
 
-//             长宽列表
-            List widthAndHeightList = new ArrayList();
+
 
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
@@ -153,7 +152,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                 width = 1;
                 height = 1;
             }
-
+            //             长宽列表
+            List widthList = new ArrayList();//宽列表
+            List heightList = new ArrayList();//高列表
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
@@ -167,7 +168,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
                     userDevice.getApp_bundle(),//APP包名
-                    widthAndHeightList//长宽列表
+                    widthList,//长宽列表
+                    heightList
             );
             if (targetDuFlowBean == null) {
                 response = "";

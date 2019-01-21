@@ -193,7 +193,8 @@ public class AdViewRequestServiceImpl implements RequestService {
 
 
 //             长宽列表 目前只支持悠易和广点通
-            List widthAndHeightList = new ArrayList();
+            List widthList = new ArrayList();//宽列表
+            List heightList = new ArrayList();//高列表
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
                     adType,//广告类型
@@ -206,7 +207,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     userDevice.getIp(),//用户ip
                     app.getBundle(),//APP包名
-                    widthAndHeightList
+                    widthList,//宽列表
+                    heightList//高列表
 
             );
             if (targetDuFlowBean == null) {

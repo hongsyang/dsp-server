@@ -1,5 +1,6 @@
 package cn.shuzilm.bean.tencent.request;
 
+import cn.shuzilm.bean.youyi.request.YouYiMobile;
 import lombok.Data;
 
 import java.io.Serializable;

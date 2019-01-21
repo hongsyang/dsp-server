@@ -3,15 +3,13 @@ package cn.shuzilm.interf.rtb.parser;
 import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.bean.youyi.request.YouYiAdzone;
-import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
-import cn.shuzilm.bean.youyi.request.YouYiMobile;
-import cn.shuzilm.bean.youyi.request.YouYiUser;
-import cn.shuzilm.bean.youyi.response.YouYiAd;
-import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
+import cn.shuzilm.bean.tencent.request.*;
+import cn.shuzilm.bean.tencent.response.TencentBid;
+import cn.shuzilm.bean.tencent.response.TencentBidResponse;
+import cn.shuzilm.bean.tencent.response.TencentSeatBid;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.IpBlacklistUtil;
+import cn.shuzilm.util.WidthAndHeightListUtil;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -49,6 +47,8 @@ public class TencentRequestServiceImpl implements RequestService {
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
+    private static WidthAndHeightListUtil widthAndHeightListUtil = WidthAndHeightListUtil.getInstance();
+
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
 
@@ -60,12 +60,12 @@ public class TencentRequestServiceImpl implements RequestService {
             MDC.put("sift", "dsp-server");
             log.debug(" BidRequest参数入参：{}", dataStr);
             //请求报文解析
-            YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
+            TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
             //创建返回结果  bidRequest请求参数保持不变
-            YouYiMobile userDevice = bidRequestBean.getMobile();//设备APP信息
-            YouYiAdzone adzone = bidRequestBean.getAdzone().get(0);//曝光信息
-            YouYiUser user = bidRequestBean.getUser();//用户信息
-
+            TencentDevice userDevice = bidRequestBean.getDevice();//设备信息
+            TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
+            TencentUser user = bidRequestBean.getUser();//用户信息
+            TencentApp app = bidRequestBean.getApp();
             Integer width = null;//广告位的宽
             Integer height = null;//广告位的高
 //            Integer showtype = userImpression.getExt().getShowtype();//广告类型
@@ -73,64 +73,34 @@ public class TencentRequestServiceImpl implements RequestService {
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
             //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(user.getUser_ip())){
-                log.debug("IP黑名单:{}", user.getUser_ip());
+            if (ipBlacklist.isIpBlacklist(bidRequestBean.getIp())){
+                log.debug("IP黑名单:{}", bidRequestBean.getIp());
                 response = "";
                 return response;
             }
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
-                if ("ios".equals(userDevice.getDevice_os().toLowerCase())) {
+                if (userDevice.getOs().toLowerCase().contains("ios")) {
                     deviceId = userDevice.getIdfa();
-                } else if ("android".equalsIgnoreCase(userDevice.getDevice_os().toLowerCase())) {
-                    //竞价请求进来之前对imei和mac做过滤
-                    if (userDevice.getMd5_imei() != null) {
-                        if (userDevice.getMd5_imei().length() == 32) {
-                        }
-                    } else if (userDevice.getMd5_mac() != null) {
-                        if (userDevice.getMd5_mac().length() == 32) {
-                            userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
-                        }
-                    } else {
-                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(),userDevice.getMd5_mac());
-                        response = "";
-                        return response;
-                    }
-                    deviceId = userDevice.getMd5_imei();
+                } else if (userDevice.getOs().toLowerCase().contains("android")) {
+                    //广点通设备mac地址
+                    deviceId = userDevice.getId();
                 }
             }
 
 
 
 
-
-
-
 //            //支持的文件类型
-            String adz_type = adzone.getAdz_type();
-            if (adz_type.equals("ADZONE_TYPE_INAPP_BANNER") | adz_type.equals("ADZONE_TYPE_WAP_BANNER")) {
-                stringSet = "[image/jpeg, image/png]";
-                //广告位的宽和高
-                width = adzone.getAdz_width();
-                height = adzone.getAdz_height();
-            } else if (adz_type.equals("ADZONE_TYPE_INAPP_VIDEO") | adz_type.equals("ADZONE_TYPE_WAP_VIDEO")) {
-                stringSet = "[ application/x-shockwave-flash，video/x-flv]";
-                //广告位的宽和高
-                width = adzone.getAdz_width();
-                height = adzone.getAdz_height();
-            } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
-                stringSet = "[image/jpeg, image/png]";
-                adxId = adxId + "_"+adzone.getNative().get(0).getNative_id();
-                //广告位的宽和高
-                width = adzone.getAdz_width();
-                height = adzone.getAdz_height();
+            if (bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list()!=null){
+                stringSet =bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list().toString();
             }else {
-                response = "pc 不竞价";
-                return response;
+                stringSet="[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
             }
 
             //             长宽列表
-            List widthAndHeightList = new ArrayList();
+            List widthList = new ArrayList();//宽列表
+            List heightList = new ArrayList();//高列表
 
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
@@ -143,20 +113,21 @@ public class TencentRequestServiceImpl implements RequestService {
                     0,// 高误差值;
                     adxId,//ADX 服务商ID
                     stringSet,//文件扩展名
-                    user.getUser_ip(),//用户ip
-                    userDevice.getApp_bundle(),//APP包名
-                    widthAndHeightList//长宽列表
+                    bidRequestBean.getIp(),//用户ip
+                    app.getApp_bundle_id(),//APP包名
+                    widthList,//长宽列表
+                    heightList
             );
             if (targetDuFlowBean == null) {
                 response = "";
                 return response;
             }
             //需要添加到Phoenix中的数据
-            targetDuFlowBean.setRequestId(bidRequestBean.getSession_id());//bidRequest id
+            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
             //曝光id
             List<Impression> list = new ArrayList();
             Impression impression = new Impression();
-            impression.setId(adzone.getAdz_id());
+            impression.setId(adzone.getId());
             list.add(impression);
             targetDuFlowBean.setImpression(list);//曝光id
             targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
@@ -166,10 +137,10 @@ public class TencentRequestServiceImpl implements RequestService {
             String format = LocalDateTime.now().format(formatter);//时间戳
             targetDuFlowBean.setBidid(format + UUID.randomUUID());//bid id  时间戳+随机数不去重
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
-            targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
-            targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
+            targetDuFlowBean.setAppName("");//APP名称
+            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-            YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+            TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
             MDC.put("sift", "dsp-server");
             log.debug("bidResponseBean:{}", response);
@@ -188,28 +159,32 @@ public class TencentRequestServiceImpl implements RequestService {
      *
      * @param targetDuFlowBean
      * @param bidRequestBean
-     * @return YouYiBidResponse
+     * @return TencentBidResponse
      */
-    private YouYiBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, YouYiBidRequest bidRequestBean) {
-        YouYiBidResponse youYiBidResponse = new YouYiBidResponse();
-        youYiBidResponse.setSession_id(bidRequestBean.getSession_id());
+    private TencentBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, TencentBidRequest bidRequestBean) {
+        TencentBidResponse TencentBidResponse = new TencentBidResponse();
+        TencentBidResponse.setRequest_id(bidRequestBean.getId());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         String format = LocalDateTime.now().format(formatter);//时间戳
         //广告信息
         List ads = new ArrayList();
-        YouYiAd youYiAd = new YouYiAd();
-        YouYiAdzone youYiAdzone = bidRequestBean.getAdzone().get(0);//曝光信息
-        youYiAd.setAdz_id(youYiAdzone.getAdz_id());//广告位id
-        youYiAd.setAdz_array_id(0);//广告数组id
+        TencentSeatBid tencentSeatBid =new TencentSeatBid();
+        //曝光信息
+        TencentImpressions tencentImpressions = bidRequestBean.getImpressions().get(0);
+        //曝光id
+        tencentSeatBid.setImpression_id(tencentImpressions.getId());
+        //腾讯 Bid 类型
+        List tencentBidList = new ArrayList();
+        TencentBid tencentBid =new TencentBid();
+
         double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;//广告出价
-        youYiAd.setBid_price((int) biddingPrice);
-        youYiAd.setAdvertiser_id(targetDuFlowBean.getAdvertiserUid());//广告主id
-        youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
+        tencentBid.setBid_price((int) biddingPrice);
+        tencentBid.setCreaive_id(targetDuFlowBean.getCrid());//推审id
         //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" +  youYiAdzone.getAdz_id() +
-                "&price=" + "__PRICE__" +
+                "&impid=" +  tencentImpressions.getId() +
+                "&price=" + "__WIN_PRICE__" +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
@@ -228,12 +203,12 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid()+ //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-        youYiAd.setWin_para(wurl);//赢价通知，按此收费
+        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
         //曝光通知Nurl
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" +  youYiAdzone.getAdz_id() +
-                "&price=" + "__PRICE__" +
+                "&impid=" +  tencentImpressions.getId() +
+                "&price=" + "__WIN_PRICE__" +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
@@ -252,10 +227,10 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid()+ //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-        youYiAd.setImp_para(nurl);//曝光通知
+        tencentBid.setImpression_param(nurl);//曝光通知
         String curl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" + youYiAdzone.getAdz_id() +
+                "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
@@ -273,12 +248,16 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-        youYiAd.setClk_para(curl);//点击通知
-        ads.add(youYiAd);
-        youYiBidResponse.setAds(ads);
+        tencentBid.setClick_param(curl);//点击通知
+        //腾讯 Bid 类型列表
+        tencentBidList.add(tencentBid);
+        tencentSeatBid.setBids(tencentBidList);
+        //腾讯  seat_bids类型列表
+        ads.add(tencentSeatBid);
+        TencentBidResponse.setSeat_bids(ads);
         MDC.put("sift", "bidResponseBean");
-        log.debug("bidResponseBean:{}", JSON.toJSONString(youYiBidResponse));
-        return youYiBidResponse;
+        log.debug("bidResponseBean:{}", JSON.toJSONString(TencentBidResponse));
+        return TencentBidResponse;
 
     }
 
