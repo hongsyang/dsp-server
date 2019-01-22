@@ -136,6 +136,7 @@ public class RuleMatching {
 		//多尺寸
 		if(!widthList.isEmpty()){
 			for(int i=0;i<widthList.size();i++){
+				
 				int gWidth = widthList.get(i);
 				int gHeight = heightList.get(i);
 				if (isResolutionRatio) {
