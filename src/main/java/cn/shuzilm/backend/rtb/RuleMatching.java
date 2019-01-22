@@ -238,6 +238,7 @@ public class RuleMatching {
 				}
 			}
 		}else{
+			
 			int divisor = MathTools.division(width, height);
 			widthHeightRatio = width / divisor + "/" + height / divisor;
 			//materialRatioKey = widthHeightRatio;
