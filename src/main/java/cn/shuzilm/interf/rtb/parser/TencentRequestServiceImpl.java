@@ -102,8 +102,8 @@ public class TencentRequestServiceImpl implements RequestService {
             List heightList = new ArrayList();//高列表
             widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
             heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
-
-
+            //长宽列表 
+            log.debug("widthList:{},heightList:{}",widthList,heightList);
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
