@@ -12,7 +12,7 @@ public class TencentImpressions  implements Serializable {
     private Long placement_id;//是  ADX 提供的广告位 id
     private List<Integer> creative_specs;//是   广告位支持的素材规格，取值见《Tencent AdExchange 广告样式说明》
     private Integer bid_floor;//是 true 广告位的 CPM 底价。 单位：分
-    private List<Integer> blocking_industry_id;//否 广告位过滤的行业 ID 列表，取值见《Tencent AdExchange 广告主行业分类》 。
+    private List<Long> blocking_industry_id;//否 广告位过滤的行业 ID 列表，取值见《Tencent AdExchange 广告主行业分类》 。
     private List<TencentNative> natives;//否 原生广告位信息
     private List<String> multimedia_type_white_list;//否 广告位支持的素材类型。取值范围为"gif", "jpeg",
     private List<String> blocking_keyword;//否 广告位过滤的关键字

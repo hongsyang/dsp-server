@@ -102,7 +102,7 @@ public class WidthAndHeightListUtil {
         for (Integer s : creativeSpecList) {
             String heights = widthAndHeightListUtilMap.get(s);
             System.out.println(heights);
-            if (heightList != null) {
+            if (heights != null) {
                 String[] split = heights.split("x");
                 heightList.add(split[1]);
             }

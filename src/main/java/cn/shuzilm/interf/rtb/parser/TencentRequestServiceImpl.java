@@ -66,10 +66,10 @@ public class TencentRequestServiceImpl implements RequestService {
             TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
             TencentUser user = bidRequestBean.getUser();//用户信息
             TencentApp app = bidRequestBean.getApp();
-            Integer width = null;//广告位的宽
-            Integer height = null;//广告位的高
+            Integer width = -1;//广告位的宽
+            Integer height = -1;//广告位的高
 //            Integer showtype = userImpression.getExt().getShowtype();//广告类型
-            String adType = null; //对应内部 广告类型
+            String adType = ""; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
             //ip 黑名单规则  在黑名单内直接返回
