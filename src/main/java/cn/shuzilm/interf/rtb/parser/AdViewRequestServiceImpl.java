@@ -238,7 +238,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             String s = serviceUrl + "adviewclick?";
             if (response.contains(s)) {
                 String substring = response.substring(response.indexOf(s));
-                String adviewexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+                String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
                 String adviewexpUrl = adviewexp + price + pf;
                 Boolean flag = sendGetUrl(adviewexpUrl);
                 log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);

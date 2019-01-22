@@ -159,7 +159,7 @@ public class TencentRequestServiceImpl implements RequestService {
             String s = serviceUrl + "tencentclick?";
             if (response.contains(s)) {
                 String substring = response.substring(response.indexOf(s));
-                String tencentexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+                String tencentexp = substring.substring(0, substring.indexOf('"')).replace("tencentclick", "tencentexp");
                 String tencentexpUrl = tencentexp + price + pf;
                 Boolean flag = sendGetUrl(tencentexpUrl);
                 log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
