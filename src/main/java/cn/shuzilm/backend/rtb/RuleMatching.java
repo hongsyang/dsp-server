@@ -226,7 +226,7 @@ public class RuleMatching {
 		//多尺寸
 		if(width == -1){
 			//多尺寸不按尺寸筛选广告
-			auidList = (List<String>) rtbIns.getAdMap().keys();
+			auidList = new ArrayList(rtbIns.getAdMap().keySet());
 			materialSet = new HashSet<String>();
 			for(int i=0;i<widthList.size();i++){
 				int gWidth = widthList.get(i);
