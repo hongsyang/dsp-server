@@ -9,7 +9,6 @@ import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
-import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import cn.shuzilm.util.tencent.GdtWinPriceDecoder;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -29,9 +28,9 @@ import java.util.*;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class TencentExpParameterParserImpl implements ParameterParser {
+public class COPYTencentExpParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(TencentExpParameterParserImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(COPYTencentExpParameterParserImpl.class);
 
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
@@ -112,9 +111,9 @@ public class TencentExpParameterParserImpl implements ParameterParser {
             bean.setPremiumFactor(element.getPremiumFactor());
             bean.setHost(configs.getString("HOST"));
             String price = urlRequest.get("price");
-            GdtWinPriceDecoder gdtWinPriceDecoder = new GdtWinPriceDecoder();
+            GdtWinPriceDecoder gdtWinPriceDecoder =new GdtWinPriceDecoder();
             String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();
-            bean.setCost(Double.valueOf(price) / 100);
+            bean.setCost(Double.valueOf( Integer.valueOf(price_str)) / 100);
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的TencentExpBean：{}", bean);
@@ -123,7 +122,7 @@ public class TencentExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-            element.setActualPrice(Double.valueOf(price) / 100);//成本价
+            element.setActualPrice(Double.valueOf( Integer.valueOf(price_str)) / 100);//成本价
             element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
@@ -145,7 +144,7 @@ public class TencentExpParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(), element.getBidid(), price, element.getIpAddr(), urlRequest.get("remoteIp"));
+                    element.getDealid(), element.getAppId(), element.getBidid(), price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
             MDC.remove("phoenix");
             MDC.put("sift", "TencentExp");
@@ -157,11 +156,11 @@ public class TencentExpParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,TencentExp");
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,TencentExp");
             MDC.put("sift", "exception");
             boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到EXP_ERROR队列：{}", exp_error);
-            log.debug("element:{}", JSON.toJSONString(element));
+            log.debug("element:{}",JSON.toJSONString(element));
             log.error("异常信息:{}", e);
             MDC.remove("sift");
         }
