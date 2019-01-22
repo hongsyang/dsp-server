@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class YouYiRedisTask implements Runnable {
 
 
-    private static final Logger log = LoggerFactory.getLogger(YouYiExpParameterParserImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(YouYiRedisTask.class);
 
     @Override
     public void run() {

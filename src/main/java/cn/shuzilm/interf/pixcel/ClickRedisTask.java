@@ -26,6 +26,7 @@ public class ClickRedisTask implements Runnable {
                 Object adviewclick = JedisQueueManager.getElementFromQueue("adviewclick");
                 Object youyiclick = JedisQueueManager.getElementFromQueue("youyiclick");
                 Object lingjiclick = JedisQueueManager.getElementFromQueue("lingjiclick");
+                Object tencentclick = JedisQueueManager.getElementFromQueue("tencentclick");
                 if (adviewclick != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     AdViewClickParameterParserImpl.parseUrlStr(adviewclick.toString());

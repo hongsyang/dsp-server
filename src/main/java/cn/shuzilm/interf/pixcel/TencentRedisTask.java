@@ -29,7 +29,7 @@ public class TencentRedisTask implements Runnable {
                 Object tencentimp = JedisQueueManager.getElementFromQueue("tencentimp");
                 if (tencentimp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
-                    YouYiImpParameterParserImpl.parseUrlStr(tencentimp.toString());
+                    TencentExpParameterParserImpl.parseUrlStr(tencentimp.toString());
                 } else if (tencentexp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     TencentExpParameterParserImpl.parseUrlStr(tencentexp.toString());
