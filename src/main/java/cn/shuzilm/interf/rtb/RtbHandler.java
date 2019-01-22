@@ -133,6 +133,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 JsonFormat.merge(resultData, builder);
                 BidserverSsp.BidResponse build = builder.build();
                 content = build.toByteArray();
+            }else if (resultData.contains("seat_bids")) {
+                GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
+                JsonFormat.merge(resultData, builder);
+                GdtRtb.BidResponse build = builder.build();
+                content = build.toByteArray();
             } else {
                 content = resultData.getBytes("utf-8");
             }
@@ -152,6 +157,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             long end = System.currentTimeMillis();
             MDC.put("sift", "rtb-exception");
             log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
+            log.debug("timeMs:{},Exception:{}", end - start, e);
             MDC.remove("sift");
             response.setStatus(HttpResponseStatus.NO_CONTENT);
             ChannelFuture future1 = messageEvent.getChannel().write(response);
