@@ -9,7 +9,7 @@ import java.util.List;
 public class TencentImpressions  implements Serializable {
 
     private String id;//是 Bid Request 范围内，Impression 唯一标识
-    private Integer placement_id;//是  ADX 提供的广告位 id
+    private Long placement_id;//是  ADX 提供的广告位 id
     private List<Integer> creative_specs;//是   广告位支持的素材规格，取值见《Tencent AdExchange 广告样式说明》
     private Integer bid_floor;//是 true 广告位的 CPM 底价。 单位：分
     private List<Integer> blocking_industry_id;//否 广告位过滤的行业 ID 列表，取值见《Tencent AdExchange 广告主行业分类》 。
