@@ -75,16 +75,6 @@ public class AdViewRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
-            //竞价请求进来之前对imei和mac做过滤
-            if (userDevice.getDidmd5() != null & userDevice.getDidmd5().length() == 32) {
-
-            } else if (userDevice.getMacmd5() != null & userDevice.getMacmd5().length() == 32) {
-                userDevice.setDidmd5("mac-" + userDevice.getMacmd5());
-            } else {
-                log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getMacmd5());
-                response = "";
-                return response;
-            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "";
@@ -237,8 +227,23 @@ public class AdViewRequestServiceImpl implements RequestService {
             response = JSON.toJSONString(bidResponseBean);
             log.debug("没有过滤的bidResponseBean:{}", response);
             response = JSON.toJSONString(bidResponseBean);
+            //测试环境自动发送曝光
+            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
+            Double v = bidfloorcur * 1.3;
+            String price = "&price=" + v;
+            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+            String serviceUrl = configs.getString("SERVICE_URL");
+            String s = serviceUrl + "adviewclick?";
+            if (response.contains(s)) {
+                String substring = response.substring(response.indexOf(s));
+                String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
+                String adviewexpUrl = adviewexp + price + pf;
+                Boolean flag = sendGetUrl(adviewexpUrl);
+                log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
+            }
             bidRequestBean = null;
             targetDuFlowBean = null;
+
             return response;
         } else {
             return response;

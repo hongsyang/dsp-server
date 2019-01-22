@@ -80,16 +80,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
-            //竞价请求进来之前对imei和mac做过滤
-            if (userDevice.getDidmd5() != null & userDevice.getDidmd5().length() == 32) {
-
-            } else if (userDevice.getExt().getMacmd5() != null & userDevice.getExt().getMacmd5().length() == 32) {
-                userDevice.setDidmd5("mac-" + userDevice.getExt().getMacmd5());
-            } else {
-                log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getExt().getMacmd5());
-                response = "";
-                return response;
-            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
@@ -116,7 +106,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                     }
                     deviceId = userDevice.getDidmd5();
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
-//                    deviceId = userDevice.getExt().getMac();
                     deviceId = userDevice.getDidmd5();
                 }
             }
@@ -218,8 +207,23 @@ public class LingJiRequestServiceImpl implements RequestService {
             MDC.put("sift", "dsp-server");
             log.debug("没有过滤的bidResponseBean:{}", response);
 
-            bidRequestBean = null;
+
+
+            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
+            Double v = bidfloorcur * 1.3;
+            String price = "&price=" + v;
+            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+            String serviceUrl = configs.getString("SERVICE_URL");
+            String s = serviceUrl + "lingjiclick?";
+            if (response.contains(s)) {
+                String substring = response.substring(response.indexOf(s));
+                String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+                String lingjiexpUrl = lingjiexp + price + pf;
+                Boolean flag = sendGetUrl(lingjiexpUrl);
+                log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
+            }
             targetDuFlowBean = null;
+            bidRequestBean = null;
             return response;
         } else {
             return response;

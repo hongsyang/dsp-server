@@ -224,7 +224,7 @@ public class RuleMatching {
 		Set<String> materialSet = null;
 		String widthHeightRatio =null;
 		//多尺寸
-		if(width == -1){
+		if(!widthList.isEmpty()){
 			//多尺寸不按尺寸筛选广告
 			auidList = new ArrayList(rtbIns.getAdMap().keySet());
 			materialSet = new HashSet<String>();
