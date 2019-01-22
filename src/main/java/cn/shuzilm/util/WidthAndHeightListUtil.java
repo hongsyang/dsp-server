@@ -84,7 +84,7 @@ public class WidthAndHeightListUtil {
             String widthAndHeight = widthAndHeightListUtilMap.get(s);
             if (widthAndHeight != null) {
                 String[] split = widthAndHeight.split("x");
-                widthList.add(split[0]);
+                widthList.add(Integer.valueOf(split[0]));
             }
         }
         return widthList;
@@ -104,7 +104,7 @@ public class WidthAndHeightListUtil {
             System.out.println(heights);
             if (heights != null) {
                 String[] split = heights.split("x");
-                heightList.add(split[1]);
+                heightList.add(Integer.valueOf(split[1]));
             }
         }
         return heightList;
