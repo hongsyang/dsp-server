@@ -147,8 +147,7 @@ public class TencentRequestServiceImpl implements RequestService {
             MDC.put("sift", "dsp-server");
             log.debug("bidResponseBean:{}", response);
 
-            bidRequestBean = null;
-            targetDuFlowBean = null;
+
 
             //测试环境自动发送曝光
             Double bidfloorcur = Double.valueOf(adzone.getBid_floor());
@@ -164,7 +163,8 @@ public class TencentRequestServiceImpl implements RequestService {
                 Boolean flag = sendGetUrl(tencentexpUrl);
                 log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
             }
-
+            bidRequestBean = null;
+            targetDuFlowBean = null;
             return response;
         } else {
             return response;

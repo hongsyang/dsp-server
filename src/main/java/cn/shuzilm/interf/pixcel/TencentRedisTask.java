@@ -34,7 +34,7 @@ public class TencentRedisTask implements Runnable {
                     log.debug("线程号" + Thread.currentThread().getName());
                     TencentExpParameterParserImpl.parseUrlStr(tencentexp.toString());
                 }  else {
-                    log.debug("等待中" + Thread.currentThread().getName());
+//                    log.debug("等待中" + Thread.currentThread().getName());
                     Thread.currentThread().join(1000);
                 }
 

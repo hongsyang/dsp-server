@@ -227,8 +227,6 @@ public class AdViewRequestServiceImpl implements RequestService {
             response = JSON.toJSONString(bidResponseBean);
             log.debug("没有过滤的bidResponseBean:{}", response);
             response = JSON.toJSONString(bidResponseBean);
-            bidRequestBean = null;
-            targetDuFlowBean = null;
             //测试环境自动发送曝光
             Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
             Double v = bidfloorcur * 1.3;
@@ -243,6 +241,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                 Boolean flag = sendGetUrl(adviewexpUrl);
                 log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
             }
+            bidRequestBean = null;
+            targetDuFlowBean = null;
 
             return response;
         } else {

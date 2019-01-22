@@ -207,8 +207,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             MDC.put("sift", "dsp-server");
             log.debug("没有过滤的bidResponseBean:{}", response);
 
-            bidRequestBean = null;
-            targetDuFlowBean = null;
+
 
             Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
             Double v = bidfloorcur * 1.3;
@@ -223,6 +222,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 Boolean flag = sendGetUrl(lingjiexpUrl);
                 log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
             }
+            targetDuFlowBean = null;
+            bidRequestBean = null;
             return response;
         } else {
             return response;

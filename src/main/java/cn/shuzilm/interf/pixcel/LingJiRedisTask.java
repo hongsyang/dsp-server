@@ -32,7 +32,7 @@ public class LingJiRedisTask implements Runnable {
                     log.debug("线程号" + Thread.currentThread().getName());
                     LingJiImpParameterParserImpl.parseUrlStr(lingjiimp.toString());
                 } else {
-                    log.debug("等待中" + Thread.currentThread().getName());
+//                    log.debug("等待中" + Thread.currentThread().getName());
                     Thread.currentThread().join(1000);
                 }
 
