@@ -102,7 +102,7 @@ public class TencentRequestServiceImpl implements RequestService {
             List heightList = new ArrayList();//高列表
             widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
             heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
-            //长宽列表 
+            //长宽列表
             log.debug("widthList:{},heightList:{}",widthList,heightList);
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
@@ -159,10 +159,10 @@ public class TencentRequestServiceImpl implements RequestService {
             String s = serviceUrl + "tencentclick?";
             if (response.contains(s)) {
                 String substring = response.substring(response.indexOf(s));
-                String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
-                String lingjiexpUrl = lingjiexp + price + pf;
-                Boolean flag = sendGetUrl(lingjiexpUrl);
-                log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
+                String tencentexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+                String tencentexpUrl = tencentexp + price + pf;
+                Boolean flag = sendGetUrl(tencentexpUrl);
+                log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
             }
 
             return response;

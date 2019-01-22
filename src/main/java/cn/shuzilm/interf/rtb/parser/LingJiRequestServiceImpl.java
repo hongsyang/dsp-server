@@ -209,6 +209,20 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             bidRequestBean = null;
             targetDuFlowBean = null;
+
+            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
+            Double v = bidfloorcur * 1.3;
+            String price = "&price=" + v;
+            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+            String serviceUrl = configs.getString("SERVICE_URL");
+            String s = serviceUrl + "lingjiclick?";
+            if (response.contains(s)) {
+                String substring = response.substring(response.indexOf(s));
+                String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+                String lingjiexpUrl = lingjiexp + price + pf;
+                Boolean flag = sendGetUrl(lingjiexpUrl);
+                log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
+            }
             return response;
         } else {
             return response;
