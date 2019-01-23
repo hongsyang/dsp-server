@@ -136,6 +136,7 @@ public class RuleMatching {
 		//多尺寸
 		if(!widthList.isEmpty()){
 			for(int i=0;i<widthList.size();i++){
+				
 				int gWidth = widthList.get(i);
 				int gHeight = heightList.get(i);
 				if (isResolutionRatio) {
@@ -231,8 +232,8 @@ public class RuleMatching {
 			for(int i=0;i<widthList.size();i++){
 				int gWidth = widthList.get(i);
 				int gHeight = heightList.get(i);
-				int divisor = MathTools.division(width, height);
-				widthHeightRatio = width / divisor + "/" + height / divisor;
+				int divisor = MathTools.division(gWidth, gHeight);
+				widthHeightRatio = gWidth / divisor + "/" + gHeight / divisor;
 				if(rtbIns.getMaterialByRatioMap().get(widthHeightRatio) != null){
 					materialSet.addAll(rtbIns.getMaterialByRatioMap().get(widthHeightRatio));
 				}
