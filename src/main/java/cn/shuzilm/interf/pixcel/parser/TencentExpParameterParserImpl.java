@@ -113,7 +113,7 @@ public class TencentExpParameterParserImpl implements ParameterParser {
             bean.setHost(configs.getString("HOST"));
             String price = urlRequest.get("price");
             GdtWinPriceDecoder gdtWinPriceDecoder = new GdtWinPriceDecoder();
-            String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();
+//            String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();
             bean.setCost(Double.valueOf(price) / 100);
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块

@@ -103,7 +103,7 @@ public class TencentRequestServiceImpl implements RequestService {
             widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
             heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
             //长宽列表
-            log.debug("widthList:{},heightList:{}",widthList,heightList);
+            log.debug("widthList:{},heightList:{}", widthList, heightList);
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
@@ -148,18 +148,16 @@ public class TencentRequestServiceImpl implements RequestService {
             log.debug("bidResponseBean:{}", response);
 
 
-
             //测试环境自动发送曝光
             Double bidfloorcur = Double.valueOf(adzone.getBid_floor());
             Double v = bidfloorcur * 1.3;
             String price = "&price=" + v;
             String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
-            String serviceUrl = configs.getString("SERVICE_URL");
-            String s = serviceUrl + "tencentclick?";
+            String s = "click_param";
             if (response.contains(s)) {
                 String substring = response.substring(response.indexOf(s));
-                String tencentexp = substring.substring(0, substring.indexOf('"')).replace("tencentclick", "tencentexp");
-                String tencentexpUrl = tencentexp + price + pf;
+                String tencentexp = substring.substring(substring.indexOf("id="));
+                String tencentexpUrl = "http://59.110.220.112:9880/tencentexp?" + tencentexp + price + pf;
                 Boolean flag = sendGetUrl(tencentexpUrl);
                 log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
             }
