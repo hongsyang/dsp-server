@@ -208,6 +208,7 @@ public class RuleMatching {
 		Map<String, Boolean> demographicMap = new HashMap<String, Boolean>();
 		List<String> adxNamePushList = new ArrayList<String>();
 		
+		
 		// 匹配
 		DUFlowBean targetDuFlowBean = null;
 		TagBean tagBean = null;
