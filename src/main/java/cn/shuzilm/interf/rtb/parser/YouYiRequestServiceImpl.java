@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import com.google.common.collect.Lists;
 
@@ -50,6 +51,7 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
+    private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
@@ -75,6 +77,14 @@ public class YouYiRequestServiceImpl implements RequestService {
             String adType = null; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
+            //ip 黑名单规则  在黑名单内直接返回
+            if (ipBlacklist.isIpBlacklist(user.getUser_ip())) {
+                log.debug("IP黑名单:{}", user.getUser_ip());
+                response = "";
+                return response;
+            }
+
+
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
 //                return response;
@@ -88,7 +98,19 @@ public class YouYiRequestServiceImpl implements RequestService {
                 if ("ios".equals(userDevice.getDevice_os().toLowerCase())) {
                     deviceId = userDevice.getIdfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getDevice_os().toLowerCase())) {
-//                    deviceId = userDevice.getExt().getMac();
+                    //竞价请求进来之前对imei和mac做过滤
+                    if (userDevice.getMd5_imei() != null) {
+                        if (userDevice.getMd5_imei().length() == 32) {
+                        }
+                    } else if (userDevice.getMd5_mac() != null) {
+                        if (userDevice.getMd5_mac().length() == 32) {
+                            userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
+                        }
+                    } else {
+                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
+                        response = "";
+                        return response;
+                    }
                     deviceId = userDevice.getMd5_imei();
                 }
             }
@@ -107,15 +129,22 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = adzone.getAdz_height();
             } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
                 stringSet = "[image/jpeg, image/png]";
-                adxId = adxId + "_"+adzone.getNative().get(0).getNative_id();
+                adxId = adxId + "_" + adzone.getNative().get(0).getNative_id();
                 //广告位的宽和高
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
-            }else {
+            } else {
                 response = "pc 不竞价";
                 return response;
             }
-
+            //通过广告id获取长宽
+            if (width == null | height == null) {
+                width = 1;
+                height = 1;
+            }
+            //             长宽列表
+            List widthList = new ArrayList();//宽列表
+            List heightList = new ArrayList();//高列表
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
@@ -128,7 +157,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                     adxId,//ADX 服务商ID
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
-                    userDevice.getApp_bundle()//APP包名
+                    userDevice.getApp_bundle(),//APP包名
+                    widthList,//长宽列表
+                    heightList
             );
             if (targetDuFlowBean == null) {
                 response = "";
@@ -154,6 +185,8 @@ public class YouYiRequestServiceImpl implements RequestService {
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
+            targetDuFlowBean = null;
+            bidRequestBean = null;
             MDC.put("sift", "dsp-server");
             log.debug("bidResponseBean:{}", response);
             return response;
@@ -188,7 +221,7 @@ public class YouYiRequestServiceImpl implements RequestService {
         //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" +  youYiAdzone.getAdz_id() +
+                "&impid=" + youYiAdzone.getAdz_id() +
                 "&price=" + "__PRICE__" +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
@@ -206,13 +239,13 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid()+ //私有交易
+                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" +  youYiAdzone.getAdz_id() +
+                "&impid=" + youYiAdzone.getAdz_id() +
                 "&price=" + "__PRICE__" +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
@@ -230,7 +263,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid()+ //私有交易
+                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setImp_para(nurl);//曝光通知
         String curl = "id=" + targetDuFlowBean.getRequestId() +

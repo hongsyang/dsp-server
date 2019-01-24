@@ -47,10 +47,6 @@ public class RtbRequestParser {
      */
     public String parseData(String url, String dataStr, String remoteIp) throws Exception {
         String responseStr = "没有对应的厂商";
-        long start = new Date().getTime();
-//        MDC.put("sift", configs.getString("ADX_REQUEST"));
-//        log.debug("url:{},body:{},remoteIp:{}", url, dataStr, remoteIp);
-//        MDC.remove("sift");
         if (Boolean.valueOf(configs.getString("FILTER_RTB"))) {
             responseStr = "测试请求";
             return responseStr;
@@ -68,15 +64,10 @@ public class RtbRequestParser {
             }
         }
 
-        //TODO 更换为MAP
         if (className != null) {
             RequestService requestService = RequestServiceFactory.getRequestService(className);
             responseStr = requestService.parseRequest(dataStr);
         }
-        long end = new Date().getTime();
-        MDC.put("sift", configs.getString("ADX_REQUEST"));
-        log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
-        MDC.remove("sift");
         return responseStr;
     }
 
