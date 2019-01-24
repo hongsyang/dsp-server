@@ -128,6 +128,13 @@ public class RuleMatching {
 			return false;
 		}
 		
+		if (!extStr.equals("") && !extStr.contains(material.getExt())) {
+			return false;
+		}
+		if (isDimension && !materialSet.contains(material.getUid())) {
+			return false;
+		}
+		
 		if(isDimension){
 			if (!material.getApprovedAdxSet().contains(adxName)) {
 				return false;
@@ -145,17 +152,12 @@ public class RuleMatching {
 				}
 				if(!dimensionFlag){
 					return false;
+				}else{
+					return true;
 				}
 			}
 		}
-		
-		if (!extStr.equals("") && !extStr.contains(material.getExt())) {
-			return false;
-		}
-		if (adxNameList.isEmpty() && !materialSet.contains(material.getUid())) {
-			return false;
-		}
-	
+
 		if(isDimension){
 			if (isResolutionRatio) {
 				if (adWidth >= width && adHeight >= height) {
