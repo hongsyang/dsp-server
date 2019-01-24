@@ -207,7 +207,6 @@ public class TencentRequestServiceImpl implements RequestService {
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" +  youYiAdzone.getAdz_id() +
-                "&price=" + "__PRICE__" +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
@@ -231,7 +230,6 @@ public class TencentRequestServiceImpl implements RequestService {
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" +  youYiAdzone.getAdz_id() +
-                "&price=" + "__PRICE__" +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
