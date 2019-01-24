@@ -204,7 +204,7 @@ public class TencentRequestServiceImpl implements RequestService {
 
         double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;//广告出价
         tencentBid.setBid_price((int) biddingPrice);
-        tencentBid.setCreaive_id(targetDuFlowBean.getCrid());//推审id
+        tencentBid.setCreative_id(targetDuFlowBean.getCrid());//推审id
         //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
