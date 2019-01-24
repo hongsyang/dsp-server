@@ -227,14 +227,14 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
 //                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
+//        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
         //曝光通知Nurl
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-                "&did=" + targetDuFlowBean.getDid() +
+//                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
 //                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
@@ -256,11 +256,11 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-                "&did=" + targetDuFlowBean.getDid() +
+//                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
+//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-                "&appv=" + targetDuFlowBean.getAppVersion() +
+//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
