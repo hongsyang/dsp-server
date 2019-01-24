@@ -146,7 +146,7 @@ public class TencentRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
             String format = LocalDateTime.now().format(formatter);//时间戳
-            targetDuFlowBean.setBidid(format + UUID.randomUUID());//bid id  时间戳+随机数不去重
+            targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppName("");//APP名称
             targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
@@ -213,9 +213,9 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
+//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-                "&appv=" + targetDuFlowBean.getAppVersion() +
+//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
@@ -225,7 +225,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
         //曝光通知Nurl
@@ -236,9 +236,9 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
+//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-                "&appv=" + targetDuFlowBean.getAppVersion() +
+//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
@@ -248,7 +248,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setImpression_param(nurl);//曝光通知
         String curl = "id=" + targetDuFlowBean.getRequestId() +
@@ -269,7 +269,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setClick_param(curl);//点击通知
         //腾讯 Bid 类型列表
