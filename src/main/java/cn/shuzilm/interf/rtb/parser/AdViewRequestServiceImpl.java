@@ -425,11 +425,11 @@ public class AdViewRequestServiceImpl implements RequestService {
             List<String> linkCurls = new ArrayList<>();
             linkCurls.add(curl);
             link.setUrl(landingUrl);
-            link.setClicktrackers(linkCurls);
+//            link.setClicktrackers(linkCurls);
             nativeResponseBean.setLink(link);
             List<String> curls = new ArrayList<>();
             curls.add(curl);
-            nativeResponseBean.setImptrackers(curls);//点击检测
+//            nativeResponseBean.setImptrackers(curls);//点击检测
             log.debug("nativeResponseBean:{}", nativeResponseBean);
             bid.setNative(nativeResponseBean);
         } else {
