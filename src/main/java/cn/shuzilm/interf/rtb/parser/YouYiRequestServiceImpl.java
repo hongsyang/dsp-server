@@ -136,6 +136,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
                 if (width == null | height == null) {
+                    width = -1;
+                    height = -1;
                     adxNameList.add(adxId + "_" + adzone.getNative().get(0).getNative_id());
                     log.debug("adxNameList:{}", adxNameList);
                     //是否匹配长宽
