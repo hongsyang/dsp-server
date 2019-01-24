@@ -158,6 +158,7 @@ public class RuleMatching {
 			}
 		}
 
+		
 		if(isDimension){
 			if (isResolutionRatio) {
 				if (adWidth >= width && adHeight >= height) {
