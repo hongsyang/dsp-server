@@ -158,9 +158,12 @@ public class LingJiRequestServiceImpl implements RequestService {
                 }
             }
             //             长宽列表 目前只支持悠易和广点通
-            List widthList = new ArrayList();//宽列表
-            List heightList = new ArrayList();//高列表
-
+//            List widthList = new ArrayList();//宽列表
+//            List heightList = new ArrayList();//高列表
+            //广告位列表 只有悠易和广点通需要
+            List adxNameList = new ArrayList();//
+            //是否匹配长宽
+            Boolean  isDimension=true;
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
                     adType,//广告类型
@@ -173,8 +176,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     userDevice.getIp(),//用户ip
                     app.getBundle(),//APP包名
-                    widthList,
-                    heightList
+                    adxNameList,
+                    isDimension
             );
             if (targetDuFlowBean == null) {
                 response = "";
