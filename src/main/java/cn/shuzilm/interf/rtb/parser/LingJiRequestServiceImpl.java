@@ -296,7 +296,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         bid.setNurl(nurl);
 
         //曝光检测地址
-        String  lingjieimp = serviceUrl + "lingjieimp?" +
+        String  lingjieimp = serviceUrl + "lingjiimp?" +
                 "id=" + "${AUCTION_ID}" +
                 "&bidid=" + "${AUCTION_BID_ID}" +
                 "&impid=" + "${AUCTION_IMP_ID}" +
