@@ -338,7 +338,7 @@ public class LingJiRequestServiceImpl implements RequestService {
         bid.setNurl(nurl);
 
         //曝光检测地址
-        String  lingjieimp = serviceUrl + "lingjieimp?" +
+        String  lingjieimp = serviceUrl + "lingjiimp?" +
                 "id=" + "${AUCTION_ID}" +
                 "&bidid=" + "${AUCTION_BID_ID}" +
                 "&impid=" + "${AUCTION_IMP_ID}" +
@@ -399,7 +399,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             NativeAD nativeAD = new NativeAD();
             List urls = new ArrayList();
-            urls.add(lingjieimp);
+//            urls.add(lingjieimp);
             urls.add(nurl);
             nativeAD.setImptrackers(urls);// 展示曝光URL数组
 
