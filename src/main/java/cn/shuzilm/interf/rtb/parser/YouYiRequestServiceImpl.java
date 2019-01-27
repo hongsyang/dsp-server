@@ -153,12 +153,13 @@ public class YouYiRequestServiceImpl implements RequestService {
                 //广告位的宽和高
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
+                //是否匹配长宽
+                isDimension = false;
             }
             if (width == null || width==0|| height == null||height==0) {
                 width = -1;
                 height = -1;
-                //是否匹配长宽
-                isDimension = false;
+
             }
 
 
