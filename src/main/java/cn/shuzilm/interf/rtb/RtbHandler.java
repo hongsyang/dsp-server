@@ -149,7 +149,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
             if (resultData.contains("204session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                //修改状态码为200
+//                response.setStatus(HttpResponseStatus.NO_CONTENT);
                 String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
                 builder.setSessionId(substring);
                 builder.setAds(0, builder.getAds(0));
