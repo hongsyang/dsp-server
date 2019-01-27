@@ -169,7 +169,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                     adType,//广告类型
                     width,//广告位的宽
                     height,//广告位的高
-                    true,// 是否要求分辨率
+                    false,// 是否要求分辨率
                     0,//宽误差值
                     0,// 高误差值;
                     adxId,//ADX 服务商ID

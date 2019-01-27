@@ -186,7 +186,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     adType,//广告类型
                     width,//广告位的宽
                     height,//广告位的高
-                    true,// 是否要求分辨率
+                    false,// 是否要求分辨率
                     5,//宽误差值
                     5,// 高误差值;
                     ADX_ID,//ADX 服务商ID
