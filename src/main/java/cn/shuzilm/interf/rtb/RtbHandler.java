@@ -1,8 +1,10 @@
 package cn.shuzilm.interf.rtb;
 
 import bidserver.BidserverSsp;
+import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.googlecode.protobuf.format.JsonFormat;
+import gdt.adx.GdtRtb;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
@@ -13,6 +15,8 @@ import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Date;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -26,104 +30,139 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class RtbHandler extends SimpleChannelUpstreamHandler {
 
+    private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
+
+
     private static final Logger log = LoggerFactory.getLogger(RtbHandler.class);
     //	private WriteDataToLog wdt;
-    private  RtbRequestParser parser = null;
+    private RtbRequestParser parser = null;
     private static AtomicInteger counter = new AtomicInteger();
 
-    public RtbHandler() {
-//		wdt = new WriteDataToLog();
+    private ExecutorService executor = null;
+
+    private String remoteIp = null;
+    private String dataStr = null;
+    private String url = null;
+    //返回结果
+    private String result = null;
+
+
+    public RtbHandler(ExecutorService executor) {
         parser = new RtbRequestParser();
+        this.executor = executor;
         System.out.println(Thread.currentThread().getName() + " rtb parser 初始化成功。。。");
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        try {
-//            System.out.println(Thread.currentThread().getName() + "\t" + counter);
-            counter.getAndAdd(1);
-            if (e.getMessage() instanceof HttpRequest) {
-                HttpRequest request = (HttpRequest) e.getMessage();
-                boolean close = HttpHeaders.Values.CLOSE
-                        .equalsIgnoreCase(request
-                                .getHeader(HttpHeaders.Names.CONNECTION))
-                        || request.getProtocolVersion().equals(
-                        HttpVersion.HTTP_1_0)
-                        && !HttpHeaders.Values.KEEP_ALIVE
-                        .equalsIgnoreCase(request
-                                .getHeader(HttpHeaders.Names.CONNECTION));
-//				System.out.println("------------\r\n" + request.getUri());
-                // 获取对方的ip地址
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent) {
+        long start = System.currentTimeMillis();
+        //返回状态
+        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+        response.setHeader("Content-Type", "text/html");
+        response.setHeader("Accept-Ranges", "bytes");
+        response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
 
-                String remoteIp = ctx.getChannel().getRemoteAddress()
-                        .toString().split(":")[0].replace("/", "");
-//				System.out.println("remoteIp : "+remoteIp);
+        // 请求状态
+        boolean close = true;
+        log.debug("线程名称：{}，counter：{}", Thread.currentThread().getName(), counter);
+        counter.getAndAdd(1);
+        try {
+            if (messageEvent.getMessage() instanceof HttpRequest) {
+                HttpRequest request = (HttpRequest) messageEvent.getMessage();
+                // 请求状态
+                close = HttpHeaders.Values.CLOSE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION)) || request.getProtocolVersion().equals(HttpVersion.HTTP_1_0) && !HttpHeaders.Values.KEEP_ALIVE.equalsIgnoreCase(request.getHeader(HttpHeaders.Names.CONNECTION));
+                // 获取对方的ip地址
+                remoteIp = ctx.getChannel().getRemoteAddress().toString().split(":")[0].replace("/", "");
+                //接收 GET 请求
+                url = request.getUri();
                 //接收 POST 请求 , 获取 SDK 回传数据
-//                log.debug(request.getContent().toString());
-                String dataStr = null;
-                String url = request.getUri();
-                BidserverSsp.BidRequest bidRequest = null;
                 dataStr = new String(request.getContent().array());
+
+                BidserverSsp.BidRequest bidRequest = null;
+                GdtRtb.BidRequest tencentBidRequest = null;
+
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
+                } else if (url.contains("tencent")) {
+                    tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
+                    dataStr = JsonFormat.printToString(tencentBidRequest);
+//                    log.debug(" 接收 tencentBidRequest 请求：{}", dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
-//				String dataStr = new String(request.getContent().array(),"utf-8");
-//				System.out.println("接收到的原始数据 --- "+dataStr);
-//				dataStr = new String(EncryptionData.decrypt(EKEY, dataStr)
-//						.getBytes(), "UTF-8");
-                //接收 GET 请求
-//				System.out.println("uri : "+url);
 
-                HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-                ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-                //主业务逻辑
-                byte[] content = null;
-//                String resultData = parseRequest(url, dataStr, remoteIp);
-                String resultData = parser.parseData(url, dataStr, remoteIp);
-                if ("".equals(resultData)) {
-                    response.setStatus(HttpResponseStatus.NO_CONTENT);
-                    content = resultData.getBytes("utf-8");
-                } else if (resultData.contains("session_id")) {
-                    BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
-                    JsonFormat.merge(resultData, builder);
-                    BidserverSsp.BidResponse build = builder.build();
-                    content = build.toByteArray();
-                } else {
-                    content = resultData.getBytes("utf-8");
-                }
-                response.setHeader("Content-Type", "text/html");
-                response.setHeader("Connection", HttpHeaders.Values.KEEP_ALIVE);
-                response.setHeader("Content-Length", content.length);
-                response.setHeader("Accept-Ranges", "bytes");
 
-                buffer.writeBytes(content);
-                //设置返回状态
-                response.setContent(buffer);
-                content = null;
-                dataStr = null;
-                resultData = null;
-                bidRequest = null;
-                // Write the response.
-                ChannelFuture future2 = e.getChannel().write(response);
-                if (close) {
-                    future2.addListener(ChannelFutureListener.CLOSE);
-                }
-
-//				Channel ch = e.getChannel();
-                // ch.write(response);
-//				ch.disconnect();
-//				ch.close();
             }
-        } catch (Exception e2) {
-            HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-            response.setStatus(HttpResponseStatus.INTERNAL_SERVER_ERROR);
-            ChannelFuture future2 = e.getChannel().write(response);
-            future2.addListener(ChannelFutureListener.CLOSE);
-            log.error("", e2);
-            e2.printStackTrace();
+
+            //增加超时线程池
+            Future<Object> future = executor.submit(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    //主业务逻辑
+                    return parser.parseData(url, dataStr, remoteIp);
+                }
+            });
+
+            log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
+            try {
+                result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
+                log.debug("线程返回：{}", result);
+            } catch (TimeoutException e) {
+                // 超时情况
+                long end = System.currentTimeMillis();
+                MDC.put("sift", "timeOut");
+                log.error("timeMs:{},url:{}", end - start, url);
+                MDC.remove("sift");
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                ChannelFuture future1 = messageEvent.getChannel().write(response);
+                future1.addListener(ChannelFutureListener.CLOSE);
+                future.cancel(true);// 中断执行此任务的线程
+                return;
+            }
+
+            //正常情况 主业务逻辑
+            byte[] content = null;
+            String resultData = result;
+            if ("".equals(resultData)) {
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                content = resultData.getBytes("utf-8");
+            } else if (resultData.contains("session_id")) {
+                BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+                JsonFormat.merge(resultData, builder);
+                BidserverSsp.BidResponse build = builder.build();
+                content = build.toByteArray();
+            } else {
+                content = resultData.getBytes("utf-8");
+            }
+
+
+            response.setHeader("Content-Length", content.length);
+            ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+            buffer.writeBytes(content);
+            response.setContent(buffer);
+
+            //正常返回
+            ChannelFuture future2 = messageEvent.getChannel().write(response);
+            if (close) {
+                future2.addListener(ChannelFutureListener.CLOSE);
+            }
+        } catch (Exception e) {
+            long end = System.currentTimeMillis();
+            MDC.put("sift", "rtb-exception");
+            log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
+            MDC.remove("sift");
+            response.setStatus(HttpResponseStatus.NO_CONTENT);
+            ChannelFuture future1 = messageEvent.getChannel().write(response);
+            future1.addListener(ChannelFutureListener.CLOSE);
+
+        } finally {
+            long end = System.currentTimeMillis();
+            MDC.put("sift", configs.getString("ADX_REQUEST"));
+            log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+            MDC.remove("sift");
         }
 
     }
@@ -146,8 +185,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
         /**********		POST主业务逻辑		***************/
         String resultData = parser.parseData(url, dataStr, remoteIp);//SDK 2.0.1
 
-//		byte[] content = null;
-//		content = resultData.getBytes("utf-8");
+        byte[] content = null;
+        content = resultData.getBytes("utf-8");
         return resultData;
     }
 

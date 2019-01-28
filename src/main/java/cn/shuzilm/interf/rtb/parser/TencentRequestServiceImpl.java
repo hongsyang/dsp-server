@@ -1,12 +1,7 @@
 package cn.shuzilm.interf.rtb.parser;
 
-import cn.shuzilm.bean.adview.request.Impression;
-import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.MD5Util;
-import com.google.common.collect.Lists;
-
-import bidserver.BidserverSsp;
 import cn.shuzilm.backend.rtb.RuleMatching;
+import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.youyi.request.YouYiAdzone;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
@@ -16,8 +11,8 @@ import cn.shuzilm.bean.youyi.response.YouYiAd;
 import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.util.IpBlacklistUtil;
 import com.alibaba.fastjson.JSON;
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +21,9 @@ import org.slf4j.MDC;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @Description: YouYiParser 灵集post参数解析
@@ -37,17 +34,17 @@ import java.util.*;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class YouYiRequestServiceImpl implements RequestService {
+public class TencentRequestServiceImpl implements RequestService {
 
-    private static final Logger log = LoggerFactory.getLogger(YouYiRequestServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(TencentRequestServiceImpl.class);
 
     private AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
 
-    private static final String ADX_NAME = "YouYi";
+    private static final String ADX_NAME = "Tencent";
 
-    private static final String ADX_ID = "3";
+    private static final String ADX_ID = "4";
 
     private static JedisManager jedisManager = JedisManager.getInstance();
 
@@ -58,7 +55,7 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     @Override
     public String parseRequest(String dataStr) throws Exception {
-        String adxId = "3";
+        String adxId = "4";
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);
@@ -109,19 +106,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 if ("ios".equals(userDevice.getDevice_os().toLowerCase())) {
                     deviceId = userDevice.getIdfa();
                 } else if ("android".equalsIgnoreCase(userDevice.getDevice_os().toLowerCase())) {
-                    //竞价请求进来之前对imei和mac做过滤
-                    if (userDevice.getMd5_imei() != null) {
-                        if (userDevice.getMd5_imei().length() == 32) {
-                        }
-                    } else if (userDevice.getMd5_mac() != null) {
-                        if (userDevice.getMd5_mac().length() == 32) {
-                            userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
-                        }
-                    } else {
-                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(),userDevice.getMd5_mac());
-                        response = "";
-                        return response;
-                    }
+//                    deviceId = userDevice.getExt().getMac();
                     deviceId = userDevice.getMd5_imei();
                 }
             }
@@ -148,11 +133,6 @@ public class YouYiRequestServiceImpl implements RequestService {
                 response = "pc 不竞价";
                 return response;
             }
-            //通过广告id获取长宽
-            if (width==null|height==null){
-                width=1;
-                height=1;
-            }
 
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
@@ -167,7 +147,6 @@ public class YouYiRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
                     userDevice.getApp_bundle()//APP包名
-                    ,null,null
             );
             if (targetDuFlowBean == null) {
                 response = "";

@@ -5,7 +5,6 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
@@ -16,18 +15,14 @@ import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import redis.clients.jedis.Jedis;
 
-import javax.xml.crypto.Data;
-import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * @Description: LingJiExpParameterParserImpl  曝光量解析
+ * @Description: LingJiImpParameterParserImpl  曝光量解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:57
  * @UpdateUser: houkp
@@ -35,9 +30,9 @@ import java.util.*;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class LingJiExpParameterParserImpl implements ParameterParser {
+public class LingJiImpParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(LingJiExpParameterParserImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(LingJiImpParameterParserImpl.class);
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
@@ -46,10 +41,10 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
     private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
 
     public static String parseUrlStr(String url) {
-        MDC.put("sift", "LingJiExp");
-        log.debug("LingJiExp曝光的nurl值:{}", url);
+        MDC.put("sift", "LingJiImp");
+        log.debug("LingJiImp曝光的nurl值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
-        log.debug("LingJiExp转换之后曝光的nurl值:{}", urlRequest);
+        log.debug("LingJiImp转换之后曝光的nurl值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
@@ -109,7 +104,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
             try {
-                log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
+                log.debug("LingJiImp曝光的requestid:{},element值:{}", requestId, element);
                 MDC.put("sift", "pixel");
                 AdPixelBean bean = new AdPixelBean();
                 if (element != null) {
@@ -123,11 +118,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 Double money = Double.valueOf(split[0]) / 100;
                 bean.setCost(money);
                 bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
-                bean.setWinNoticeNums(1);
+                bean.setWinNoticeNums(0);
                 bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setType(0);
                 //pixel服务器发送到主控模块
-                log.debug("pixel服务器发送到主控模块的LingJiExpBean：{}", bean);
+                log.debug("pixel服务器发送到主控模块的LingJiImpBean：{}", bean);
                 AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
                 NumberFormat numberFormat = NumberFormat.getNumberInstance();
                 numberFormat.setMaximumFractionDigits(5);
@@ -140,9 +135,9 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
                 element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
                 element.setAdxSource("LingJi");
-                MDC.put("sift", "LingJiExp");
+                MDC.put("sift", "LingJiImp");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
-                MDC.put("phoenix", "Exp");
+                MDC.put("phoenix", "Nurl");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
@@ -162,17 +157,9 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                         element.getBidid(),price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
                 MDC.remove("phoenix");
-                boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-                MDC.put("sift", "LingJiExp");
-                if (lingJiExp) {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiExp);
-                } else {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiExp);
-                    throw new RuntimeException();
-                }
 
             } catch (Exception e) {
-                Help.sendAlert("发送到" + configs.getString("HOST")+"失败,LingJiExp");
+                Help.sendAlert("发送到" + configs.getString("HOST")+"失败,LingJiImp");
                 MDC.put("sift", "exception");
                 boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
                 log.debug("发送element：{}到EXP_ERROR队列：{}", element, exp_error);

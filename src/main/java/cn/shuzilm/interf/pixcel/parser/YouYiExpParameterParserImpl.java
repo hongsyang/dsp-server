@@ -33,15 +33,14 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(YouYiExpParameterParserImpl.class);
 
-    private AppConfigs configs = null;
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
     private static final String PIXEL_CONFIG = "pixel.properties";
 
-    @Override
-    public String parseUrl(String url) {
-        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
+
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "YouYiExp");
         log.debug("YouYiExp曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -132,7 +131,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             MDC.put("phoenix", "Exp");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), new Date().getHours(),
                     new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -145,7 +144,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(), element.getBidid(), price);
+                    element.getDealid(), element.getAppId(), element.getBidid(), price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
             MDC.remove("phoenix");
             MDC.put("sift", "YouYiExp");
@@ -157,17 +156,22 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("pixcel异常触发报警:YouYiExp");
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,YouYiExp");
             MDC.put("sift", "exception");
             boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到EXP_ERROR队列：{}", exp_error);
-            log.debug("element{}", element);
-            log.error("异常信息：{}", e);
+            log.debug("element:{}",JSON.toJSONString(element));
+            log.error("异常信息:{}", e);
             MDC.remove("sift");
         }
 
         String duFlowBeanJson = JSON.toJSONString(element);
         log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }

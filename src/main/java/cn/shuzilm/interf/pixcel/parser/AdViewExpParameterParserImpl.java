@@ -36,15 +36,14 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewExpParameterParserImpl.class);
 
-    private AppConfigs configs = null;
+    private static final String PIXEL_CONFIG = "pixel.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
 
-    private static final String PIXEL_CONFIG = "pixel.properties";
 
-    @Override
-    public String parseUrl(String url) {
-        this.configs = AppConfigs.getInstance(PIXEL_CONFIG);
+    public static String parseUrlStr(String url) {
         MDC.put("sift", "AdViewExp");
         log.debug("AdViewExp曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
@@ -65,7 +64,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
 
 
         String act = urlRequest.get("act");
-        element.setWinNoticeTime( new Date().getTime());
+        element.setWinNoticeTime(new Date().getTime());
 
         String adx = urlRequest.get("adx");
         element.setAdxId(adx);
@@ -135,7 +134,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 MDC.put("phoenix", "Exp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                         element.getInfoId(), new Date().getHours(),
                         new Date().getTime(), LocalDateTime.now().toString(),
                         element.getDid(), element.getDeviceId(),
@@ -148,34 +147,30 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
                         element.getRequestId(), element.getImpression().get(0).getId(),
-                        element.getDealid(), element.getAppId(),element.getBidid(),price);
+                        element.getDealid(), element.getAppId(), element.getBidid(), price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
                 MDC.remove("phoenix");
-              /*  MDC.put("sift", "AdViewExp");
-                boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-                if (lingJiClick) {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-                } else {
-                    log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-                    throw new RuntimeException();
-                }*/
             } catch (Exception e) {
-                Help.sendAlert("pixcel异常触发报警:AdViewExp");
+                Help.sendAlert("发送到" + configs.getString("HOST") + "失败,AdViewExp");
                 MDC.put("sift", "exception");
                 boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
                 log.debug("发送到EXP_ERROR队列：{}", exp_error);
-                log.debug("element{}", element);
-                log.error("异常信息：{}", e);
+                log.debug("element:{}", JSON.toJSONString(element));
+                log.error("异常信息:{}", e);
                 MDC.remove("sift");
             }
 
             String duFlowBeanJson = JSON.toJSONString(element);
             log.debug("duFlowBeanJson:{}", duFlowBeanJson);
-        }else {
+        } else {
             MDC.put("sift", "repeat");
-            log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
-
+            log.debug("本次请求requestId:{}；bidid:{}", requestId, element.getBidid());
         }
         return requestId;
+    }
+
+    @Override
+    public String parseUrl(String url) {
+        return null;
     }
 }
