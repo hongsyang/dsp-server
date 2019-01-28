@@ -58,7 +58,7 @@ public class BaiduRequestServiceImpl implements RequestService {
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
 //            MDC.put("sift", "dsp-server");
-//            log.debug(" BidRequest参数入参：{}", dataStr);
+            log.debug(" BidRequest参数入参：{}", dataStr);
 //            //请求报文解析
 //            TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
 //            //创建返回结果  bidRequest请求参数保持不变
