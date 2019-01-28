@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb;
 
 import bidserver.BidserverSsp;
+import baidu.BaiduRealtimeBiddingV26;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.googlecode.protobuf.format.JsonFormat;
@@ -15,7 +16,6 @@ import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Date;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -82,6 +82,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 BidserverSsp.BidRequest bidRequest = null;
                 GdtRtb.BidRequest tencentBidRequest = null;
+                BaiduRealtimeBiddingV26.BidRequest baiduBidRequest = null;
 
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
@@ -89,6 +90,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 } else if (url.contains("tencent")) {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
+                }else if (url.contains("baidu")) {
+                    baiduBidRequest = BaiduRealtimeBiddingV26.BidRequest.parseFrom(request.getContent().array());
+                    log.debug("baiduBidRequest：{}", baiduBidRequest);
+                    dataStr = JsonFormat.printToString(baiduBidRequest);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
