@@ -1,7 +1,7 @@
 package cn.shuzilm.interf.rtb;
 
+import baidu.BaiduRealtimeBidding;
 import bidserver.BidserverSsp;
-import baidu.BaiduRealtimeBiddingV26;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.googlecode.protobuf.format.JsonFormat;
@@ -82,7 +82,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 BidserverSsp.BidRequest bidRequest = null;
                 GdtRtb.BidRequest tencentBidRequest = null;
-                BaiduRealtimeBiddingV26.BidRequest baiduBidRequest = null;
 
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
@@ -90,14 +89,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 } else if (url.contains("tencent")) {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
-                }else if (url.contains("baidu")) {
-                    log.debug("baiduBidRequest 原值：{}",request.getContent().array() );
-                    baiduBidRequest = BaiduRealtimeBiddingV26.BidRequest.parseFrom(request.getContent().array());
-                    log.debug("baiduBidRequest的id:{}",baiduBidRequest.getId());
-                    baiduBidRequest.getMobile();
-                    baiduBidRequest.getExcludedProductCategoryList();
-                    dataStr = JsonFormat.printToString(baiduBidRequest);
-                    log.debug("dataStr:{}",dataStr);
+                } else if (url.contains("baidu")) {
+                    log.debug("baiduBidRequest 原值：{}", request.getContent().array());
+                    BaiduRealtimeBidding.BidRequest bidRequest1 = BaiduRealtimeBidding.BidRequest.parseFrom(request.getContent().array());
+                    dataStr = JsonFormat.printToString(bidRequest1);
+                    log.debug("dataStr:{}", dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
@@ -142,7 +138,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 JsonFormat.merge(resultData, builder);
                 BidserverSsp.BidResponse build = builder.build();
                 content = build.toByteArray();
-            }else if (resultData.contains("seat_bids")) {
+            } else if (resultData.contains("seat_bids")) {
                 GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
                 GdtRtb.BidResponse build = builder.build();
