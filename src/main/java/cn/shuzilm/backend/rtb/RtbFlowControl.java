@@ -499,7 +499,7 @@ public class RtbFlowControl {
         while (iterator.hasNext()) {
             String adId = iterator.next();
             // 清除掉 deviceLimitMap 中不参与投放的广告
-            if(!mapAd.contains(adId)) {
+            if(!mapAd.containsKey(adId)) {
                 iterator.remove();
                 myLog.info("删除不投放的广告： {}", adId);
             }
