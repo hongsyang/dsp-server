@@ -82,7 +82,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 BidserverSsp.BidRequest bidRequest = null;
                 GdtRtb.BidRequest tencentBidRequest = null;
-
+                BaiduRealtimeBidding.BidRequest baiduBidRequest = null;
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
@@ -91,8 +91,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     dataStr = JsonFormat.printToString(tencentBidRequest);
                 } else if (url.contains("baidu")) {
                     log.debug("baiduBidRequest 原值：{}", request.getContent().array());
-                    BaiduRealtimeBidding.BidRequest bidRequest1 = BaiduRealtimeBidding.BidRequest.parseFrom(request.getContent().array());
-                    dataStr = JsonFormat.printToString(bidRequest1);
+                    baiduBidRequest = BaiduRealtimeBidding.BidRequest.parseFrom(request.getContent().array());
+                    dataStr = JsonFormat.printToString(baiduBidRequest);
                     log.debug("dataStr:{}", dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
