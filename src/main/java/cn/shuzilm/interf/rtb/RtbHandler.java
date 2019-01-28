@@ -1,7 +1,7 @@
 package cn.shuzilm.interf.rtb;
 
-import baidu.BaiduRealtimeBidding;
 import bidserver.BidserverSsp;
+import cn.shuzilm.BaiduRealtimeBidding;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.googlecode.protobuf.format.JsonFormat;
