@@ -89,16 +89,14 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     dataStr = JsonFormat.printToString(bidRequest);
                 } else if (url.contains("tencent")) {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
-
                     dataStr = JsonFormat.printToString(tencentBidRequest);
                 }else if (url.contains("baidu")) {
                     log.debug("baiduBidRequest 原值：{}",request.getContent().array() );
                     baiduBidRequest = BaiduRealtimeBiddingV26.BidRequest.parseFrom(request.getContent().array());
-//                    log .debug("baiduBidRequest的toString:{}",baiduBidRequest.toString());
-//                    log.debug("baiduBidRequest的id:{}",baiduBidRequest.getId());
-                    log.debug("Json开始:{}",baiduBidRequest.getId());
+                    log.debug("baiduBidRequest的id:{}",baiduBidRequest.getId());
+                    baiduBidRequest.getMobile();
+                    baiduBidRequest.getExcludedProductCategoryList();
                     dataStr = JsonFormat.printToString(baiduBidRequest);
-                    log.debug("Json结束:{}",baiduBidRequest.getId());
                     log.debug("dataStr:{}",dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
@@ -112,7 +110,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 @Override
                 public Object call() throws Exception {
                     //主业务逻辑
-                    return "";
+                    return parser.parseData(url, dataStr, remoteIp);
                 }
             });
 
