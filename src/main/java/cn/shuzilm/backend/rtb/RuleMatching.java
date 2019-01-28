@@ -205,7 +205,7 @@ public class RuleMatching {
 		List<String> auidList = null;
 		Set<String> materialSet = null;
 		String widthHeightRatio =null;
-		//多尺寸
+		
 		int divisor = MathTools.division(width, height);
 		widthHeightRatio = width / divisor + "/" + height / divisor;
 		//materialRatioKey = widthHeightRatio;

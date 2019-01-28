@@ -68,12 +68,12 @@ public class AdFlowControl {
     /**
      * RTB节点线程数
      */
-    private static final int RTB_NODE_THREAD_NUMS = 5;
+    private static final int RTB_NODE_THREAD_NUMS = 300;
     
     /**
      * PIXCEL节点线程数
      */
-    private static final int PIXCEL_NODE_THREAD_NUMS = 300;
+    private static final int PIXCEL_NODE_THREAD_NUMS = 1000;
 
 //    /**
 //     * 广告主对应的广告 MAP
@@ -236,13 +236,28 @@ public class AdFlowControl {
      */
     private static ConcurrentHashMap<String,Long> appFlowControlMap = null;
     
+    /**
+     * 每个广告单元最小竞价次数限制
+     */
+    private static ConcurrentHashMap<String,Float> adMinBidNumsLimitMap = null;
     
-    
+    /**
+     * 广告主余额缓存
+     */
+    private static ConcurrentHashMap<String,Float> advertiserBalanceMap = null;
+        
     private DataTransQueue queue;
     
     private static ConcurrentHashMap<String,Float> cpcClieckRatioMap = null; 
     
     private static final float maxCpcClieckRatio = 0.006f;
+    
+    private static final float maxLimitBidNums = 100;
+    
+    /**
+     * 广告因竞价次数限制停止时间
+     */
+    private static ConcurrentHashMap<String,Long> adStopTimeMap = null;
 
     public AdFlowControl() {
 
@@ -269,6 +284,9 @@ public class AdFlowControl {
         appFlowControlThresholdMap = new ConcurrentHashMap<>();
         adxFlowControlMap = new ConcurrentHashMap<>();
         appFlowControlMap = new ConcurrentHashMap<>();
+        adMinBidNumsLimitMap = new ConcurrentHashMap<>();
+        advertiserBalanceMap = new ConcurrentHashMap<>();
+        adStopTimeMap = new ConcurrentHashMap<>();
         queue = DataTransQueue.getInstance();
 //        adviserMap = new HashMap<>();
 
@@ -304,6 +322,24 @@ public class AdFlowControl {
         AdFlowStatus statusTotal = mapMonitorTotal.get(adUid);
         if(statusTotal != null)
         	statusTotal.setBidNums(statusTotal.getBidNums() + addBidNums);
+        
+        if(adMinBidNumsLimitMap.containsKey(adUid)){
+        	adMinBidNumsLimitMap.put(adUid, adMinBidNumsLimitMap.get(adUid)-addBidNums);
+        	float limitBidNums = adMinBidNumsLimitMap.get(adUid);
+        	myLog.info("缓存中"+adUid+"竞价次数:"+limitBidNums);
+        	if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+        		stopAd(adUid,adUid + "\t可竞得次数剩余100次,停止广告",false,4);
+        		adStopTimeMap.put(adUid, System.currentTimeMillis());
+        		//重新计算竞价次数限制
+//        		checkAdCpmLimit(false);
+//        		limitBidNums = adMinBidNumsLimitMap.get(adUid);
+//        		if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+//        			stopAd(adUid,adUid + "\t可竞得次数剩余100次,停止广告",false,4);
+//        		}
+        		
+        	}
+        	
+        }
     }
 
     /**
@@ -426,24 +462,17 @@ public class AdFlowControl {
                 	}
                 }
                 
-                if(!isLower && mapTask.containsKey(adUid)){
-                	String reason = "["+adUid+"]竞价价格过低，请提升报价";
-                	stopAd(adUid, reason, false,0);
-                }
+//                if(!isLower && mapTask.containsKey(adUid)){
+//                	String reason = "["+adUid+"]竞价价格过低，请提升报价";
+//                	stopAd(adUid, reason, false,0);
+//                }
                 
               //拿当前的指标跟当前的阀值比较，如果超出阀值，则立刻停止任务，并下发任务停止命令
                     
                 if(mapAd.containsKey(adUid)){
                 	AdBean ad = mapAd.get(adUid);
                 	String mode = ad.getMode();
-                	if("cpc".equalsIgnoreCase(mode)){
-                	//监测 CPC 类型的广告是否可以投放
-                    String isOk = cpcHandler.checkAvailable(adUid);
-                    if(isOk != null){
-                        //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
-                        stopAd(adUid, isOk, false,0);
-                    }
-                	}
+
                     AdFlowStatus threshold = mapThresholdHour.get(adUid);
                     AdFlowStatus monitor = mapMonitorHour.get(adUid);
                     //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
@@ -489,6 +518,12 @@ public class AdFlowControl {
                     AdFlowStatus thresholdDaily = mapThresholdDaily.get(adUid);
                     AdFlowStatus monitorDaily = mapMonitorDaily.get(adUid);
                     String advertiserId = mapAd.get(adUid).getAdvertiser().getUid();
+                    
+                    //实时更新余额表
+                    if(advertiserBalanceMap.containsKey(advertiserId)){
+                    	advertiserBalanceMap.put(advertiserId, advertiserBalanceMap.get(advertiserId)-addMoney);
+                    }
+                    
                     AdFlowStatus advertiserDaily = mapMonitorAdvertiserDaily.get(advertiserId);
                     AdFlowStatus thresholdAdvertiser = mapMonitorAdvertiserThresholdDaily.get(advertiserId);
                     
@@ -509,6 +544,15 @@ public class AdFlowControl {
                         stopAd(adUid, reason, true,0);
                         myLog.error(monitorDaily.toString() + "\t" + reason);
                     }
+                    
+                    if("cpc".equalsIgnoreCase(mode)){
+                    	//监测 CPC 类型的广告是否可以投放
+                        String isOk = cpcHandler.checkAvailable(adUid);
+                        if(isOk != null){
+                            //String reason = "### cpc 价格设置 过低，超过了成本线，停止广告投放 ###" + auid;
+                            stopAd(adUid, isOk, false,0);
+                        }
+                    	}
 
                 }
                 
@@ -612,6 +656,8 @@ public class AdFlowControl {
         		}
         	}
         }
+
+        //}
     }
 
 
@@ -691,8 +737,21 @@ public class AdFlowControl {
                 if(mapTask.containsKey(auid)){
                 	TaskBean task = mapTask.get(auid);
                 	if (task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(auid, false)) {
-                	task.setCommand(TaskBean.COMMAND_START);
-                	putDataToAdLogQueue(auid, "天计数器清零,广告开启", 1);
+                		if(task.getCommandResonStatus() == 4){
+                			//广告不开启
+//                			checkAdCpmLimit(false);
+//                			float limitBidNums = adMinBidNumsLimitMap.get(auid);
+//                			if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+//                				//广告不开启
+//                			}else{
+//                				task.setCommand(TaskBean.COMMAND_START);
+//                				task.setCommandResonStatus(0);
+//                    			putDataToAdLogQueue(auid, "天计数器清零,广告开启", 1);
+//                			}
+                		}else{
+                			task.setCommand(TaskBean.COMMAND_START);
+                			putDataToAdLogQueue(auid, "天计数器清零,广告开启", 1);
+                		}
                 	}
                 }
 
@@ -799,8 +858,22 @@ public class AdFlowControl {
                 	if(mapTask.containsKey(auid)){
                 		TaskBean task = mapTask.get(auid);
                 		if(task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(auid, false)){
-                			task.setCommand(TaskBean.COMMAND_START);
-                			putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
+                			if(task.getCommandResonStatus() == 4){
+                				//广告不开启
+//                    			checkAdCpmLimit(false);
+//                    			float limitBidNums = adMinBidNumsLimitMap.get(auid);
+//                    			if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+//                    				//广告不开启
+//                    			}else{
+//                    				task.setCommand(TaskBean.COMMAND_START);
+//                    				task.setCommandResonStatus(0);
+//                    				putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
+//                    			}
+                    		}else{
+                    			task.setCommand(TaskBean.COMMAND_START);
+                    			putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
+                    		}
+                			
                 		}
                 	}
                 }
@@ -830,7 +903,7 @@ public class AdFlowControl {
 				Map.Entry<String, AdBean> entry = (Map.Entry) iter.next();
 				String adUid = entry.getKey();
 				if(!adUidSet.contains(adUid)){				
-					stopAd(adUid, adUid+"广告被关闭", false,0);
+					stopAd(adUid, adUid+"广告被关闭", false,2);
 				}
 			}
 		} catch (Exception e) {
@@ -1140,8 +1213,27 @@ public class AdFlowControl {
                 if(mapTask.containsKey(adUid)){
                     task = mapTask.get(adUid);
                     if(task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(adUid, true)){
-                    task.setCommand(TaskBean.COMMAND_START);
-                    putDataToAdLogQueue(adUid, "广告被修改,广告开启", 1);
+                    	if(task.getCommandResonStatus() == 4){
+                    		//广告不开启
+//                			checkAdCpmLimit(false);
+//                			float limitBidNums = adMinBidNumsLimitMap.get(adUid);
+//                			if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+//                				//广告不开启
+//                			}else{
+//                				task.setCommand(TaskBean.COMMAND_START);
+//                				task.setCommandResonStatus(0);
+//                				putDataToAdLogQueue(adUid, "广告被修改,广告开启", 1);
+//                    		
+//                			}
+                		}else{
+                			task.setCommand(TaskBean.COMMAND_START);
+                			putDataToAdLogQueue(adUid, "广告被修改,广告开启", 1);
+                		}
+                    //task.setCommand(TaskBean.COMMAND_START);
+                    if(task.getCommandResonStatus() == 2){
+                    	task.setCommandResonStatus(0);
+                    }
+                    
                 	}
                     int scope = -1;
                     if(ad.getSpeedMode() == 0)
@@ -1214,7 +1306,7 @@ public class AdFlowControl {
         	TaskBean task = mapTask.get(adUid);
             AdBean ad = mapAd.get(adUid);
                        
-            if(task.getCommand() == TaskBean.COMMAND_START){
+            if(task.getCommand() == TaskBean.COMMAND_START && task.getCommandResonStatus() != 4){
             	myLog.info("广告["+adUid+"]加入下发队列......");
             	taskList.add(task);
             	adList.add(ad);
@@ -1229,6 +1321,224 @@ public class AdFlowControl {
         		pushTaskSingleNode(node.getName(), taskList);
         	}
         }
+    }
+    
+    /**
+     * 10秒钟检查一次广告是否因竞价次数限制停止超过1个小时
+     */
+    public void checkAdLimitStop(){
+    	
+    	Iterator iter = adStopTimeMap.entrySet().iterator();
+    	long now = System.currentTimeMillis();
+		while(iter.hasNext()){
+			Map.Entry<String, Long> entry = (Map.Entry) iter.next();
+			String adUid = entry.getKey();
+			long stopTime = entry.getValue();
+			if(now - stopTime >= 1 * 60 * 60 * 1000){
+			myLog.info(adUid+"开始重新更新竞价次数缓存");
+			adStopTimeMap.put(adUid, now);
+			checkSingleAdCpmLimit(adUid);
+			float limitBidNums = adMinBidNumsLimitMap.get(adUid);   			
+        	myLog.info("缓存中"+adUid+"竞价次数:"+limitBidNums);
+        	if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+        		myLog.info(adUid+"因竞价次数限制已经停止,不重复停止!");
+        	}else{
+        		TaskBean task = mapTask.get(adUid);
+        		if( task != null && task.getCommand() !=TaskBean.COMMAND_START  && (task.getCommandResonStatus() == 4)){
+        			task.setCommand(TaskBean.COMMAND_START);
+    				task.setCommandResonStatus(0);
+    				putDataToAdLogQueue(adUid, "达到1小时,广告竞价次数还未到限制,广告开启", 1);
+        		}
+        	}
+			}
+		}
+    }
+    
+    /**
+     * 检查广告单元CPM限制
+     */
+    public void checkAdCpmLimit(boolean isInit){
+    	MDC.put("sift", "control");
+    	Iterator iter = mapAd.entrySet().iterator();
+		while(iter.hasNext()){
+			Map.Entry<String, AdBean> entry = (Map.Entry) iter.next();
+			String adUid = entry.getKey();
+			AdBean ad = mapAd.get(adUid);
+			String groupId = ad.getGroupId();
+			String advertiserId = ad.getAdvertiser().getUid();
+			float tempMoney = -1f;
+			AdFlowStatus adtThresholdDaily = mapThresholdDaily.get(adUid);
+			float adtThresholdDailyMoney = 0.0f;
+			if(adtThresholdDaily != null)
+				adtThresholdDailyMoney =  adtThresholdDaily.getMoney();
+			if(adtThresholdDailyMoney != 0){
+				AdFlowStatus adMonitorDaily = mapMonitorDaily.get(adUid);
+				float adMonitorDailyMoney = 0.0f;
+				if(adMonitorDaily != null)
+					adMonitorDailyMoney = adMonitorDaily.getMoney();
+				//广告单元每日限额余额
+				float adDailyMoney = adtThresholdDailyMoney - adMonitorDailyMoney;
+				tempMoney = adDailyMoney;
+			}
+			
+			float adGroupThresholdDailyMoney = mapAdGroup.get(groupId).getQuotaMoney().floatValue()*1000;
+                        
+            if(adGroupThresholdDailyMoney != 0){
+            	 AdFlowStatus adGroupMonitorDaily = mapMonitorAdGroupTotal.get(groupId);
+            	 float adGroupMonitorDailyMoney = 0.0f;
+            	 if(adGroupMonitorDaily != null){
+            		 adGroupMonitorDailyMoney = adGroupMonitorDaily.getMoney();
+            		 //广告组每日限额余额
+            		 float adGroupDailyMoney = adGroupThresholdDailyMoney - adGroupMonitorDailyMoney;
+            		 if(tempMoney > adGroupDailyMoney){
+            			 tempMoney = adGroupDailyMoney;
+            		 }
+            		 
+            	 }
+            }
+            
+            float adGroupThresholdTotalMoney = mapAdGroup.get(groupId).getQuotaTotalMoney().floatValue()*1000;
+            
+            if(adGroupThresholdTotalMoney != 0){
+            	AdFlowStatus adGroupMonitorTotal = mapMonitorAdGroupRealTotal.get(groupId);
+            	float adGroupMonitorTotalMoney = 0.0f;
+            	if(adGroupMonitorTotal != null){
+            		adGroupMonitorTotalMoney = adGroupMonitorTotal.getMoney();
+            		//广告组总限额余额
+            		float adGroupTotalMoney = adGroupThresholdTotalMoney - adGroupMonitorTotalMoney;
+            		if(tempMoney > adGroupTotalMoney){
+           			 tempMoney = adGroupTotalMoney;
+           		 }
+            	}
+            }
+            
+            AdFlowStatus advertiserThresholdDaily = mapMonitorAdvertiserThresholdDaily.get(advertiserId);
+            if(advertiserThresholdDaily != null){
+            	float advertiserThresholdDailyMoney = advertiserThresholdDaily.getMoney();
+            	if(advertiserThresholdDailyMoney != 0){
+            		AdFlowStatus advertiserMonitorDaily = mapMonitorAdvertiserDaily.get(advertiserId);
+            		float advertiserMonitorDailyMoney = 0.0f;
+            		if(advertiserMonitorDaily != null){
+            			advertiserMonitorDailyMoney = advertiserMonitorDaily.getMoney();
+            			//广告主日限额余额
+            			float advertiserDailyMoney = advertiserThresholdDailyMoney - advertiserMonitorDailyMoney;
+            			if(tempMoney > advertiserDailyMoney){
+            				tempMoney = advertiserDailyMoney;
+            			}
+            		}
+            	}
+            }
+            
+            if(isInit){
+	            ResultMap balanceMap = taskService.queryAdviserAccountById(advertiserId);
+	            if(balanceMap != null){
+	            	//广告主账户中的余额
+	            	BigDecimal balance = balanceMap.getBigDecimal("balance");
+	            	float balancePrice = balance.floatValue()*1000;
+	            	advertiserBalanceMap.put(advertiserId, balancePrice);
+	            	if(tempMoney > balancePrice){
+	            		tempMoney = balancePrice;
+	            	}
+	            }
+            }else{
+            	if(advertiserBalanceMap.containsKey(advertiserId)){
+            		float balancePrice = advertiserBalanceMap.get(advertiserId);
+            		if(tempMoney > balancePrice){
+            			tempMoney = balancePrice;
+            		}
+            	}
+            }
+            
+            float bidNums = (float) (tempMoney / (10 * 0.7));
+            
+            adMinBidNumsLimitMap.put(adUid, bidNums);
+		}
+		
+		myLog.info("广告可竞价次数:"+adMinBidNumsLimitMap);
+    }
+    
+    /**
+     * 检查单个广告单元CPM限制
+     */
+    public void checkSingleAdCpmLimit(String adUid){
+    	MDC.put("sift", "control");
+			AdBean ad = mapAd.get(adUid);
+			String groupId = ad.getGroupId();
+			String advertiserId = ad.getAdvertiser().getUid();
+			float tempMoney = -1f;
+			AdFlowStatus adtThresholdDaily = mapThresholdDaily.get(adUid);
+			float adtThresholdDailyMoney = 0.0f;
+			if(adtThresholdDaily != null)
+				adtThresholdDailyMoney =  adtThresholdDaily.getMoney();
+			if(adtThresholdDailyMoney != 0){
+				AdFlowStatus adMonitorDaily = mapMonitorDaily.get(adUid);
+				float adMonitorDailyMoney = 0.0f;
+				if(adMonitorDaily != null)
+					adMonitorDailyMoney = adMonitorDaily.getMoney();
+				//广告单元每日限额余额
+				float adDailyMoney = adtThresholdDailyMoney - adMonitorDailyMoney;
+				tempMoney = adDailyMoney;
+			}
+			
+			float adGroupThresholdDailyMoney = mapAdGroup.get(groupId).getQuotaMoney().floatValue()*1000;
+                        
+            if(adGroupThresholdDailyMoney != 0){
+            	 AdFlowStatus adGroupMonitorDaily = mapMonitorAdGroupTotal.get(groupId);
+            	 float adGroupMonitorDailyMoney = 0.0f;
+            	 if(adGroupMonitorDaily != null){
+            		 adGroupMonitorDailyMoney = adGroupMonitorDaily.getMoney();
+            		 //广告组每日限额余额
+            		 float adGroupDailyMoney = adGroupThresholdDailyMoney - adGroupMonitorDailyMoney;
+            		 if(tempMoney > adGroupDailyMoney){
+            			 tempMoney = adGroupDailyMoney;
+            		 }
+            		 
+            	 }
+            }
+            
+            float adGroupThresholdTotalMoney = mapAdGroup.get(groupId).getQuotaTotalMoney().floatValue()*1000;
+            
+            if(adGroupThresholdTotalMoney != 0){
+            	AdFlowStatus adGroupMonitorTotal = mapMonitorAdGroupRealTotal.get(groupId);
+            	float adGroupMonitorTotalMoney = 0.0f;
+            	if(adGroupMonitorTotal != null){
+            		adGroupMonitorTotalMoney = adGroupMonitorTotal.getMoney();
+            		//广告组总限额余额
+            		float adGroupTotalMoney = adGroupThresholdTotalMoney - adGroupMonitorTotalMoney;
+            		if(tempMoney > adGroupTotalMoney){
+           			 tempMoney = adGroupTotalMoney;
+           		 }
+            	}
+            }
+            
+            AdFlowStatus advertiserThresholdDaily = mapMonitorAdvertiserThresholdDaily.get(advertiserId);
+            if(advertiserThresholdDaily != null){
+            	float advertiserThresholdDailyMoney = advertiserThresholdDaily.getMoney();
+            	if(advertiserThresholdDailyMoney != 0){
+            		AdFlowStatus advertiserMonitorDaily = mapMonitorAdvertiserDaily.get(advertiserId);
+            		float advertiserMonitorDailyMoney = 0.0f;
+            		if(advertiserMonitorDaily != null){
+            			advertiserMonitorDailyMoney = advertiserMonitorDaily.getMoney();
+            			//广告主日限额余额
+            			float advertiserDailyMoney = advertiserThresholdDailyMoney - advertiserMonitorDailyMoney;
+            			if(tempMoney > advertiserDailyMoney){
+            				tempMoney = advertiserDailyMoney;
+            			}
+            		}
+            	}
+            }
+            	if(advertiserBalanceMap.containsKey(advertiserId)){
+            		float balancePrice = advertiserBalanceMap.get(advertiserId);
+            		if(tempMoney > balancePrice){
+            			tempMoney = balancePrice;
+            		}
+            	}
+            
+            float bidNums = (float) (tempMoney / (10 * 0.7));
+            
+            adMinBidNumsLimitMap.put(adUid, bidNums);
+		
+		myLog.info("广告可竞价次数:"+adMinBidNumsLimitMap);
     }
     
     

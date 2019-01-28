@@ -129,6 +129,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
                     userDevice.getApp_bundle()//APP包名
+                    ,null,null
             );
             if (targetDuFlowBean == null) {
                 response = "";

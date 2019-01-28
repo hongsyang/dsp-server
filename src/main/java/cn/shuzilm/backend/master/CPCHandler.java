@@ -196,16 +196,16 @@ public class CPCHandler {
                 	reason = "出现点击 每个点击平均产生的费用  大于  广告主单个CPC报价，则暂停广告发放  广告ID:"+auid+" 曝光花费:"+money+" 点击单价:"+price+"(CPM)";
                     return reason;
                 }else {
-                    //myLog.debug("出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放");
-                	reason = "出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放   "+auid;               	
-                	if(adFlowControl.getMapTask().containsKey(auid)){
-                		TaskBean task = adFlowControl.getMapTask().get(auid);
-                		if(task.getCommand() != TaskBean.COMMAND_START){
-                			myLog.info(reason);
-                			task.setCommand(TaskBean.COMMAND_START);
-                			adFlowControl.putDataToAdLogQueue(auid, reason, 1);
-                		}
-                	}               	
+                    myLog.debug("出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放"+auid);
+//                	reason = "出现点击 每个点击平均产生的费用  小于  广告主单个CPC报价，则继续广告发放   "+auid;               	
+//                	if(adFlowControl.getMapTask().containsKey(auid)){
+//                		TaskBean task = adFlowControl.getMapTask().get(auid);
+//                		if(task.getCommand() != TaskBean.COMMAND_START && task.getCommandResonStatus() == 0){
+//                			myLog.info(reason);
+//                			task.setCommand(TaskBean.COMMAND_START);
+//                			adFlowControl.putDataToAdLogQueue(auid, reason, 1);
+//                		}
+//                	}               	
                     return null;
                 }
             }else {
@@ -222,16 +222,16 @@ public class CPCHandler {
                     	reason = "没有点击，未投放完毕，超额，暂停广告投放   "+auid;
                         return reason;
                     }else {
-                        //myLog.debug("没有点击，未投放完毕，未超额，继续广告投放");
-                    	reason = "没有点击，未投放完毕，未超额，继续广告投放";
-                    	if(adFlowControl.getMapTask().containsKey(auid)){
-                    		TaskBean task = adFlowControl.getMapTask().get(auid);
-                    		if(task.getCommand() != TaskBean.COMMAND_START){
-                    			myLog.info(reason);
-                    			task.setCommand(TaskBean.COMMAND_START);
-                    			adFlowControl.putDataToAdLogQueue(auid, reason, 1);
-                    		}
-                    	} 
+                        myLog.debug("没有点击，未投放完毕，未超额，继续广告投放"+auid);
+//                    	reason = "没有点击，未投放完毕，未超额，继续广告投放";
+//                    	if(adFlowControl.getMapTask().containsKey(auid)){
+//                    		TaskBean task = adFlowControl.getMapTask().get(auid);
+//                    		if(task.getCommand() != TaskBean.COMMAND_START && task.getCommandResonStatus() == 0){
+//                    			myLog.info(reason);
+//                    			task.setCommand(TaskBean.COMMAND_START);
+//                    			adFlowControl.putDataToAdLogQueue(auid, reason, 1);
+//                    		}
+//                    	} 
                         return null;
                     }
                 }
