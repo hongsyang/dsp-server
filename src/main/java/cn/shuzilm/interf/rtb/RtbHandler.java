@@ -91,6 +91,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
                 }else if (url.contains("baidu")) {
+
+                    log.debug("baiduBidRequest 原值：{}",request.getContent().array() );
                     baiduBidRequest = BaiduRealtimeBiddingV26.BidRequest.parseFrom(request.getContent().array());
                     log.debug("baiduBidRequest：{}", baiduBidRequest);
                     dataStr = JsonFormat.printToString(baiduBidRequest);
