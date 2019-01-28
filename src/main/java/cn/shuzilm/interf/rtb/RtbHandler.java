@@ -97,7 +97,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     log.debug("baiduBidRequest的id:{}",baiduBidRequest.getId());
 
                     log.debug("Json开始:{}",baiduBidRequest.getId());
-                    dataStr = JsonFormat.printToString(tencentBidRequest);
+                    dataStr = JsonFormat.printToString(baiduBidRequest);
                     log.debug("Json结束:{}",baiduBidRequest.getId());
                     log.debug("dataStr:{}",dataStr);
                 } else {
