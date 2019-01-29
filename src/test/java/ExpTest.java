@@ -7,7 +7,6 @@ public class ExpTest {
     private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
     public static void main(String[] args) throws  Exception {
-        BaiduRealtimeBiddingV26.BidRequest bidRequest =   BaiduRealtimeBiddingV26.BidRequest.getDefaultInstance();
 
 //        String  url= "/adviewexp?id=20190103-110336_bidreq_174-2623-sVuT-107&bidid=fd5b512c637ab3e8102fd5fe9d50b1b0&impid=20190103-110336_reqimp_174-1809-9ahQ-65&price=iIyqEWgBAABxdFQKZ0JQI4Jy3wA0Dgq9yAoWTw&act=20190103110335&adx=2&did=eafc3db8a9e2d1ac6d4c2874fa884f82&device=eafc3db8a9e2d1ac6d4c2874fa884f82&app=%E8%A1%8C%E5%AE%B6%E8%AF%B4%E8%AF%B4-%E5%AE%89%E5%8D%93&appn=cn.hangjiashuo.app&appv=1.1.3&pf=1.0&ddem=5369c1f4-639f-4801-a022-dd68832e510a&dcuid=19a0c5df-c889-48a5-a6cb-3d2b67ba69a8&dpro=11&dcit=113&dcou=1187&dade=418c1058-1d73-441d-9c54-17c723a381e5&dage=&daduid=67b25f02-a0f3-4060-9fed-9dbde33d7fa4&pmp=null&userip=117.182.243.158";
 //        List<String> list = UrlParserUtil.urlParser(url);
