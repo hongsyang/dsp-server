@@ -7,7 +7,7 @@ import java.io.Serializable;
 @Data
 public class TencentBid implements Serializable {
 
-    private String creaive_id;// 是 小于 128 字节 DSP 侧的素材 id。
+    private String creative_id;// 是 小于 128 字节 DSP 侧的素材 id。
     private Integer bid_price;//是 DSP 的 CPM 出价。单位： 分。
     private String click_param;// 否 移动联盟流量需保证做完宏替换的点击跳转地址 base64 encode 之后
     private String impression_param;//否 impression_param 小于500 字节，整体 url 做完

@@ -267,6 +267,7 @@ public class RuleMatching {
 				}
 			}
 		}
+		
 		if (appPackageName != null) {
 			FlowTaskBean appFlowTaskBean = rtbIns.getMapFlowTask().get(appPackageName);
 			if (appFlowTaskBean != null) {

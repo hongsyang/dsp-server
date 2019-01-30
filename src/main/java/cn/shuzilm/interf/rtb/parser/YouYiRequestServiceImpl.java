@@ -114,7 +114,10 @@ public class YouYiRequestServiceImpl implements RequestService {
                     deviceId = userDevice.getMd5_imei();
                 }
             }
-
+            //是否匹配长宽
+            Boolean isDimension = true;
+            //通过广告id获取长宽
+            List adxNameList = new ArrayList();//
 //            //支持的文件类型
             String adz_type = adzone.getAdz_type();
             if (adz_type.equals("ADZONE_TYPE_INAPP_BANNER") | adz_type.equals("ADZONE_TYPE_WAP_BANNER")) {
@@ -129,27 +132,23 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = adzone.getAdz_height();
             } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
                 stringSet = "[image/jpeg, image/png]";
-                adxId = adxId + "_" + adzone.getNative().get(0).getNative_id();
                 //广告位的宽和高
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
+                if (width == null | height == null) {
+                    width = -1;
+                    height = -1;
+                    adxNameList.add(adxId + "_" + adzone.getNative().get(0).getNative_id());
+                    log.debug("adxNameList:{}", adxNameList);
+                    //是否匹配长宽
+                    isDimension = false;
+                }
             } else {
                 response = "pc 不竞价";
                 return response;
             }
-            //通过广告id获取长宽
-            if (width == null | height == null) {
-                width = 1;
-                height = 1;
-            }
-            List adxNameList = new ArrayList();//
-            List<Integer> creative_specs = adzone.getCreative_specs();
-            for (Integer creative_spec : creative_specs) {
-                adxNameList.add(adxId+"_"+creative_spec);
-            }
-            log.debug("adxNameList:{}", adxNameList);
-            //是否匹配长宽
-            Boolean  isDimension=false;
+
+
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
