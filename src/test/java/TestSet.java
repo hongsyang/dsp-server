@@ -1,9 +1,17 @@
 import bidserver.BidserverSsp;
+import cn.shuzilm.interf.rtb.parser.YouYiRequestServiceImpl;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 public class TestSet {
     public static void main(String[] args) throws InvalidProtocolBufferException {
-
+        String body="{\"session_id\": \"EnpRXAoADF-gNXUE\",\"bucket_id\": \"1\",\"host_nodes\": \"bidr4a6.sora.cm2\",\"keywords\": [\"18以上\",\"普通话\",\"搞笑\",\"日漫\",\"动画电影\",\"配音语种\",\"地区\",\"冒险\",\"年龄段\",\"剧场版\",\"版本\",\"番剧\",\"类型\"],\"exchange\": {\"bid_id\": \"3eda1df39770fc055b033e36f1924528\",\"adx_id\": 10},\"user\": {\"user_exid\": \"ac289400faf6e47098c866dc813a7b22\",\"user_yyid\": \"ac289400faf6e47098c866dc813a7b22\",\"user_ip\": \"223.21.25.75\",\"user_area\": 1156110000,\"user_yyid_type\": 3},\"adzone\": [{\"pid\": \"1000000000663\",\"adz_id\": \"0\",\"adz_type\": \"ADZONE_TYPE_WAP_BANNER\",\"adz_width\": 160,\"adz_height\": 160,\"adz_ad_count\": 1,\"reserve_price\": 75}],\"site\": {\"url\": \"www.iqiyi.com\"},\"mobile\": {\"is_app\": true,\"device_os\": \"android\",\"device_id\": \"ac289400faf6e47098c866dc813a7b22\",\"network\": 1,\"device_type\": \"phone\",\"imei\": \"A0000071EBD0F6\",\"md5_imei\": \"ac289400faf6e47098c866dc813a7b22\"}}";
+        YouYiRequestServiceImpl youYiRequestService  =new YouYiRequestServiceImpl();
+        try {
+            String s = youYiRequestService.parseRequest(body);
+            System.out.println(s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 //        BidserverSsp.BidResponse.Builder builder =  BidserverSsp.BidResponse.newBuilder();
 //        builder.setSessionId("1111");
 //        BidserverSsp.BidResponse build = builder.build();
