@@ -140,7 +140,7 @@ public class CronDispatch {
                break;
            case 11:
                dispatch(PushFlowTaskPerTenMinute.class,"0 0/10 * * * ?");
-               break;              
+               break;
            default:
                break;
        }
