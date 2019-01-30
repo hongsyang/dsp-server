@@ -175,15 +175,14 @@ public class RuleMatching {
 			String appPackageName)
 			throws Exception {
 		MDC.put("sift", "rtb");
-
+		
+		String reason = null;
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		Map<String, Material> metrialMap = new HashMap<String, Material>();
 		Map<String, AudienceBean> audienceMap = new HashMap<String, AudienceBean>();
 		Map<String, Boolean> rtbIpMap = new HashMap<String, Boolean>();
 		Map<String, Boolean> demographicMap = new HashMap<String, Boolean>();
-
-		int divisor = MathTools.division(width, height);
-		String widthHeightRatio = width / divisor + "/" + height / divisor;
+		
 		// 匹配
 		DUFlowBean targetDuFlowBean = null;
 		TagBean tagBean = null;
@@ -204,11 +203,22 @@ public class RuleMatching {
 		}
 		// 开始匹配
 		// String materialRatioKey = adType + "_" + widthHeightRatio;
-		String materialRatioKey = widthHeightRatio;
-		List<String> auidList = rtbIns.getMaterialRatioMap().get(materialRatioKey);
-		Set<String> materialSet = rtbIns.getMaterialByRatioMap().get(materialRatioKey);
-		if (auidList == null) {
-			LOG.warn("根据[" + materialRatioKey + "]未找到广告!");
+		List<String> auidList = null;
+		Set<String> materialSet = null;
+		String widthHeightRatio =null;
+		
+		int divisor = MathTools.division(width, height);
+		widthHeightRatio = width / divisor + "/" + height / divisor;
+		//materialRatioKey = widthHeightRatio;
+		auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
+		materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
+		if (auidList == null || auidList.isEmpty()) {
+			LOG.warn("根据[" + widthHeightRatio + "]未找到广告!");
+			reason = "\t".concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t尺寸筛选未找到广告\t").concat(widthHeightRatio);
+			//另起目录记录原因
+			MDC.put("sift", "rtb-bid");
+			LOG.info(reason);
+			MDC.put("sift", "rtb");
 			return null;
 		}
 		String adxNameTemp = adxName;
@@ -328,6 +338,7 @@ public class RuleMatching {
 			// 是否投当前的广告
 			if (!isAvaliable) {
 				LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t广告投放策略触发广告停投\t");
 				continue;
 			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
@@ -335,6 +346,7 @@ public class RuleMatching {
 
 			if (creative.getApproved() != 1) {
 				LOG.debug("广告ID[" + adUid + "]创意未在ADX[" + adxName + "]通过,不参与投放!");
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t创意未在ADX[").concat(adxName).concat("]审核通过\t");
 				continue;
 			}
 
@@ -350,10 +362,12 @@ public class RuleMatching {
 			}
 			if (!filterFlag) {
 				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t未匹配到满足要求的物料\t");
 				continue;
 			}
 
 			List<AudienceBean> audienceList = ad.getAudienceList();
+			boolean audienceFlag = false;
 			for (AudienceBean audience : audienceList) {
 				if (tagBean != null && audience.getType().equals("location")) {// 地理位置
 					if (audience.getLocationMode().equals("city")) {
@@ -370,6 +384,7 @@ public class RuleMatching {
 								machedAdList.add(ad);
 								audienceMap.put(ad.getAdUid(), audience);
 								demographicMap.put(ad.getAdUid(), true);
+								audienceFlag = true;
 								break;
 							}
 						} else if ((rtbIns.getAreaMap().get(provinceIdKey) != null
@@ -382,6 +397,7 @@ public class RuleMatching {
 								machedAdList.add(ad);
 								audienceMap.put(ad.getAdUid(), audience);
 								demographicMap.put(ad.getAdUid(), false);
+								audienceFlag = true;
 								break;
 							}
 						}
@@ -395,6 +411,7 @@ public class RuleMatching {
 							// geoAdList.add(ad);
 							machedAdList.add(ad);
 							audienceMap.put(ad.getAdUid(), audience);
+							audienceFlag = true;
 							break;
 						}
 					}
@@ -416,6 +433,7 @@ public class RuleMatching {
 							machedAdList.add(ad);
 							audienceMap.put(ad.getAdUid(), audience);
 							demographicMap.put(ad.getAdUid(), true);
+							audienceFlag = true;
 							break;
 						}
 					}
@@ -425,6 +443,7 @@ public class RuleMatching {
 						// "]通过匹配，参与排序");//记录日志太花费时间,忽略
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
+						audienceFlag = true;
 						break;
 					}
 				} else if (audience.getType().equals("ip")) {// 智能设备
@@ -433,11 +452,13 @@ public class RuleMatching {
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						rtbIpMap.put(ad.getAdUid(), false);
+						audienceFlag = true;
 						break;
 					} else if (ipSet != null && ip != null && ipSet.contains(ip)) {// 通过请求IP匹配
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
 						rtbIpMap.put(ad.getAdUid(), true);
+						audienceFlag = true;
 						break;
 					}
 				} else if (tagBean != null && audience.getType().equals("dmp")) {// 定制人群包
@@ -446,6 +467,7 @@ public class RuleMatching {
 							&& audienceTagIdSet.contains(audienceId)) {
 						machedAdList.add(ad);
 						audienceMap.put(ad.getAdUid(), audience);
+						audienceFlag = true;
 						break;
 					}
 				}
@@ -453,22 +475,11 @@ public class RuleMatching {
 			
 			materialList = null;
 			audienceList = null;
+			if(!audienceFlag){
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t人群包匹配未成功\t");
+			}
 		}
 
-		// 按经纬度匹配
-		// if (geoAdList.size() > 0) {
-		// float[] residenceArray = tagBean.getResidence();
-		// float[] workArray = tagBean.getWork();
-		// float[] activityArray = tagBean.getActivity();
-		// double[] lng = { residenceArray[0], workArray[0], activityArray[0] };
-		// double[] lat = { residenceArray[1], workArray[1], activityArray[1] };
-		// Set<String> boundSet = rtbIns.checkInBound(lng, lat);
-		// for (AdBean ad : geoAdList) {
-		// if (boundSet.contains(ad.getAdUid())) {
-		// machedAdList.add(ad);
-		// }
-		// }
-		// }
 		// 排序
 
 		if (!machedAdList.isEmpty()) {
@@ -495,6 +506,10 @@ public class RuleMatching {
 					rtbIns.getAppFlowMap().put(appPackageName, 1L);
 				}
 			}
+		}else{
+			MDC.put("sift", "rtb-bid");
+			LOG.info(reason);
+			MDC.put("sift", "rtb");			
 		}
 
 		
@@ -893,11 +908,11 @@ public class RuleMatching {
 	}
 
 	public static void main(String[] args) {
-//		try {
-//			RuleMatching rule = RuleMatching.getInstance();
+		try {
+			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
-//			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 670, 100, true, 5, 5, "1,2", "jpg,gif", "127.0.0.1",
-//					"cn.asm.clweather");
+			DUFlowBean duflowBean = rule.match("040041d1482718ea1bce9a664e3b5f61", "interstitial", 600, 500, true, 5, 5, "1", "jpg,gif", "127.0.0.1",
+					"cn.asm.clweather");
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
 //			}
@@ -906,9 +921,9 @@ public class RuleMatching {
 //			adBean.setPrice(50.2f);
 //			duflowBean.setBiddingPrice((double) adBean.getPrice()*0.6);
 //			System.out.println(duflowBean.getBiddingPrice());
-//		} catch (Exception e) {
-//			e.getMessage();
-//		}
+		} catch (Exception e) {
+			e.getMessage();
+		}
 	}
 
 }

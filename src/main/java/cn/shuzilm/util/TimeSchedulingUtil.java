@@ -58,7 +58,7 @@ public class TimeSchedulingUtil {
     }
     
     public static void main(String[] args) {
-    	String timeScheTxt = "{\"2\":[9,10,11,12,13,14,15,16,17,18,19],\"3\":[9,10,11,12,13,14,15,16,17,18,19],\"4\":[9,10,11,12,13,14,15,16,17,18,19],\"5\":[9,10,11,12,13,14,15,16,17,18,19]}";
+    	String timeScheTxt = "{\"1\":[0,1,2,3,11,12,13,20,21,22,23],\"2\":[0,1,2,3,11,12,13,20,21,22,23],\"3\":[0,1,2,3,11,12,13,20,21,22,23],\"4\":[0,1,2,3,11,12,13,20,21,22,23],\"5\":[0,1,2,3,11,12,13,20,21,22,23],\"6\":[0,1,2,3,11,12,13,20,21,22,23],\"7\":[0,1,2,3,11,12,13,20,21,22,23]}";
     	//String timeScheTxt = "{}";
 		int[][] timeSchedulingArr1 = timeTxtToMatrix(timeScheTxt);
 //		for(int i=0;i<timeSchedulingArr.length;i++){
@@ -68,11 +68,11 @@ public class TimeSchedulingUtil {
 //			System.out.println();
 //		}
 		
-		ConcurrentHashMap<String, String> mapFlowTask = new ConcurrentHashMap<String, String>();
-		for(int i=0;i<1000;i++){
-			mapFlowTask.put(i+"", i+"");
-		}
-		mapFlowTask.put("me.ht.local.hot", "4");
+//		ConcurrentHashMap<String, String> mapFlowTask = new ConcurrentHashMap<String, String>();
+//		for(int i=0;i<1000;i++){
+//			mapFlowTask.put(i+"", i+"");
+//		}
+//		mapFlowTask.put("me.ht.local.hot", "4");
 		SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
 		Date date = new Date();
 		String time = dateFm.format(date);
@@ -81,8 +81,8 @@ public class TimeSchedulingUtil {
 		int dayNum = Integer.parseInt(splitTime[1]);
 		if (dayNum == 24)
 			dayNum = 0;
-		dayNum = 16;
-		weekNum = 1;
+		dayNum = 15;
+		weekNum = 2;
 		
 		AdBean adBean = new AdBean();
 		adBean.setTimeSchedulingArr(timeSchedulingArr1);

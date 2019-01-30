@@ -175,6 +175,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                             stringSet,//文件扩展名
                             userDevice.getIp(),//用户ip
                             app.getBundle()//APP包名
+                            ,null,null
                     );
                     if (targetDuFlowBean == null) {
                         response = "";
@@ -220,6 +221,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                         stringSet,//文件扩展名
                         userDevice.getIp(),//用户ip
                         app.getBundle()//APP包名
+                        ,null,null
                 );
                 if (targetDuFlowBean == null) {
                     response = "";
