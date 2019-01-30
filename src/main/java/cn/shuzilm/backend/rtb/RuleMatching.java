@@ -276,6 +276,7 @@ public class RuleMatching {
 				}
 			}
 		}
+		
 
 		List<String> tagIdList = null;
 		List<String> companyIdList = null;
