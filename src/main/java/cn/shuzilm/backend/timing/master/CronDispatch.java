@@ -145,8 +145,8 @@ public class CronDispatch {
            case 11:
                dispatch(PushFlowTaskPerTenMinute.class,"0 0/10 * * * ?");
                break;        
-           case 12:
-        	   dispatch(CheckAdLimitTask.class,"0/10 * * * * ?");
+//           case 12:
+//        	   dispatch(CheckAdLimitTask.class,"0/10 * * * * ?");
         	   
            default:
                break;
