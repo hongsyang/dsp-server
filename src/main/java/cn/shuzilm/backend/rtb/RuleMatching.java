@@ -214,7 +214,8 @@ public class RuleMatching {
 		materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
 		if (auidList == null || auidList.isEmpty()) {
 			LOG.warn("根据[" + widthHeightRatio + "]未找到广告!");
-			reason = "\t".concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t尺寸筛选未找到广告\t").concat(widthHeightRatio);
+			reason = "\t".concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t").concat(width+"").concat("\t").concat(height+"").
+					concat("\t").concat(ip).concat("\t尺寸筛选未找到广告\t").concat(widthHeightRatio);
 			//另起目录记录原因
 			MDC.put("sift", "rtb-bid");
 			LOG.info(reason);
@@ -338,7 +339,8 @@ public class RuleMatching {
 			// 是否投当前的广告
 			if (!isAvaliable) {
 				LOG.debug("ID[" + adUid + "]广告不参与投放!");
-				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t广告投放策略触发广告停投\t");
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t").concat(width+"").concat("\t").concat(height+"").
+						concat("\t").concat(ip).concat("\t广告投放策略触发广告停投\t");
 				continue;
 			}
 			AdBean ad = rtbIns.getAdMap().get(adUid);
@@ -346,7 +348,8 @@ public class RuleMatching {
 
 			if (creative.getApproved() != 1) {
 				LOG.debug("广告ID[" + adUid + "]创意未在ADX[" + adxName + "]通过,不参与投放!");
-				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t创意未在ADX[").concat(adxName).concat("]审核通过\t");
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t").concat(width+"").concat("\t").concat(height+"").
+						concat("\t").concat(ip).concat("\t创意未在ADX[").concat(adxName).concat("]审核通过\t");
 				continue;
 			}
 
@@ -362,7 +365,8 @@ public class RuleMatching {
 			}
 			if (!filterFlag) {
 				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
-				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t未匹配到满足要求的物料\t");
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t").concat(width+"").concat("\t").concat(height+"").
+						concat("\t").concat(ip).concat("\t未匹配到满足要求的物料\t");
 				continue;
 			}
 
@@ -476,7 +480,8 @@ public class RuleMatching {
 			materialList = null;
 			audienceList = null;
 			if(!audienceFlag){
-				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t人群包匹配未成功\t");
+				reason = adUid.concat("\t").concat(deviceId).concat("\t").concat(adxName).concat("\t").concat(appPackageName).concat("\t").concat(width+"").concat("\t").concat(height+"").
+						concat("\t").concat(ip).concat("\t人群包匹配未成功\t");
 			}
 		}
 
