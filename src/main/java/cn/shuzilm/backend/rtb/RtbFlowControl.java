@@ -197,7 +197,6 @@ public class RtbFlowControl {
         redis = AsyncRedisClient.getInstance(nodes);
     }
     
-    
 
     public void trigger() {
         // 5 s
