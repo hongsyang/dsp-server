@@ -181,7 +181,9 @@ public class AdViewRequestServiceImpl implements RequestService {
                 }
             }
 
-
+            MDC.put("sift", "rtb-adview");
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" ,deviceId,adType,width,height,ADX_ID,stringSet, userDevice.getIp(),app.getBundle());
+            MDC.put("sift", "dsp-server");
             //初步过滤规则开关
             if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
                 if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "adview")) {

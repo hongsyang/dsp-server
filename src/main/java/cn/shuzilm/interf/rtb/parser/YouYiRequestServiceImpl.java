@@ -153,7 +153,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                 width=1;
                 height=1;
             }
-
+            MDC.put("sift", "rtb-youyi");
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,adxId,stringSet,  user.getUser_ip(),userDevice.getApp_bundle());
+            MDC.put("sift", "dsp-server");
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5

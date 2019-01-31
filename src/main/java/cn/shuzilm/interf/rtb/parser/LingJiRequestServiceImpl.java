@@ -238,7 +238,9 @@ public class LingJiRequestServiceImpl implements RequestService {
 //                msg.clear();
 //                msg = null;
 //            } else {
-
+            MDC.put("sift", "rtb-lingji");
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,ADX_ID,stringSet, userDevice.getIp(),app.getBundle() );
+            MDC.put("sift", "dsp-server");
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
                         deviceId,//设备mac的MD5
                         adType,//广告类型
