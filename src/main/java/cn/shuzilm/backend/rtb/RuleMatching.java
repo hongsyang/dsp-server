@@ -921,11 +921,14 @@ public class RuleMatching {
 	}
 
 	public static void main(String[] args) {
-//		try {
-//			RuleMatching rule = RuleMatching.getInstance();
+		try {
+			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
-//			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 670, 100, true, 5, 5, "1,2", "jpg,gif", "127.0.0.1",
-//					"cn.asm.clweather");
+			List<String> adxNameList = new ArrayList<String>();
+			adxNameList.add("4_79");
+			adxNameList.add("4_113");
+			DUFlowBean duflowBean = rule.match("fa6531e5a360c24755c90593adde2d97", "banner", 670, 100, true, 5, 5, "4", "jpg,gif", "127.0.0.1",
+					"cn.asm.clweather",adxNameList,false);
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
 //			}
@@ -934,9 +937,9 @@ public class RuleMatching {
 //			adBean.setPrice(50.2f);
 //			duflowBean.setBiddingPrice((double) adBean.getPrice()*0.6);
 //			System.out.println(duflowBean.getBiddingPrice());
-//		} catch (Exception e) {
-//			e.getMessage();
-//		}
+		} catch (Exception e) {
+			e.getMessage();
+		}
 	}
 
 }

@@ -196,6 +196,7 @@ public class RtbFlowControl {
         String nodes [] = nodeStr.split(";");
         redis = AsyncRedisClient.getInstance(nodes);
     }
+    
 
     public void trigger() {
         // 5 s
