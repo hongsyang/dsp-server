@@ -57,7 +57,7 @@ public class RtbServer {
     public static void main(String[] args) {
         try {
             configs = AppConfigs.getInstance(FILTER_CONFIG);
-            widthAndHeightListUtil =WidthAndHeightListUtil.getInstance();
+//            widthAndHeightListUtil =WidthAndHeightListUtil.getInstance();
             ipBlacklist = IpBlacklistUtil.getInstance();
             jedisManager = JedisManager.getInstance();
             ruleMatching = RuleMatching.getInstance();
