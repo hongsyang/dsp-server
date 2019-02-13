@@ -30,6 +30,7 @@ public class DeviceBlackListUtil {
     public static void updateDeviceBlackList() {
         MDC.put("sift", "dsp-server");
         try {
+            log.info("开始更新设备黑名单");
             Select select = new Select();
             String date = sdf.format(new Date());
             ResultMap countRs = select.selectSingle(countSql.replace("<DATE>", date));
@@ -64,6 +65,7 @@ public class DeviceBlackListUtil {
                 }
                 deviceBlackList = tempSet;
             }
+            log.info("更新设备黑名单结束：黑名单数量：{}", deviceBlackList.size());
         } catch (Exception e) {
             log.error("获取媒体黑名单失败", e);
         }
