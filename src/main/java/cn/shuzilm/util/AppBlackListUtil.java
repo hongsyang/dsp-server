@@ -35,9 +35,9 @@ public class AppBlackListUtil {
             Select select = new Select();
             String date = sdf.format(new Date());
             ResultMap countRs = select.selectSingle(countSql.replace("<DATE>", date));
-            int count = 0;
+            Long count = 0L;
             if(countRs != null) {
-                count = countRs.getInteger("count");
+                count = countRs.getLong("count");
             }
             if(count > 1000000) {
                 log.error("媒体黑名单数量（数量：{}）超限, 不执行操作", count);
