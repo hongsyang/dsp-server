@@ -6,9 +6,7 @@ import cn.shuzilm.bean.adview.response.*;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.util.HttpClientUtil;
-import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.MD5Util;
+import cn.shuzilm.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
 import cn.shuzilm.filter.FilterRule;
@@ -75,6 +73,15 @@ public class AdViewRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
+            // 过滤媒体黑名单
+            if(app != null) {
+                String bundle = app.getBundle();
+                if(AppBlackListUtil.inAppBlackList(bundle)) {
+                    log.debug("媒体黑名单:{}", bundle);
+                    response = "";
+                    return response;
+                }
+            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "";
@@ -102,6 +109,13 @@ public class AdViewRequestServiceImpl implements RequestService {
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getDidmd5();
                 }
+            }
+
+            // 过滤设备黑名单
+            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                log.debug("设备黑名单:{}", deviceId);
+                response = "";
+                return response;
             }
 
             //支持的文件类型
