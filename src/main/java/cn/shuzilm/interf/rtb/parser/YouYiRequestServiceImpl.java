@@ -1,6 +1,9 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.util.AppBlackListUtil;
+import cn.shuzilm.util.DeviceBlackListUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import com.google.common.collect.Lists;
@@ -84,6 +87,15 @@ public class YouYiRequestServiceImpl implements RequestService {
                 return response;
             }
 
+            // 过滤设备黑名单
+            if(userDevice != null) {
+                String bundle = userDevice.getApp_bundle();
+                if(AppBlackListUtil.inAppBlackList(bundle)) {
+                    log.debug("媒体黑名单:{}", bundle);
+                    response = "";
+                    return response;
+                }
+            }
 
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
@@ -114,6 +126,14 @@ public class YouYiRequestServiceImpl implements RequestService {
                     deviceId = userDevice.getMd5_imei();
                 }
             }
+
+            // 过滤设备黑名单
+            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                log.debug("设备黑名单:{}", deviceId);
+                response = "";
+                return response;
+            }
+
             //是否匹配长宽
             Boolean isDimension = true;
             //通过广告id获取长宽

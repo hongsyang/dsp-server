@@ -90,6 +90,9 @@ public class RtbCronDispatch {
         RtbCronDispatch.startTimer(7);
 
         RtbCronDispatch.startTimer(8);
+
+        RtbCronDispatch.startTimer(9);
+
     }
 
     /**
@@ -129,6 +132,9 @@ public class RtbCronDispatch {
         	   break;
            case 8:
                dispatch(FetchDeviceLimitDataTask.class,"0 * * * * ?");
+               break;
+           case 9:
+               dispatch(BlackListTask.class,"0 0 * * * ?");
                break;
            default:
                break;
