@@ -16,11 +16,16 @@
     <property name="queryExecuteTimeLimitInMs">0</property><!--Queries taking longer than this limit to execute are logged.-->
     <property name="poolAvailabilityThreshold">20</property><!--Create more connections when we hit x% of our possible number of connections.-->
     <property name="connectionTimeoutInMs">50000</property><!--Time to wait before a call to getConnection() times out and returns an error. in milliseconds-->
-    <property name="jdbcUrl">jdbc:mysql://rm-2zer1w1qt6k5nr163.mysql.rds.aliyuncs.com:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>
-        <!--深圳mysql外网地址-->
-    <!--<property name="jdbcUrl">jdbc:mysql://rm-2zer1w1qt6k5nr1634o.mysql.rds.aliyuncs.com :3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>-->
+    <!--<property name="jdbcUrl">jdbc:mysql://rm-2zer1w1qt6k5nr163.mysql.rds.aliyuncs.com:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>
+        &lt;!&ndash;深圳mysql外网地址&ndash;&gt;
+    &lt;!&ndash;<property name="jdbcUrl">jdbc:mysql://rm-2zer1w1qt6k5nr1634o.mysql.rds.aliyuncs.com :3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>&ndash;&gt;
     <property name="username">smdspcindb</property>
-    <property name="password">m4ds#%@$WWS</property>
+    <property name="password">m4ds#%@$WWS</property>-->
+
+    <property name="jdbcUrl">jdbc:mysql://172.17.129.116/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>
+    <property name="username">dsp</property>
+    <property name="password">@WFJUYV0xDs$7^v9</property>
+
     <!--<property name="jdbcUrl">jdbc:mysql://47.93.230.253:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>-->
     <!--<property name="jdbcUrl">jdbc:mysql://172.17.129.116:3306/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>-->
     <!--<property name="username">dsp</property>-->
