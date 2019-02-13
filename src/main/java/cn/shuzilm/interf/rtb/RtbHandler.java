@@ -15,6 +15,7 @@ import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -165,7 +166,22 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
             MDC.remove("sift");
             MDC.put("phoenix","" );
-            log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                    LocalDateTime.now().toString(), new Date().getTime(),
+                    new Date().getHours(),   new Date().getHours(),
+                    element.getDid(), element.getDeviceId(),
+                    element.getAdUid(), element.getAudienceuid(),
+                    element.getAgencyUid(), element.getAdvertiserUid(),
+                    element.getCreativeUid(), element.getProvince(),
+                    element.getCity(), element.getActualPricePremium(),
+                    element.getBiddingPrice(), element.getActualPrice(),
+                    element.getAgencyProfit(), element.getOurProfit(),
+                    element.getAdxId(), element.getAppName(),
+                    element.getAppPackageName(), element.getAppVersion(),
+                    element.getRequestId(), element.getImpression().get(0).getId(),
+                    element.getDealid(), element.getAppId(), element.getBidid(),element.getIpAddr(),urlRequest.get("remoteIp"));
             MDC.remove("phoenix");
         }
 
