@@ -10,9 +10,7 @@ import cn.shuzilm.bean.lj.response.*;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.FilterRule;
-import cn.shuzilm.util.HttpClientUtil;
-import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.MD5Util;
+import cn.shuzilm.util.*;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -80,6 +78,15 @@ public class LingJiRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
+            // 过滤媒体黑名单
+            if(app != null) {
+                String bundle = app.getBundle();
+                if(AppBlackListUtil.inAppBlackList(bundle)) {
+                    log.debug("媒体黑名单:{}", bundle);
+                    response = "";
+                    return response;
+                }
+            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
@@ -110,6 +117,14 @@ public class LingJiRequestServiceImpl implements RequestService {
                     deviceId = userDevice.getDidmd5();
                 }
             }
+
+            // 过滤设备黑名单
+            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                log.debug("设备黑名单:{}", deviceId);
+                response = "";
+                return response;
+            }
+
             //支持的文件类型
             List<LJAssets> assets = new ArrayList<>();
             if ("banner".equals(adType)) {// banner 类型
