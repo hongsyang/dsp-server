@@ -74,14 +74,14 @@ public class AdViewRequestServiceImpl implements RequestService {
                 return response;
             }
             // 过滤媒体黑名单
-            if(app != null) {
-                String bundle = app.getBundle();
-                if(AppBlackListUtil.inAppBlackList(bundle)) {
-                    log.debug("媒体黑名单:{}", bundle);
-                    response = "";
-                    return response;
-                }
-            }
+//            if(app != null) {
+//                String bundle = app.getBundle();
+//                if(AppBlackListUtil.inAppBlackList(bundle)) {
+//                    log.debug("媒体黑名单:{}", bundle);
+//                    response = "";
+//                    return response;
+//                }
+//            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "";
@@ -112,11 +112,11 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
             // 过滤设备黑名单
-            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
-                log.debug("设备黑名单:{}", deviceId);
-                response = "";
-                return response;
-            }
+//            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+//                log.debug("设备黑名单:{}", deviceId);
+//                response = "";
+//                return response;
+//            }
 
             //支持的文件类型
             List<Assets> assets = new ArrayList<>();
@@ -194,53 +194,56 @@ public class AdViewRequestServiceImpl implements RequestService {
 
                 }
             }
-
-            MDC.put("sift", "rtb-adview");
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" ,deviceId,adType,width,height,ADX_ID,stringSet, userDevice.getIp(),app.getBundle());
-            MDC.put("sift", "dsp-server");
+            if (width == null | height == null) {
+                width = -1;
+                height = -1;
+            }
+//            MDC.put("sift", "rtb-adview");
+//            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" ,deviceId,adType,width,height,ADX_ID,stringSet, userDevice.getIp(),app.getBundle());
+//            MDC.put("sift", "dsp-server");
             //初步过滤规则开关
-            if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
-                if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "adview")) {
-                    DUFlowBean targetDuFlowBean = ruleMatching.match(
-                            deviceId,//设备mac的MD5
-                            adType,//广告类型
-                            width,//广告位的宽
-                            height,//广告位的高
-                            true,// 是否要求分辨率
-                            5,//宽误差值
-                            5,// 高误差值;
-                            ADX_ID,//ADX 服务商ID
-                            stringSet,//文件扩展名
-                            userDevice.getIp(),//用户ip
-                            app.getBundle()//APP包名
-                    );
-                    if (targetDuFlowBean == null) {
-                        response = "";
-                        return response;
-                    }
-                    targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
-                    targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
-                    targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-                    targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-                    targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
-                    targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-                    targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
-                    targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
-                    targetDuFlowBean.setAppName(app.getName());//APP名称
-                    targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
-                    targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
-                    log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
-                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-                    MDC.remove("sift");
-//                    pushRedis(targetDuFlowBean);//上传到redis服务器
-                    response = JSON.toJSONString(bidResponseBean);
-                    log.debug("过滤通过的bidResponseBean:{}", response);
-                } else {
-                    response = JSON.toJSONString(msg);//过滤规则结果输出
-                }
-                msg.clear();
-                msg = null;
-            } else {
+//            if (Boolean.valueOf(configs.getString("FILTER_SWITCH"))) {
+//                if (FilterRule.filterRuleBidRequest(bidRequestBean, true, msg, "adview")) {
+//                    DUFlowBean targetDuFlowBean = ruleMatching.match(
+//                            deviceId,//设备mac的MD5
+//                            adType,//广告类型
+//                            width,//广告位的宽
+//                            height,//广告位的高
+//                            true,// 是否要求分辨率
+//                            5,//宽误差值
+//                            5,// 高误差值;
+//                            ADX_ID,//ADX 服务商ID
+//                            stringSet,//文件扩展名
+//                            userDevice.getIp(),//用户ip
+//                            app.getBundle()//APP包名
+//                    );
+//                    if (targetDuFlowBean == null) {
+//                        response = "";
+//                        return response;
+//                    }
+//                    targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+//                    targetDuFlowBean.setImpression(bidRequestBean.getImp());//曝光id
+//                    targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+//                    targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+//                    targetDuFlowBean.setAdxAdTypeId(showtype);//广告小类对应ADX服务商的ID
+//                    targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+//                    targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
+//                    targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
+//                    targetDuFlowBean.setAppName(app.getName());//APP名称
+//                    targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
+//                    targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
+//                    log.debug("拷贝过滤通过的targetDuFlowBean:{}", targetDuFlowBean);
+//                    BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+//                    MDC.remove("sift");
+////                    pushRedis(targetDuFlowBean);//上传到redis服务器
+//                    response = JSON.toJSONString(bidResponseBean);
+//                    log.debug("过滤通过的bidResponseBean:{}", response);
+//                } else {
+//                    response = JSON.toJSONString(msg);//过滤规则结果输出
+//                }
+//                msg.clear();
+//                msg = null;
+//            } else {
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
                         deviceId,//设备mac的MD5
                         adType,//广告类型
@@ -252,7 +255,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                         ADX_ID,//ADX 服务商ID
                         stringSet,//文件扩展名
                         userDevice.getIp(),//用户ip
-                        app.getBundle()//APP包名
+                        app.getBundle(),//APP包名
+                        bidRequestBean.getId()
                 );
                 if (targetDuFlowBean == null) {
                     response = "";
@@ -283,7 +287,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
                 bidRequestBean = null;
                 targetDuFlowBean = null;
-            }
+//            }
             return response;
         } else {
             return response;

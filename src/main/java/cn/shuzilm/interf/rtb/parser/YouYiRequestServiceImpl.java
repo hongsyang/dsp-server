@@ -96,14 +96,14 @@ public class YouYiRequestServiceImpl implements RequestService {
             }
 
             // 过滤媒体黑名单
-            if(userDevice != null) {
-                String bundle = userDevice.getApp_bundle();
-                if(AppBlackListUtil.inAppBlackList(bundle)) {
-                    log.debug("媒体黑名单:{}", bundle);
-                    response = "";
-                    return response;
-                }
-            }
+//            if(userDevice != null) {
+//                String bundle = userDevice.getApp_bundle();
+//                if(AppBlackListUtil.inAppBlackList(bundle)) {
+//                    log.debug("媒体黑名单:{}", bundle);
+//                    response = "";
+//                    return response;
+//                }
+//            }
 
 
 //            if (StringUtils.isBlank(adType)) {
@@ -137,11 +137,11 @@ public class YouYiRequestServiceImpl implements RequestService {
             }
 
             // 过滤设备黑名单
-            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
-                log.debug("设备黑名单:{}", deviceId);
-                response = "";
-                return response;
-            }
+//            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+//                log.debug("设备黑名单:{}", deviceId);
+//                response = "";
+//                return response;
+//            }
 
 
 //            //支持的文件类型
@@ -172,9 +172,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = -1;
             }
 
-            MDC.put("sift", "rtb-youyi");
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,adxId,stringSet,  user.getUser_ip(),userDevice.getApp_bundle());
-            MDC.put("sift", "dsp-server");
+//            MDC.put("sift", "rtb-youyi");
+//            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,adxId,stringSet,  user.getUser_ip(),userDevice.getApp_bundle());
+//            MDC.put("sift", "dsp-server");
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
@@ -187,7 +187,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                     adxId,//ADX 服务商ID
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
-                    userDevice.getApp_bundle()//APP包名
+                    userDevice.getApp_bundle(),//APP包名
+                    bidRequestBean.getSession_id()
             );
             if (targetDuFlowBean == null) {
                 response = "";

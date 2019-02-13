@@ -79,14 +79,14 @@ public class LingJiRequestServiceImpl implements RequestService {
                 return response;
             }
             // 过滤媒体黑名单
-            if(app != null) {
-                String bundle = app.getBundle();
-                if(AppBlackListUtil.inAppBlackList(bundle)) {
-                    log.debug("媒体黑名单:{}", bundle);
-                    response = "";
-                    return response;
-                }
-            }
+//            if(app != null) {
+//                String bundle = app.getBundle();
+//                if(AppBlackListUtil.inAppBlackList(bundle)) {
+//                    log.debug("媒体黑名单:{}", bundle);
+//                    response = "";
+//                    return response;
+//                }
+//            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "没有对应的广告类型";
@@ -119,11 +119,11 @@ public class LingJiRequestServiceImpl implements RequestService {
             }
 
             // 过滤设备黑名单
-            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
-                log.debug("设备黑名单:{}", deviceId);
-                response = "";
-                return response;
-            }
+//            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+//                log.debug("设备黑名单:{}", deviceId);
+//                response = "";
+//                return response;
+//            }
 
             //支持的文件类型
 
@@ -253,9 +253,9 @@ public class LingJiRequestServiceImpl implements RequestService {
 //                msg.clear();
 //                msg = null;
 //            } else {
-            MDC.put("sift", "rtb-lingji");
-            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,ADX_ID,stringSet, userDevice.getIp(),app.getBundle() );
-            MDC.put("sift", "dsp-server");
+//            MDC.put("sift", "rtb-lingji");
+//            log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,ADX_ID,stringSet, userDevice.getIp(),app.getBundle() );
+//            MDC.put("sift", "dsp-server");
                 DUFlowBean targetDuFlowBean = ruleMatching.match(
                         deviceId,//设备mac的MD5
                         adType,//广告类型
@@ -267,7 +267,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                         ADX_ID,//ADX 服务商ID
                         stringSet,//文件扩展名
                         userDevice.getIp(),//用户ip
-                        app.getBundle()//APP包名
+                        app.getBundle(),//APP包名
+                        bidRequestBean.getId()
                 );
                 if (targetDuFlowBean == null) {
                     response = "";
