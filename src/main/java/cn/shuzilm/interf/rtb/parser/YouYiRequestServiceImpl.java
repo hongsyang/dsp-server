@@ -149,10 +149,11 @@ public class YouYiRequestServiceImpl implements RequestService {
                 return response;
             }
             //通过广告id获取长宽
-            if (width==null|height==null){
-                width=1;
-                height=1;
+            if (width == null | height == null) {
+                width = -1;
+                height = -1;
             }
+
             MDC.put("sift", "rtb-youyi");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",deviceId,adType,width,height,adxId,stringSet,  user.getUser_ip(),userDevice.getApp_bundle());
             MDC.put("sift", "dsp-server");

@@ -164,6 +164,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             MDC.put("sift", configs.getString("ADX_REQUEST"));
             log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
             MDC.remove("sift");
+            MDC.put("phoenix","" );
+            log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+            MDC.remove("phoenix");
         }
 
     }
