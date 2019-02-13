@@ -20,5 +20,5 @@ public class TencentImpressions  implements Serializable {
     private List<String> advertiser_blacklist;//否 广告位过滤的广告主
     private List<String> pretargeting_ids;//否 请求命中的 Pretargeting配置包 ID
     private List<String> deal_ids;//否 PMP 投放线下约定的合同号，当请求符合合同约定则为对应的合同号
-    private List<TencentProductType> product_types;//否广告位支持的商品类型列表。
+    private List<String> product_types;//否广告位支持的商品类型列表。
 }

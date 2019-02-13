@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 @Data
 public class AdPropertyBean implements ICommand {
 
+    private static final long serialVersionUID = 2547420604167434540L;
+
     /**
      * 广告投放进度
      */

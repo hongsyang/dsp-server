@@ -5,7 +5,6 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
@@ -16,18 +15,14 @@ import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import redis.clients.jedis.Jedis;
 
-import javax.xml.crypto.Data;
-import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * @Description: LingJiExpParameterParserImpl  曝光量解析
+ * @Description: TESTLingJiExpParameterParserImpl  曝光量解析
  * @Author: houkp
  * @CreateDate: 2018/7/19 15:57
  * @UpdateUser: houkp
@@ -117,12 +112,12 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 }
                 bean.setHost(configs.getString("HOST"));
                 String price = urlRequest.get("price");
-//                String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
+                String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
                 log.debug("price解析结果：{}", price);
-//                String[] split = result.split("_");
-//                Double money = Double.valueOf(split[0]) / 100;
-                bean.setCost(Double.valueOf(price)/ 100);
-                bean.setWinNoticeTime(System.currentTimeMillis());//设置对账时间
+                String[] split = result.split("_");
+                Double money = Double.valueOf(split[0]) / 100;
+                bean.setCost(money);
+                bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
                 bean.setWinNoticeNums(1);
                 bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setType(0);
@@ -134,11 +129,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 //pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
                 element.setRequestId(requestId);
-                element.setActualPrice(Double.valueOf(price)/ 100);//成本价
+                element.setActualPrice(money);//成本价
                 element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-                element.setWinNoticeTime(System.currentTimeMillis());//设置对账时间
+                element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
                 element.setAdxSource("LingJi");
                 MDC.put("sift", "LingJiExp");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
