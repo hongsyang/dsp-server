@@ -82,7 +82,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             //ip 黑名单规则  在黑名单内直接返回
             if (ipBlacklist.isIpBlacklist(user.getUser_ip())){
                 log.debug("IP黑名单:{}", user.getUser_ip());
-                response = "";
+                response = "ipBlackList";
                 return response;
             }
             //竞价请求进来之前对imei和mac做过滤

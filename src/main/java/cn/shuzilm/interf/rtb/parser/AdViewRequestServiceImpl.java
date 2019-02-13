@@ -70,7 +70,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             //ip 黑名单规则  在黑名单内直接返回
             if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
                 log.debug("IP黑名单:{}", userDevice.getIp());
-                response = "";
+                response = "ipBlackList";
                 return response;
             }
             // 过滤媒体黑名单
