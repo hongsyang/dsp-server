@@ -172,7 +172,7 @@ public class RuleMatching {
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
 			int widthDeviation, int heightDeviation, String adxName, String extStr, String ip, 
-			String appPackageName)
+			String appPackageName,String requestId)
 			throws Exception {
 		MDC.put("sift", "rtb");
 		
@@ -917,7 +917,7 @@ public class RuleMatching {
 			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
 			DUFlowBean duflowBean = rule.match("040041d1482718ea1bce9a664e3b5f61", "interstitial", 600, 500, true, 5, 5, "1", "jpg,gif", "127.0.0.1",
-					"cn.asm.clweather");
+					"cn.asm.clweather",null);
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
 //			}

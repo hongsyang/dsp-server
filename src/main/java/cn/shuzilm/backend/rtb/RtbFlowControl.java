@@ -704,7 +704,8 @@ public class RtbFlowControl {
         	}
         	
         	//限制广告5秒内的竞价次数
-        	Long bidNums = bidMap.get(auid);	
+        	Long bidNums = bidMap.get(auid);
+        	//高并发的情况下,该数值有出入
         	if(bidNums != null && bidNums > 10){
         		myLog.info("广告["+auid+"]已达到5秒10次的竞价数,停止投放");
         		return false;
