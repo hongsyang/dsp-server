@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @Data
 public class AdPropertyBean implements ICommand {
 
+	private static final long serialVersionUID = 2547420604167434540L;
     /**
      * 广告投放进度
      */
@@ -65,6 +66,26 @@ public class AdPropertyBean implements ICommand {
         }else {
             moneyLeft = 20;
         }
+    }
+    
+    /**
+     * 剩余资金打分
+     * @param _moneyLeft
+     */
+    public void setMoneyLeft(float _moneyLeft){
+    	 if(_moneyLeft >= 50000){
+             moneyLeft = 100;
+         }else if(_moneyLeft >= 20000 ){
+             moneyLeft = 80;
+         }else if(_moneyLeft >= 5000){
+             moneyLeft = 60;
+         }else if(_moneyLeft >= 2000){
+             moneyLeft = 40;
+         }else if(_moneyLeft >= 100){
+             moneyLeft = 20;
+         }else{
+        	 moneyLeft = 10;
+         }
     }
 
     public void setImpProcess(double cost){
