@@ -127,7 +127,8 @@ public class TencentRequestServiceImpl implements RequestService {
                     bidRequestBean.getIp(),//用户ip
                     app.getApp_bundle_id(),//APP包名
                     adxNameList,//长宽列表
-                    isDimension
+                    isDimension,
+                    bidRequestBean.getId()
             );
             if (targetDuFlowBean == null) {
                 response = "";

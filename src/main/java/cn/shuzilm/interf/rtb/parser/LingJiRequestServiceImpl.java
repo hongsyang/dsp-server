@@ -192,7 +192,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                     userDevice.getIp(),//用户ip
                     app.getBundle(),//APP包名
                     adxNameList,
-                    isDimension
+                    isDimension,
+                    bidRequestBean.getId()
             );
             if (targetDuFlowBean == null) {
                 response = "";
