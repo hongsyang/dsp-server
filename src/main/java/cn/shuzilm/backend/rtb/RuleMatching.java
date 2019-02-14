@@ -327,10 +327,14 @@ public class RuleMatching {
 			
 		}
 
-		if (extStr.contains("jpg")) {
-			extStr = extStr.concat(",jpeg");
-		} else if (extStr.contains("jpeg")) {
-			extStr = extStr.concat(",jpg");
+		if(extStr != null){
+			if (extStr.contains("jpg")) {
+				extStr = extStr.concat(",jpeg");
+			} else if (extStr.contains("jpeg")) {
+				extStr = extStr.concat(",jpg");
+			}
+		}else{
+			extStr = "jpg,jpeg,png,mp4,gif";
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
