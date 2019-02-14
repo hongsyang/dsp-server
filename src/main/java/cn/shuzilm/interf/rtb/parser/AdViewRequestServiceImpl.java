@@ -216,8 +216,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                     userDevice.getIp(),//用户ip
                     app.getBundle(),//APP包名
                     adxNameList,//宽列表
-                    isDimension//高列表
-
+                    isDimension,//高列表
+                    bidRequestBean.getId()
             );
             if (targetDuFlowBean == null) {
                 response = "";

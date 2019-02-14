@@ -183,7 +183,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                     user.getUser_ip(),//用户ip
                     userDevice.getApp_bundle(),//APP包名
                     adxNameList,//长宽列表
-                    isDimension
+                    isDimension,
+                    bidRequestBean.getSession_id()
             );
             if (targetDuFlowBean == null) {
                 response = "";
