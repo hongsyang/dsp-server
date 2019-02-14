@@ -122,8 +122,7 @@ public class RuleMatching {
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
 			int widthDeviation, int heightDeviation, String adxName, Material material, String extStr,
 			Set<String> materialSet,List<String> adxNameList,boolean isDimension,List<String> adxNamePushList) throws Exception {
-		// 筛选审核通过的物料
-		
+		// 筛选审核通过的物料		
 		if(material.getApproved_adx() == null || material.getApproved_adx().trim().equals("")){
 			return false;
 		}
