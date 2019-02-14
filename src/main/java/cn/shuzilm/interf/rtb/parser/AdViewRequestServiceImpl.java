@@ -277,7 +277,8 @@ public class AdViewRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
             targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
             targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
-            targetDuFlowBean.setAppName(app.getName());//APP名称
+            String appName = app.getName()== null ? "" : app.getName();
+            targetDuFlowBean.setAppName(appName);//APP名称
             targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
             targetDuFlowBean.setAppId(app.getId());//APP包名
             targetDuFlowBean.setAppVersion(app.getVer());//设备版本号

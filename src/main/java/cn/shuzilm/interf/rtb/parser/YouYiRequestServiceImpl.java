@@ -206,7 +206,8 @@ public class YouYiRequestServiceImpl implements RequestService {
             String format = LocalDateTime.now().format(formatter);//时间戳
             targetDuFlowBean.setBidid(format + UUID.randomUUID());//bid id  时间戳+随机数不去重
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
-            targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
+            String appName =userDevice.getApp_name()== null ? "" : userDevice.getApp_name();
+            targetDuFlowBean.setAppName(appName);//APP名称
             targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
