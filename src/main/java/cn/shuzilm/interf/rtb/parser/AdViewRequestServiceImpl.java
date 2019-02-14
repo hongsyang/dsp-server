@@ -6,9 +6,7 @@ import cn.shuzilm.bean.adview.response.*;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.util.HttpClientUtil;
-import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.MD5Util;
+import cn.shuzilm.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
 import cn.shuzilm.filter.FilterRule;
@@ -75,6 +73,15 @@ public class AdViewRequestServiceImpl implements RequestService {
                 response = "";
                 return response;
             }
+            // 过滤设备黑名单
+            if(app != null) {
+                String bundle = app.getBundle();
+                if(AppBlackListUtil.inAppBlackList(bundle)) {
+                    log.debug("媒体黑名单:{}", bundle);
+                    response = "";
+                    return response;
+                }
+            }
 
             if (StringUtils.isBlank(adType)) {
                 response = "";
@@ -102,6 +109,13 @@ public class AdViewRequestServiceImpl implements RequestService {
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getDidmd5();
                 }
+            }
+
+            // 过滤设备黑名单
+            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                log.debug("设备黑名单:{}", deviceId);
+                response = "";
+                return response;
             }
 
             //支持的文件类型
@@ -183,8 +197,12 @@ public class AdViewRequestServiceImpl implements RequestService {
 
 
 //             长宽列表 目前只支持悠易和广点通
-            List widthList = new ArrayList();//宽列表
-            List heightList = new ArrayList();//高列表
+//            List widthList = new ArrayList();//宽列表
+//            List heightList = new ArrayList();//高列表
+            //广告位列表 只有悠易和广点通需要
+            List adxNameList = new ArrayList();//
+            //是否匹配长宽
+            Boolean  isDimension=true;
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
                     adType,//广告类型
@@ -197,8 +215,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     userDevice.getIp(),//用户ip
                     app.getBundle(),//APP包名
-                    widthList,//宽列表
-                    heightList//高列表
+                    adxNameList,//宽列表
+                    isDimension//高列表
 
             );
             if (targetDuFlowBean == null) {
@@ -227,8 +245,23 @@ public class AdViewRequestServiceImpl implements RequestService {
             response = JSON.toJSONString(bidResponseBean);
             log.debug("没有过滤的bidResponseBean:{}", response);
             response = JSON.toJSONString(bidResponseBean);
+            //测试环境自动发送曝光
+            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
+            Double v = bidfloorcur * 1.3;
+            String price = "&price=" + v;
+            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+            String serviceUrl = configs.getString("SERVICE_URL");
+            String s = serviceUrl + "adviewclick?";
+            if (response.contains(s)) {
+                String substring = response.substring(response.indexOf(s));
+                String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
+                String adviewexpUrl = adviewexp + price + pf;
+//                Boolean flag = sendGetUrl(adviewexpUrl);
+//                log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
+            }
             bidRequestBean = null;
             targetDuFlowBean = null;
+
             return response;
         } else {
             return response;

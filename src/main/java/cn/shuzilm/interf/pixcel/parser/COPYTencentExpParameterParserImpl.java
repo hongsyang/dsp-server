@@ -28,9 +28,9 @@ import java.util.*;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class TencentImpParameterParserImpl implements ParameterParser {
+public class COPYTencentExpParameterParserImpl implements ParameterParser {
 
-    private static final Logger log = LoggerFactory.getLogger(TencentImpParameterParserImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(COPYTencentExpParameterParserImpl.class);
 
 
     private static PixelFlowControl pixelFlowControl = PixelFlowControl.getInstance();
@@ -40,10 +40,10 @@ public class TencentImpParameterParserImpl implements ParameterParser {
     private static AppConfigs configs = AppConfigs.getInstance(PIXEL_CONFIG);
 
     public static String parseUrlStr(String url) {
-        MDC.put("sift", "TencentImp");
-        log.debug("TencentImp曝光的url值:{}", url);
+        MDC.put("sift", "TencentExp");
+        log.debug("TencentExp曝光的url值:{}", url);
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
-        log.debug("TencentImp曝光转换之后的url值:{}", urlRequest);
+        log.debug("TencentExp曝光转换之后的url值:{}", urlRequest);
 
         DUFlowBean element = new DUFlowBean();
         String requestId = urlRequest.get("id");
@@ -102,7 +102,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             element.setPremiumFactor(Double.valueOf(premiumFactor));
             element.setAdxSource("Tencent");
 
-            log.debug("TencentImp曝光的requestid:{},element对象:{}", requestId, element);
+            log.debug("TencentExp曝光的requestid:{},element对象:{}", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
@@ -114,9 +114,9 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             GdtWinPriceDecoder gdtWinPriceDecoder =new GdtWinPriceDecoder();
             String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();
             bean.setCost(Double.valueOf( Integer.valueOf(price_str)) / 100);
-            bean.setWinNoticeNums(0);
+            bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
-            log.debug("pixel服务器发送到主控模块的TencentImpBean：{}", bean);
+            log.debug("pixel服务器发送到主控模块的TencentExpBean：{}", bean);
             AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
 
             //pixel服务器发送到Phoenix
@@ -126,7 +126,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-            MDC.put("sift", "TencentImp");
+            MDC.put("sift", "TencentExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Exp");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
@@ -147,7 +147,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
                     element.getDealid(), element.getAppId(), element.getBidid(), price,element.getIpAddr(),urlRequest.get("remoteIp"));
 
             MDC.remove("phoenix");
-
+            MDC.put("sift", "TencentExp");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
@@ -156,7 +156,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,TencentImp");
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,TencentExp");
             MDC.put("sift", "exception");
             boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到EXP_ERROR队列：{}", exp_error);

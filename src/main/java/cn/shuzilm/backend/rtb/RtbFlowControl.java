@@ -196,6 +196,7 @@ public class RtbFlowControl {
         String nodes [] = nodeStr.split(";");
         redis = AsyncRedisClient.getInstance(nodes);
     }
+    
 
     public void trigger() {
         // 5 s
@@ -499,7 +500,7 @@ public class RtbFlowControl {
         while (iterator.hasNext()) {
             String adId = iterator.next();
             // 清除掉 deviceLimitMap 中不参与投放的广告
-            if(!mapAd.contains(adId)) {
+            if(!mapAd.containsKey(adId)) {
                 iterator.remove();
                 myLog.info("删除不投放的广告： {}", adId);
             }
@@ -710,11 +711,11 @@ public class RtbFlowControl {
         		return false;
         	}
         	
-        	String advertiserUid = adBean.getAdvertiser().getUid();
-        	//针对推啊过滤快友广告
-        	if("c5d2db7e-f356-4f78-970a-ccddd4259860".equals(advertiserUid) && "2".equals(adxName)){
-        		return false;
-        	}
+//        	String advertiserUid = adBean.getAdvertiser().getUid();
+//        	//针对推啊过滤快友广告
+//        	if("c5d2db7e-f356-4f78-970a-ccddd4259860".equals(advertiserUid) && "2".equals(adxName)){
+//        		return false;
+//        	}
         	        	
         	Integer weekNum = weekAndDayNumMap.get("EEEE");
         	Integer dayNum = weekAndDayNumMap.get("HH");

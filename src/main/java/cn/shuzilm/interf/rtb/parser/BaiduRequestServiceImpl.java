@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,16 +32,16 @@ import java.util.UUID;
  * @UpdateRemark: 修改内容
  * @Version: 1.0
  */
-public class TencentRequestServiceImpl implements RequestService {
+public class BaiduRequestServiceImpl implements RequestService {
 
-    private static final Logger log = LoggerFactory.getLogger(TencentRequestServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(BaiduRequestServiceImpl.class);
 
 
     private static final String FILTER_CONFIG = "filter.properties";
 
-    private static final String ADX_NAME = "Tencent";
+    private static final String ADX_NAME = "Baidu";
 
-    private static final String ADX_ID = "4";
+    private static final String ADX_ID = "5";
 
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
@@ -55,123 +54,123 @@ public class TencentRequestServiceImpl implements RequestService {
 
     @Override
     public String parseRequest(String dataStr) throws Exception {
-        String adxId = "4";
+        String adxId = "5";
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
-            MDC.put("sift", "dsp-server");
+//            MDC.put("sift", "dsp-server");
             log.debug(" BidRequest参数入参：{}", dataStr);
-            //请求报文解析
-            TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
-            //创建返回结果  bidRequest请求参数保持不变
-            TencentDevice userDevice = bidRequestBean.getDevice();//设备信息
-            TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
-            TencentUser user = bidRequestBean.getUser();//用户信息
-            TencentApp app = bidRequestBean.getApp();
-            Integer width = -1;//广告位的宽
-            Integer height = -1;//广告位的高
-//            Integer showtype = userImpression.getExt().getShowtype();//广告类型
-            String adType = ""; //对应内部 广告类型
-            String stringSet = null;//文件类型列表
-            String deviceId = null;//设备号
-            //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(bidRequestBean.getIp())) {
-                log.debug("IP黑名单:{}", bidRequestBean.getIp());
-                response = "";
-                return response;
-            }
-            //设备的设备号：用于匹配数盟库中的数据
-            if (userDevice != null) {
-                if (userDevice.getOs().toLowerCase().contains("ios")) {
-                    deviceId = userDevice.getIdfa();
-                } else if (userDevice.getOs().toLowerCase().contains("android")) {
-                    //广点通设备mac地址
-                    deviceId = userDevice.getId();
-                }
-            }
-
-
-//            //支持的文件类型
-            if (bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list() != null) {
-                stringSet = adzone.getMultimedia_type_white_list().toString();
-            } else {
-                stringSet = "[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
-            }
-
-            //             长宽列表
-//            List widthList = new ArrayList();//宽列表
-//            List heightList = new ArrayList();//高列表
-//            widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
-//            heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
-//            长宽列表
-//            log.debug("widthList:{},heightList:{}", widthList, heightList);
-            //广告位列表 只有悠易和广点通需要
-            List adxNameList = new ArrayList();//
-            List<Integer> creative_specs = adzone.getCreative_specs();
-            for (Integer creative_spec : creative_specs) {
-                adxNameList.add(adxId+"_"+creative_spec);
-            }
-            log.debug("adxNameList:{}", adxNameList);
-            //是否匹配长宽
-            Boolean  isDimension=false;
-            //广告匹配规则
-            DUFlowBean targetDuFlowBean = ruleMatching.match(
-                    deviceId,//设备mac的MD5
-                    adType,//广告类型
-                    width,//广告位的宽
-                    height,//广告位的高
-                    true,// 是否要求分辨率
-                    0,//宽误差值
-                    0,// 高误差值;
-                    adxId,//ADX 服务商ID
-                    stringSet,//文件扩展名
-                    bidRequestBean.getIp(),//用户ip
-                    app.getApp_bundle_id(),//APP包名
-                    adxNameList,//长宽列表
-                    isDimension
-            );
-            if (targetDuFlowBean == null) {
-                response = "";
-                return response;
-            }
-            //需要添加到Phoenix中的数据
-            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
-            //曝光id
-            List<Impression> list = new ArrayList();
-            Impression impression = new Impression();
-            impression.setId(adzone.getId());
-            list.add(impression);
-            targetDuFlowBean.setImpression(list);//曝光id
-            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-            targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-            String format = LocalDateTime.now().format(formatter);//时间戳
-            targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
-            targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
-            targetDuFlowBean.setAppName("");//APP名称
-            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
-            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-            TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-            response = JSON.toJSONString(bidResponseBean);
-            MDC.put("sift", "dsp-server");
-            log.debug("bidResponseBean:{}", response);
-
-
-            //测试环境自动发送曝光
-            Double bidfloorcur = Double.valueOf(adzone.getBid_floor());
-            Double v = bidfloorcur * 1.3;
-            String price = "&price=" + v;
-            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
-            String s = "click_param";
-            if (response.contains(s)) {
-                String substring = response.substring(response.indexOf(s));
-                String tencentexp = substring.substring(substring.indexOf("id="));
-                String tencentexpUrl = "http://59.110.220.112:9880/tencentexp?" + tencentexp + price + pf;
-//                Boolean flag = sendGetUrl(tencentexpUrl);
-//                log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
-            }
-            bidRequestBean = null;
-            targetDuFlowBean = null;
+//            //请求报文解析
+//            TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
+//            //创建返回结果  bidRequest请求参数保持不变
+//            TencentDevice userDevice = bidRequestBean.getDevice();//设备信息
+//            TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
+//            TencentUser user = bidRequestBean.getUser();//用户信息
+//            TencentApp app = bidRequestBean.getApp();
+//            Integer width = -1;//广告位的宽
+//            Integer height = -1;//广告位的高
+////            Integer showtype = userImpression.getExt().getShowtype();//广告类型
+//            String adType = ""; //对应内部 广告类型
+//            String stringSet = null;//文件类型列表
+//            String deviceId = null;//设备号
+//            //ip 黑名单规则  在黑名单内直接返回
+//            if (ipBlacklist.isIpBlacklist(bidRequestBean.getIp())) {
+//                log.debug("IP黑名单:{}", bidRequestBean.getIp());
+//                response = "";
+//                return response;
+//            }
+//            //设备的设备号：用于匹配数盟库中的数据
+//            if (userDevice != null) {
+//                if (userDevice.getOs().toLowerCase().contains("ios")) {
+//                    deviceId = userDevice.getIdfa();
+//                } else if (userDevice.getOs().toLowerCase().contains("android")) {
+//                    //广点通设备mac地址
+//                    deviceId = userDevice.getId();
+//                }
+//            }
+//
+//
+////            //支持的文件类型
+//            if (bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list() != null) {
+//                stringSet = adzone.getMultimedia_type_white_list().toString();
+//            } else {
+//                stringSet = "[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
+//            }
+//
+//            //             长宽列表
+////            List widthList = new ArrayList();//宽列表
+////            List heightList = new ArrayList();//高列表
+////            widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
+////            heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
+////            长宽列表
+////            log.debug("widthList:{},heightList:{}", widthList, heightList);
+//            //广告位列表 只有悠易和广点通需要
+//            List adxNameList = new ArrayList();//
+//            List<Integer> creative_specs = adzone.getCreative_specs();
+//            for (Integer creative_spec : creative_specs) {
+//                adxNameList.add(adxId+"_"+creative_spec);
+//            }
+//            log.debug("adxNameList:{}", adxNameList);
+//            //是否匹配长宽
+//            Boolean  isDimension=false;
+//            //广告匹配规则
+//            DUFlowBean targetDuFlowBean = ruleMatching.match(
+//                    deviceId,//设备mac的MD5
+//                    adType,//广告类型
+//                    width,//广告位的宽
+//                    height,//广告位的高
+//                    true,// 是否要求分辨率
+//                    0,//宽误差值
+//                    0,// 高误差值;
+//                    adxId,//ADX 服务商ID
+//                    stringSet,//文件扩展名
+//                    bidRequestBean.getIp(),//用户ip
+//                    app.getApp_bundle_id(),//APP包名
+//                    adxNameList,//长宽列表
+//                    isDimension
+//            );
+//            if (targetDuFlowBean == null) {
+//                response = "";
+//                return response;
+//            }
+//            //需要添加到Phoenix中的数据
+//            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+//            //曝光id
+//            List<Impression> list = new ArrayList();
+//            Impression impression = new Impression();
+//            impression.setId(adzone.getId());
+//            list.add(impression);
+//            targetDuFlowBean.setImpression(list);//曝光id
+//            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+//            targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+//            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+//            String format = LocalDateTime.now().format(formatter);//时间戳
+//            targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
+//            targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
+//            targetDuFlowBean.setAppName("");//APP名称
+//            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
+//            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+//            TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+//            response = JSON.toJSONString(bidResponseBean);
+//            MDC.put("sift", "dsp-server");
+//            log.debug("bidResponseBean:{}", response);
+//
+//
+//            //测试环境自动发送曝光
+//            Double bidfloorcur = Double.valueOf(adzone.getBid_floor());
+//            Double v = bidfloorcur * 1.3;
+//            String price = "&price=" + v;
+//            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+//            String s = "click_param";
+//            if (response.contains(s)) {
+//                String substring = response.substring(response.indexOf(s));
+//                String tencentexp = substring.substring(substring.indexOf("id="));
+//                String tencentexpUrl = "http://59.110.220.112:9880/tencentexp?" + tencentexp + price + pf;
+////                Boolean flag = sendGetUrl(tencentexpUrl);
+////                log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
+//            }
+//            bidRequestBean = null;
+//            targetDuFlowBean = null;
             return response;
         } else {
             return response;

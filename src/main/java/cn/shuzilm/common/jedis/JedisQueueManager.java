@@ -371,7 +371,8 @@ public class JedisQueueManager {
 //    	putElementToQueue("rtb-010","123",null);
 //    	putElementToQueue("rtb-010","456",null);
 //    	temp:while(true){
-//    	List<AdBean> adBeanList = (List<AdBean>) getElementFromQueue("pixel-002_ad");
+ //   	List<TaskBean> taskList = (List<TaskBean>) getElementFromQueue("rtb-001_tdown");
+ //   	System.out.println(taskList.size());
 //    	for(AdBean ad:adBeanList){
 //    		System.out.println(ad.getAdUid());
 //    		if(ad.getAdUid().equals("438276e7-738d-4b39-9d86-d58d5dd84b77")){
@@ -396,7 +397,8 @@ public class JedisQueueManager {
     	//System.out.println(node);
     	//System.out.println(node.getNodeName());
     	//System.out.println(node.getLastUpdateTime());
-    	
+//    	removeAll("rtb-100_ad");
+//    	removeAll("rtb-100_flow_tdown");
 //    	for(int i=2;i<5;i++){
 //    	removeAll("pixel-00"+i+"_pixel");
 //    	//removeAll("rtb-00"+"_pixel");

@@ -2,8 +2,7 @@ package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.AdViewExpParameterParserImpl;
-import cn.shuzilm.interf.pixcel.parser.AdViewNurlParameterParserImpl;
-import cn.shuzilm.interf.pixcel.parser.LingJiExpParameterParserImpl;
+import cn.shuzilm.interf.pixcel.parser.TESTAdViewNurlParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.YouYiExpParameterParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +29,12 @@ public class AdviewRedisTask implements Runnable {
                 Object adviewexp = JedisQueueManager.getElementFromQueue("adviewexp");
                 if (adviewnurl != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
-                    AdViewNurlParameterParserImpl.parseUrlStr(adviewnurl.toString());
+                    TESTAdViewNurlParameterParserImpl.parseUrlStr(adviewnurl.toString());
                 } else if (adviewexp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     AdViewExpParameterParserImpl.parseUrlStr(adviewexp.toString());
                 } else {
-                    log.debug("等待中" + Thread.currentThread().getName());
+//                    log.debug("等待中" + Thread.currentThread().getName());
                     Thread.currentThread().join(1000);
                 }
 

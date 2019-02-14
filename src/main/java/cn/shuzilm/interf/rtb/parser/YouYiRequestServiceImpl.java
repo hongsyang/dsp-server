@@ -1,6 +1,9 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.util.AppBlackListUtil;
+import cn.shuzilm.util.DeviceBlackListUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.MD5Util;
 import com.google.common.collect.Lists;
@@ -84,6 +87,15 @@ public class YouYiRequestServiceImpl implements RequestService {
                 return response;
             }
 
+            // 过滤设备黑名单
+            if(userDevice != null) {
+                String bundle = userDevice.getApp_bundle();
+                if(AppBlackListUtil.inAppBlackList(bundle)) {
+                    log.debug("媒体黑名单:{}", bundle);
+                    response = "";
+                    return response;
+                }
+            }
 
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
@@ -115,6 +127,17 @@ public class YouYiRequestServiceImpl implements RequestService {
                 }
             }
 
+            // 过滤设备黑名单
+            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                log.debug("设备黑名单:{}", deviceId);
+                response = "";
+                return response;
+            }
+
+            //是否匹配长宽
+            Boolean isDimension = true;
+            //通过广告id获取长宽
+            List adxNameList = new ArrayList();//
 //            //支持的文件类型
             String adz_type = adzone.getAdz_type();
             if (adz_type.equals("ADZONE_TYPE_INAPP_BANNER") | adz_type.equals("ADZONE_TYPE_WAP_BANNER")) {
@@ -129,22 +152,23 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = adzone.getAdz_height();
             } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
                 stringSet = "[image/jpeg, image/png]";
-                adxId = adxId + "_" + adzone.getNative().get(0).getNative_id();
                 //广告位的宽和高
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
+                if (width == null | height == null) {
+                    width = -1;
+                    height = -1;
+                    adxNameList.add(adxId + "_" + adzone.getNative().get(0).getNative_id());
+                    log.debug("adxNameList:{}", adxNameList);
+                    //是否匹配长宽
+                    isDimension = false;
+                }
             } else {
                 response = "pc 不竞价";
                 return response;
             }
-            //通过广告id获取长宽
-            if (width == null | height == null) {
-                width = 1;
-                height = 1;
-            }
-            //             长宽列表
-            List widthList = new ArrayList();//宽列表
-            List heightList = new ArrayList();//高列表
+
+
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
@@ -158,8 +182,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
                     userDevice.getApp_bundle(),//APP包名
-                    widthList,//长宽列表
-                    heightList
+                    adxNameList,//长宽列表
+                    isDimension
             );
             if (targetDuFlowBean == null) {
                 response = "";

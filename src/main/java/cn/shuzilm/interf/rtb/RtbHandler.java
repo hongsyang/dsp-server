@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb;
 
 import bidserver.BidserverSsp;
+import cn.shuzilm.BaiduRealtimeBidding;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.googlecode.protobuf.format.JsonFormat;
@@ -15,7 +16,6 @@ import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Date;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -82,13 +82,18 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 BidserverSsp.BidRequest bidRequest = null;
                 GdtRtb.BidRequest tencentBidRequest = null;
-
+                BaiduRealtimeBidding.BidRequest baiduBidRequest = null;
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(bidRequest);
                 } else if (url.contains("tencent")) {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
+                } else if (url.contains("baidu")) {
+                    log.debug("baiduBidRequest 原值：{}", request.getContent().array());
+                    baiduBidRequest = BaiduRealtimeBidding.BidRequest.parseFrom(request.getContent().array());
+                    dataStr = JsonFormat.printToString(baiduBidRequest);
+                    log.debug("dataStr:{}", dataStr);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
@@ -133,7 +138,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 JsonFormat.merge(resultData, builder);
                 BidserverSsp.BidResponse build = builder.build();
                 content = build.toByteArray();
-            }else if (resultData.contains("seat_bids")) {
+            } else if (resultData.contains("seat_bids")) {
                 GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
                 GdtRtb.BidResponse build = builder.build();
