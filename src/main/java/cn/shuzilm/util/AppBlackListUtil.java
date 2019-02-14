@@ -32,6 +32,7 @@ public class AppBlackListUtil {
     public static void updateAppBlackList() {
         MDC.put("sift", "dsp-server");
         try {
+            log.info("开始更新媒体黑名单");
             Select select = new Select();
             String date = sdf.format(new Date());
             ResultMap countRs = select.selectSingle(countSql.replace("<DATE>", date));
@@ -66,6 +67,7 @@ public class AppBlackListUtil {
                 }
                 appBlackList = tempSet;
             }
+            log.info("更新媒体黑名单结束：黑名单数量：{}", appBlackList.size());
         } catch (Exception e) {
             log.error("获取媒体黑名单失败", e);
         }
