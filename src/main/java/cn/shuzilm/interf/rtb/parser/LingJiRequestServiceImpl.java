@@ -151,18 +151,22 @@ public class LingJiRequestServiceImpl implements RequestService {
             } else if (userImpression.getNativead() != null) {
                 assets = userImpression.getNativead().getAssets();
                 for (LJAssets asset : assets) {
-                    if (asset.getImg() != null && asset.getRequired().equals(true)) {
-                        width = asset.getImg().getW();
-                        height = asset.getImg().getH();
-                        stringSet = Arrays.toString(asset.getImg().getMimes());
-                    } else if (asset.getVideo() != null && asset.getRequired().equals(true)) {
-                        width = asset.getVideo().getW();
-                        height = asset.getVideo().getH();
-                        stringSet = Arrays.toString(asset.getVideo().getMimes());
+                    if (asset.getImg() != null && asset.getRequired() != null) {
+                        if (asset.getRequired().equals(true)) {
+                            width = asset.getImg().getW();
+                            height = asset.getImg().getH();
+                            stringSet = Arrays.toString(asset.getImg().getMimes());
+                        }
+                    } else  if (asset.getImg() != null && asset.getRequired() != null) {
+                        if (asset.getRequired().equals(true)) {
+                            width = asset.getVideo().getW();
+                            height = asset.getVideo().getH();
+                            stringSet = Arrays.toString(asset.getVideo().getMimes());
+                        }
                     }
                 }
             }
-            if (width == null||width == 0| height == null||height == 0) {
+            if (width == null || width == 0 | height == null || height == 0) {
                 width = -1;
                 height = -1;
             }
@@ -295,7 +299,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
             targetDuFlowBean.setBidid(MD5Util.MD5(MD5Util.MD5(bidRequestBean.getId())));//bid id
             targetDuFlowBean.setDspid(LocalDateTime.now().toString() + UUID.randomUUID());//dsp id
-            String appName = app.getName()== null ? "" : app.getName();
+            String appName = app.getName() == null ? "" : app.getName();
             targetDuFlowBean.setAppName(appName);//APP名称
             targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
             targetDuFlowBean.setAppId(app.getId());//APP包名
@@ -499,28 +503,36 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
             for (LJAssets ljAsset : ljAssets) {
-                if (ljAsset.getTitle() != null && ljAsset.getRequired().equals(true)) {
-                    assetsTitle.setId(ljAsset.getId());
-                } else if (ljAsset.getData() != null && ljAsset.getRequired().equals(true)) {
-                    assetsData.setId(ljAsset.getId());
-                } else if (ljAsset.getImg() != null && ljAsset.getRequired().equals(true)) {
-                    LJAssets assetsImg = new LJAssets();
-                    LJNativeImg ljNativeImg = new LJNativeImg();
-                    String imgUrl = duFlowBean.getAdm();
-                    List<String> imgUrls = new ArrayList<>();
-                    imgUrls.add(imgUrl);
-                    ljNativeImg.setUrls(imgUrls);
-                    assetsImg.setImg(ljNativeImg);
-                    assetsImg.setId(ljAsset.getId());
-                    ljAssetsList.add(assetsImg);
-                } else if (ljAsset.getVideo() != null && ljAsset.getRequired().equals(true)) {
-                    LJAssets assetsVideo = new LJAssets();
-                    LJNativeVideo ljNativeVideo = new LJNativeVideo();
-                    String videoUrl = duFlowBean.getAdm();
-                    ljNativeVideo.setUrl(videoUrl);
-                    assetsVideo.setVideo(ljNativeVideo);
-                    assetsVideo.setId(ljAsset.getId());
-                    ljAssetsList.add(assetsVideo);
+                if (ljAsset.getTitle() != null && ljAsset.getRequired() != null) {
+                    if (ljAsset.getRequired().equals(true)) {
+                        assetsTitle.setId(ljAsset.getId());
+                    }
+                } else if (ljAsset.getData() != null && ljAsset.getRequired() != null) {
+                    if (ljAsset.getRequired().equals(true)) {
+                        assetsData.setId(ljAsset.getId());
+                    }
+                } else if (ljAsset.getImg() != null && ljAsset.getRequired() != null) {
+                    if (ljAsset.getRequired().equals(true)) {
+                        LJAssets assetsImg = new LJAssets();
+                        LJNativeImg ljNativeImg = new LJNativeImg();
+                        String imgUrl = duFlowBean.getAdm();
+                        List<String> imgUrls = new ArrayList<>();
+                        imgUrls.add(imgUrl);
+                        ljNativeImg.setUrls(imgUrls);
+                        assetsImg.setImg(ljNativeImg);
+                        assetsImg.setId(ljAsset.getId());
+                        ljAssetsList.add(assetsImg);
+                    }
+                } else if (ljAsset.getVideo() != null && ljAsset.getRequired() != null) {
+                    if (ljAsset.getRequired().equals(true)) {
+                        LJAssets assetsVideo = new LJAssets();
+                        LJNativeVideo ljNativeVideo = new LJNativeVideo();
+                        String videoUrl = duFlowBean.getAdm();
+                        ljNativeVideo.setUrl(videoUrl);
+                        assetsVideo.setVideo(ljNativeVideo);
+                        assetsVideo.setId(ljAsset.getId());
+                        ljAssetsList.add(assetsVideo);
+                    }
                 }
             }
 
