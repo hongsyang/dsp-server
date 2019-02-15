@@ -139,8 +139,10 @@ public class RuleMatching {
 				return false;
 			}
 		}else{
-			//多尺寸or无尺寸
+			//多尺寸or无尺寸			
 			if(adxNameList != null){
+				LOG.info("adxNameList="+adxNameList.toString());
+				LOG.info("approvedAdxSet="+material.getApprovedAdxSet());
 				boolean dimensionFlag = false;
 				for(String adxNameTemp:adxNameList){
 					if (material.getApprovedAdxSet().contains(adxNameTemp)) {
@@ -423,6 +425,8 @@ public class RuleMatching {
 				reason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
 						0+"\t"+""+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 				continue;
+			}else{
+				LOG.debug("广告ID[" + adUid + "]通过物料匹配!");
 			}
 
 			List<AudienceBean> audienceList = ad.getAudienceList();
