@@ -245,20 +245,6 @@ public class AdViewRequestServiceImpl implements RequestService {
             response = JSON.toJSONString(bidResponseBean);
             log.debug("没有过滤的bidResponseBean:{}", response);
             response = JSON.toJSONString(bidResponseBean);
-            //测试环境自动发送曝光
-            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
-            Double v = bidfloorcur * 1.3;
-            String price = "&price=" + v;
-            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
-            String serviceUrl = configs.getString("SERVICE_URL");
-            String s = serviceUrl + "adviewclick?";
-            if (response.contains(s)) {
-                String substring = response.substring(response.indexOf(s));
-                String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
-                String adviewexpUrl = adviewexp + price + pf;
-//                Boolean flag = sendGetUrl(adviewexpUrl);
-//                log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
-            }
             bidRequestBean = null;
             targetDuFlowBean = null;
 

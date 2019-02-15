@@ -158,18 +158,6 @@ public class TencentRequestServiceImpl implements RequestService {
 
 
             //测试环境自动发送曝光
-            Double bidfloorcur = Double.valueOf(adzone.getBid_floor());
-            Double v = bidfloorcur * 1.3;
-            String price = "&price=" + v;
-            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
-            String s = "click_param";
-            if (response.contains(s)) {
-                String substring = response.substring(response.indexOf(s));
-                String tencentexp = substring.substring(substring.indexOf("id="));
-                String tencentexpUrl = "http://59.110.220.112:9880/tencentexp?" + tencentexp + price + pf;
-//                Boolean flag = sendGetUrl(tencentexpUrl);
-//                log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
-            }
             bidRequestBean = null;
             targetDuFlowBean = null;
             return response;
