@@ -148,7 +148,7 @@ public class TencentRequestServiceImpl implements RequestService {
             targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppName("");//APP名称
-            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
+            targetDuFlowBean.setAppPackageName(appPackageName);//APP包名
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
