@@ -69,7 +69,6 @@ public class TencentRequestServiceImpl implements RequestService {
             TencentApp app = bidRequestBean.getApp();
             Integer width = -1;//广告位的宽
             Integer height = -1;//广告位的高
-//            Integer showtype = userImpression.getExt().getShowtype();//广告类型
             String adType = ""; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
@@ -97,14 +96,6 @@ public class TencentRequestServiceImpl implements RequestService {
                 stringSet = "[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
             }
 
-            //             长宽列表
-//            List widthList = new ArrayList();//宽列表
-//            List heightList = new ArrayList();//高列表
-//            widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
-//            heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
-//            长宽列表
-//            log.debug("widthList:{},heightList:{}", widthList, heightList);
-            //广告位列表 只有悠易和广点通需要
             List adxNameList = new ArrayList();//
             List<Integer> creative_specs = adzone.getCreative_specs();
             for (Integer creative_spec : creative_specs) {
@@ -270,7 +261,6 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setClick_param(curl);//点击通知
         //腾讯 Bid 类型列表
