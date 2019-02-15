@@ -67,6 +67,14 @@ public class TencentRequestServiceImpl implements RequestService {
             TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
             TencentUser user = bidRequestBean.getUser();//用户信息
             TencentApp app = bidRequestBean.getApp();
+            String appPackageName="";
+            String userIp="";
+            if (bidRequestBean.getIp()!=null){
+                userIp=bidRequestBean.getIp();
+            }
+            if (app!=null){
+                appPackageName=app.getApp_bundle_id();
+            }
             Integer width = -1;//广告位的宽
             Integer height = -1;//广告位的高
             String adType = ""; //对应内部 广告类型
@@ -115,8 +123,8 @@ public class TencentRequestServiceImpl implements RequestService {
                     0,// 高误差值;
                     adxId,//ADX 服务商ID
                     stringSet,//文件扩展名
-                    bidRequestBean.getIp(),//用户ip
-                    app.getApp_bundle_id(),//APP包名
+                    userIp,//用户ip
+                    appPackageName,//APP包名
                     adxNameList,//长宽列表
                     isDimension,
                     bidRequestBean.getId()
