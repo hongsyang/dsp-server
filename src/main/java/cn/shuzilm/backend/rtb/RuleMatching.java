@@ -141,8 +141,6 @@ public class RuleMatching {
 		}else{
 			//多尺寸or无尺寸			
 			if(adxNameList != null){
-				LOG.info("adxNameList="+adxNameList.toString());
-				LOG.info("approvedAdxSet="+material.getApprovedAdxSet());
 				boolean dimensionFlag = false;
 				for(String adxNameTemp:adxNameList){
 					if (material.getApprovedAdxSet().contains(adxNameTemp)) {
@@ -382,7 +380,7 @@ public class RuleMatching {
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
-		// long startOrder = System.currentTimeMillis();
+		 long startOrder = System.currentTimeMillis();
 
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName);
@@ -425,8 +423,6 @@ public class RuleMatching {
 				reason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
 						0+"\t"+""+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 				continue;
-			}else{
-				LOG.debug("广告ID[" + adUid + "]通过物料匹配!");
 			}
 
 			List<AudienceBean> audienceList = ad.getAudienceList();
@@ -545,6 +541,8 @@ public class RuleMatching {
 						1+"\t"+0+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 			}
 		}
+		
+		LOG.info("匹配花费时间:"+(System.currentTimeMillis()-startOrder));
 
 		// 排序
 
@@ -596,6 +594,7 @@ public class RuleMatching {
 		ipList = null;
 		audienceTagIdSet = null;
 
+		LOG.info("总花费时间:"+(System.currentTimeMillis()-startOrder));
 		return targetDuFlowBean;
 	}
 
