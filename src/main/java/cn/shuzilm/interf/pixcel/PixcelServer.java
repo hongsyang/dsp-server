@@ -73,7 +73,7 @@ public class PixcelServer {
             executor2.execute(lingJiRedisTask);
             executor3.execute(youYIRedisTask);
             executor4.execute(adviewRedisTask);
-            executor5.execute(tencentRedisTask);
+//            executor5.execute(tencentRedisTask);
         }
     }
 

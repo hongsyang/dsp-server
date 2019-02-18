@@ -91,6 +91,8 @@ public class TencentClickParameterParserImpl implements ParameterParser {
         element.setAdUid(daduid);
         String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
         element.setDealid(pmp);
+        String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+        element.setMaterialId(dmat);//素材id
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
 
@@ -113,7 +115,7 @@ public class TencentClickParameterParserImpl implements ParameterParser {
             MDC.put("phoenix", "Click");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), new Date().getHours(),
                     new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -126,7 +128,8 @@ public class TencentClickParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(), element.getBidid(),element.getIpAddr(),urlRequest.get("remoteIp"));
+                    element.getDealid(), element.getAppId(), element.getBidid(),
+                    element.getIpAddr(),urlRequest.get("remoteIp"),element.getMaterialId());
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
