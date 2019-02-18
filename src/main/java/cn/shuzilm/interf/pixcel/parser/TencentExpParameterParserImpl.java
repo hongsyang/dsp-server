@@ -97,8 +97,10 @@ public class TencentExpParameterParserImpl implements ParameterParser {
             element.setAdUid(daduid);
             String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
             element.setDealid(pmp);
-            String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
-            element.setMaterialId(dmat);//素材id
+            if (urlRequest.get("dmat")!=null) {
+                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+                element.setMaterialId(dmat);//素材id
+            }
             String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
             element.setIpAddr(userip);
             String premiumFactor = urlRequest.get("pf");//溢价系数

@@ -97,8 +97,10 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             element.setAdUid(daduid);
             String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
             element.setDealid(pmp);
-            String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
-            element.setMaterialId(dmat);//素材id
+            if (urlRequest.get("dmat")!=null) {
+                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+                element.setMaterialId(dmat);//素材id
+            }
             String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
             element.setIpAddr(userip);
             String premiumFactor = urlRequest.get("pf");//溢价系数
@@ -147,7 +149,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
                     element.getDealid(), element.getAppId(), element.getBidid(),
-                    price,element.getIpAddr(),urlRequest.get("remoteIp"),
+                    price, element.getIpAddr(), urlRequest.get("remoteIp"),
                     element.getMaterialId());
 
             MDC.remove("phoenix");
@@ -160,11 +162,11 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,YouYiExp");
+            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,YouYiExp");
             MDC.put("sift", "exception");
             boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到EXP_ERROR队列：{}", exp_error);
-            log.debug("element:{}",JSON.toJSONString(element));
+            log.debug("element:{}", JSON.toJSONString(element));
             log.error("异常信息:{}", e);
             MDC.remove("sift");
         }
