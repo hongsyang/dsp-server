@@ -380,7 +380,6 @@ public class RuleMatching {
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
-		 long startOrder = System.currentTimeMillis();
 
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName);
@@ -542,8 +541,6 @@ public class RuleMatching {
 			}
 		}
 		
-		LOG.info("匹配花费时间:"+(System.currentTimeMillis()-startOrder));
-
 		// 排序
 
 		if (!machedAdList.isEmpty()) {
@@ -594,7 +591,6 @@ public class RuleMatching {
 		ipList = null;
 		audienceTagIdSet = null;
 
-		LOG.info("总花费时间:"+(System.currentTimeMillis()-startOrder));
 		return targetDuFlowBean;
 	}
 
