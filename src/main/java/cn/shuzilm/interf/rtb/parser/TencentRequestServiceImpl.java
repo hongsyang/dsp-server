@@ -193,7 +193,7 @@ public class TencentRequestServiceImpl implements RequestService {
         tencentBid.setBid_price((int) biddingPrice);
         tencentBid.setCreative_id(targetDuFlowBean.getCrid());//推审id
         //曝光通知Nurl
-        String wurl = "id=" + targetDuFlowBean.getRequestId() +
+        String wurl =  targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
@@ -216,7 +216,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
 //        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
         //曝光通知Nurl
-        String nurl = "id=" + targetDuFlowBean.getRequestId() +
+        String nurl =  targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
@@ -237,7 +237,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setImpression_param(nurl);//曝光通知
-        String curl = "id=" + targetDuFlowBean.getRequestId() +
+        String curl = targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +

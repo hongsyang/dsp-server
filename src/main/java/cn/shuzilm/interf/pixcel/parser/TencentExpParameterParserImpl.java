@@ -47,7 +47,7 @@ public class TencentExpParameterParserImpl implements ParameterParser {
         log.debug("TencentExp曝光转换之后的url值:{}", urlRequest);
 
         DUFlowBean element = new DUFlowBean();
-        String requestId = urlRequest.get("id");
+        String requestId = urlRequest.get("impparam");
         try {
             element.setInfoId(requestId + UUID.randomUUID());
             element.setRequestId(requestId);
@@ -73,12 +73,12 @@ public class TencentExpParameterParserImpl implements ParameterParser {
             String device = urlRequest.get("device");
             element.setDeviceId(device);
 
-            String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-            element.setAppName(URLDecoder.decode(app));
+//            String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
+//            element.setAppName(URLDecoder.decode(app));
             String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
             element.setAppPackageName(appn);
-            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-            element.setAppVersion(appv);
+//            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+//            element.setAppVersion(appv);
             String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
             element.setAudienceuid(ddem);
             String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
@@ -154,19 +154,19 @@ public class TencentExpParameterParserImpl implements ParameterParser {
                     element.getMaterialId());
 
             MDC.remove("phoenix");
-            MDC.put("sift", "TencentExp");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
-            if (lingJiClick) {
-                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-            } else {
-                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
-                throw new RuntimeException();
-            }
+//            MDC.put("sift", "TencentExp");
+//            boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+//            if (lingJiClick) {
+//                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+//            } else {
+//                log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
+//                throw new RuntimeException();
+//            }
         } catch (Exception e) {
-            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,TencentExp");
+//            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,TencentExp");
             MDC.put("sift", "exception");
-            boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
-            log.debug("发送到EXP_ERROR队列：{}", exp_error);
+//            boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+//            log.debug("发送到EXP_ERROR队列：{}", exp_error);
             log.debug("element:{}", JSON.toJSONString(element));
             log.error("异常信息:{}", e);
             MDC.remove("sift");
