@@ -208,9 +208,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
@@ -220,7 +218,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
 //        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
         //曝光通知Nurl
@@ -229,11 +227,8 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
@@ -243,6 +238,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setImpression_param(nurl);//曝光通知
         String curl = targetDuFlowBean.getRequestId() +
@@ -250,11 +246,8 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
@@ -263,6 +256,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setClick_param(curl);//点击通知
         //腾讯 Bid 类型列表
