@@ -146,9 +146,15 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             //正常情况 主业务逻辑
             byte[] content = null;
             String resultData = result;
-            if ("".equals(resultData)) {
+            if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 content = resultData.getBytes("utf-8");
+            }else if(resultData.contains("204session_id")){
+                BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                String substring = resultData.substring(resultData.indexOf("204session_id"));
+                builder.setSessionId(substring);
+                content = builder.build().toByteArray();
             } else if (resultData.contains("session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);

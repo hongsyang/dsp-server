@@ -70,6 +70,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             log.debug(" BidRequest参数入参：{}", dataStr);
             //请求报文解析
             YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
+            String session_id = bidRequestBean.getSession_id();
             //创建返回结果  bidRequest请求参数保持不变
             YouYiMobile userDevice = bidRequestBean.getMobile();//设备APP信息
             YouYiAdzone adzone = bidRequestBean.getAdzone().get(0);//曝光信息
@@ -109,7 +110,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
-                        response = "";
+                        response = session_id + "deviceIdBlackList";
                         return response;
                     }
                     deviceId = userDevice.getMd5_imei();
@@ -117,15 +118,15 @@ public class YouYiRequestServiceImpl implements RequestService {
             }
 
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName,user.getUser_ip());//过滤规则的返回结果
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip());//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList";
+                return "ipBlackList" + session_id;
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList";
+                return "bundleBlackList" + session_id;
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList";
+                return "deviceIdBlackList" + session_id;
             }
 
 
@@ -158,9 +159,6 @@ public class YouYiRequestServiceImpl implements RequestService {
                     //是否匹配长宽
                     isDimension = false;
                 }
-            } else {
-                response = "pc 不竞价";
-                return response;
             }
 
 
@@ -182,7 +180,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                     bidRequestBean.getSession_id()
             );
             if (targetDuFlowBean == null) {
-                response = "";
+                response = "204session_id:" + session_id;
                 return response;
             }
             //需要添加到Phoenix中的数据
