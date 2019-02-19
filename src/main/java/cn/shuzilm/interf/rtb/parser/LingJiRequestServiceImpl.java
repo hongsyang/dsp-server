@@ -77,23 +77,10 @@ public class LingJiRequestServiceImpl implements RequestService {
             }
 
 
-            //反作弊规则
-            Map msg = FilterRule.filterRuleBidRequest(bidRequestBean, ADX_ID);//过滤规则的返回结果
-            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
-            if (msg.get("ipBlackList")!=null){
-                return "ipBlackList";
-            }else if (msg.get("bundleBlackList")!=null){
-                return "bundleBlackList";
-            }else if (msg.get("deviceIdBlackList")!=null){
-                return "deviceIdBlackList";
-            }
 
 
-//            if (StringUtils.isBlank(adType)) {
-//                response = "没有对应的广告类型";
-//                return response;
-//
-//            }
+
+
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if (userDevice.getOs() != null) {
@@ -121,7 +108,16 @@ public class LingJiRequestServiceImpl implements RequestService {
                 }
             }
 
+            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName, userDevice.getIp());//过滤规则的返回结果
 
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList";
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList";
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList";
+            }
 
             //支持的文件类型
             List<LJAssets> assets = new ArrayList<>();

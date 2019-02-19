@@ -54,7 +54,6 @@ public class AdViewRequestServiceImpl implements RequestService {
             MDC.put("sift", "dsp-server");
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);
             log.debug(" BidRequest参数入参：{}", dataStr);
-            Map msg = new HashMap();//过滤规则的返回结果
             //请求报文解析
             BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
             //创建返回结果  bidRequest请求参数保持不变
@@ -67,26 +66,14 @@ public class AdViewRequestServiceImpl implements RequestService {
             String adType = convertAdType(showtype); //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
-            //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(userDevice.getIp())) {
-                log.debug("IP黑名单:{}", userDevice.getIp());
-                response = "";
-                return response;
-            }
-            // 过滤设备黑名单
-            if(app != null) {
-                String bundle = app.getBundle();
-                if(AppBlackListUtil.inAppBlackList(bundle)) {
-                    log.debug("媒体黑名单:{}", bundle);
-                    response = "";
-                    return response;
-                }
+            String appPackageName = null;//应用包名
+            if (app != null) {
+                appPackageName = app.getBundle();
             }
 
-            if (StringUtils.isBlank(adType)) {
-                response = "";
-                return response;
-            }
+            //反作弊规则
+
+
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if ("ios".equals(userDevice.getOs().toLowerCase())) {
@@ -102,13 +89,25 @@ public class AdViewRequestServiceImpl implements RequestService {
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getDidmd5(), userDevice.getMacmd5());
-                        response = "";
+                        response = "deviceIdBlackList";
                         return response;
                     }
                     deviceId = userDevice.getDidmd5();
                 } else if ("wp".equals(userDevice.getOs().toLowerCase())) {
                     deviceId = userDevice.getDidmd5();
                 }
+            }
+
+
+            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName, userDevice.getIp());//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList";
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList";
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList";
             }
 
             // 过滤设备黑名单
@@ -194,15 +193,17 @@ public class AdViewRequestServiceImpl implements RequestService {
 
                 }
             }
+            //长宽为空的，默认为-1
+            if (width == null || width == 0 | height == null || height == 0) {
+                width = -1;
+                height = -1;
+            }
 
 
-//             长宽列表 目前只支持悠易和广点通
-//            List widthList = new ArrayList();//宽列表
-//            List heightList = new ArrayList();//高列表
             //广告位列表 只有悠易和广点通需要
             List adxNameList = new ArrayList();//
             //是否匹配长宽
-            Boolean  isDimension=true;
+            Boolean isDimension = true;
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
                     adType,//广告类型
@@ -214,7 +215,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     ADX_ID,//ADX 服务商ID
                     stringSet,//文件扩展名
                     userDevice.getIp(),//用户ip
-                    app.getBundle(),//APP包名
+                    appPackageName,//APP包名
                     adxNameList,//宽列表
                     isDimension,//高列表
                     bidRequestBean.getId()
@@ -241,7 +242,6 @@ public class AdViewRequestServiceImpl implements RequestService {
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             MDC.remove("sift");
             MDC.put("sift", "dsp-server");
-//                pushRedis(targetDuFlowBean);//上传到redis服务器
             response = JSON.toJSONString(bidResponseBean);
             log.debug("没有过滤的bidResponseBean:{}", response);
             response = JSON.toJSONString(bidResponseBean);

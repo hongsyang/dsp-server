@@ -2,6 +2,7 @@ package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.AppBlackListUtil;
 import cn.shuzilm.util.DeviceBlackListUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
@@ -80,23 +81,11 @@ public class YouYiRequestServiceImpl implements RequestService {
             String adType = null; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
-            //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(user.getUser_ip())) {
-                log.debug("IP黑名单:{}", user.getUser_ip());
-                response = "";
-                return response;
-            }
 
-            // 过滤设备黑名单
-            if(userDevice != null) {
-                String bundle = userDevice.getApp_bundle();
-                if(AppBlackListUtil.inAppBlackList(bundle)) {
-                    log.debug("媒体黑名单:{}", bundle);
-                    response = "";
-                    return response;
-                }
+            String appPackageName = null;//应用包名
+            if (userDevice != null) {
+                appPackageName = userDevice.getApp_bundle();
             }
-
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
 //                return response;
@@ -125,6 +114,18 @@ public class YouYiRequestServiceImpl implements RequestService {
                     }
                     deviceId = userDevice.getMd5_imei();
                 }
+            }
+
+
+            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName,user.getUser_ip());//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList";
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList";
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList";
             }
 
             // 过滤设备黑名单
