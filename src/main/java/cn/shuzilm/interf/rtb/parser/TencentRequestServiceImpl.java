@@ -8,6 +8,7 @@ import cn.shuzilm.bean.tencent.response.TencentBid;
 import cn.shuzilm.bean.tencent.response.TencentBidResponse;
 import cn.shuzilm.bean.tencent.response.TencentSeatBid;
 import cn.shuzilm.common.AppConfigs;
+import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.WidthAndHeightListUtil;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -79,12 +81,7 @@ public class TencentRequestServiceImpl implements RequestService {
             String adType = ""; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
-            //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(bidRequestBean.getIp())) {
-                log.debug("IP黑名单:{}", bidRequestBean.getIp());
-                response = "";
-                return response;
-            }
+
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if (userDevice.getOs().toLowerCase().contains("ios")) {
@@ -95,9 +92,20 @@ public class TencentRequestServiceImpl implements RequestService {
                 }
             }
 
+            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName,userIp);//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList";
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList";
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList";
+            }
+
 
 //            //支持的文件类型
-            if (bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list() != null) {
+            if (adzone.getMultimedia_type_white_list() != null) {
                 stringSet = adzone.getMultimedia_type_white_list().toString();
             } else {
                 stringSet = "[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
