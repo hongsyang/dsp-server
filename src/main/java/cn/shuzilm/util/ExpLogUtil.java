@@ -21,10 +21,9 @@ public class ExpLogUtil {
                     if (readLine.contains("TencentExp曝光的url值:/")) {
                         String exp_error = readLine.substring(readLine.indexOf("TencentExp曝光的url值:/"));
                         System.out.println(exp_error);
+                        String substring = exp_error.substring(exp_error.indexOf("bidid="));
 
-//                        System.out.println(duFlowBean.toString().getBytes());
-//                        JedisQueueManager.putElementToQueue("EXP", exp_error, Priority.MAX_PRIORITY);
-//                        JSON.parse(duFlowBean);
+                        HttpRequestUtil.sendGet("http://pixel.shuzijz.cn/tencentexp",substring);
                     }
                 }
             } catch (FileNotFoundException e) {
