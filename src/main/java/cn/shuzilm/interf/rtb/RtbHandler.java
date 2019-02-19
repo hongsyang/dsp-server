@@ -149,10 +149,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 content = resultData.getBytes("utf-8");
-            }else if(resultData.contains("204session_id")){
+            } else if (resultData.contains("204session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
-                String substring = resultData.substring(resultData.indexOf("204session_id"));
+                String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
                 builder.setSessionId(substring);
                 content = builder.build().toByteArray();
             } else if (resultData.contains("session_id")) {
@@ -160,7 +160,12 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 JsonFormat.merge(resultData, builder);
                 BidserverSsp.BidResponse build = builder.build();
                 content = build.toByteArray();
-            } else {
+            }else if (resultData.contains("seat_bids")) {
+                GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
+                JsonFormat.merge(resultData, builder);
+                GdtRtb.BidResponse build = builder.build();
+                content = build.toByteArray();
+            }else {
                 content = resultData.getBytes("utf-8");
             }
 
