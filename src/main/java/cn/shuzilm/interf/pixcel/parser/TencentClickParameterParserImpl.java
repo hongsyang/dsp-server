@@ -88,8 +88,6 @@ public class TencentClickParameterParserImpl implements ParameterParser {
             element.setAgencyUid(dage);
             String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
             element.setAdUid(daduid);
-            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
-            element.setDealid(pmp);
             if (urlRequest.get("dmat") != null) {
                 String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
                 element.setMaterialId(dmat);//素材id
