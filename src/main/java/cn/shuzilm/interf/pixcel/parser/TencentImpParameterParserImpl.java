@@ -120,7 +120,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             GdtWinPriceDecoder gdtWinPriceDecoder =new GdtWinPriceDecoder();
             String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();
             bean.setCost(Double.valueOf( Integer.valueOf(price_str)) / 100);
-            bean.setWinNoticeNums(0);
+            bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的TencentImpBean：{}", bean);
             AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
