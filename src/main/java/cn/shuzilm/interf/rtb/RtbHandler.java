@@ -130,7 +130,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
                 log.debug("线程返回:{}", result.toString());
             } catch (TimeoutException e) {
-                exceptionFlag = 0;
+                timeOutFlag = 0;
                 // 超时情况
                 long end = System.currentTimeMillis();
                 MDC.put("sift", "timeOut");
