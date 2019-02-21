@@ -257,8 +257,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                 String substring = response.substring(response.indexOf(s));
                 String adviewexp = substring.substring(0, substring.indexOf('"')).replace("adviewclick", "adviewnurl");
                 String adviewexpUrl = adviewexp + price + pf;
-//                Boolean flag = sendGetUrl(adviewexpUrl);
-//                log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
+                Boolean flag = sendGetUrl(adviewexpUrl);
+                log.debug("是否曝光成功：{},adviewexpUrl:{}", flag, adviewexpUrl);
             }
             bidRequestBean = null;
             targetDuFlowBean = null;

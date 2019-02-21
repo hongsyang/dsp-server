@@ -238,8 +238,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 String substring = response.substring(response.indexOf(s));
                 String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
                 String lingjiexpUrl = lingjiexp + price + pf;
-//                Boolean flag = sendGetUrl(lingjiexpUrl);
-//                log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
+                Boolean flag = sendGetUrl(lingjiexpUrl);
+                log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
             }
             targetDuFlowBean = null;
             bidRequestBean = null;
