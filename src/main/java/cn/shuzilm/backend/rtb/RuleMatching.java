@@ -608,10 +608,10 @@ public class RuleMatching {
 	 * 对匹配的广告按照规则进行排序
 	 */
 	public DUFlowBean order(Map<String, Material> metrialMap, String deviceId, List<AdBean> machedAdList,
-							TagBean tagBean, String widthHeightRatio, Map<String, AudienceBean> audienceMap, String adxName,
-							String ipAddr, Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap,
-							String appPackageName,String requestId,int width,int height,List<String> adxNamePushList,
-							boolean isDimension,String adLocationId) throws Exception {
+		TagBean tagBean, String widthHeightRatio, Map<String, AudienceBean> audienceMap, String adxName,
+		String ipAddr, Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap,
+		String appPackageName,String requestId,int width,int height,List<String> adxNamePushList,
+		boolean isDimension,String adLocationId) throws Exception {
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
