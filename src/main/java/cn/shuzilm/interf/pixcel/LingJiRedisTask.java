@@ -27,7 +27,7 @@ public class LingJiRedisTask implements Runnable {
                 Object lingjiimp = JedisQueueManager.getElementFromQueue("lingjiimp");
                 if (lingjiexp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
-                    TESTLingJiExpParameterParserImpl.parseUrlStr(lingjiexp.toString());
+                    LingJiExpParameterParserImpl.parseUrlStr(lingjiexp.toString());
                 } else if (lingjiimp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     LingJiImpParameterParserImpl.parseUrlStr(lingjiimp.toString());

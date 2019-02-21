@@ -2,6 +2,7 @@ package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.TencentExpParameterParserImpl;
+import cn.shuzilm.interf.pixcel.parser.TencentImpParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.YouYiExpParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.YouYiImpParameterParserImpl;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class TencentRedisTask implements Runnable {
                 Object tencentimp = JedisQueueManager.getElementFromQueue("tencentimp");
                 if (tencentimp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
-                    TencentExpParameterParserImpl.parseUrlStr(tencentimp.toString());
+                    TencentImpParameterParserImpl.parseUrlStr(tencentimp.toString());
                 } else if (tencentexp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     TencentExpParameterParserImpl.parseUrlStr(tencentexp.toString());

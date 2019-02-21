@@ -9,7 +9,7 @@ import java.net.URLConnection;
 import java.util.List;
 import java.util.Map;
 
-public class HttpRequestUtil {
+public class HttpRequestUtil implements Runnable{
 
 	/**
      * 向指定URL发送GET方法的请求
@@ -128,8 +128,11 @@ public class HttpRequestUtil {
             }
         }
         return result;
-    }    
-    
-    
-	
+    }
+
+
+    @Override
+    public void run() {
+
+    }
 }

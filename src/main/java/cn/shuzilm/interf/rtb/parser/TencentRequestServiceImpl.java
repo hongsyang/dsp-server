@@ -8,6 +8,7 @@ import cn.shuzilm.bean.tencent.response.TencentBid;
 import cn.shuzilm.bean.tencent.response.TencentBidResponse;
 import cn.shuzilm.bean.tencent.response.TencentSeatBid;
 import cn.shuzilm.common.AppConfigs;
+import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.WidthAndHeightListUtil;
@@ -17,11 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -67,18 +68,20 @@ public class TencentRequestServiceImpl implements RequestService {
             TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
             TencentUser user = bidRequestBean.getUser();//用户信息
             TencentApp app = bidRequestBean.getApp();
+            String appPackageName="";
+            String userIp="";
+            if (bidRequestBean.getIp()!=null){
+                userIp=bidRequestBean.getIp();
+            }
+            if (app!=null){
+                appPackageName=app.getApp_bundle_id();
+            }
             Integer width = -1;//广告位的宽
             Integer height = -1;//广告位的高
-//            Integer showtype = userImpression.getExt().getShowtype();//广告类型
             String adType = ""; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
-            //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(bidRequestBean.getIp())) {
-                log.debug("IP黑名单:{}", bidRequestBean.getIp());
-                response = "";
-                return response;
-            }
+
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if (userDevice.getOs().toLowerCase().contains("ios")) {
@@ -89,22 +92,25 @@ public class TencentRequestServiceImpl implements RequestService {
                 }
             }
 
+            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName,userIp);//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList";
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList";
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList";
+            }
+
 
 //            //支持的文件类型
-            if (bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list() != null) {
+            if (adzone.getMultimedia_type_white_list() != null) {
                 stringSet = adzone.getMultimedia_type_white_list().toString();
             } else {
                 stringSet = "[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
             }
 
-            //             长宽列表
-//            List widthList = new ArrayList();//宽列表
-//            List heightList = new ArrayList();//高列表
-//            widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
-//            heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
-//            长宽列表
-//            log.debug("widthList:{},heightList:{}", widthList, heightList);
-            //广告位列表 只有悠易和广点通需要
             List adxNameList = new ArrayList();//
             List<Integer> creative_specs = adzone.getCreative_specs();
             for (Integer creative_spec : creative_specs) {
@@ -124,8 +130,8 @@ public class TencentRequestServiceImpl implements RequestService {
                     0,// 高误差值;
                     adxId,//ADX 服务商ID
                     stringSet,//文件扩展名
-                    bidRequestBean.getIp(),//用户ip
-                    app.getApp_bundle_id(),//APP包名
+                    userIp,//用户ip
+                    appPackageName,//APP包名
                     adxNameList,//长宽列表
                     isDimension,
                     bidRequestBean.getId()
@@ -150,7 +156,7 @@ public class TencentRequestServiceImpl implements RequestService {
             targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppName("");//APP名称
-            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
+            targetDuFlowBean.setAppPackageName(appPackageName);//APP包名
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
@@ -159,18 +165,6 @@ public class TencentRequestServiceImpl implements RequestService {
 
 
             //测试环境自动发送曝光
-            Double bidfloorcur = Double.valueOf(adzone.getBid_floor());
-            Double v = bidfloorcur * 1.3;
-            String price = "&price=" + v;
-            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
-            String s = "click_param";
-            if (response.contains(s)) {
-                String substring = response.substring(response.indexOf(s));
-                String tencentexp = substring.substring(substring.indexOf("id="));
-                String tencentexpUrl = "http://59.110.220.112:9880/tencentexp?" + tencentexp + price + pf;
-//                Boolean flag = sendGetUrl(tencentexpUrl);
-//                log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
-            }
             bidRequestBean = null;
             targetDuFlowBean = null;
             return response;
@@ -207,16 +201,14 @@ public class TencentRequestServiceImpl implements RequestService {
         tencentBid.setBid_price((int) biddingPrice);
         tencentBid.setCreative_id(targetDuFlowBean.getCrid());//推审id
         //曝光通知Nurl
-        String wurl = "id=" + targetDuFlowBean.getRequestId() +
+        String wurl =  targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
                 "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
@@ -226,20 +218,17 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
 //        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
         //曝光通知Nurl
-        String nurl = "id=" + targetDuFlowBean.getRequestId() +
+        String nurl =  targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
@@ -249,19 +238,16 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setImpression_param(nurl);//曝光通知
-        String curl = "id=" + targetDuFlowBean.getRequestId() +
+        String curl = targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +
                 "&impid=" + tencentImpressions.getId() +
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
@@ -270,7 +256,7 @@ public class TencentRequestServiceImpl implements RequestService {
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         tencentBid.setClick_param(curl);//点击通知
         //腾讯 Bid 类型列表

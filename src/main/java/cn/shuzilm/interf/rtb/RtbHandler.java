@@ -2,6 +2,7 @@ package cn.shuzilm.interf.rtb;
 
 import bidserver.BidserverSsp;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.tencent.request.TencentBidRequest;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
@@ -145,15 +146,26 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             //正常情况 主业务逻辑
             byte[] content = null;
             String resultData = result;
-            if ("".equals(resultData)) {
+            if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 content = resultData.getBytes("utf-8");
+            } else if (resultData.contains("204session_id")) {
+                BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
+                builder.setSessionId(substring);
+                content = builder.build().toByteArray();
             } else if (resultData.contains("session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
                 BidserverSsp.BidResponse build = builder.build();
                 content = build.toByteArray();
-            } else {
+            }else if (resultData.contains("seat_bids")) {
+                GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
+                JsonFormat.merge(resultData, builder);
+                GdtRtb.BidResponse build = builder.build();
+                content = build.toByteArray();
+            }else {
                 content = resultData.getBytes("utf-8");
             }
 
@@ -263,11 +275,24 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     }
                 } else if (url.contains("tencent")) {
                     adxId = 4;
-                    JSONObject jsonObject = JSON.parseObject(dataStr);
-                    requestId = jsonObject.getString("id");
-                    if (jsonObject.getJSONObject("app") != null) {
-                        JSONObject app = jsonObject.getJSONObject("app");
-                        appPackageName = app.getString("app_bundle_id");
+                    TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
+                    requestId = bidRequestBean.getId();
+                    if (bidRequestBean.getApp() != null) {
+                        appPackageName = bidRequestBean.getApp().getApp_bundle_id();
+                    }
+                    if (resultData.contains("ipBlackList")) {
+                        ipBlackListFlag = 0;
+                    }
+                    if (resultData.contains("bundleBlackList")) {
+                        bundleBlackListFlag = 0;
+                    }
+                    if (resultData.contains("deviceIdBlackList")) {
+                        deviceIdBlackListFlag = 0;
+                    }
+                    if (resultData.contains("price\":")) {
+                        bidPriceFlag = 1;
+                        String substring = resultData.substring(resultData.indexOf("price\":"));
+                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
                     }
                 }
                 MDC.put("phoenix", "rtb-houkp");
