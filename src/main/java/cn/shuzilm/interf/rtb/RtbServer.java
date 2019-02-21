@@ -72,8 +72,8 @@ public class RtbServer {
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀
         bootstrap.setOption("reuseAddress", true);
-        bootstrap.setOption("child.linger", 60);
-        bootstrap.setOption("child.TIMEOUT", 1);
+        bootstrap.setOption("child.linger", -1);
+        bootstrap.setOption("child.TIMEOUT", 0);
         bootstrap.setOption("sendBufferSize", 1048576);
         bootstrap.setOption("writeBufferHighWaterMark", 10 * 64 * 1024);
 
