@@ -380,6 +380,10 @@ public class RuleMatching {
 		}
 
 		// 开始遍历符合广告素材尺寸的广告
+		
+		String adAvalableReason = null;
+		String materialReason = null;
+		String audienceReason = null;
 
 		for (String adUid : auidList) {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName);
@@ -391,7 +395,7 @@ public class RuleMatching {
 				LOG.debug("ID[" + adUid + "]广告不参与投放!");
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t广告投放策略触发广告停投\t";
-				reason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+0+"\t"+
+				adAvalableReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+0+"\t"+
 						""+"\t"+""+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 				continue;
 			}
@@ -419,7 +423,7 @@ public class RuleMatching {
 				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t未匹配到满足要求的物料\t";
-				reason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
+				materialReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
 						0+"\t"+""+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 				continue;
 			}
@@ -536,7 +540,7 @@ public class RuleMatching {
 			if(!audienceFlag){
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t人群包匹配未成功\t";
-				reason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
+				audienceReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
 						1+"\t"+0+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 			}
 		}
@@ -570,7 +574,13 @@ public class RuleMatching {
 			}
 		}else{
 			MDC.put("phoenix", "rtb-bid-notice");
-			LOG.info(reason);
+			if(audienceReason != null){
+				LOG.info(audienceReason);
+			}else if(materialReason != null){
+				LOG.info(materialReason);
+			}else{
+				LOG.info(adAvalableReason);
+			}			
 			MDC.remove("phoenix");
 			MDC.put("sift", "rtb");
 		}
