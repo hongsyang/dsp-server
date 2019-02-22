@@ -217,12 +217,18 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     }
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
+                            MDC.put("sift", "ipBlackList");
+                            log.debug("requestId:{},result:{}",requestId,result);
+                            MDC.remove("sift");
                             ipBlackListFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
+                            MDC.put("sift", "deviceIdBlackList");
+                            log.debug("requestId:{},result:{}",requestId,result);
+                            MDC.remove("sift");
                             deviceIdBlackListFlag = 0;
                         }
                         if (result.contains("price\":")) {
