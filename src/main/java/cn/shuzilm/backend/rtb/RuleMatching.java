@@ -542,6 +542,7 @@ public class RuleMatching {
 			
 			materialList = null;
 			audienceList = null;
+			
 			if(!audienceFlag){
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t人群包匹配未成功\t";
