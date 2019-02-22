@@ -122,11 +122,11 @@ public class YouYiRequestServiceImpl implements RequestService {
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList" + session_id;
+                return "ipBlackList" +"204session_id:" + session_id;
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList" + session_id;
+                return "bundleBlackList" + "204session_id:" + session_id;
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList" + session_id;
+                return "deviceIdBlackList" + "204session_id:" + session_id;
             }
 
 

@@ -9,7 +9,13 @@ public class ExpTest {
 
     public static void main(String[] args) throws  Exception {
         String url="tencentimp?bidid=ancftd3dt6hla&win=hJBhSEhMKDrvIPEkHumcug==&impparam=ancftd3dt6hla&bidid=2019021915493968657605ba1-3618-4b11-9b&impid=1060515766791231&act=20190219154939686&adx=4&device=9fc5a30c-28a2-4405-9d0b-0c0bfdc60377&appn=com.chancky.365Read&pf=0.3&ddem=0698471f-1829-419d-9bde-49369151e66f&dcuid=f11d160c-8bd4-4333-94ef-a4818d30e318&dpro=2&dcit=36&dcou=377&dade=89633fef-b7d0-4a36-802d-8960ffe5e851&dage=null&daduid=fedf05bb-8b8c-499c-bb60-f3a4e64dd6cc&userip=124.193.88.142&ip=124.193.88.142&remoteIp=14.17.3.31";
-        TencentImpParameterParserImpl.parseUrlStr(url);
+        if (url.contains("tencentimp")) {
+//            bundleBlackListFlag = 0;
+            System.out.println(0);
+        }else {
+            System.out.println(1);
+        }
+//        TencentImpParameterParserImpl.parseUrlStr(url);
 //        String  url= "/adviewexp?id=20190103-110336_bidreq_174-2623-sVuT-107&bidid=fd5b512c637ab3e8102fd5fe9d50b1b0&impid=20190103-110336_reqimp_174-1809-9ahQ-65&price=iIyqEWgBAABxdFQKZ0JQI4Jy3wA0Dgq9yAoWTw&act=20190103110335&adx=2&did=eafc3db8a9e2d1ac6d4c2874fa884f82&device=eafc3db8a9e2d1ac6d4c2874fa884f82&app=%E8%A1%8C%E5%AE%B6%E8%AF%B4%E8%AF%B4-%E5%AE%89%E5%8D%93&appn=cn.hangjiashuo.app&appv=1.1.3&pf=1.0&ddem=5369c1f4-639f-4801-a022-dd68832e510a&dcuid=19a0c5df-c889-48a5-a6cb-3d2b67ba69a8&dpro=11&dcit=113&dcou=1187&dade=418c1058-1d73-441d-9c54-17c723a381e5&dage=&daduid=67b25f02-a0f3-4060-9fed-9dbde33d7fa4&pmp=null&userip=117.182.243.158";
 //        String s="ipBlackList204session_id:1111";
 //        String substring = s.substring(s.indexOf("204session_id")+14);
