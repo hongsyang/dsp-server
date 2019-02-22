@@ -429,8 +429,10 @@ public class RuleMatching {
 			}
 
 			List<AudienceBean> audienceList = ad.getAudienceList();
+			List<String> audienceIdList = new ArrayList<String>();
 			boolean audienceFlag = false;
 			for (AudienceBean audience : audienceList) {
+				audienceIdList.add(audience.getUid());
 				if (tagBean != null && audience.getType().equals("location")) {// 地理位置
 					if (audience.getLocationMode().equals("city")) {
 						// 省市县的匹配
@@ -534,7 +536,7 @@ public class RuleMatching {
 					}
 				}
 			}
-
+			
 			materialList = null;
 			audienceList = null;
 			if(!audienceFlag){
@@ -542,6 +544,10 @@ public class RuleMatching {
 				//"\t"+ip+"\t人群包匹配未成功\t";
 				audienceReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
 						1+"\t"+0+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
+				
+				if(tagBean != null && audienceTagIdSet != null){
+					LOG.info("人群包匹配结果:"+requestId+"\t"+audienceIdList.toString()+"\t"+audienceTagIdSet.toString());
+				}
 			}
 		}
 		
