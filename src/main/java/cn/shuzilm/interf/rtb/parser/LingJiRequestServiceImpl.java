@@ -112,11 +112,11 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList";
+                return "ipBlackList"+bidRequestBean.getId();
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList";
+                return "bundleBlackList"+bidRequestBean.getId();
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList";
+                return "deviceIdBlackList"+bidRequestBean.getId();
             }
 
             //支持的文件类型

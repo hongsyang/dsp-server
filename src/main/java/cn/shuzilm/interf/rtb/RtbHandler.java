@@ -58,9 +58,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     private Integer adxId = 0;
     private String appName = "";
     private String appPackageName = "";
-    private Integer ipBlackListFlag = 1;
-    private Integer bundleBlackListFlag = 1;
-    private Integer deviceIdBlackListFlag = 1;
+    private Integer ipBlackListFlag = null;
+    private Integer bundleBlackListFlag = null;
+    private Integer deviceIdBlackListFlag = null;
     private Integer timeOutFlag = 1;
     private Integer bidPriceFlag = 0;
     private String price = "-1";
@@ -128,8 +128,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
             try {
                 result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
-                log.debug("线程返回:{}", result.toString());
-
+                ipBlackListFlag = 1;
+                bundleBlackListFlag = 1;
+                deviceIdBlackListFlag = 1;
                 //不知道超时会不会增加
                 if (url.contains("lingji")) {
                     adxId = 1;
@@ -141,18 +142,12 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     }
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
-                            MDC.put("sift", "ipBlackList");
-                            log.debug("requestId:{},result:{}",requestId,result);
-                            MDC.remove("sift");
                             ipBlackListFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
-                            MDC.put("sift", "deviceIdBlackList");
-                            log.debug("requestId:{},result:{}",requestId,result);
-                            MDC.remove("sift");
                             deviceIdBlackListFlag = 0;
                         }
                         if (result.contains("price\":")) {
@@ -300,10 +295,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
         } finally {
             try {
-//                String resultData = "";
-//                if (result != null) {
-//                    resultData = result.toString();
-//                }
+
                 long end = System.currentTimeMillis();
                 MDC.put("sift", configs.getString("ADX_REQUEST"));
                 log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
