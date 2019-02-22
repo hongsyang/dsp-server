@@ -389,7 +389,10 @@ public class RuleMatching {
 			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName);
 
 			AdBean ad = rtbIns.getAdMap().get(adUid);
-			String advertierId = ad.getAdvertiser().getUid();
+			String advertierId = "";
+			if(ad != null && ad.getAdvertiser() != null){
+				advertierId = ad.getAdvertiser().getUid();
+			}
 			// 是否投当前的广告
 			if (!isAvaliable) {
 				LOG.debug("ID[" + adUid + "]广告不参与投放!");
