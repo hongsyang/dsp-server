@@ -549,7 +549,7 @@ public class RuleMatching {
 						1+"\t"+0+"\t"+advertierId+"\t"+adUid+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 				
 				if(tagBean != null && audienceTagIdSet != null){
-					LOG.info("人群包匹配结果:"+requestId+"\t"+audienceIdList.toString()+"\t"+audienceTagIdSet.toString());
+					LOG.info("人群包匹配结果:"+requestId+"\t"+audienceIdList.toString()+"\t"+audienceTagIdSet.toString()+"\t"+deviceId);
 				}
 			}
 		}
