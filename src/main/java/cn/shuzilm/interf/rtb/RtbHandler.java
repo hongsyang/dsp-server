@@ -128,6 +128,80 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
             try {
                 result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
+
+            } catch (TimeoutException e) {
+                timeOutFlag = 0;
+                // 超时情况
+                long end = System.currentTimeMillis();
+                MDC.put("sift", "timeOut");
+                log.error("超时timeMs:{},url:{}", end - start, url);
+                MDC.remove("sift");
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                ChannelFuture future1 = messageEvent.getChannel().write(response);
+                future1.addListener(ChannelFutureListener.CLOSE);
+                future.cancel(true);// 中断执行此任务的线程
+                return;
+            }
+
+            //正常情况 主业务逻辑
+            byte[] content = null;
+            String resultData = result;
+
+            if (resultData.contains("204session_id")) {
+                BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
+                builder.setSessionId(substring);
+                content = builder.build().toByteArray();
+            } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                content = resultData.getBytes("utf-8");
+            } else if (resultData.contains("session_id")) {
+                BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+                JsonFormat.merge(resultData, builder);
+                BidserverSsp.BidResponse build = builder.build();
+                content = build.toByteArray();
+            } else if (resultData.contains("seat_bids")) {
+                GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
+                JsonFormat.merge(resultData, builder);
+                GdtRtb.BidResponse build = builder.build();
+                content = build.toByteArray();
+            } else {
+                content = resultData.getBytes("utf-8");
+            }
+
+
+            response.setHeader("Content-Length", content.length);
+            ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+            buffer.writeBytes(content);
+            response.setContent(buffer);
+
+            //正常返回
+            ChannelFuture future2 = messageEvent.getChannel().write(response);
+            if (close) {
+                future2.addListener(ChannelFutureListener.CLOSE);
+            }
+        } catch (Exception e) {
+            exceptionFlag = 0;
+            long end = System.currentTimeMillis();
+            MDC.put("sift", "rtb-exception");
+            log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
+            log.debug("timeMs:{},Exception:{}", end - start, e);
+            MDC.remove("sift");
+            response.setStatus(HttpResponseStatus.NO_CONTENT);
+            ChannelFuture future1 = messageEvent.getChannel().write(response);
+            future1.addListener(ChannelFutureListener.CLOSE);
+
+
+        } finally {
+            try {
+
+
+                long end = System.currentTimeMillis();
+                MDC.put("sift", configs.getString("ADX_REQUEST"));
+                log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+                MDC.remove("sift");
+                //ip黑名单bug修改
                 ipBlackListFlag = 1;
                 bundleBlackListFlag = 1;
                 deviceIdBlackListFlag = 1;
@@ -229,77 +303,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     }
 
                 }
-            } catch (TimeoutException e) {
-                timeOutFlag = 0;
-                // 超时情况
-                long end = System.currentTimeMillis();
-                MDC.put("sift", "timeOut");
-                log.error("超时timeMs:{},url:{}", end - start, url);
-                MDC.remove("sift");
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
-                ChannelFuture future1 = messageEvent.getChannel().write(response);
-                future1.addListener(ChannelFutureListener.CLOSE);
-                future.cancel(true);// 中断执行此任务的线程
-                return;
-            }
 
-            //正常情况 主业务逻辑
-            byte[] content = null;
-            String resultData = result;
-
-            if (resultData.contains("204session_id")) {
-                BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
-                String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
-                builder.setSessionId(substring);
-                content = builder.build().toByteArray();
-            } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
-                content = resultData.getBytes("utf-8");
-            } else if (resultData.contains("session_id")) {
-                BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
-                JsonFormat.merge(resultData, builder);
-                BidserverSsp.BidResponse build = builder.build();
-                content = build.toByteArray();
-            } else if (resultData.contains("seat_bids")) {
-                GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
-                JsonFormat.merge(resultData, builder);
-                GdtRtb.BidResponse build = builder.build();
-                content = build.toByteArray();
-            } else {
-                content = resultData.getBytes("utf-8");
-            }
-
-
-            response.setHeader("Content-Length", content.length);
-            ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-            buffer.writeBytes(content);
-            response.setContent(buffer);
-
-            //正常返回
-            ChannelFuture future2 = messageEvent.getChannel().write(response);
-            if (close) {
-                future2.addListener(ChannelFutureListener.CLOSE);
-            }
-        } catch (Exception e) {
-            exceptionFlag = 0;
-            long end = System.currentTimeMillis();
-            MDC.put("sift", "rtb-exception");
-            log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
-            log.debug("timeMs:{},Exception:{}", end - start, e);
-            MDC.remove("sift");
-            response.setStatus(HttpResponseStatus.NO_CONTENT);
-            ChannelFuture future1 = messageEvent.getChannel().write(response);
-            future1.addListener(ChannelFutureListener.CLOSE);
-
-
-        } finally {
-            try {
-
-                long end = System.currentTimeMillis();
-                MDC.put("sift", configs.getString("ADX_REQUEST"));
-                log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
-                MDC.remove("sift");
                 MDC.put("phoenix", "rtb-houkp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}",
