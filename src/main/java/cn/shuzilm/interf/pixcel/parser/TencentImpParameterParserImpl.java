@@ -46,7 +46,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
         log.debug("TencentImp曝光转换之后的url值:{}", urlRequest);
 
         DUFlowBean element = new DUFlowBean();
-        String requestId = urlRequest.get("id");
+        String requestId = urlRequest.get("impparam");
         try {
             element.setInfoId(requestId + UUID.randomUUID());
             element.setRequestId(requestId);
@@ -71,13 +71,15 @@ public class TencentImpParameterParserImpl implements ParameterParser {
 
             String device = urlRequest.get("device");
             element.setDeviceId(device);
-
-            String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-            element.setAppName(URLDecoder.decode(app));
+//            if (urlRequest.get("app")!=null){
+//                String app = "null".equals(urlRequest.get("app")) ? "" : urlRequest.get("app");
+//                element.setAppName(URLDecoder.decode(app));
+//            }
             String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
             element.setAppPackageName(appn);
-            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-            element.setAppVersion(appv);
+
+//            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+//            element.setAppVersion(appv);
             String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
             element.setAudienceuid(ddem);
             String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
@@ -94,8 +96,12 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             element.setAgencyUid(dage);
             String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
             element.setAdUid(daduid);
-            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
-            element.setDealid(pmp);
+//            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
+//            element.setDealid(pmp);
+            if (urlRequest.get("dmat")!=null) {
+                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+                element.setMaterialId(dmat);//素材id
+            }
             String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
             element.setIpAddr(userip);
             String premiumFactor = urlRequest.get("pf");//溢价系数
@@ -110,11 +116,11 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             }
             bean.setPremiumFactor(element.getPremiumFactor());
             bean.setHost(configs.getString("HOST"));
-            String price = urlRequest.get("price");
+            String price = urlRequest.get("win");
             GdtWinPriceDecoder gdtWinPriceDecoder =new GdtWinPriceDecoder();
             String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();
             bean.setCost(Double.valueOf( Integer.valueOf(price_str)) / 100);
-            bean.setWinNoticeNums(0);
+            bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的TencentImpBean：{}", bean);
             AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
@@ -131,7 +137,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             MDC.put("phoenix", "Exp");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), new Date().getHours(),
                     new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -144,10 +150,12 @@ public class TencentImpParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(), element.getBidid(), price,element.getIpAddr(),urlRequest.get("remoteIp"));
+                    element.getDealid(), element.getAppId(), element.getBidid(),
+                    price,element.getIpAddr(),urlRequest.get("remoteIp"),
+                    element.getMaterialId());
 
             MDC.remove("phoenix");
-
+            MDC.put("sift", "TencentImp");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);

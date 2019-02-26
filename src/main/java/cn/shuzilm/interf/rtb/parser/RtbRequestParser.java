@@ -46,7 +46,7 @@ public class RtbRequestParser {
      * @return
      */
     public String parseData(String url, String dataStr, String remoteIp) throws Exception {
-        String responseStr = "没有对应的厂商";
+        String responseStr = "";
         if (Boolean.valueOf(configs.getString("FILTER_RTB"))) {
             responseStr = "测试请求";
             return responseStr;

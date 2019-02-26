@@ -130,7 +130,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
                 log.debug("线程返回:{}", result.toString());
             } catch (TimeoutException e) {
-                timeOutFlag = 0;
+                exceptionFlag = 0;
                 // 超时情况
                 long end = System.currentTimeMillis();
                 MDC.put("sift", "timeOut");
@@ -203,10 +203,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
                 MDC.remove("sift");
                 //是否在50毫秒内
-//                Long timeOut = end - start;
-//                if (timeOut > 50) {
-//                    timeOutFlag = 0;
-//                }
+                Long timeOut = end - start;
+                if (timeOut > 50) {
+                    timeOutFlag = 0;
+                }
                 if (url.contains("lingji")) {
                     adxId = 1;
                     BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);

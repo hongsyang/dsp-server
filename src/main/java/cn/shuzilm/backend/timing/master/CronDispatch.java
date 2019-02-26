@@ -55,6 +55,8 @@ public class CronDispatch {
     	AdFlowControl.getInstance().loadAllAdInterval(true);
         
         AdFlowControl.getInstance().loadAdInterval(true);
+        
+        AdFlowControl.getInstance().checkAdCpmLimit(true);
                
         // 初始化CPC结算方式的广告的 阈值和moniter
         CPCHandler.getInstance().updateIndicator(true);
@@ -92,6 +94,8 @@ public class CronDispatch {
         CronDispatch.startTimer(10);
         
         CronDispatch.startTimer(11);
+        
+        CronDispatch.startTimer(12);
     }
 
     /**
@@ -140,7 +144,10 @@ public class CronDispatch {
                break;
            case 11:
                dispatch(PushFlowTaskPerTenMinute.class,"0 0/10 * * * ?");
-               break;
+               break;        
+//           case 12:
+//        	   dispatch(CheckAdLimitTask.class,"0/10 * * * * ?");
+        	   
            default:
                break;
        }
