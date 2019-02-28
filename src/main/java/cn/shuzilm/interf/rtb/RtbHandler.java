@@ -115,6 +115,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
 
             }
+            //返回接口
+            byte[] content = null;
+
+
 
             //增加超时线程池
             Future<Object> future = executor.submit(new Callable<Object>() {
@@ -136,7 +140,20 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 MDC.put("sift", "timeOut");
                 log.error("超时timeMs:{},url:{}", end - start, url);
                 MDC.remove("sift");
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                String resultData = result;
+                if (resultData.contains("204session_id")){
+                    BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+                    String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
+                    builder.setSessionId(substring);
+                    builder.setAds(0, builder.getAds(0));
+                    content = builder.build().toByteArray();
+                    response.setHeader("Content-Length", content.length);
+                    ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+                    buffer.writeBytes(content);
+                    response.setContent(buffer);
+                }else {
+                    response.setStatus(HttpResponseStatus.NO_CONTENT);
+                }
                 ChannelFuture future1 = messageEvent.getChannel().write(response);
                 future1.addListener(ChannelFutureListener.CLOSE);
                 future.cancel(true);// 中断执行此任务的线程
@@ -144,7 +161,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             }
 
             //正常情况 主业务逻辑
-            byte[] content = null;
             String resultData = result;
 
             if (resultData.contains("204session_id")) {
