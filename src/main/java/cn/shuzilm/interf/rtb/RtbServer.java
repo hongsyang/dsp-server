@@ -85,7 +85,7 @@ public class RtbServer {
         bootstrap.setPipelineFactory(new ServerPipelineFactory());
         // 绑定端口
         bootstrap.bind(new InetSocketAddress(port));
-        System.out.println("admin start on " + port);
+        log.debug("admin start on {}" , port);
     }
 
     private class ServerPipelineFactory implements ChannelPipelineFactory {

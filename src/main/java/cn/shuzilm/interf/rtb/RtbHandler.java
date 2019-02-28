@@ -72,7 +72,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     public RtbHandler(ExecutorService executor) {
         parser = new RtbRequestParser();
         this.executor = executor;
-        System.out.println(Thread.currentThread().getName() + " rtb parser 初始化成功。。。");
+        log.debug("ExecutorService: {}" , executor);
     }
 
     @Override

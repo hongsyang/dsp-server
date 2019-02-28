@@ -161,7 +161,14 @@ public class YouYiRequestServiceImpl implements RequestService {
 
         }
 
-
+//        log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+//                        "\t{}",
+//                deviceId, adType,
+//                width, height,
+//                adxId, stringSet,
+//                user.getUser_ip(),appPackageName,
+//                adxNameList, isDimension,
+//                bidRequestBean.getSession_id());
         //广告匹配规则
         DUFlowBean targetDuFlowBean = ruleMatching.match(
                 deviceId,//设备mac的MD5
