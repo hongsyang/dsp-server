@@ -160,15 +160,16 @@ public class YouYiRequestServiceImpl implements RequestService {
             height = -1;
 
         }
-
+//        MDC.put("sift", "youyi-ruleMatching");
 //        log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-//                        "\t{}",
+//                        "\t{}\t",
 //                deviceId, adType,
-//                width, height,
-//                adxId, stringSet,
+//                width,height,
+//                adxId,stringSet,
 //                user.getUser_ip(),appPackageName,
-//                adxNameList, isDimension,
+//                adxNameList,isDimension,
 //                bidRequestBean.getSession_id());
+//        MDC.remove("sift");
         //广告匹配规则
         DUFlowBean targetDuFlowBean = ruleMatching.match(
                 deviceId,//设备mac的MD5
@@ -207,12 +208,12 @@ public class YouYiRequestServiceImpl implements RequestService {
         targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
         targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
         targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
+        MDC.put("sift", "dsp-server");
         log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
         YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
         response = JSON.toJSONString(bidResponseBean);
         targetDuFlowBean = null;
         bidRequestBean = null;
-        MDC.put("sift", "dsp-server");
         log.debug("bidResponseBean:{}", response);
         return response;
 
