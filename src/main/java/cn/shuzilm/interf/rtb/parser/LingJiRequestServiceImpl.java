@@ -468,7 +468,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
         LJResponseExt ljResponseExt = new LJResponseExt();
 
-        ljResponseExt.setLdp(landingUrl);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
+        ljResponseExt.setLdp(landingUrlA);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
         //曝光监测数组
         List pm = new ArrayList();
 
