@@ -77,7 +77,7 @@ public class RtbServer {
         bootstrap.setOption("reuseAddress", true);
         bootstrap.setOption("child.linger", -1);
         //悠易更新取消超时时间
-//        bootstrap.setOption("child.TIMEOUT", 0);
+        bootstrap.setOption("child.TIMEOUT", 0);
         bootstrap.setOption("sendBufferSize", 1048576);
         bootstrap.setOption("writeBufferHighWaterMark", 10 * 64 * 1024);
 
