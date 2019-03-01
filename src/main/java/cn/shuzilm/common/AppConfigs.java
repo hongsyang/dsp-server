@@ -3,6 +3,8 @@ package cn.shuzilm.common;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
@@ -18,10 +20,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AppConfigs {
     private final static Logger log = LoggerFactory.getLogger(AppConfigs.class);
-    private static HashMap<String,AppConfigs> instance = new HashMap<String, AppConfigs>();
+    private static HashMap<String, AppConfigs> instance = new HashMap<String, AppConfigs>();
     private Map<String, String> configs;
     public static String DEFAULT = "configs.properties";
-    private String configFile ;
+    private String configFile;
 
     private static final Object lock = new Object();
 
@@ -30,27 +32,30 @@ public class AppConfigs {
         configFile = name;
         init(name);
     }
+
     public static AppConfigs getInstance() {
         if (!instance.containsKey(DEFAULT)) {
             synchronized (lock) {
                 AppConfigs conf = new AppConfigs(DEFAULT);
-                instance.put(DEFAULT,conf);
+                instance.put(DEFAULT, conf);
             }
         }
         return instance.get(DEFAULT);
     }
-    public AppConfigs getByName(){
+
+    public AppConfigs getByName() {
         return instance.get(DEFAULT);
     }
 
-    public AppConfigs getByName(String name){
+    public AppConfigs getByName(String name) {
         return instance.get(name);
     }
+
     public static AppConfigs getInstance(String name) {
         if (!instance.containsKey(name)) {
             synchronized (lock) {
                 AppConfigs conf = new AppConfigs(name);
-                instance.put(name,conf);
+                instance.put(name, conf);
             }
         }
         return instance.get(name);
@@ -81,9 +86,15 @@ public class AppConfigs {
         log.debug("init AppConfigs");
         Properties props = new Properties();
         try {
-            URL url = this.getClass().getClassLoader().getResource(name);
-            InputStream in = url.openStream();
-            props.load(in);
+//            URL url = this.getClass().getClassLoader().getResource(name);
+            //测试环境
+//            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties";
+            //正式环境
+            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties" + name;
+//            InputStream in = url.openStream();
+            //读取属性文件a.properties
+            InputStream fis = new BufferedInputStream(new FileInputStream(FileName));
+            props.load(fis);
             Enumeration en = props.propertyNames();
             configs = new ConcurrentHashMap<String, String>();
             while (en.hasMoreElements()) {
@@ -105,14 +116,14 @@ public class AppConfigs {
         return configs.get(key);
     }
 
-    public Integer getInt(String key){
-        return  Integer.valueOf(configs.get(key));
+    public Integer getInt(String key) {
+        return Integer.valueOf(configs.get(key));
     }
 
-    public String get(String key,String defaultStr) {
+    public String get(String key, String defaultStr) {
         String result = configs.get(key);
-        if(result == null){
-            result =  defaultStr;
+        if (result == null) {
+            result = defaultStr;
         }
         return result;
     }
