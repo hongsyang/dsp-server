@@ -652,7 +652,7 @@ public class RuleMatching {
 					adxName, ipAddr, rtbIpMap, demographicMap,appPackageName,requestId,width,height,
 					adxNamePushList,isDimension,adLocationId);
 		} else {
-			// long startOrder = System.currentTimeMillis();
+			
 			AdBean ad = null;
 			if (gradeList.size() == 1) {
 				ad = gradeList.get(0);
