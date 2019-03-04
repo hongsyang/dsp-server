@@ -19,8 +19,8 @@ public  class BlackListTask implements Job {
         DeviceBlackListUtil.updateDeviceBlackList();
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         AppBlackListUtil.updateAppBlackList();
         DeviceBlackListUtil.updateDeviceBlackList();
-    }
+    }*/
 }

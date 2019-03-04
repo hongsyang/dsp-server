@@ -187,98 +187,98 @@ public class BaiduRequestServiceImpl implements RequestService {
      */
     private TencentBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, TencentBidRequest bidRequestBean) {
         TencentBidResponse TencentBidResponse = new TencentBidResponse();
-        TencentBidResponse.setRequest_id(bidRequestBean.getId());
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-        String format = LocalDateTime.now().format(formatter);//时间戳
-        //广告信息
-        List ads = new ArrayList();
-        TencentSeatBid tencentSeatBid = new TencentSeatBid();
-        //曝光信息
-        TencentImpressions tencentImpressions = bidRequestBean.getImpressions().get(0);
-        //曝光id
-        tencentSeatBid.setImpression_id(tencentImpressions.getId());
-        //腾讯 Bid 类型
-        List tencentBidList = new ArrayList();
-        TencentBid tencentBid = new TencentBid();
-
-        double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;//广告出价
-        tencentBid.setBid_price((int) biddingPrice);
-        tencentBid.setCreative_id(targetDuFlowBean.getCrid());//推审id
-        //曝光通知Nurl
-        String wurl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" + tencentImpressions.getId() +
-                "&act=" + format +
-                "&adx=" + targetDuFlowBean.getAdxId() +
-                "&did=" + targetDuFlowBean.getDid() +
-                "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
-                "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
-                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
-                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
-                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
-                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-                "&dcit=" + targetDuFlowBean.getCity() +// 市
-                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
-                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-//        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
-        //曝光通知Nurl
-        String nurl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" + tencentImpressions.getId() +
-                "&act=" + format +
-                "&adx=" + targetDuFlowBean.getAdxId() +
+//        TencentBidResponse.setRequest_id(bidRequestBean.getId());
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+//        String format = LocalDateTime.now().format(formatter);//时间戳
+//        //广告信息
+//        List ads = new ArrayList();
+//        TencentSeatBid tencentSeatBid = new TencentSeatBid();
+//        //曝光信息
+//        TencentImpressions tencentImpressions = bidRequestBean.getImpressions().get(0);
+//        //曝光id
+//        tencentSeatBid.setImpression_id(tencentImpressions.getId());
+//        //腾讯 Bid 类型
+//        List tencentBidList = new ArrayList();
+//        TencentBid tencentBid = new TencentBid();
+//
+//        double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;//广告出价
+//        tencentBid.setBid_price((int) biddingPrice);
+//        tencentBid.setCreative_id(targetDuFlowBean.getCrid());//推审id
+//        //曝光通知Nurl
+//        String wurl = "id=" + targetDuFlowBean.getRequestId() +
+//                "&bidid=" + targetDuFlowBean.getBidid() +
+//                "&impid=" + tencentImpressions.getId() +
+//                "&act=" + format +
+//                "&adx=" + targetDuFlowBean.getAdxId() +
 //                "&did=" + targetDuFlowBean.getDid() +
-                "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
-                "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
-                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
-                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
-                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
-                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-                "&dcit=" + targetDuFlowBean.getCity() +// 市
-                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
-                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-        tencentBid.setImpression_param(nurl);//曝光通知
-        String curl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" + tencentImpressions.getId() +
-                "&act=" + format +
-                "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&did=" + targetDuFlowBean.getDid() +
-                "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
-                "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
-                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
-                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
-                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-                "&dcit=" + targetDuFlowBean.getCity() +// 市
-                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
-                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-        tencentBid.setClick_param(curl);//点击通知
-        //腾讯 Bid 类型列表
-        tencentBidList.add(tencentBid);
-        tencentSeatBid.setBids(tencentBidList);
-        //腾讯  seat_bids类型列表
-        ads.add(tencentSeatBid);
-        TencentBidResponse.setSeat_bids(ads);
-        MDC.put("sift", "bidResponseBean");
-        log.debug("bidResponseBean:{}", JSON.toJSONString(TencentBidResponse));
+//                "&device=" + targetDuFlowBean.getDeviceId() +
+////                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
+//                "&appn=" + targetDuFlowBean.getAppPackageName() +
+////                "&appv=" + targetDuFlowBean.getAppVersion() +
+//                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
+//                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
+//                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+//                "&dpro=" + targetDuFlowBean.getProvince() +// 省
+//                "&dcit=" + targetDuFlowBean.getCity() +// 市
+//                "&dcou=" + targetDuFlowBean.getCountry() +// 县
+//                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+//                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+//                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+////                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+//                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+////        tencentBid.setWinnotice_param(wurl);//赢价通知，按此收费
+//        //曝光通知Nurl
+//        String nurl = "id=" + targetDuFlowBean.getRequestId() +
+//                "&bidid=" + targetDuFlowBean.getBidid() +
+//                "&impid=" + tencentImpressions.getId() +
+//                "&act=" + format +
+//                "&adx=" + targetDuFlowBean.getAdxId() +
+////                "&did=" + targetDuFlowBean.getDid() +
+//                "&device=" + targetDuFlowBean.getDeviceId() +
+////                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
+//                "&appn=" + targetDuFlowBean.getAppPackageName() +
+////                "&appv=" + targetDuFlowBean.getAppVersion() +
+//                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
+//                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
+//                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+//                "&dpro=" + targetDuFlowBean.getProvince() +// 省
+//                "&dcit=" + targetDuFlowBean.getCity() +// 市
+//                "&dcou=" + targetDuFlowBean.getCountry() +// 县
+//                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+//                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+//                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+////                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+//                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//        tencentBid.setImpression_param(nurl);//曝光通知
+//        String curl = "id=" + targetDuFlowBean.getRequestId() +
+//                "&bidid=" + targetDuFlowBean.getBidid() +
+//                "&impid=" + tencentImpressions.getId() +
+//                "&act=" + format +
+//                "&adx=" + targetDuFlowBean.getAdxId() +
+////                "&did=" + targetDuFlowBean.getDid() +
+//                "&device=" + targetDuFlowBean.getDeviceId() +
+////                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
+//                "&appn=" + targetDuFlowBean.getAppPackageName() +
+////                "&appv=" + targetDuFlowBean.getAppVersion() +
+//                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
+//                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+//                "&dpro=" + targetDuFlowBean.getProvince() +// 省
+//                "&dcit=" + targetDuFlowBean.getCity() +// 市
+//                "&dcou=" + targetDuFlowBean.getCountry() +// 县
+//                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+//                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+//                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+////                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+//                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//        tencentBid.setClick_param(curl);//点击通知
+//        //腾讯 Bid 类型列表
+//        tencentBidList.add(tencentBid);
+//        tencentSeatBid.setBids(tencentBidList);
+//        //腾讯  seat_bids类型列表
+//        ads.add(tencentSeatBid);
+//        TencentBidResponse.setSeat_bids(ads);
+//        MDC.put("sift", "bidResponseBean");
+//        log.debug("bidResponseBean:{}", JSON.toJSONString(TencentBidResponse));
         return TencentBidResponse;
 
     }

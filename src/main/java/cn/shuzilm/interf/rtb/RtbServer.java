@@ -4,7 +4,6 @@ import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.WidthAndHeightListUtil;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -33,14 +32,11 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @Version： May 6, 20132:48:04 PM
  **/
 public class RtbServer {
-
     private static RuleMatching ruleMatching;
 
     private static JedisManager jedisManager;
 
     private static IpBlacklistUtil ipBlacklist;
-
-    private static WidthAndHeightListUtil widthAndHeightListUtil;
 
 
     private static final String FILTER_CONFIG = "filter.properties";
@@ -50,14 +46,12 @@ public class RtbServer {
     private static final Logger log = LoggerFactory.getLogger(RtbServer.class);
 
     //超时线程池
-    private ExecutorService executor = Executors.newCachedThreadPool();
-
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
 
 
     public static void main(String[] args) {
         try {
             configs = AppConfigs.getInstance(FILTER_CONFIG);
-//            widthAndHeightListUtil =WidthAndHeightListUtil.getInstance();
             ipBlacklist = IpBlacklistUtil.getInstance();
             jedisManager = JedisManager.getInstance();
             ruleMatching = RuleMatching.getInstance();
@@ -73,7 +67,7 @@ public class RtbServer {
 
     public void start(int port) {
         // 配置服务器-使用java线程池作为解释线程
-        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(3000), Executors.newCachedThreadPool(), 3000));
+        ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(Executors.newFixedThreadPool(configs.getInt("BOSS_THREADS")), Executors.newCachedThreadPool(), configs.getInt("WORK_THREADS")));
         // 设置 pipeline factory.
         bootstrap.setOption("child.tcpNoDelay", true); //注意child前缀
         bootstrap.setOption("child.keepAlive", true); //注意child前缀

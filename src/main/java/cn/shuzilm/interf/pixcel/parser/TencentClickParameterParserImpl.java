@@ -42,7 +42,7 @@ public class TencentClickParameterParserImpl implements ParameterParser {
         log.debug("TencentClick点击之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
 
-        String requestId = urlRequest.get("id");
+        String requestId = urlRequest.get("impparam");
         element.setInfoId(requestId + UUID.randomUUID());
         element.setRequestId(requestId);
         element.setBidid(urlRequest.get("bidid"));
@@ -67,12 +67,12 @@ public class TencentClickParameterParserImpl implements ParameterParser {
         String device = urlRequest.get("device");
         element.setDeviceId(device);
 
-        String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-        element.setAppName(URLDecoder.decode(app));
+//        String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
+//        element.setAppName(URLDecoder.decode(app));
         String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
         element.setAppPackageName(appn);
-        String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-        element.setAppVersion(appv);
+//        String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+//        element.setAppVersion(appv);
         String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
         element.setAudienceuid(ddem);
         String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
@@ -91,6 +91,10 @@ public class TencentClickParameterParserImpl implements ParameterParser {
         element.setAdUid(daduid);
         String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
         element.setDealid(pmp);
+        if (urlRequest.get("dmat")!=null) {
+            String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+            element.setMaterialId(dmat);//素材id
+        }
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
 
@@ -113,7 +117,7 @@ public class TencentClickParameterParserImpl implements ParameterParser {
             MDC.put("phoenix", "Click");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                            "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                     element.getInfoId(), new Date().getHours(),
                     new Date().getTime(), LocalDateTime.now().toString(),
                     element.getDid(), element.getDeviceId(),
@@ -126,7 +130,8 @@ public class TencentClickParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(), element.getBidid(),element.getIpAddr(),urlRequest.get("remoteIp"));
+                    element.getDealid(), element.getAppId(), element.getBidid(),
+                    element.getIpAddr(),urlRequest.get("remoteIp"),element.getMaterialId());
             MDC.remove("phoenix");
             boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {

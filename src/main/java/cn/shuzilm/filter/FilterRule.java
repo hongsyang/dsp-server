@@ -1,11 +1,22 @@
 package cn.shuzilm.filter;
 
+import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.adview.request.Device;
+import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.bean.tencent.request.TencentBidRequest;
+import cn.shuzilm.bean.youyi.request.YouYiAdzone;
+import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
+import cn.shuzilm.bean.youyi.request.YouYiMobile;
+import cn.shuzilm.bean.youyi.request.YouYiUser;
+import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.filter.code.SystemCodeEnum;
 import cn.shuzilm.filter.interf.ADXFilterService;
 import cn.shuzilm.filter.interf.ADXFilterServiceFactory;
+import cn.shuzilm.util.AppBlackListUtil;
+import cn.shuzilm.util.DeviceBlackListUtil;
+import cn.shuzilm.util.IpBlacklistUtil;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.reflections.Reflections;
@@ -13,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,72 +39,50 @@ import java.util.Set;
  */
 public class FilterRule {
 
+    private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
+
     private static final Logger log = LoggerFactory.getLogger(FilterRule.class);
+
+    private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
     /**
      * 请求过滤规则  BidRequestBean
      *
-     * @param bidRequestBean
+     * @param userIp,bundle,deviceId
      * @return
      */
-    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Map message) {
-        return filterRuleBidRequest(bidRequestBean, true, message);
-    }
+    public static Map<String, String> filterRuleBidRequest(String deviceId, String bundle,String userIp) {
+        Map<String, String> msg = new HashMap();
 
-    /**
-     * 请求过滤规则  bidRequestBeanStr 字符串
-     *
-     * @param bidRequestBeanStr
-     * @return
-     */
-    public static Boolean filterRuleBidRequest(String bidRequestBeanStr, Map message) {
-        BidRequestBean bidRequestBean = JSON.parseObject(bidRequestBeanStr, BidRequestBean.class);
-        return filterRuleBidRequest(bidRequestBean, true, message);
-    }
-
-    /**
-     * 是否只判断数盟有效设备
-     *
-     * @param bidRequestBean
-     * @param flag
-     * @return
-     */
-    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Boolean flag, Map message) {
-        return filterRuleBidRequest(bidRequestBean, flag, message, " ");
-    }
-
-    /**
-     * 根据ADX服务商做过滤规则，快友用IMEI的sha1，灵集用MAC的MD5值
-     *
-     * @param bidRequestBean
-     * @param flag
-     * @param adxName        ADX服务商
-     * @return
-     */
-    public static Boolean filterRuleBidRequest(BidRequestBean bidRequestBean, Boolean flag, Map message, String adxName) {
-        //初步的过滤规则
-        if (bidRequestBean.getDevice() == null) {
-            log.debug("设备信息为空,BidRequest参数入参：{}", bidRequestBean);
-            message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，设备信息为空");
-            return false;
-        } else {
-            Device userDevice = bidRequestBean.getDevice();
-            if (StringUtils.isBlank(adxName)) {
-                log.debug("无对应ADX服务商过滤器，请检查代码。厂商名称为：{}", adxName);
-                message.put(SystemCodeEnum.CODE_FAIL.getCode(), SystemCodeEnum.CODE_FAIL.getMessage() + "，无对应ADX服务商过滤器");
-                return false;
-            } else {
-                Reflections reflections = new Reflections("cn.shuzilm.filter.interf");
-                Set<Class<? extends ADXFilterService>> monitorClasses = reflections.getSubTypesOf(ADXFilterService.class);
-                for (Class<? extends ADXFilterService> monitorClass : monitorClasses) {
-                    if (monitorClass.getSimpleName().toLowerCase().contains(adxName)) {
-                        ADXFilterService adxFilterService = ADXFilterServiceFactory.getADXFilterService(monitorClass.getName());
-                        log.debug("adxFilterService的名称:{}",adxFilterService.getClass().getSimpleName());
-                        return adxFilterService.filterDeviceParameter(userDevice, flag, message);
-                    }
-                }
+        //ip 黑名单规则  在黑名单内直接返回
+        if (Boolean.valueOf(configs.getString("IP_BLACK_LIST"))) {
+            if (ipBlacklist.isIpBlacklist(userIp)) {
+                log.debug("IP黑名单:{}",userIp);
+                msg.put("ipBlackList", "0");
             }
         }
-        return false;
+        // 过滤媒体黑名单
+        if (Boolean.valueOf(configs.getString("BUNDLE_BLACK_LIST"))) {
+                if (AppBlackListUtil.inAppBlackList(bundle)) {
+                    log.debug("媒体黑名单:{}", bundle);
+                    msg.put("bundleBlackList", "0");
+                }
+
+        }
+
+        // 过滤设备黑名单
+        if (Boolean.valueOf(configs.getString("DEVICE_ID_BLACK_LIST"))) {
+            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
+                log.debug("设备黑名单:{}", deviceId);
+                msg.put("deviceIdBlackList", "0");
+            }
+        }
+
+
+        return msg;
     }
+
+
 }

@@ -58,12 +58,12 @@ public class AppBlackListUtil {
                 Set<String> tempSet = new HashSet();
                 String packageName = "";
                 for(ResultMap app : rs) {
-                   try{
-                       packageName = app.getString("package_name");
-                       tempSet.add(packageName);
-                   }catch (Exception e) {
-                       log.error("保存媒体黑名单失败", e);
-                   }
+                    try{
+                        packageName = app.getString("package_name");
+                        tempSet.add(packageName);
+                    }catch (Exception e) {
+                        log.error("保存媒体黑名单失败", e);
+                    }
                 }
                 appBlackList = tempSet;
             }

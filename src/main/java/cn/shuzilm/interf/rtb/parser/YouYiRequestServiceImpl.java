@@ -2,6 +2,7 @@ package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.AppBlackListUtil;
 import cn.shuzilm.util.DeviceBlackListUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
@@ -69,6 +70,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             log.debug(" BidRequest参数入参：{}", dataStr);
             //请求报文解析
             YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
+            String session_id = bidRequestBean.getSession_id();
             //创建返回结果  bidRequest请求参数保持不变
             YouYiMobile userDevice = bidRequestBean.getMobile();//设备APP信息
             YouYiAdzone adzone = bidRequestBean.getAdzone().get(0);//曝光信息
@@ -80,23 +82,11 @@ public class YouYiRequestServiceImpl implements RequestService {
             String adType = null; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
-            //ip 黑名单规则  在黑名单内直接返回
-            if (ipBlacklist.isIpBlacklist(user.getUser_ip())) {
-                log.debug("IP黑名单:{}", user.getUser_ip());
-                response = "";
-                return response;
-            }
 
-            // 过滤设备黑名单
-            if(userDevice != null) {
-                String bundle = userDevice.getApp_bundle();
-                if(AppBlackListUtil.inAppBlackList(bundle)) {
-                    log.debug("媒体黑名单:{}", bundle);
-                    response = "";
-                    return response;
-                }
+            String appPackageName = null;//应用包名
+            if (userDevice != null) {
+                appPackageName = userDevice.getApp_bundle();
             }
-
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
 //                return response;
@@ -120,19 +110,25 @@ public class YouYiRequestServiceImpl implements RequestService {
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
-                        response = "";
+                        response = session_id + "deviceIdBlackList";
                         return response;
                     }
                     deviceId = userDevice.getMd5_imei();
                 }
             }
 
-            // 过滤设备黑名单
-            if (DeviceBlackListUtil.inDeviceBlackList(deviceId)) {
-                log.debug("设备黑名单:{}", deviceId);
-                response = "";
-                return response;
+
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip());//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList" + session_id;
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList" + session_id;
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList" + session_id;
             }
+
 
             //是否匹配长宽
             Boolean isDimension = true;
@@ -152,20 +148,17 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = adzone.getAdz_height();
             } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
                 stringSet = "[image/jpeg, image/png]";
+                adxNameList.add(adxId + "_" + adzone.getNative().get(0).getNative_id());
+                log.debug("adxNameList:{}", adxNameList);
                 //广告位的宽和高
                 width = adzone.getAdz_width();
                 height = adzone.getAdz_height();
-                if (width == null | height == null) {
-                    width = -1;
-                    height = -1;
-                    adxNameList.add(adxId + "_" + adzone.getNative().get(0).getNative_id());
-                    log.debug("adxNameList:{}", adxNameList);
-                    //是否匹配长宽
-                    isDimension = false;
-                }
-            } else {
-                response = "pc 不竞价";
-                return response;
+            }
+            if (width == null || width==0|| height == null||height==0) {
+                width = -1;
+                height = -1;
+                //是否匹配长宽
+                isDimension = false;
             }
 
 
@@ -181,12 +174,13 @@ public class YouYiRequestServiceImpl implements RequestService {
                     adxId,//ADX 服务商ID
                     stringSet,//文件扩展名
                     user.getUser_ip(),//用户ip
-                    userDevice.getApp_bundle(),//APP包名
+                    appPackageName,//APP包名
                     adxNameList,//长宽列表
-                    isDimension
+                    isDimension,
+                    bidRequestBean.getSession_id()
             );
             if (targetDuFlowBean == null) {
-                response = "";
+                response = "204session_id:" + session_id;
                 return response;
             }
             //需要添加到Phoenix中的数据
@@ -264,6 +258,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
@@ -288,6 +283,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setImp_para(nurl);//曝光通知
         String curl = "id=" + targetDuFlowBean.getRequestId() +
@@ -309,6 +305,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
         youYiAd.setClk_para(curl);//点击通知
         ads.add(youYiAd);

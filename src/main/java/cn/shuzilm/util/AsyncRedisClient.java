@@ -1,25 +1,15 @@
 package cn.shuzilm.util;
 
 import io.lettuce.core.*;
-import io.lettuce.core.api.async.RedisAsyncCommands;
-import io.lettuce.core.cluster.ClusterClientOptions;
 import io.lettuce.core.cluster.RedisClusterClient;
 import io.lettuce.core.cluster.api.StatefulRedisClusterConnection;
 import io.lettuce.core.cluster.api.async.RedisAdvancedClusterAsyncCommands;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.DoubleBinaryOperator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,6 +87,10 @@ public class AsyncRedisClient {
 		tagBean.setWork(work);
 		tagBean.setResidence(residence);
 		tagBean.setActivity(activity);
+		
+		tagBean.setDemographicProvinceId(3);
+		tagBean.setDemographicCityId(37);
+		tagBean.setDemographicCountyId(395);
 
 		tagBean.setProvinceId(2);
 		tagBean.setCityId(36);
@@ -108,9 +102,10 @@ public class AsyncRedisClient {
 		tagBean.setBrand("335");
 		tagBean.setPhonePrice(3);
 		tagBean.setNetworkId(2);
-		tagBean.setCarrierId("4");
+		tagBean.setCarrierId("3");
 		tagBean.setTagIdList("3_3");
-		tagBean.setCompanyIdList("2_1133091,2,2_1196028");
+		tagBean.setCompanyIdList("1_18106");
+		tagBean.setIp("49.5.2.83");
 		
 		String ss = JSON.toJSONString(tagBean);
 		String nodeStr = RtbConstants.getInstance().getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
@@ -132,14 +127,14 @@ public class AsyncRedisClient {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-    	 redis1.setAsync("a24d0y33j853d4d9da28t69d4bf83e77", ss);
+//    	 redis1.setAsync("5e8657a04ff75703f4fa9a3f95d106e1", ss);
  //   	redis1.delAsync("a24e0e337853d4d9da28769d4bf83577");
 //    	String json = redis1.getAsync("00000e3de16c8a7e80d2cca6976fafcf");
 //    	TagBean tagBean1 = JSON.parseObject(json, TagBean.class);
 //    	while(true){   	
 //    	 try {
 //    		 long startTime = System.currentTimeMillis();
-        	 System.out.println(redis1.getAsync("a24d0y33j853d4d9da28t69d4bf83e77"));
+        	 System.out.println(redis1.getAsync("040041d1482718ea1bce9a664e3b5f61"));
 //        	 LOG.info("读取耗时:"+(System.currentTimeMillis()-startTime));
 //			Thread.sleep(5 * 1000);
 //		} catch (InterruptedException e) {

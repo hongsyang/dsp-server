@@ -32,13 +32,16 @@ public class ExpUtil {
                 Long size = JedisQueueManager.getLength("EXP_ERROR");
                 System.out.println("EXP_ERROR的个数：" + size);
                 System.out.println(exp_error);
-                String adxId = exp_error.getAdxId();
                 if (exp_error.getRequestId() != null) {
                     //计算价格
                     AdPixelBean bean = new AdPixelBean();
                     bean.setAdUid(exp_error.getAdUid());
+
                     bean.setPremiumFactor(exp_error.getPremiumFactor());
                     bean.setWinNoticeNums(1);
+                    if(exp_error.getActualPrice()==null){
+                        continue;
+                    }
                     bean.setCost(exp_error.getActualPrice());
                     AdPixelBean adPixelBean = null;//价格返回结果
                     adPixelBean = pixelFlowControl.sendStatus(bean);
@@ -61,7 +64,10 @@ public class ExpUtil {
 
                 } else {
                     System.out.println(exp_error);
+//                    break;
                 }
+
+//                    break;
             }
         } catch (Exception e) {
             e.printStackTrace();
