@@ -643,6 +643,8 @@ public class RuleMatching {
 		} else {
 			gradeFlag = false;
 		}
+		
+		LOG.info("gradeList="+gradeList.size()+"\tungradeList"+ungradeList.size());
 		if (ungradeList.size() == 1 || (ungradeList.size() > 1 && gradeFlag) || (ungradeList.size() > 1 && gradeList.isEmpty())) {
 			AdBean ad = ungradeList.get(0);// 暂时获取第一个
 			// 封装返回接口引擎数据
