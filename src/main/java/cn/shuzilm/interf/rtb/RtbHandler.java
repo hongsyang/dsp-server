@@ -58,9 +58,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     private Integer adxId = 0;
     private String appName = "";
     private String appPackageName = "";
-    private Integer ipBlackListFlag = 1;
-    private Integer bundleBlackListFlag = 1;
-    private Integer deviceIdBlackListFlag = 1;
+    private Integer ipBlackListFlag = null;
+    private Integer bundleBlackListFlag = null;
+    private Integer deviceIdBlackListFlag = null;
     private Integer timeOutFlag = 1;
     private Integer bidPriceFlag = 0;
     private String price = "-1";
@@ -72,7 +72,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     public RtbHandler(ExecutorService executor) {
         parser = new RtbRequestParser();
         this.executor = executor;
-        System.out.println(Thread.currentThread().getName() + " rtb parser 初始化成功。。。");
+        log.debug("ExecutorService: {}" , executor);
     }
 
     @Override
@@ -115,6 +115,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
 
             }
+            //返回接口
+            byte[] content = null;
+
+
 
             //增加超时线程池
             Future<Object> future = executor.submit(new Callable<Object>() {
@@ -128,15 +132,28 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
             try {
                 result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
-                log.debug("线程返回:{}", result.toString());
+
             } catch (TimeoutException e) {
-                exceptionFlag = 0;
+                timeOutFlag = 0;
                 // 超时情况
                 long end = System.currentTimeMillis();
                 MDC.put("sift", "timeOut");
                 log.error("超时timeMs:{},url:{}", end - start, url);
                 MDC.remove("sift");
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                String resultData = result;
+                if (resultData.contains("204session_id")){
+                    BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
+                    String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
+                    builder.setSessionId(substring);
+                    builder.setAds(0, builder.getAds(0));
+                    content = builder.build().toByteArray();
+                    response.setHeader("Content-Length", content.length);
+                    ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+                    buffer.writeBytes(content);
+                    response.setContent(buffer);
+                }else {
+                    response.setStatus(HttpResponseStatus.NO_CONTENT);
+                }
                 ChannelFuture future1 = messageEvent.getChannel().write(response);
                 future1.addListener(ChannelFutureListener.CLOSE);
                 future.cancel(true);// 中断执行此任务的线程
@@ -144,28 +161,30 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             }
 
             //正常情况 主业务逻辑
-            byte[] content = null;
             String resultData = result;
-            if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
-                content = resultData.getBytes("utf-8");
-            } else if (resultData.contains("204session_id")) {
+
+            if (resultData.contains("204session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
-                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                //修改状态码为200
+//                response.setStatus(HttpResponseStatus.NO_CONTENT);
                 String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
                 builder.setSessionId(substring);
+                builder.setAds(0, builder.getAds(0));
                 content = builder.build().toByteArray();
+            } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
+                response.setStatus(HttpResponseStatus.NO_CONTENT);
+                content = "".getBytes("utf-8");
             } else if (resultData.contains("session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
                 BidserverSsp.BidResponse build = builder.build();
                 content = build.toByteArray();
-            }else if (resultData.contains("seat_bids")) {
+            } else if (resultData.contains("seat_bids")) {
                 GdtRtb.BidResponse.Builder builder = GdtRtb.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
                 GdtRtb.BidResponse build = builder.build();
                 content = build.toByteArray();
-            }else {
+            } else {
                 content = resultData.getBytes("utf-8");
             }
 
@@ -194,19 +213,17 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
         } finally {
             try {
-                String resultData = "";
-                if (result != null) {
-                    resultData = result.toString();
-                }
+
+
                 long end = System.currentTimeMillis();
                 MDC.put("sift", configs.getString("ADX_REQUEST"));
                 log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
                 MDC.remove("sift");
-                //是否在50毫秒内
-                Long timeOut = end - start;
-                if (timeOut > 50) {
-                    timeOutFlag = 0;
-                }
+                //ip黑名单bug修改
+                ipBlackListFlag = 1;
+                bundleBlackListFlag = 1;
+                deviceIdBlackListFlag = 1;
+                //不知道超时会不会增加
                 if (url.contains("lingji")) {
                     adxId = 1;
                     BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
@@ -215,19 +232,21 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         appName = bidRequestBean.getApp().getName();
                         appPackageName = bidRequestBean.getApp().getBundle();
                     }
-                    if (resultData.contains("ipBlackList")) {
-                        ipBlackListFlag = 0;
-                    }
-                    if (resultData.contains("bundleBlackList")) {
-                        bundleBlackListFlag = 0;
-                    }
-                    if (resultData.contains("deviceIdBlackList")) {
-                        deviceIdBlackListFlag = 0;
-                    }
-                    if (resultData.contains("price\":")) {
-                        bidPriceFlag = 1;
-                        String substring = resultData.substring(resultData.indexOf("price\":"));
-                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf("}"));
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf("}"));
+                        }
                     }
                 } else if (url.contains("adview")) {
                     adxId = 2;
@@ -237,19 +256,21 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         appName = bidRequestBean.getApp().getName();
                         appPackageName = bidRequestBean.getApp().getBundle();
                     }
-                    if (resultData.contains("ipBlackList")) {
-                        ipBlackListFlag = 0;
-                    }
-                    if (resultData.contains("bundleBlackList")) {
-                        bundleBlackListFlag = 0;
-                    }
-                    if (resultData.contains("deviceIdBlackList")) {
-                        deviceIdBlackListFlag = 0;
-                    }
-                    if (resultData.contains("price\":")) {
-                        bidPriceFlag = 1;
-                        String substring = resultData.substring(resultData.indexOf("price\":"));
-                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                        }
                     }
                 } else if (url.contains("youyi")) {
                     adxId = 3;
@@ -259,19 +280,21 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         appName = bidRequestBean.getMobile().getApp_name();
                         appPackageName = bidRequestBean.getMobile().getApp_bundle();
                     }
-                    if (resultData.contains("ipBlackList")) {
-                        ipBlackListFlag = 0;
-                    }
-                    if (resultData.contains("bundleBlackList")) {
-                        bundleBlackListFlag = 0;
-                    }
-                    if (resultData.contains("deviceIdBlackList")) {
-                        deviceIdBlackListFlag = 0;
-                    }
-                    if (resultData.contains("price\":")) {
-                        bidPriceFlag = 1;
-                        String substring = resultData.substring(resultData.indexOf("price\":"));
-                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                        }
                     }
                 } else if (url.contains("tencent")) {
                     adxId = 4;
@@ -280,21 +303,25 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (bidRequestBean.getApp() != null) {
                         appPackageName = bidRequestBean.getApp().getApp_bundle_id();
                     }
-                    if (resultData.contains("ipBlackList")) {
-                        ipBlackListFlag = 0;
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                        }
                     }
-                    if (resultData.contains("bundleBlackList")) {
-                        bundleBlackListFlag = 0;
-                    }
-                    if (resultData.contains("deviceIdBlackList")) {
-                        deviceIdBlackListFlag = 0;
-                    }
-                    if (resultData.contains("price\":")) {
-                        bidPriceFlag = 1;
-                        String substring = resultData.substring(resultData.indexOf("price\":"));
-                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
-                    }
+
                 }
+
                 MDC.put("phoenix", "rtb-houkp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                                 "\t{}\t{}\t{}\t{}\t{}\t{}",
