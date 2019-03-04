@@ -165,6 +165,6 @@ public class AdBean implements ICommand  {
      * 广告单元所投放的媒体ID列表
      */
     @Setter
-    private List<Integer> mediaIdList;
+    private List<Long> mediaIdList;
 
 }

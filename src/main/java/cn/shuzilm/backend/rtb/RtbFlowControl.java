@@ -175,7 +175,7 @@ public class RtbFlowControl {
     private static HashMap<String,HashSet<String>> deviceLimitMapDaiyly = new HashMap<>();
     private static HashMap<String,HashSet<String>> deviceLimitMapHourly = new HashMap<>();
     
-    private static ConcurrentHashMap<Integer,MediaBean> mediaMap = null;
+    private static ConcurrentHashMap<Long,MediaBean> mediaMap = null;
     
     private static ConcurrentHashMap<String,Set<String>> adMediaMap = null;
     
@@ -207,7 +207,7 @@ public class RtbFlowControl {
         adMediaMap = new ConcurrentHashMap<>();
         bidList = new ArrayList<AdBidBean>();
         weekAndDayNumMap = new ConcurrentHashMap<String,Integer>();
-        mediaMap = new ConcurrentHashMap<Integer,MediaBean>();
+        mediaMap = new ConcurrentHashMap<Long,MediaBean>();
         adLocationSet = Collections.synchronizedSet(new HashSet<String>());
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
@@ -288,9 +288,9 @@ public class RtbFlowControl {
                 mapAd.put(uid, adBean);
                 
               //更新广告单元媒体投放缓存
-                List<Integer> adMediaList = adBean.getMediaIdList();
+                List<Long> adMediaList = adBean.getMediaIdList();
 
-                for(Integer mediaId:adMediaList){
+                for(Long mediaId:adMediaList){
                 	if(mediaMap.containsKey(mediaId)){
                 		MediaBean media = mediaMap.get(mediaId);
                 		String mediaAdxAndPackage = media.getAdxId()+"_"+media.getPackageName();
@@ -695,9 +695,9 @@ public class RtbFlowControl {
     		return;
     	}
     	for(AdLocationBean adLocation:adLocationList){
-    		Integer adxId = adLocation.getAdxId();
+    		Long adxId = adLocation.getAdxId();
     		MediaBean media = adLocation.getMedia();
-    		Integer mediaAdx = null;
+    		Long mediaAdx = null;
     		String mediaAppPackageName = null;
     		if(media != null){
     			mediaAdx = media.getAdxId();

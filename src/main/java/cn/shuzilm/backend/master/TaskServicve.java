@@ -800,14 +800,14 @@ public class TaskServicve extends Service {
 			rl = select.select(sql);
 			for(ResultMap rm : rl){
 				MediaBean media = new MediaBean();
-				media.setId(rm.getInteger("id"));
-				media.setAdxId(rm.getInteger("adx_id"));
+				media.setId(rm.getLong("id"));
+				media.setAdxId(rm.getLong("adx_id"));
 				media.setPackageName(rm.getString("package_name"));
 				media.setAppName(rm.getString("name"));
 				media.setMediaType(rm.getInteger("media_type"));
 				media.setSetOther(rm.getInteger("set_other"));
 				media.setIsMaster(rm.getInteger("is_master"));
-				media.setMasterMediaId(rm.getInteger("master_media_id"));
+				media.setMasterMediaId(rm.getLong("master_media_id"));
 				media.setOpStatus(rm.getInteger("op_status"));
 				media.setMediaStatus(rm.getInteger("media_status"));
 				mediaList.add(media);
@@ -824,7 +824,7 @@ public class TaskServicve extends Service {
      * 根据媒体ID查询媒体
      * @return
      */
-    public MediaBean queryMediaById(Integer id){
+    public MediaBean queryMediaById(Long id){
     	Object arr[] = new Object[1];
     	arr[0] = id;
     	String sql = "SELECT * FROM media where op_status = 1 and media_status = 1 and id = ?";
@@ -834,14 +834,14 @@ public class TaskServicve extends Service {
 			if(rm == null){
 				return null;
 			}
-			media.setId(rm.getInteger("id"));
-			media.setAdxId(rm.getInteger("adx_id"));
+			media.setId(rm.getLong("id"));
+			media.setAdxId(rm.getLong("adx_id"));
 			media.setPackageName(rm.getString("package_name"));
 			media.setAppName(rm.getString("name"));
 			media.setMediaType(rm.getInteger("media_type"));
 			media.setSetOther(rm.getInteger("set_other"));
 			media.setIsMaster(rm.getInteger("is_master"));
-			media.setMasterMediaId(rm.getInteger("master_media_id"));
+			media.setMasterMediaId(rm.getLong("master_media_id"));
 			media.setOpStatus(rm.getInteger("op_status"));
 			media.setMediaStatus(rm.getInteger("media_status"));			
 			return media;
@@ -856,17 +856,17 @@ public class TaskServicve extends Service {
      * @param adUid
      * @return
      */
-    public ArrayList<Integer> queryMediaIdByAdUid(String adUid){
+    public ArrayList<Long> queryMediaIdByAdUid(String adUid){
     	Object arr[] = new Object[1];
     	arr[0] = adUid;
     	String sql = "SELECT media_uid from map_ad_media where ad_uid = ? and deleted = 0";
-    	ArrayList<Integer> mediaIdList = new ArrayList<Integer>();
+    	ArrayList<Long> mediaIdList = new ArrayList<Long>();
     	ResultList rl = new ResultList(); 
     	try {
 			rl = select.select(sql,arr);
 			for(ResultMap rm : rl){
-				Integer mediaId = rm.getInteger("media_uid");
-				ArrayList<Integer> mediaIdTempList = queryMediaIdByMasterMediaId(mediaId);
+				Long mediaId = rm.getLong("media_uid");
+				ArrayList<Long> mediaIdTempList = queryMediaIdByMasterMediaId(mediaId);
 				if(mediaIdTempList != null && !mediaIdTempList.isEmpty()){
 					mediaIdList.addAll(mediaIdTempList);
 				}
@@ -880,16 +880,16 @@ public class TaskServicve extends Service {
 		}
     }
     
-    public ArrayList<Integer> queryMediaIdByMasterMediaId(Integer masterMediaId){
+    public ArrayList<Long> queryMediaIdByMasterMediaId(Long masterMediaId){
     	Object arr[] = new Object[1];
     	arr[0] = masterMediaId;
     	String sql = "SELECT id from media where master_media_id <> 0 and master_media_id = ?";
-    	ArrayList<Integer> mediaIdList = new ArrayList<Integer>();
+    	ArrayList<Long> mediaIdList = new ArrayList<Long>();
     	ResultList rl = new ResultList(); 
     	try {
 			rl = select.select(sql,arr);
 			for(ResultMap rm : rl){
-				Integer mediaId = rm.getInteger("id");				
+				Long mediaId = rm.getLong("id");				
 				mediaIdList.add(mediaId);
 			}
 			
@@ -912,12 +912,12 @@ public class TaskServicve extends Service {
     		rl = select.select(sql);
     		for(ResultMap rm:rl){
     			AdLocationBean adLocation = new AdLocationBean();
-    			Integer id = rm.getInteger("id");  		
+    			Long id = rm.getLong("id");  		
     			String type = rm.getString("type");
     			String fields = rm.getString("fields");
-    			Integer mediaId = rm.getInteger("media_id");
+    			Long mediaId = rm.getLong("media_id");
     			adLocation.setId(id);
-    			adLocation.setAdxId(rm.getInteger("adx_id"));
+    			adLocation.setAdxId(rm.getLong("adx_id"));
     			adLocation.setMediaId(mediaId);
     			adLocation.setAdLocationId(rm.getString("place_id"));
     			adLocation.setType(type);
@@ -935,7 +935,7 @@ public class TaskServicve extends Service {
     	}
     }
  
-    public AdLocationItemBean queryAdLocationItemLit(Integer id){
+    public AdLocationItemBean queryAdLocationItemLit(Long id){
     	Object arr[] = new Object[1];
     	arr[0] = id;
     	String sql = "SELECT * FROM adx_media_placement_item where placement_id = ? order by item_limit_key";

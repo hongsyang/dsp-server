@@ -407,5 +407,8 @@ public class JedisQueueManager {
 //    	removeAll("pixel-00"+i+"_tdown");
 //    	//removeAll("rtb-00"+"_tdown");
 //    	}
+    	removeAll("rtb-100_ad");
+    	removeAll("rtb-100_tdown");
+    	
 	}
 }

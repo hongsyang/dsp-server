@@ -1254,7 +1254,7 @@ public class AdFlowControl {
                 Integer mediaForm = map.getInteger("media_form");
                 ad.setMediaForm(mediaForm);
                 if(mediaForm != null){
-            		List<Integer> mediaIdList = taskService.queryMediaIdByAdUid(adUid);
+            		List<Long> mediaIdList = taskService.queryMediaIdByAdUid(adUid);
             		ad.setMediaIdList(mediaIdList);
                 }
                 ad.setCreativeForm(map.getInteger("creative_form"));

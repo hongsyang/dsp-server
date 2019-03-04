@@ -10,17 +10,17 @@ public class AdLocationBean implements ICommand{
 
 	private static final long serialVersionUID = -1221535425557016424L;
 	
-	private Integer id;
+	private Long id;
 	
 	/**
 	 * ADXID
 	 */
-	private Integer adxId;
+	private Long adxId;
 	
 	/**
 	 * 媒体ID
 	 */
-	private Integer mediaId;
+	private Long mediaId;
 	
 	/**
 	 * 广告位ID
@@ -48,27 +48,27 @@ public class AdLocationBean implements ICommand{
 	
 	private MediaBean media;
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
-	public Integer getAdxId() {
+	public Long getAdxId() {
 		return adxId;
 	}
 
-	public void setAdxId(Integer adxId) {
+	public void setAdxId(Long adxId) {
 		this.adxId = adxId;
 	}
 
-	public Integer getMediaId() {
+	public Long getMediaId() {
 		return mediaId;
 	}
 
-	public void setMediaId(Integer mediaId) {
+	public void setMediaId(Long mediaId) {
 		this.mediaId = mediaId;
 	}
 

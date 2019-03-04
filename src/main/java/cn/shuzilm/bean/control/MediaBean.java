@@ -5,7 +5,7 @@ public class MediaBean {
 	/**
 	 * 媒体ID
 	 */
-	private Integer id;
+	private Long id;
 	
 	/**
 	 * 包名
@@ -20,7 +20,7 @@ public class MediaBean {
 	/**
 	 * ADXID
 	 */
-	private Integer adxId;
+	private Long adxId;
 	
 	/**
 	 * 媒体类型
@@ -40,7 +40,7 @@ public class MediaBean {
 	/**
 	 * 所属朱媒体ID
 	 */
-	private Integer masterMediaId;
+	private Long masterMediaId;
 	
 	/**
 	 * 启用状态
@@ -53,11 +53,11 @@ public class MediaBean {
 	private Integer mediaStatus;
 	
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -77,11 +77,11 @@ public class MediaBean {
 		this.appName = appName;
 	}
 
-	public Integer getAdxId() {
+	public Long getAdxId() {
 		return adxId;
 	}
 
-	public void setAdxId(Integer adxId) {
+	public void setAdxId(Long adxId) {
 		this.adxId = adxId;
 	}
 
@@ -109,11 +109,11 @@ public class MediaBean {
 		this.isMaster = isMaster;
 	}
 
-	public Integer getMasterMediaId() {
+	public Long getMasterMediaId() {
 		return masterMediaId;
 	}
 
-	public void setMasterMediaId(Integer masterMediaId) {
+	public void setMasterMediaId(Long masterMediaId) {
 		this.masterMediaId = masterMediaId;
 	}
 
