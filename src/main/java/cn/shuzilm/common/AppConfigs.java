@@ -61,36 +61,36 @@ public class AppConfigs {
         return instance.get(name);
     }
 
-    public synchronized void reload() {
-        Map<String, String> configsTemp = new ConcurrentHashMap<String, String>();
-        log.debug("reload AppConfigs");
-        Properties props = new Properties();
-        try {
-            URL url = this.getClass().getClassLoader().getResource(configFile);
-            InputStream in = url.openStream();
-            props.load(in);
-            Enumeration en = props.propertyNames();
-            while (en.hasMoreElements()) {
-                String key = (String) en.nextElement();
-                String value = props.getProperty(key);
-                configsTemp.put(key, value);
-            }
-        } catch (Exception e) {
-            log.error("reload AppConfigs error:" + e.getMessage());
-            return;
-        }
-        configs = configsTemp;
-    }
+//    public synchronized void reload() {
+//        Map<String, String> configsTemp = new ConcurrentHashMap<String, String>();
+//        log.debug("reload AppConfigs");
+//        Properties props = new Properties();
+//        try {
+//            URL url = this.getClass().getClassLoader().getResource(configFile);
+//            InputStream in = url.openStream();
+//            props.load(in);
+//            Enumeration en = props.propertyNames();
+//            while (en.hasMoreElements()) {
+//                String key = (String) en.nextElement();
+//                String value = props.getProperty(key);
+//                configsTemp.put(key, value);
+//            }
+//        } catch (Exception e) {
+//            log.error("reload AppConfigs error:" + e.getMessage());
+//            return;
+//        }
+//        configs = configsTemp;
+//    }
 
     public void init(String name) {
-        log.debug("init AppConfigs");
+        log.debug("init AppConfigs :{}" ,name);
         Properties props = new Properties();
         try {
 //            URL url = this.getClass().getClassLoader().getResource(name);
             //测试环境
 //            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties";
             //正式环境
-            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties" + name;
+            String FileName = "/home/srvadmin/dsp/" + name;
 //            InputStream in = url.openStream();
             //读取属性文件a.properties
             InputStream fis = new BufferedInputStream(new FileInputStream(FileName));

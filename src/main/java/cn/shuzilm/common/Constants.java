@@ -15,7 +15,7 @@ public class Constants {
             //测试环境
 //            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties";
             //正式环境
-            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties";
+            String FileName = "/home/srvadmin/dsp/rtb.properties";
             //读取属性文件a.properties
             InputStream fis = new BufferedInputStream(new FileInputStream(FileName));
 //            InputStream fis = Constants.class.getClassLoader().getResourceAsStream("rtb.properties");
