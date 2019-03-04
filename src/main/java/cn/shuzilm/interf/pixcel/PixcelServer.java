@@ -1,11 +1,7 @@
 package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
-import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisQueueManager;
-import cn.shuzilm.common.jedis.Priority;
-import cn.shuzilm.interf.pixcel.parser.AdViewClickParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.ChannelPipeline;
@@ -18,12 +14,10 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.reflections.Reflections;
 
 import java.net.InetSocketAddress;
-import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 /**
  * @Description: PixcelServer 用于监听曝光量和点击量

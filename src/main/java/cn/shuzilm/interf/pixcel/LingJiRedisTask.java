@@ -1,6 +1,6 @@
 package cn.shuzilm.interf.pixcel;
 
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +23,8 @@ public class LingJiRedisTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object lingjiexp = JedisQueueManager.getElementFromQueue("lingjiexp");
-                Object lingjiimp = JedisQueueManager.getElementFromQueue("lingjiimp");
+                Object lingjiexp = RedisQueueManager.getElementFromQueue("lingjiexp");
+                Object lingjiimp = RedisQueueManager.getElementFromQueue("lingjiimp");
                 if (lingjiexp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     LingJiExpParameterParserImpl.parseUrlStr(lingjiexp.toString());

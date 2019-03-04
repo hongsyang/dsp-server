@@ -1,8 +1,8 @@
 package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
 import cn.shuzilm.interf.pixcel.parser.RequestParser;
 import cn.shuzilm.util.Help;
@@ -93,7 +93,7 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 if (urlParser.size()>0){
                     redisStr = urlParser.get(0);
                     if(redisStr.contains("lingji")|redisStr.contains("adview")|redisStr.contains("youyi")|redisStr.contains("tencent")){
-                        boolean b = JedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
+                        boolean b = RedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
                         if (b) {
 
                         } else {

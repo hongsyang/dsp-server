@@ -133,7 +133,7 @@ public class TencentExpParameterParserImpl implements ParameterParser {
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             MDC.put("sift", "TencentExp");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
-            MDC.put("phoenix", "Exp");
+            MDC.put("phoenix", "Nurl");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",

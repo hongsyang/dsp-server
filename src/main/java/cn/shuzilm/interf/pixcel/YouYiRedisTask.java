@@ -1,6 +1,6 @@
 package cn.shuzilm.interf.pixcel;
 
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +22,8 @@ public class YouYiRedisTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object youyiexp = JedisQueueManager.getElementFromQueue("youyiexp");
-                Object youyiimp = JedisQueueManager.getElementFromQueue("youyiimp");
+                Object youyiexp = RedisQueueManager.getElementFromQueue("youyiexp");
+                Object youyiimp = RedisQueueManager.getElementFromQueue("youyiimp");
                 if (youyiimp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     YouYiImpParameterParserImpl.parseUrlStr(youyiimp.toString());
