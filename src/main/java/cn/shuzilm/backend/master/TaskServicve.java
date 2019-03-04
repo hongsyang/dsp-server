@@ -656,76 +656,92 @@ public class TaskServicve extends Service {
 		}
     }
     
+    public void test(){
+    	String sql= "select * from media limit 1";
+    	ResultList rl = new ResultList();
+    	try {
+			rl = select.select(sql);
+			for(ResultMap rm : rl){
+				Integer i = rm.getInteger("media_type");
+				System.out.println(i);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    }
+    
     
     public static void main(String[] args) {
     	TaskServicve task = new TaskServicve();
-    	AdNoticeDetailBean adNoticeDetail = new AdNoticeDetailBean();
-    	adNoticeDetail.setAdUid("123");
-    	adNoticeDetail.setAdName("test");
-    	adNoticeDetail.setAdvertiserUid("123");
-    	adNoticeDetail.setAdvertiserName("TEST");
-    	adNoticeDetail.setWinNums(10000);
-    	adNoticeDetail.setClickNums(12);
-    	adNoticeDetail.setBidNums(100000);
-    	adNoticeDetail.setWinRatio(adNoticeDetail.getWinNums()*1.0f/adNoticeDetail.getBidNums());
-    	adNoticeDetail.setClickRatio(adNoticeDetail.getClickNums()*1.0f/adNoticeDetail.getWinNums());
-    	try {
-			//task.insertDataToNoticeDetailPerHour(adNoticeDetail);
-    		//Map map = task.getNoticeDetailByHourPerDay();
-    		long timeNow = System.currentTimeMillis();
-           long timeBefore = timeNow - 10 * 60 *1000;
-//    		List<FlowControlBean> list = task.getAdxFlowControl(timeBefore);
-//    		System.out.println(list);
-//    		ResultMap balanceMap = task.queryAdviserAccountById("1e3ebfc0-db29-49fc-b39f-82543606e887");
-//    		Integer updatedAt = balanceMap.getInteger("updated_at");
+    	task.test();
+//    	AdNoticeDetailBean adNoticeDetail = new AdNoticeDetailBean();
+//    	adNoticeDetail.setAdUid("123");
+//    	adNoticeDetail.setAdName("test");
+//    	adNoticeDetail.setAdvertiserUid("123");
+//    	adNoticeDetail.setAdvertiserName("TEST");
+//    	adNoticeDetail.setWinNums(10000);
+//    	adNoticeDetail.setClickNums(12);
+//    	adNoticeDetail.setBidNums(100000);
+//    	adNoticeDetail.setWinRatio(adNoticeDetail.getWinNums()*1.0f/adNoticeDetail.getBidNums());
+//    	adNoticeDetail.setClickRatio(adNoticeDetail.getClickNums()*1.0f/adNoticeDetail.getWinNums());
+//    	try {
+//			//task.insertDataToNoticeDetailPerHour(adNoticeDetail);
+//    		//Map map = task.getNoticeDetailByHourPerDay();
 //    		long timeNow = System.currentTimeMillis();
-//            long timeBefore = timeNow - 10 * 60 * 1000;
-//            timeBefore  = timeBefore / 1000;
-//            if(updatedAt != null && updatedAt != 0 && updatedAt >= timeBefore){
-//            	System.out.println("ok");
-//            }
-//    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//    		String s = specDateFM.format(new Date(timeBefore));
-//    		System.out.println(s);
-           //ResultList adList = task.queryAdByUpTime(timeBefore);
-           //System.out.println(adList.size());
-           ConcurrentHashMap<String,AdBean> mapAd = new ConcurrentHashMap<String,AdBean>();
-           
-           ResultList adList = task.queryAdByUpTime(0);
-           for(ResultMap map:adList){
-        	   AdBean ad = new AdBean();
-               ad.setAdUid(map.getString("uid"));
-               //广告组
-               String groupId = map.getString("group_uid");
-               ad.setGroupId(groupId);
-               mapAd.put(ad.getAdUid(), ad);
-           }
-           ConcurrentHashMap<String, ReportBean> reportMapTotal = task.statAdCostTotal();
-           Map<String, Double> map = new HashMap<>();
-           Iterator iter = reportMapTotal.entrySet().iterator();
-           while (iter.hasNext()) {
-        	   	Map.Entry entry = (Map.Entry) iter.next();
-        	   	String key = (String) entry.getKey();
-        	   	ReportBean value = (ReportBean) entry.getValue();
-        	   	AdBean ad = mapAd.get(key);
-        	   	if(ad != null){
-        	   		String groupId = ad.getGroupId();
-        	   		if(map.containsKey(groupId)){
-        	   			if(groupId.equals("58a38bd5-a8c0-4866-b988-926512c90a2b")){
-        	   				System.out.println(value.getExpense().doubleValue()*1000);
-        	   			}
-        	   			map.put(groupId, map.get(groupId)+value.getExpense().doubleValue()*1000);
-        	   		}else{
-        	   			map.put(groupId, value.getExpense().doubleValue()*1000);
-        	   		}
-        	   	}
-           }
-           System.out.println(map);
-           
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//           long timeBefore = timeNow - 10 * 60 *1000;
+////    		List<FlowControlBean> list = task.getAdxFlowControl(timeBefore);
+////    		System.out.println(list);
+////    		ResultMap balanceMap = task.queryAdviserAccountById("1e3ebfc0-db29-49fc-b39f-82543606e887");
+////    		Integer updatedAt = balanceMap.getInteger("updated_at");
+////    		long timeNow = System.currentTimeMillis();
+////            long timeBefore = timeNow - 10 * 60 * 1000;
+////            timeBefore  = timeBefore / 1000;
+////            if(updatedAt != null && updatedAt != 0 && updatedAt >= timeBefore){
+////            	System.out.println("ok");
+////            }
+////    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+////    		String s = specDateFM.format(new Date(timeBefore));
+////    		System.out.println(s);
+//           //ResultList adList = task.queryAdByUpTime(timeBefore);
+//           //System.out.println(adList.size());
+//           ConcurrentHashMap<String,AdBean> mapAd = new ConcurrentHashMap<String,AdBean>();
+//           
+//           ResultList adList = task.queryAdByUpTime(0);
+//           for(ResultMap map:adList){
+//        	   AdBean ad = new AdBean();
+//               ad.setAdUid(map.getString("uid"));
+//               //广告组
+//               String groupId = map.getString("group_uid");
+//               ad.setGroupId(groupId);
+//               mapAd.put(ad.getAdUid(), ad);
+//           }
+//           ConcurrentHashMap<String, ReportBean> reportMapTotal = task.statAdCostTotal();
+//           Map<String, Double> map = new HashMap<>();
+//           Iterator iter = reportMapTotal.entrySet().iterator();
+//           while (iter.hasNext()) {
+//        	   	Map.Entry entry = (Map.Entry) iter.next();
+//        	   	String key = (String) entry.getKey();
+//        	   	ReportBean value = (ReportBean) entry.getValue();
+//        	   	AdBean ad = mapAd.get(key);
+//        	   	if(ad != null){
+//        	   		String groupId = ad.getGroupId();
+//        	   		if(map.containsKey(groupId)){
+//        	   			if(groupId.equals("58a38bd5-a8c0-4866-b988-926512c90a2b")){
+//        	   				System.out.println(value.getExpense().doubleValue()*1000);
+//        	   			}
+//        	   			map.put(groupId, map.get(groupId)+value.getExpense().doubleValue()*1000);
+//        	   		}else{
+//        	   			map.put(groupId, value.getExpense().doubleValue()*1000);
+//        	   		}
+//        	   	}
+//           }
+//           System.out.println(map);
+//           
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
     
 }

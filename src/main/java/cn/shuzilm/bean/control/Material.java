@@ -172,7 +172,7 @@ public class Material implements ICommand {
 	}
 	
 	public static void main(String[] args) {
-		String s = "[1,\"3_111\"]";
+		String s = "[\"4_79\",\"4_113\"]";
 		Material m = new Material();
 		m.setApproved_adx(s);
 		System.out.println(m.getApprovedAdxSet());
