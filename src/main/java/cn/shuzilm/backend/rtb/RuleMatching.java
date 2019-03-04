@@ -643,7 +643,7 @@ public class RuleMatching {
 		} else {
 			gradeFlag = false;
 		}
-		if (ungradeList.size() == 1 || (ungradeList.size() > 1 && gradeFlag)) {
+		if (ungradeList.size() == 1 || (ungradeList.size() > 1 && gradeFlag) || (ungradeList.size() > 1 && gradeList.isEmpty())) {
 			AdBean ad = ungradeList.get(0);// 暂时获取第一个
 			// 封装返回接口引擎数据
 			LOG.debug("广告ID[" + ad.getAdUid() + "]广告主ID[" + ad.getAdvertiser().getUid() + "]通过排序获得竞价资格!");
