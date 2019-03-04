@@ -395,7 +395,7 @@ public class RuleMatching {
 			}
 			// 是否投当前的广告
 			if (!isAvaliable) {
-				LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				//LOG.debug("ID[" + adUid + "]广告不参与投放!");
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t广告投放策略触发广告停投\t";
 				adAvalableReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+0+"\t"+
@@ -423,7 +423,7 @@ public class RuleMatching {
 				}
 			}
 			if (!filterFlag) {
-				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
+				//LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t未匹配到满足要求的物料\t";
 				materialReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
@@ -644,7 +644,6 @@ public class RuleMatching {
 			gradeFlag = false;
 		}
 		
-		LOG.info("gradeList="+gradeList.size()+"\tungradeList"+ungradeList.size());
 		if (ungradeList.size() == 1 || (ungradeList.size() > 1 && gradeFlag) || (ungradeList.size() > 1 && gradeList.isEmpty())) {
 			AdBean ad = ungradeList.get(0);// 暂时获取第一个
 			// 封装返回接口引擎数据
