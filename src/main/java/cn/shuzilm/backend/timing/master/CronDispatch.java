@@ -51,12 +51,15 @@ public class CronDispatch {
 
     public static void main(String[] args) {
     	//程序初始化 加载程序
+    	AdFlowControl.getInstance().updateAndPushMediaList();
+    	
+    	AdFlowControl.getInstance().updateAndPushAdLocationList();
     	
     	AdFlowControl.getInstance().loadAllAdInterval(true);
         
         AdFlowControl.getInstance().loadAdInterval(true);
         
-        AdFlowControl.getInstance().checkAdCpmLimit(true);
+//        AdFlowControl.getInstance().checkAdCpmLimit(true);
                
         // 初始化CPC结算方式的广告的 阈值和moniter
         CPCHandler.getInstance().updateIndicator(true);
@@ -67,7 +70,7 @@ public class CronDispatch {
         AdFlowControl.getInstance().updateFlow();
         
         AdFlowControl.getInstance().updateAdxAndAppFlowControl(true);
-        
+ 
           // 5 s 触发
         CronDispatch.startTimer(0);
 //        //  每小时触发
@@ -95,7 +98,11 @@ public class CronDispatch {
         
         CronDispatch.startTimer(11);
         
-        CronDispatch.startTimer(12);
+ //       CronDispatch.startTimer(12);
+        
+        CronDispatch.startTimer(13);
+        
+        CronDispatch.startTimer(14);
     }
 
     /**
@@ -145,9 +152,15 @@ public class CronDispatch {
            case 11:
                dispatch(PushFlowTaskPerTenMinute.class,"0 0/10 * * * ?");
                break;        
-//           case 12:
-//        	   dispatch(CheckAdLimitTask.class,"0/10 * * * * ?");
-        	   
+           case 12:
+        	   dispatch(CheckAdLimitTask.class,"0/10 * * * * ?");
+        	   break;
+           case 13:
+        	   dispatch(UpdateAndPushMediaTask.class,"0 0/10 * * * ?");
+        	   break;  
+           case 14:
+        	   dispatch(UpdateAndPushAdLocationTask.class,"0 0/10 * * * ?");
+        	   break;
            default:
                break;
        }

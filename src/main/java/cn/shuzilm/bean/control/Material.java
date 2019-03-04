@@ -2,6 +2,7 @@ package cn.shuzilm.bean.control;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,12 +20,12 @@ public class Material implements ICommand {
 	/**
      * 创意类型： banner interstitial 插屏<br> fullscreen 全屏广告<br> feed 信息流 <br> text 文字链
      */
-	private String type;
-	private String fileName;//物料文件名
-	private String ext;//文件扩展名/文件类型
-	private int size;//文件大小(字节)
-	private int width;//素材宽度
-	private int height;//素材高度
+	//private String type;
+	//private String fileName;//物料文件名
+	//private String ext;//文件扩展名/文件类型
+	//private int size;//文件大小(字节)
+	//private int width;//素材宽度
+	//private int height;//素材高度
 	private long createdAt;//创建时间
 	private String createdBy;//创建者
 	private long updatedAt;//更新时间
@@ -39,6 +40,8 @@ public class Material implements ICommand {
 	private String auditId;//推审ID
 	
 	private Map<String,String> auditIdMap;
+	
+	private List<Image> imageList;
 
 	public String getUid() {
 		return uid;
@@ -57,42 +60,6 @@ public class Material implements ICommand {
 	}
 	public void setCreativeUid(String creativeUid) {
 		this.creativeUid = creativeUid;
-	}
-	public String getType() {
-		return type;
-	}
-	public void setType(String type) {
-		this.type = type;
-	}
-	public String getFileName() {
-		return fileName;
-	}
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-	public String getExt() {
-		return ext;
-	}
-	public void setExt(String ext) {
-		this.ext = ext;
-	}
-	public int getSize() {
-		return size;
-	}
-	public void setSize(int size) {
-		this.size = size;
-	}
-	public int getWidth() {
-		return width;
-	}
-	public void setWidth(int width) {
-		this.width = width;
-	}
-	public int getHeight() {
-		return height;
-	}
-	public void setHeight(int height) {
-		this.height = height;
 	}
 	public long getCreatedAt() {
 		return createdAt;
@@ -171,8 +138,14 @@ public class Material implements ICommand {
 		return auditIdMap;
 	}
 	
+	public List<Image> getImageList() {
+		return imageList;
+	}
+	public void setImageList(List<Image> imageList) {
+		this.imageList = imageList;
+	}
 	public static void main(String[] args) {
-		String s = "[\"4_79\",\"4_113\"]";
+		String s = "[1,\"3_111\"]";
 		Material m = new Material();
 		m.setApproved_adx(s);
 		System.out.println(m.getApprovedAdxSet());

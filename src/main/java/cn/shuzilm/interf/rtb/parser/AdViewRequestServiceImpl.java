@@ -344,14 +344,14 @@ public class AdViewRequestServiceImpl implements RequestService {
         if (instl == 0 | instl == 4 | instl == 1) {
             bid.setAdmt(1);//duFlowBean.getAdmt()广告类型
             bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid()广告物料 ID
-            bid.setAdi(duFlowBean.getAdm());//图片路径 duFlowBean.getAdm() 广告物料html数据
+            bid.setAdi(duFlowBean.getAdmMap().get(0));//图片路径 duFlowBean.getAdm() 广告物料html数据
             bid.setAdh(duFlowBean.getAdh());//duFlowBean.getAdh()广告物料高度
             bid.setAdw(duFlowBean.getAdw());//duFlowBean.getAdw()广告物料宽度
         } else if (instl == 5) {
             bid.setAdmt(6);//duFlowBean.getAdmt()广告类型  视频广告
             ResponseVideo responseVideo = new ResponseVideo();
             responseVideo.setXmltype(2);
-            responseVideo.setVideourl(duFlowBean.getAdm());
+            responseVideo.setVideourl(duFlowBean.getAdmMap().get(0));
             responseVideo.setDuration(15);
             responseVideo.setWidth(duFlowBean.getAdw());
             responseVideo.setHeight(duFlowBean.getAdw());
@@ -392,13 +392,13 @@ public class AdViewRequestServiceImpl implements RequestService {
                     NativeRequestImage image = new NativeRequestImage();
                     image.setW(duFlowBean.getAdw());
                     image.setH(duFlowBean.getAdh());
-                    image.setUrl(duFlowBean.getAdm());
+                    image.setUrl(duFlowBean.getAdmMap().get(0));
                     assetsImg.setImg(image);
                     assetsList.add(assetsImg);
                 } else if (asset.getVideo() != null) {
                     NativeRequestVideo video = new NativeRequestVideo();
                     video.setXmltype(2);
-                    video.setVideourl(duFlowBean.getAdm());
+                    video.setVideourl(duFlowBean.getAdmMap().get(0));
                     video.setDuration(15);
                     video.setWidth(duFlowBean.getAdw());
                     video.setHeight(duFlowBean.getAdh());
