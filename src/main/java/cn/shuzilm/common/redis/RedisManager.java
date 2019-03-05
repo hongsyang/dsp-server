@@ -26,7 +26,7 @@ public class RedisManager {
 
     private static final Object lock2 = new Object();
 
-    private static final String FILE_REDIS_CONFIG = "configs_redis.properties";
+    private static final String FILE_REDIS_CONFIG = "configs_imp_redis.properties";
 
     private static HashMap<String,RedisManager> instanceMap = new HashMap<String,RedisManager>();
     private static volatile RedisManager ourInstance = null;

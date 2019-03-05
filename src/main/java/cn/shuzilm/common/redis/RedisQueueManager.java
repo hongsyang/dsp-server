@@ -1,6 +1,5 @@
 package cn.shuzilm.common.redis;
 
-import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.ObjectUtils;
 import cn.shuzilm.common.jedis.Priority;
 import org.apache.commons.lang.StringUtils;
@@ -21,9 +20,9 @@ public class RedisQueueManager {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisQueueManager.class);
 
-    private static JedisManager manager = JedisManager.getInstance();
+    private static RedisManager manager = RedisManager.getInstance();
     public static void init(){
-        manager = JedisManager.getInstance();
+        manager = RedisManager.getInstance();
     }
     /**
      * 放入指定队列
@@ -33,7 +32,7 @@ public class RedisQueueManager {
      * @param priority  优先级 默认是NORM_PRIORITY
      * @return true，成功; false,失败
      */
-    public static boolean putElementToQueue(String queueName, Object value, Priority priority,JedisManager manager,String configFileName) {
+    public static boolean putElementToQueue(String queueName, Object value, Priority priority,RedisManager manager,String configFileName) {
         if (StringUtils.isEmpty(queueName)) {
             logger.error("Queue Name should not be null");
             return false;
@@ -101,7 +100,7 @@ public class RedisQueueManager {
             manager.returnResource(jedis);
         }
     }
-    public static String getStringFromQueue(String queueName,JedisManager manager,String configFileName) {
+    public static String getStringFromQueue(String queueName,RedisManager manager,String configFileName) {
         Jedis jedis = null;
         try {
             jedis = manager.getResource(configFileName);
@@ -124,7 +123,7 @@ public class RedisQueueManager {
      * @param queueName
      * @return null or value
      */
-    public static Object getElementFromQueue(String queueName,JedisManager manager,String configFileName) {
+    public static Object getElementFromQueue(String queueName,RedisManager manager,String configFileName) {
         if (StringUtils.isEmpty(queueName)) {
             logger.error("Queue Name should not be null");
             return null;
@@ -140,7 +139,7 @@ public class RedisQueueManager {
             manager.returnResource(jedis);
         }
     }
-    public static boolean putStringToQueue(String queueName, String value,JedisManager manager,String configFileName) {
+    public static boolean putStringToQueue(String queueName, String value,RedisManager manager,String configFileName) {
         Jedis jedis = null;
         try {
             jedis = manager.getResource(configFileName);
