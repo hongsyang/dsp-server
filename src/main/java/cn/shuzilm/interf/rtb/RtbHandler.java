@@ -72,7 +72,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     public RtbHandler(ExecutorService executor) {
         parser = new RtbRequestParser();
         this.executor = executor;
-        log.debug("ExecutorService: {}" , executor);
+        log.debug("ExecutorService: {}", executor);
     }
 
     @Override
@@ -119,7 +119,6 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             byte[] content = null;
 
 
-
             //增加超时线程池
             Future<Object> future = executor.submit(new Callable<Object>() {
                 @Override
@@ -141,18 +140,21 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 log.error("超时timeMs:{},url:{}", end - start, url);
                 MDC.remove("sift");
                 String resultData = result;
-                if (resultData.contains("204session_id")){
+                if (resultData.contains("204session_id")) {
                     BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                     String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
                     builder.setSessionId(substring);
-                    builder.setAds(0, builder.getAds(0));
+//                    builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
                     content = builder.build().toByteArray();
                     response.setHeader("Content-Length", content.length);
                     ChannelBuffer buffer = new DynamicChannelBuffer(2048);
                     buffer.writeBytes(content);
                     response.setContent(buffer);
-                }else {
+                } else {
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
+                    ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+                    buffer.writeBytes(content);
+                    response.setContent(buffer);
                 }
                 ChannelFuture future1 = messageEvent.getChannel().write(response);
                 future1.addListener(ChannelFutureListener.CLOSE);
@@ -169,7 +171,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //                response.setStatus(HttpResponseStatus.NO_CONTENT);
                 String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
                 builder.setSessionId(substring);
-                builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
+//                builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
                 content = builder.build().toByteArray();
             } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
@@ -204,9 +206,13 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             long end = System.currentTimeMillis();
             MDC.put("sift", "rtb-exception");
             log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
-            log.debug("timeMs:{},Exception:{}", end - start, e);
+            log.error("timeMs:{},Exception:{}", end - start, e);
             MDC.remove("sift");
             response.setStatus(HttpResponseStatus.NO_CONTENT);
+            ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+            byte[] content = null;
+            buffer.writeBytes(content);
+            response.setContent(buffer);
             ChannelFuture future1 = messageEvent.getChannel().write(response);
             future1.addListener(ChannelFutureListener.CLOSE);
 
@@ -337,7 +343,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 MDC.remove("phoenix");
             } catch (Exception e1) {
                 MDC.put("sift", "rtb-exception");
-                log.debug("最后的异常Exception:{}", e1);
+                log.error("最后的异常Exception:{}", e1);
                 MDC.remove("sift");
             }
 

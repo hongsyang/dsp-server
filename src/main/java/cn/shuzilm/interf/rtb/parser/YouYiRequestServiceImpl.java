@@ -241,30 +241,29 @@ public class YouYiRequestServiceImpl implements RequestService {
         youYiAd.setBid_price((int) biddingPrice);
         youYiAd.setAdvertiser_id(targetDuFlowBean.getAdvertiserUid());//广告主id
         youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
-        //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid() +
+                "&bidid=" + targetDuFlowBean.getBidid().substring(0,20) +
                 "&impid=" + youYiAdzone.getAdz_id() +
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&price=" + "__PRICE__" +
+                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
                 "&dcit=" + targetDuFlowBean.getCity() +// 市
+                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
+                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
-                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+        //曝光通知Nurl
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
