@@ -330,7 +330,7 @@ public class TaskServicve extends Service {
         Object[] arr = new Object[1];
         arr[0] = timeBefore / 1000;
         arr[0] = specDateFM.format(new Date(timeBefore));
-        String sql = "SELECT m.a.ad_uid,a.* FROM creative_group a JOIN map_ad_creative m ON m.creative_group_uid = a.uid where refresh_ts >= ? and a.deleted = 0";
+        String sql = "SELECT m.ad_uid,a.* FROM creative_group a JOIN map_ad_creative m ON m.creative_group_uid = a.uid where refresh_ts >= ? and a.deleted = 0";
         try {           
             ResultList list =  select.select(sql,arr);
             for(ResultMap cMap : list) {
@@ -800,14 +800,16 @@ public class TaskServicve extends Service {
 			rl = select.select(sql);
 			for(ResultMap rm : rl){
 				MediaBean media = new MediaBean();
-				media.setId(rm.getLong("id"));
-				media.setAdxId(rm.getLong("adx_id"));
-				media.setPackageName(rm.getString("package_name"));
+				Long mediaId = rm.getLong("id");
+				media.setId(mediaId);
+				media.setAdxId(rm.getInteger("adx_id"));
+				List<String> packageNameList = queryPackageNameByMediaId(mediaId);
+				media.setPackageNameList(packageNameList);
 				media.setAppName(rm.getString("name"));
 				media.setMediaType(rm.getInteger("media_type"));
 				media.setSetOther(rm.getInteger("set_other"));
 				media.setIsMaster(rm.getInteger("is_master"));
-				media.setMasterMediaId(rm.getLong("master_media_id"));
+				media.setMasterMediaId(rm.getInteger("master_media_id").longValue());
 				media.setOpStatus(rm.getInteger("op_status"));
 				media.setMediaStatus(rm.getInteger("media_status"));
 				mediaList.add(media);
@@ -817,6 +819,25 @@ public class TaskServicve extends Service {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return mediaList;
+		}
+    }
+    
+    public ArrayList<String> queryPackageNameByMediaId(Long mediaId){
+    	Object arr[] = new Object[1];
+    	arr[0] = mediaId;
+    	String sql = "SELECT package_name FROM map_media_package where media_id = ? and deleted = 0";
+    	ResultList rl = new ResultList(); 
+    	ArrayList<String> packageNameList = new ArrayList<String>();
+    	try {
+			rl = select.select(sql,arr);
+			for(ResultMap rm : rl){
+				packageNameList.add(rm.getString("package_name"));
+			}
+			
+			return packageNameList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return packageNameList;
 		}
     }
     
@@ -834,14 +855,16 @@ public class TaskServicve extends Service {
 			if(rm == null){
 				return null;
 			}
-			media.setId(rm.getLong("id"));
-			media.setAdxId(rm.getLong("adx_id"));
-			media.setPackageName(rm.getString("package_name"));
+			Long mediaId = rm.getLong("id");
+			media.setId(mediaId);
+			media.setAdxId(rm.getInteger("adx_id"));
+			List<String> packageNameList = queryPackageNameByMediaId(mediaId);
+			media.setPackageNameList(packageNameList);
 			media.setAppName(rm.getString("name"));
 			media.setMediaType(rm.getInteger("media_type"));
 			media.setSetOther(rm.getInteger("set_other"));
 			media.setIsMaster(rm.getInteger("is_master"));
-			media.setMasterMediaId(rm.getLong("master_media_id"));
+			media.setMasterMediaId(rm.getInteger("master_media_id").longValue());
 			media.setOpStatus(rm.getInteger("op_status"));
 			media.setMediaStatus(rm.getInteger("media_status"));			
 			return media;
@@ -865,7 +888,7 @@ public class TaskServicve extends Service {
     	try {
 			rl = select.select(sql,arr);
 			for(ResultMap rm : rl){
-				Long mediaId = rm.getLong("media_uid");
+				Long mediaId = rm.getInteger("media_uid").longValue();
 				ArrayList<Long> mediaIdTempList = queryMediaIdByMasterMediaId(mediaId);
 				if(mediaIdTempList != null && !mediaIdTempList.isEmpty()){
 					mediaIdList.addAll(mediaIdTempList);
@@ -912,12 +935,12 @@ public class TaskServicve extends Service {
     		rl = select.select(sql);
     		for(ResultMap rm:rl){
     			AdLocationBean adLocation = new AdLocationBean();
-    			Long id = rm.getLong("id");  		
+    			Long id = rm.getInteger("id").longValue();  		
     			String type = rm.getString("type");
     			String fields = rm.getString("fields");
-    			Long mediaId = rm.getLong("media_id");
+    			Long mediaId = rm.getInteger("media_id").longValue();
     			adLocation.setId(id);
-    			adLocation.setAdxId(rm.getLong("adx_id"));
+    			adLocation.setAdxId(rm.getInteger("adx_id").longValue());
     			adLocation.setMediaId(mediaId);
     			adLocation.setAdLocationId(rm.getString("place_id"));
     			adLocation.setType(type);
@@ -946,12 +969,12 @@ public class TaskServicve extends Service {
     		for(ResultMap rm:rl){
     			String itemLimitKey = rm.getString("item_limit_key");
     			if(itemLimitKey.contains("_width")){
-    				String nameAndWidth [] = itemLimitKey.split("_");
-    				item.setWidth(Integer.parseInt(nameAndWidth[1]));
+    				String itemLimitValue = rm.getString("item_limit_value");   				    				
+    				item.setWidth(Integer.parseInt(itemLimitValue));
     			}
     			if(itemLimitKey.contains("_height")){
-    				String nameAndHeight [] = itemLimitKey.split("_");
-    				item.setHeight(Integer.parseInt(nameAndHeight[1]));
+    				String itemLimitValue = rm.getString("item_limit_value");  
+    				item.setHeight(Integer.parseInt(itemLimitValue));
     			}
     		}
     		return item;
@@ -966,8 +989,7 @@ public class TaskServicve extends Service {
     	TaskServicve task = new TaskServicve();
     	
     	try {
-			List<WorkNodeBean> workList = task.getWorkNodeAll();
-           System.out.println(workList);
+    		task.queryAdLocationList();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

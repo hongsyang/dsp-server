@@ -1,5 +1,7 @@
 package cn.shuzilm.bean.control;
 
+import java.util.List;
+
 public class MediaBean {
 	
 	/**
@@ -10,7 +12,7 @@ public class MediaBean {
 	/**
 	 * 包名
 	 */
-	private String packageName;
+	private List<String> packageNameList;
 	
 	/**
 	 * 媒体名称
@@ -20,7 +22,7 @@ public class MediaBean {
 	/**
 	 * ADXID
 	 */
-	private Long adxId;
+	private Integer adxId;
 	
 	/**
 	 * 媒体类型
@@ -61,12 +63,12 @@ public class MediaBean {
 		this.id = id;
 	}
 
-	public String getPackageName() {
-		return packageName;
+	public List<String> getPackageNameList() {
+		return packageNameList;
 	}
 
-	public void setPackageName(String packageName) {
-		this.packageName = packageName;
+	public void setPackageNameList(List<String> packageNameList) {
+		this.packageNameList = packageNameList;
 	}
 
 	public String getAppName() {
@@ -77,11 +79,11 @@ public class MediaBean {
 		this.appName = appName;
 	}
 
-	public Long getAdxId() {
+	public Integer getAdxId() {
 		return adxId;
 	}
 
-	public void setAdxId(Long adxId) {
+	public void setAdxId(Integer adxId) {
 		this.adxId = adxId;
 	}
 
@@ -108,6 +110,7 @@ public class MediaBean {
 	public void setIsMaster(Integer isMaster) {
 		this.isMaster = isMaster;
 	}
+
 
 	public Long getMasterMediaId() {
 		return masterMediaId;

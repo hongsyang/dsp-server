@@ -293,7 +293,9 @@ public class RtbFlowControl {
                 for(Long mediaId:adMediaList){
                 	if(mediaMap.containsKey(mediaId)){
                 		MediaBean media = mediaMap.get(mediaId);
-                		String mediaAdxAndPackage = media.getAdxId()+"_"+media.getPackageName();
+                		List<String> packageNameList = media.getPackageNameList();
+                		for(String packageName:packageNameList){
+                		String mediaAdxAndPackage = media.getAdxId()+"_"+packageName;
                 		if (!adMediaMap.containsKey(uid)) {
                             Set<String> uidSet = new HashSet<String>();
                             uidSet.add(mediaAdxAndPackage);
@@ -304,6 +306,7 @@ public class RtbFlowControl {
                             	uidSet.add(mediaAdxAndPackage);
                             }
                         }
+                	}
                 	}
                 }
                 
@@ -697,11 +700,11 @@ public class RtbFlowControl {
     	for(AdLocationBean adLocation:adLocationList){
     		Long adxId = adLocation.getAdxId();
     		MediaBean media = adLocation.getMedia();
-    		Long mediaAdx = null;
-    		String mediaAppPackageName = null;
+    		Integer mediaAdx = null;
+    		List<String> mediaAppPackageNameList = new ArrayList<String>();
     		if(media != null){
     			mediaAdx = media.getAdxId();
-    			mediaAppPackageName = media.getPackageName();
+    			mediaAppPackageNameList = media.getPackageNameList();
     		}
     		String placeId = adLocation.getAdLocationId();
     		AdLocationItemBean item = adLocation.getAdLocationItem();
@@ -711,10 +714,12 @@ public class RtbFlowControl {
     			width = item.getWidth();
     			height = item.getHeight();
     		}
-    		String adLocationStr1 = adxId+"_"+mediaAdx+"_"+mediaAppPackageName+"_"+placeId;
-    		String adLocationStr2 = adxId+"_"+mediaAdx+"_"+mediaAppPackageName+"_"+width+"_"+height;
-    		adLocationSet.add(adLocationStr1);
-    		adLocationSet.add(adLocationStr2);
+    		for(String packageName:mediaAppPackageNameList){
+	    		String adLocationStr1 = adxId+"_"+mediaAdx+"_"+packageName+"_"+placeId;
+	    		String adLocationStr2 = adxId+"_"+mediaAdx+"_"+packageName+"_"+width+"_"+height;
+	    		adLocationSet.add(adLocationStr1);
+	    		adLocationSet.add(adLocationStr2);
+    		}
     	}
     }
 
