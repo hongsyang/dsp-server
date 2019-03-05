@@ -5,7 +5,7 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.net.URLDecoder;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -156,7 +155,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
 
             MDC.remove("phoenix");
             MDC.put("sift", "TencentImp");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+            boolean lingJiClick = RedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
             } else {
@@ -166,7 +165,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
         } catch (Exception e) {
             Help.sendAlert("发送到" + configs.getString("HOST")+"失败,TencentImp");
             MDC.put("sift", "exception");
-            boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+            boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到EXP_ERROR队列：{}", exp_error);
             log.debug("element:{}",JSON.toJSONString(element));
             log.error("异常信息:{}", e);

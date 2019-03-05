@@ -5,8 +5,7 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
 import cn.shuzilm.util.UrlParserUtil;
@@ -14,7 +13,6 @@ import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import redis.clients.jedis.Jedis;
 
 import java.net.URLDecoder;
 import java.time.LocalDateTime;
@@ -135,7 +133,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                     element.getDealid(), element.getAppId(), element.getBidid(),element.getIpAddr(),urlRequest.get("remoteIp"),
                     element.getMaterialId());
             MDC.remove("phoenix");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
+            boolean lingJiClick = RedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
             } else {
@@ -145,7 +143,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
         } catch (Exception e) {
             Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewClick");
             MDC.put("sift", "exception");
-            boolean click_error = JedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
+            boolean click_error = RedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到CLICK_ERROR队列：{}", click_error);
             log.debug("element:{}", JSON.toJSONString(element));
             log.error("异常信息:{}", e);

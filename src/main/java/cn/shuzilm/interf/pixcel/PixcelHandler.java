@@ -1,8 +1,8 @@
 package cn.shuzilm.interf.pixcel;
 
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
 import cn.shuzilm.interf.pixcel.parser.RequestParser;
 import cn.shuzilm.util.Help;
@@ -92,14 +92,17 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 String redisStr="";
                 if (urlParser.size()>0){
                     redisStr = urlParser.get(0);
-                    boolean b = JedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
-                    if (b) {
+                    if(redisStr.contains("lingji")|redisStr.contains("adview")|redisStr.contains("youyi")|redisStr.contains("tencent")){
+                        boolean b = RedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
+                        if (b) {
 
-                    } else {
-                        Help.sendAlert("发送到" + configs.getString("HOST") + "失败,PixcelHandler");
-                        MDC.put("sift", "urlRedisError");
-                        log.debug("url:{}，remoteIp:{}", url, remoteIp);
+                        } else {
+                            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,PixcelHandler");
+                            MDC.put("sift", "urlRedisError");
+                            log.debug("url:{}，remoteIp:{}", url, remoteIp);
+                        }
                     }
+
                 }
                 //是否发送到redis
 

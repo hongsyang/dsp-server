@@ -1,10 +1,8 @@
 package cn.shuzilm.interf.pixcel;
 
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.TencentExpParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.TencentImpParameterParserImpl;
-import cn.shuzilm.interf.pixcel.parser.YouYiExpParameterParserImpl;
-import cn.shuzilm.interf.pixcel.parser.YouYiImpParameterParserImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +24,8 @@ public class TencentRedisTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object tencentexp = JedisQueueManager.getElementFromQueue("tencentexp");
-                Object tencentimp = JedisQueueManager.getElementFromQueue("tencentimp");
+                Object tencentexp = RedisQueueManager.getElementFromQueue("tencentexp");
+                Object tencentimp = RedisQueueManager.getElementFromQueue("tencentimp");
                 if (tencentimp != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     TencentImpParameterParserImpl.parseUrlStr(tencentimp.toString());

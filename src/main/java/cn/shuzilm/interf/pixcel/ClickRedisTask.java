@@ -1,6 +1,6 @@
 package cn.shuzilm.interf.pixcel;
 
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +23,10 @@ public class ClickRedisTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object adviewclick = JedisQueueManager.getElementFromQueue("adviewclick");
-                Object youyiclick = JedisQueueManager.getElementFromQueue("youyiclick");
-                Object lingjiclick = JedisQueueManager.getElementFromQueue("lingjiclick");
-                Object tencentclick = JedisQueueManager.getElementFromQueue("tencentclick");
+                Object adviewclick = RedisQueueManager.getElementFromQueue("adviewclick");
+                Object youyiclick = RedisQueueManager.getElementFromQueue("youyiclick");
+                Object lingjiclick = RedisQueueManager.getElementFromQueue("lingjiclick");
+                Object tencentclick = RedisQueueManager.getElementFromQueue("tencentclick");
                 if (adviewclick != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     AdViewClickParameterParserImpl.parseUrlStr(adviewclick.toString());
