@@ -2,8 +2,10 @@ package cn.shuzilm.bean.control;
 
 import java.util.List;
 
-public class MediaBean {
+public class MediaBean implements ICommand{
 	
+	private static final long serialVersionUID = 3832866842789989932L;
+
 	/**
 	 * 媒体ID
 	 */

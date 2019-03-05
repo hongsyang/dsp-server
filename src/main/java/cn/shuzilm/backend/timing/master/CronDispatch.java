@@ -51,9 +51,6 @@ public class CronDispatch {
 
     public static void main(String[] args) {
     	//程序初始化 加载程序
-    	AdFlowControl.getInstance().updateAndPushMediaList();
-    	
-    	AdFlowControl.getInstance().updateAndPushAdLocationList();
     	
     	AdFlowControl.getInstance().loadAllAdInterval(true);
         
@@ -70,6 +67,10 @@ public class CronDispatch {
         AdFlowControl.getInstance().updateFlow();
         
         AdFlowControl.getInstance().updateAdxAndAppFlowControl(true);
+        
+        AdFlowControl.getInstance().updateAndPushMediaList();
+    	
+    	AdFlowControl.getInstance().updateAndPushAdLocationList();
  
           // 5 s 触发
         CronDispatch.startTimer(0);
