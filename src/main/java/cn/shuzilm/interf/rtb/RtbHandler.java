@@ -152,6 +152,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 } else {
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
                     ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+                    content="".getBytes("utf-8");
                     buffer.writeBytes(content);
                     response.setContent(buffer);
                 }
