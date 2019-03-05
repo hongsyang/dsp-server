@@ -7,7 +7,6 @@ import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.googlecode.protobuf.format.JsonFormat;
 import gdt.adx.GdtRtb;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -163,8 +162,12 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             }
 
             //正常情况 主业务逻辑
-            String resultData = result;
-
+            String resultData = null;
+            if (result != null) {
+                resultData = result;
+            } else {
+                resultData = "";
+            }
             if (resultData.contains("204session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 //修改状态码为200
@@ -201,6 +204,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             if (close) {
                 future2.addListener(ChannelFutureListener.CLOSE);
             }
+
         } catch (Exception e) {
             exceptionFlag = 0;
             long end = System.currentTimeMillis();

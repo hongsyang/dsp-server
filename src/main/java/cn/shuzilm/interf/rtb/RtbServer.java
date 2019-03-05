@@ -9,22 +9,14 @@ import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.channel.Channels;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
 import java.net.InetSocketAddress;
-import java.sql.Connection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 
 /**
@@ -101,7 +93,8 @@ public class RtbServer {
             pipeline.addLast("decoder", new HttpRequestDecoder());
             pipeline.addLast("encoder", new HttpResponseEncoder());
 //		         pipeline.addLast("streamer", new ChunkedWriteHandler());
-            pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
+            //先注释掉，看看报不报错。
+//            pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
             //http处理handler
             pipeline.addLast("handler", new RtbHandler(executor));
 

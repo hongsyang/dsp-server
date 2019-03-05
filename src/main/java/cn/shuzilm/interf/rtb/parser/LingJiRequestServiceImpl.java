@@ -236,8 +236,6 @@ public class LingJiRequestServiceImpl implements RequestService {
         }
     }
 
-    private void filterRuleBidRequest(BidRequestBean bidRequestBean, Map msg, String adxId) {
-    }
 
     /**
      * 发送曝光请求

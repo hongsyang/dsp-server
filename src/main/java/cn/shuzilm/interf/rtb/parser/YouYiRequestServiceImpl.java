@@ -1,15 +1,9 @@
 package cn.shuzilm.interf.rtb.parser;
 
-import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.filter.FilterRule;
-import cn.shuzilm.util.AppBlackListUtil;
-import cn.shuzilm.util.DeviceBlackListUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.MD5Util;
-import com.google.common.collect.Lists;
 
-import bidserver.BidserverSsp;
 import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.youyi.request.YouYiAdzone;
@@ -21,8 +15,6 @@ import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import com.alibaba.fastjson.JSON;
-import com.google.protobuf.InvalidProtocolBufferException;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -242,7 +234,7 @@ public class YouYiRequestServiceImpl implements RequestService {
         youYiAd.setAdvertiser_id(targetDuFlowBean.getAdvertiserUid());//广告主id
         youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid().substring(0,20) +
+                "&bidid=" + targetDuFlowBean.getBidid().substring(0, 20) +
                 "&impid=" + youYiAdzone.getAdz_id() +
                 "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&price=" + "__PRICE__" +
@@ -258,11 +250,10 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
                 "&dcit=" + targetDuFlowBean.getCity() +// 市
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
-                "&appv=" + targetDuFlowBean.getAppVersion() +
+                "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
                 "&dcou=" + targetDuFlowBean.getCountry() +// 县
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
-                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName())+//app中文名称
+                "&appv=" + targetDuFlowBean.getAppVersion();//app版本
         //曝光通知Nurl
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
