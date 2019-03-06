@@ -22,7 +22,7 @@
     <!--<property name="username">smdspcindb</property>-->
     <!--<property name="password">m4ds#%@$WWS</property>-->
 
-    <property name="jdbcUrl">jdbc:mysql://172.17.129.116/digitalunion?useUnicode=true&amp;characterEncoding=utf8</property>
+    <property name="jdbcUrl">jdbc:mysql://172.17.129.116/digitalunion_v2?useUnicode=true&amp;characterEncoding=utf8</property>
     <property name="username">dsp</property>
     <property name="password">@WFJUYV0xDs$7^v9</property>
 

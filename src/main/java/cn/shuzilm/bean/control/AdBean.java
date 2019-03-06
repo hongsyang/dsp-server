@@ -76,10 +76,10 @@ public class AdBean implements ICommand  {
     private Date endTime;
 
     /**
-     * 该广告下创意列表
+     * 该广告下创意组列表
      */
     @Setter
-    private List<CreativeBean> creativeList;
+    private List<CreativeGroupBean> creativeGroupList;
 
     /**
      * 出价模式（文本cpm/cpc）
@@ -148,5 +148,23 @@ public class AdBean implements ICommand  {
      */
     @Setter
     private long timestamp;
+    
+    /**
+     * 创意投放形式
+     */
+    @Setter
+    private int creativeForm;
+    
+    /**
+     * 媒体投放形式
+     */
+    @Setter
+    private int mediaForm;
+    
+    /**
+     * 广告单元所投放的媒体ID列表
+     */
+    @Setter
+    private List<Long> mediaIdList;
 
 }

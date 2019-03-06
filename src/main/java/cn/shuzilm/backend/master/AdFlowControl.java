@@ -144,6 +144,10 @@ public class AdFlowControl {
 	public ConcurrentHashMap<String, AdFlowStatus> getMapThresholdHour() {
 		return mapThresholdHour;
 	}
+	
+	public ConcurrentHashMap<String, Float> getAdMinBidNumsLimitMap() {
+		return adMinBidNumsLimitMap;
+	}
 
 	/**
      * 广告资源管理
@@ -293,17 +297,6 @@ public class AdFlowControl {
 
     }
 
-    public void trigger() {
-        // 5 s 触发
-        pullAndUpdateTask(true);
-        // 10 min 触发
-        loadAdInterval(true);
-        //每小时触发
-        resetHourMonitor();
-        //每天触发
-        resetDayMonitor();
-
-    }
 
     /**
      * 将 RTB 数量更新到天 、小时和总监视器中
@@ -323,23 +316,23 @@ public class AdFlowControl {
         if(statusTotal != null)
         	statusTotal.setBidNums(statusTotal.getBidNums() + addBidNums);
         
-        if(adMinBidNumsLimitMap.containsKey(adUid)){
-        	adMinBidNumsLimitMap.put(adUid, adMinBidNumsLimitMap.get(adUid)-addBidNums);
-        	float limitBidNums = adMinBidNumsLimitMap.get(adUid);
-        	myLog.info("缓存中"+adUid+"竞价次数:"+limitBidNums);
-        	if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
-        		stopAd(adUid,adUid + "\t可竞得次数剩余100次,停止广告",false,4);
-        		adStopTimeMap.put(adUid, System.currentTimeMillis());
-        		//重新计算竞价次数限制
-//        		checkAdCpmLimit(false);
-//        		limitBidNums = adMinBidNumsLimitMap.get(adUid);
-//        		if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
-//        			stopAd(adUid,adUid + "\t可竞得次数剩余100次,停止广告",false,4);
-//        		}
-        		
-        	}
-        	
-        }
+//        if(adMinBidNumsLimitMap.containsKey(adUid)){
+//        	adMinBidNumsLimitMap.put(adUid, adMinBidNumsLimitMap.get(adUid)-addBidNums);
+//        	float limitBidNums = adMinBidNumsLimitMap.get(adUid);
+//        	myLog.info("缓存中"+adUid+"竞价次数:"+limitBidNums);
+//        	if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+//        		stopAd(adUid,adUid + "\t可竞得次数剩余100次,停止广告",false,4);
+//        		adStopTimeMap.put(adUid, System.currentTimeMillis());
+//        		//重新计算竞价次数限制
+////        		checkAdCpmLimit(false);
+////        		limitBidNums = adMinBidNumsLimitMap.get(adUid);
+////        		if(limitBidNums != 0 && (limitBidNums<0 || (limitBidNums >0 && (limitBidNums <= maxLimitBidNums)))){
+////        			stopAd(adUid,adUid + "\t可竞得次数剩余100次,停止广告",false,4);
+////        		}
+//        		
+//        	}
+//        	
+//        }
     }
 
     /**
@@ -519,9 +512,13 @@ public class AdFlowControl {
                     AdFlowStatus monitorDaily = mapMonitorDaily.get(adUid);
                     String advertiserId = mapAd.get(adUid).getAdvertiser().getUid();
                     
-                    //实时更新余额表
+                    //实时更新判断余额
                     if(advertiserBalanceMap.containsKey(advertiserId)){
                     	advertiserBalanceMap.put(advertiserId, advertiserBalanceMap.get(advertiserId)-addMoney);
+                    	if(advertiserBalanceMap.get(advertiserId) <= 0){
+                    		String reason = advertiserId+"#### 广告主余额不足! ###";
+                    		stopAd(adUid, reason, false,0);
+                    	}
                     }
                     
                     AdFlowStatus advertiserDaily = mapMonitorAdvertiserDaily.get(advertiserId);
@@ -568,9 +565,6 @@ public class AdFlowControl {
      */
     public void pullAndUpdateTask(boolean isInit) {
     	MDC.put("sift", "control");
-        //分发任务
-        //1、根据当前各个节点消耗的情况，进行扣减，如：之前已经有该广告在投放了，后来调整了配额或金额，则从当前的额度中减掉已经消耗的部分（每小时和每天的），然后剩余的作为任务重新分发下去
-        //更新当前广告主报价，资金池，流量池,广告打分
     	
     	List<String> nodeNameList = new ArrayList<String>();
     	if(isInit){
@@ -766,7 +760,7 @@ public class AdFlowControl {
      * 每隔 10 分钟更新一次天和小时的阀值
      * 返回 余额为 0 的广告
      */
-    private HashSet<String> updateIndicator(ResultList adList) {
+    private HashSet<String> updateIndicator(ResultList adList,boolean isInitial) {
     	MDC.put("sift", "control");
         HashSet<String> lowBalanceAdSet = new HashSet<>();
         long timeNow = System.currentTimeMillis();
@@ -782,7 +776,10 @@ public class AdFlowControl {
                     continue;
                 //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
-                //如果余额小于 200 块钱，则不进行广告投放
+                if(isInitial){
+                	advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
+                }
+                //如果余额小于0 块钱，则不进行广告投放
                 if(balance.doubleValue() <= 0){
                     lowBalanceAdSet.add(auid);
                 }else{
@@ -807,6 +804,10 @@ public class AdFlowControl {
                 BigDecimal money = map.getBigDecimal("quota_amount");
                 
                 boolean adQuota = map.getBoolean("quota");
+                
+                if(!adQuota){
+                	money = new BigDecimal(0);
+                }
 
                 // 如果广告主中的每日限额比广告的还小，以小的为准
                 if (advertiserQuota && adQuota && quotaMoneyPerDay.floatValue() <= money.floatValue()) {
@@ -816,9 +817,10 @@ public class AdFlowControl {
                 	money = quotaMoneyPerDay;
                 }
                 //如果这个账户的余额比每天或小时的限额还小，则赋予小的值
-                if (balance.floatValue() != 0 && balance.floatValue() <= money.floatValue()) {
-                    money = balance;
-                }
+                //移除
+//                if (balance.floatValue() != 0 && balance.floatValue() <= money.floatValue()) {
+//                    money = balance;
+//                }
                 
                 Integer updatedAt = balanceMap.getInteger("updated_at");
 
@@ -870,6 +872,7 @@ public class AdFlowControl {
 //                    				putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
 //                    			}
                     		}else{
+                    			advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
                     			task.setCommand(TaskBean.COMMAND_START);
                     			putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
                     		}
@@ -937,25 +940,54 @@ public class AdFlowControl {
     		}
     		
     		//开始更新创意、物料
-    		List<CreativeBean> creativeList = taskService.queryCreativeByUpTime();
-    		for(CreativeBean creative:creativeList){
-    			String adUid = creative.getRelatedAdUid();
-    			List<Material> materialList = taskService.queryMaterialByCreativeId(creative.getUid());
-    			creative.setMaterialList(materialList);
-    			if(mapAd.containsKey(adUid)){
-    				AdBean ad = mapAd.get(adUid);
-    				List<CreativeBean> creativeTempList = ad.getCreativeList();
-    				ListIterator<CreativeBean> it = creativeTempList.listIterator();
-    				while(it.hasNext()){
-    					CreativeBean creativeBean = it.next();
-    					if(creativeBean.getUid().equals(creative.getUid())){
+//    		List<CreativeBean> creativeList = taskService.queryCreativeByUpTime();
+//    		for(CreativeBean creative:creativeList){
+//    			String adUid = creative.getRelatedAdUid();
+//    			List<Material> materialList = taskService.queryMaterialByCreativeId(creative.getUid());
+//    			creative.setMaterialList(materialList);
+//    			if(mapAd.containsKey(adUid)){
+//    				AdBean ad = mapAd.get(adUid);
+//    				List<CreativeBean> creativeTempList = ad.getCreativeList();
+//    				ListIterator<CreativeBean> it = creativeTempList.listIterator();
+//    				while(it.hasNext()){
+//    					CreativeBean creativeBean = it.next();
+//    					if(creativeBean.getUid().equals(creative.getUid())){
+//    						it.remove();
+//    						it.add(creative);
+//    					}
+//    				}
+//    			}
+//    			
+//    		}
+    		
+    		List<CreativeGroupBean> creativeGroupList = taskService.queryCreativeGroupByUpTime();
+    		for(CreativeGroupBean creativeGroup:creativeGroupList){
+            	String creativeGroupUid = creativeGroup.getUid();
+            	List<CreativeBean> creativeList = taskService.queryCreativeByGroupId(creativeGroupUid);
+            	for(CreativeBean creative:creativeList){
+            		//根据创意 ID 查询 物料
+            	  String creativeUid = creative.getUid();
+            	  String creativeType = creative.getType();
+                  List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid,creativeType);
+                  creative.setMaterialList(materialList);
+            	}
+            	creativeGroup.setCreativeList(creativeList);
+            	String adUid = creativeGroup.getAdUid();
+            	if(mapAd.containsKey(adUid)){
+            		AdBean ad = mapAd.get(adUid);
+            		List<CreativeGroupBean> creativeGroupTempList = ad.getCreativeGroupList();
+            		ListIterator<CreativeGroupBean> it = creativeGroupTempList.listIterator();
+            		while(it.hasNext()){
+    					CreativeGroupBean creativeGroupBean = it.next();
+    					if(creativeGroupBean.getUid().equals(creativeGroup.getUid())){
     						it.remove();
-    						it.add(creative);
+    						it.add(creativeGroup);
     					}
     				}
-    			}
-    			
+            	}
     		}
+    		
+    		
     		//开始更新广告主、代理商
     		List<AdvertiserBean> advertiserList = taskService.queryAdverByUpTime();
     		for(AdvertiserBean advertiser:advertiserList){
@@ -1094,7 +1126,7 @@ public class AdFlowControl {
         //取出所有的广告，并取出变动的部分，如果是配额和金额发生变化，则需要重新分配任务
         try {
             //加载 主机节点信息
-            nodeList = taskService.getWorkNodeAll();
+            nodeList = taskService.getWorkNodeAll();           
             //加载最新广告信息
             if (isInitial) {
                 timeBefore = 0;
@@ -1122,10 +1154,10 @@ public class AdFlowControl {
             //更新监视器阀值信息
             HashSet<String> lowBalanceAdList = null;
             if(isInitial){
-            	lowBalanceAdList = updateIndicator(adList);
+            	lowBalanceAdList = updateIndicator(adList,isInitial);
             }else{
             	ResultList adAllList = taskService.queryAdByUpTime(0);
-            	lowBalanceAdList = updateIndicator(adAllList);
+            	lowBalanceAdList = updateIndicator(adAllList,isInitial);
             }
 
             int counter = 0;
@@ -1155,16 +1187,31 @@ public class AdFlowControl {
                 List<AudienceBean> audience = taskService.queryAudienceByUpTime(adUid);
                 ad.setAudienceList(audience);
 
-                String creativeUid = map.getString("creative_uid");
-                //根据 广告创意ID 获得广告创意
-                CreativeBean creativeBean = taskService.queryCreativeUidByAid(creativeUid);
-                //根据创意 ID 查询 物料
-                List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid);
-                creativeBean.setMaterialList(materialList);
-
-                ArrayList<CreativeBean> creaList = new ArrayList<>();
-                creaList.add(creativeBean);
-                ad.setCreativeList(creaList);
+//              String creativeUid = map.getString("creative_uid");
+//              //根据 广告创意ID 获得广告创意
+//              CreativeBean creativeBean = taskService.queryCreativeUidByAid(creativeUid);
+//              //根据创意 ID 查询 物料
+//              List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid);
+//              creativeBean.setMaterialList(materialList);
+//
+//              ArrayList<CreativeBean> creaList = new ArrayList<>();
+//              creaList.add(creativeBean);
+//              ad.setCreativeList(creaList);
+              List<CreativeGroupBean> creativeGroupList = taskService.queryCreativeGroupByAdUid(adUid);
+              for(CreativeGroupBean creativeGroup:creativeGroupList){
+              	String creativeGroupUid = creativeGroup.getUid();
+              	List<CreativeBean> creativeList = taskService.queryCreativeByGroupId(creativeGroupUid);
+              	for(CreativeBean creative:creativeList){
+              		//根据创意 ID 查询 物料
+              	  String creativeUid = creative.getUid();
+              	  String creativeType = creative.getType();
+                    List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid,creativeType);
+                    creative.setMaterialList(materialList);
+              	}
+              	creativeGroup.setCreativeList(creativeList);
+              }
+              ad.setCreativeGroupList(creativeGroupList);
+              
                 ad.setEndTime(new Date(map.getInteger("e")));
                 ad.setFrqDaily(map.getInteger("frq_daily"));
                 ad.setFrqHour(map.getInteger("frq_hourly"));
@@ -1204,6 +1251,13 @@ public class AdFlowControl {
                 int[][] timeScheduling = TimeSchedulingUtil.timeTxtToMatrix(timeScheTxt);
                 ad.setTimeSchedulingArr(timeScheduling);
                 ad.setTimestamp(map.getInteger("created_at"));
+                Integer mediaForm = map.getInteger("media_form");
+                ad.setMediaForm(mediaForm);
+                if(mediaForm != null){
+            		List<Long> mediaIdList = taskService.queryMediaIdByAdUid(adUid);
+            		ad.setMediaIdList(mediaIdList);
+                }
+                ad.setCreativeForm(map.getInteger("creative_form"));
                 //如果是价格和配额发生了变化，直接通知
                 //如果素材发生了变化，直接通知
                 mapAd.put(adUid, ad);
@@ -1296,7 +1350,6 @@ public class AdFlowControl {
      */
     private void dispatchTask() {
     	MDC.put("sift", "control");
-        int nodeNums = nodeList.size();
         //遍历所有的广告
         ArrayList<AdBean> adList = new ArrayList<AdBean>();
         ArrayList<TaskBean> taskList = new ArrayList<TaskBean>();
@@ -1831,6 +1884,34 @@ public class AdFlowControl {
         }
     }
     
+    /**
+     * 每隔10分钟下发一次媒体列表
+     */
+    public void updateAndPushMediaList(){
+    	ArrayList<MediaBean> mediaList = taskService.queryMediaAll();
+    	if(mediaList != null && !mediaList.isEmpty()){  		
+    		for(WorkNodeBean node:nodeList){
+    			if(node.getName().contains("rtb")){
+    				pushMediaList(node.getName(), mediaList);
+    			}
+    		}
+    	}
+    }
+    
+    /**
+     * 每隔10分钟下发一次广告位列表
+     */
+    public void updateAndPushAdLocationList(){
+    	ArrayList<AdLocationBean> adLocationList = taskService.queryAdLocationList();
+    	if(adLocationList != null && !adLocationList.isEmpty()){
+    		for(WorkNodeBean node:nodeList){
+    			if(node.getName().contains("rtb")){
+    				pushAdLocationList(node.getName(), adLocationList);
+    			}
+    		}
+    	}
+    }
+    
     public boolean isNodeDown(String nodeName){
     	MDC.put("sift", "control");
     	Long lastTime = nodeStatusMap.get(nodeName);
@@ -1877,6 +1958,19 @@ public class AdFlowControl {
 
     private void pushFlowTask(String nodeName,ArrayList<FlowTaskBean> beanList){
     	MsgControlCenter.sendFlowTask(nodeName, beanList, Priority.NORM_PRIORITY);
+    }
+    
+    /**
+     * 下发媒体列表
+     * @param nodeName
+     * @param mediaList
+     */
+    private void pushMediaList(String nodeName,ArrayList<MediaBean> mediaList){
+    	MsgControlCenter.sendMediaList(nodeName,mediaList,Priority.NORM_PRIORITY);
+    }
+    
+    private void pushAdLocationList(String nodeName,ArrayList<AdLocationBean> adLocationList){
+    	MsgControlCenter.sendAdLocationList(nodeName, adLocationList, Priority.NORM_PRIORITY);
     }
 
     /**

@@ -387,11 +387,11 @@ public class LingJiRequestServiceImpl implements RequestService {
         //人群包，创意id，省，市，广告主id，代理商id，广告id，
 
         if ("banner".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdm());//  横幅
+            bid.setAdm(duFlowBean.getAdmMap().get(0));//  横幅
         } else if ("fullscreen".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdm());// 开屏
+            bid.setAdm(duFlowBean.getAdmMap().get(0));// 开屏
         } else if ("interstitial".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdm());// 插屏
+            bid.setAdm(duFlowBean.getAdmMap().get(0));// 插屏
         } else if ("feed".equals(adType)) {//信息流
             bid.setNurl("");//
             LJNativeResponse ljNativeResponse = new LJNativeResponse();
@@ -445,7 +445,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     if (ljAsset.getRequired().equals(true)) {
                         LJAssets assetsImg = new LJAssets();
                         LJNativeImg ljNativeImg = new LJNativeImg();
-                        String imgUrl = duFlowBean.getAdm();
+                        String imgUrl = duFlowBean.getAdmMap().get(0);
                         List<String> imgUrls = new ArrayList<>();
                         imgUrls.add(imgUrl);
                         ljNativeImg.setUrls(imgUrls);
@@ -457,7 +457,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     if (ljAsset.getRequired().equals(true)) {
                         LJAssets assetsVideo = new LJAssets();
                         LJNativeVideo ljNativeVideo = new LJNativeVideo();
-                        String videoUrl = duFlowBean.getAdm();
+                        String videoUrl = duFlowBean.getAdmMap().get(0);
                         ljNativeVideo.setUrl(videoUrl);
                         assetsVideo.setVideo(ljNativeVideo);
                         assetsVideo.setId(ljAsset.getId());
