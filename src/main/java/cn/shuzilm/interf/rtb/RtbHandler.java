@@ -179,7 +179,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 content = builder.build().toByteArray();
             } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
-                content = resultData.getBytes("utf-8");
+                content = "".getBytes("utf-8");
             } else if (resultData.contains("session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
