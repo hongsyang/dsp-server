@@ -116,12 +116,14 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 }
                 bean.setHost(configs.getString("HOST"));
                 String price = urlRequest.get("price");
-                String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
+//                String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
                 log.debug("price解析结果：{}", price);
-                String[] split = result.split("_");
-                Double money = Double.valueOf(split[0]) / 100;
+//                String[] split = result.split("_");
+//                Double money = Double.valueOf(split[0]) / 100;
+                Double money=Double.valueOf(price);
                 bean.setCost(money);
-                bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
+//                bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
+                bean.setWinNoticeTime(new Date().getTime());//设置对账时间
                 bean.setWinNoticeNums(1);
                 bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setType(0);
@@ -137,7 +139,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
-                element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
+//                element.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
+                element.setWinNoticeTime(new Date().getTime());//设置对账时间
                 element.setAdxSource("LingJi");
                 MDC.put("sift", "LingJiExp");
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
