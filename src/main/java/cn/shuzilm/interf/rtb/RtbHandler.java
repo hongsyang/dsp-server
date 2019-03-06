@@ -216,6 +216,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             response.setStatus(HttpResponseStatus.NO_CONTENT);
             ChannelBuffer buffer = new DynamicChannelBuffer(2048);
             byte[] content = null;
+            try {
+                content = "".getBytes("utf-8");
+            } catch (UnsupportedEncodingException e1) {
+                e1.printStackTrace();
+            }
             buffer.writeBytes(content);
             response.setContent(buffer);
             ChannelFuture future1 = messageEvent.getChannel().write(response);
