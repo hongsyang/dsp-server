@@ -284,7 +284,7 @@ public class RuleMatching {
 			
 			String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
 			if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
-				LOG.info("["+width+"_"+height+"]尺寸都未开启投放,该请求停止投放");
+				LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
 				reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
 						""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
 				//另起目录记录原因
@@ -463,7 +463,7 @@ public class RuleMatching {
 //			}
 
 			boolean filterFlag = false;
-			List<CreativeGroupBean> creativeGroupList = new ArrayList<CreativeGroupBean>();
+			List<CreativeGroupBean> creativeGroupList = ad.getCreativeGroupList();
 			temp:for(CreativeGroupBean creativeGroup:creativeGroupList){
 				List<CreativeBean> creativeList = creativeGroup.getCreativeList();
 				for(CreativeBean creative:creativeList){
@@ -915,7 +915,7 @@ public class RuleMatching {
 			targetDuFlowBean.setCrid(adxNamePushList.isEmpty()?null:material.getAuditIdMap().get(adxNamePushList.get(0)));
 		}
 //		targetDuFlowBean.setAdmt(material.getType());
-		targetDuFlowBean.setAdct(creative.getLink_type());// 点击广告行为
+		targetDuFlowBean.setAdct(creativeGroup.getLink_type());// 点击广告行为
 		targetDuFlowBean.setAdUid(ad.getAdUid());
 		targetDuFlowBean.setDid(deviceId);
 		targetDuFlowBean.setDeviceId(deviceId);
@@ -924,7 +924,7 @@ public class RuleMatching {
 		targetDuFlowBean.setAudienceuid(audience.getUid());
 		targetDuFlowBean.setAdvertiserUid(advertiser.getUid());
 		targetDuFlowBean.setAgencyUid(advertiser.getAgencyUid());
-		targetDuFlowBean.setCreativeUid(creative.getUid());
+		targetDuFlowBean.setCreativeUid(creativeGroup.getUid());
 		String provinceId = null, cityId = null, countyId = null;
 		if (tagBean != null) {
 			if (rtbIpMap.containsKey(ad.getAdUid())) {// 通过IP匹配的结果
@@ -959,9 +959,9 @@ public class RuleMatching {
 			targetDuFlowBean.setBiddingPrice((double) ad.getPrice());
 		}
 		targetDuFlowBean.setPremiumFactor(premiumRatio);
-		targetDuFlowBean.setLandingUrl(creative.getLink());
-		targetDuFlowBean.setLinkUrl(creative.getClickTrackingUrl());
-		targetDuFlowBean.setTracking(creative.getTracking());
+		targetDuFlowBean.setLandingUrl(creativeGroup.getLink());
+		targetDuFlowBean.setLinkUrl(creativeGroup.getClickTrackingUrl());
+		targetDuFlowBean.setTracking(creativeGroup.getTracking());
 		// targetDuFlowBean.setDspid("123");// DSP对该次出价分配的ID
 		targetDuFlowBean.setWidthHeightRatio(widthHeightRatio);
 		targetDuFlowBean.setPlatform(tagBean != null ? (getPlatformById(tagBean.getPlatformId())) : null);
@@ -1086,8 +1086,8 @@ public class RuleMatching {
 		try {
 			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
-//			DUFlowBean duflowBean = rule.match("040041d1482718ea1bce9a664e3b5f61", "interstitial", 600, 500, true, 5, 5, "1", "jpg,gif", "127.0.0.1",
-//					"cn.asm.clweather",null,null,null,null);
+			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 640, 100, false, 5, 5, "1", "jpg,gif", "127.0.0.1",
+					"com.iflytek.inputmethod",new ArrayList(),true,"123");
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
 //			}

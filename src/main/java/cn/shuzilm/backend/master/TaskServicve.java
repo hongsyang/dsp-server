@@ -396,7 +396,7 @@ public class TaskServicve extends Service {
             ResultList list = select.select(sql,arr);
             for(ResultMap cMap:list){
             	CreativeBean creativeBean = new CreativeBean();
-	            creativeBean.setName(cMap.getString("name"));
+	           // creativeBean.setName(cMap.getString("name"));
 	            creativeBean.setUid(cMap.getString("uid"));
 	            creativeBean.setBrand(cMap.getString("brand"));
 	            creativeBean.setDesc(cMap.getString("desc"));
@@ -464,13 +464,14 @@ public class TaskServicve extends Service {
     public Image queryImageByfileId(String fileId){
     	Object[] arr = new Object[1];
     	arr[0] = fileId;
-    	String sql = "SELECT * FROM img where uid = ? status = 1";
+    	String sql = "SELECT * FROM img where uid = ? and status = 1";
     	 try {           
     		 Image image = new Image();
              ResultMap cMap =  select.selectSingle(sql,arr);
              if(cMap == null){
             	 return null;
              }
+             image.setUid(cMap.getString("uid"));
              image.setFileName(cMap.getString("filename"));
              image.setExt(cMap.getString("ext"));
              image.setSize(cMap.getInteger("size"));
@@ -986,10 +987,22 @@ public class TaskServicve extends Service {
     
     
     public static void main(String[] args) {
-    	TaskServicve task = new TaskServicve();
+    	TaskServicve taskService = new TaskServicve();
     	
     	try {
-    		task.queryAdLocationList();
+    		List<CreativeGroupBean> creativeGroupList = taskService.queryCreativeGroupByAdUid("ec5cba9e-3a2b-4c22-bd53-251c60b206da");
+            for(CreativeGroupBean creativeGroup:creativeGroupList){
+            	String creativeGroupUid = creativeGroup.getUid();
+            	List<CreativeBean> creativeList = taskService.queryCreativeByGroupId(creativeGroupUid);
+            	for(CreativeBean creative:creativeList){
+            		//根据创意 ID 查询 物料
+            	  String creativeUid = creative.getUid();
+            	  String creativeType = creative.getType();
+                  List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid,creativeType);
+                  creative.setMaterialList(materialList);
+            	}
+            	creativeGroup.setCreativeList(creativeList);
+            }
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
