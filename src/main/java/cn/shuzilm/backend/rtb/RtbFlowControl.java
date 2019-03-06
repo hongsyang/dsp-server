@@ -113,6 +113,10 @@ public class RtbFlowControl {
     public Set<String> getAdLocationSet(){
     	return adLocationSet;
     }
+    
+    public ConcurrentHashMap<String,AdLocationBean> getAdLocationMap(){
+    	return adLocationMap;
+    }
 
 	private String nodeName;
     /**
@@ -169,6 +173,8 @@ public class RtbFlowControl {
      */
     private static Set<String> adLocationSet = null;
     
+    private static ConcurrentHashMap<String,AdLocationBean> adLocationMap = null;
+    
     private static ConcurrentHashMap<String,Integer> weekAndDayNumMap = null;
 
     /* 广告超投设备 */
@@ -209,6 +215,7 @@ public class RtbFlowControl {
         weekAndDayNumMap = new ConcurrentHashMap<String,Integer>();
         mediaMap = new ConcurrentHashMap<Long,MediaBean>();
         adLocationSet = Collections.synchronizedSet(new HashSet<String>());
+        adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
 //        gridMap = new HashMap<>();
@@ -288,7 +295,7 @@ public class RtbFlowControl {
                 mapAd.put(uid, adBean);
                 
               //更新广告单元媒体投放缓存
-                List<Long> adMediaList = adBean.getMediaIdList();
+                Set<Long> adMediaList = adBean.getMediaIdList();
 
                 for(Long mediaId:adMediaList){
                 	if(mediaMap.containsKey(mediaId)){
@@ -699,8 +706,10 @@ public class RtbFlowControl {
     		return;
     	}
     	adLocationSet.clear();
-    	for(AdLocationBean adLocation:adLocationList){
+    	adLocationMap.clear();
+    	for(AdLocationBean adLocation:adLocationList){    		
     		Long adxId = adLocation.getAdxId();
+    		adLocationMap.put(adxId+"_"+adLocation.getAdLocationId(), adLocation);
     		MediaBean media = adLocation.getMedia();
     		Integer mediaAdx = null;
     		List<String> mediaAppPackageNameList = new ArrayList<String>();
@@ -763,7 +772,8 @@ public class RtbFlowControl {
      * @param auid
      * @return
      */
-    public boolean checkAvalable(String auid,String deviceId,String adxName,String appPackageName,String adxAndMedia) {
+    public boolean checkAvalable(String auid,String deviceId,String adxName,String appPackageName,
+    		String adxAndMedia,boolean packageFlag,List<Long> mediaTempList) {
     	MDC.put("sift", "rtb");
         TaskBean bean = mapTask.get(auid);
         if (bean != null) {
@@ -829,18 +839,35 @@ public class RtbFlowControl {
         	Integer mediaForm = adBean.getMediaForm();
         	if(mediaForm != null && mediaForm == 0){//不限
         		//媒体管理不做限制，不做任何处理
-        	}else{       	
-	        	if(adMediaMap.containsKey(auid)){
-	        		Set<String> adxAndMediaSet = adMediaMap.get(auid);
-	        		if(adxName != null && appPackageName != null && !adxAndMediaSet.contains(adxAndMedia)){
-	        			myLog.info("广告["+auid+"]不参与["+adxAndMedia+"]投放!");
-	        			return false;
-	        		}
-	        		
-	        	}else{
-	        		myLog.info("广告["+auid+"]未选择媒体投放!");
-	        		return false;
-	        	}
+        	}else{
+        		if(packageFlag){//有包名
+		        	if(adMediaMap.containsKey(auid)){
+		        		Set<String> adxAndMediaSet = adMediaMap.get(auid);
+		        		if(adxName != null && appPackageName != null && !adxAndMediaSet.contains(adxAndMedia)){
+		        			myLog.info("广告["+auid+"]不参与["+adxAndMedia+"]媒体投放!");
+		        			return false;
+		        		}
+		        		
+		        	}else{
+		        		myLog.info("广告["+auid+"]未选择媒体投放!");
+		        		return false;
+		        	}
+        		}else{
+        			if(!mediaTempList.isEmpty()){
+        				boolean flag = false;
+        				for(Long mediaId:mediaTempList){
+        					if(adBean.getMediaIdList().contains(mediaId)){
+        						flag = true;
+        						break;
+        					}
+        				}
+        				if(!flag){
+        					myLog.info("广告["+auid+"]不参与["+adxAndMedia+"]媒体投放!");
+        					return false;
+        					
+        				}
+        			}
+        		}
         	} 
         	
         	//判断广告投放时间窗

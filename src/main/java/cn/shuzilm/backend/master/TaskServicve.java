@@ -418,7 +418,7 @@ public class TaskServicve extends Service {
      * @return
      */
     public ArrayList<Material> queryMaterialByCreativeId(String creativeUid,String creativeType){
-        String sql = "select * from material where creative_uid = '"+ creativeUid +"' and deleted = 0";
+        String sql = "select * from material where creative_uid = '"+ creativeUid +"' and deleted = 0 and op_status = 1";
         ResultList rl = null;
         try {
             rl = select.select(sql);

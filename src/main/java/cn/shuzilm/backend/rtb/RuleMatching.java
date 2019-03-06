@@ -125,7 +125,7 @@ public class RuleMatching {
 	public boolean filter(int width, int height, int adWidth, int adHeight, boolean isResolutionRatio,
 						  int widthDeviation, int heightDeviation, String adxName, Material material,
 						  Image image,String extStr,Set<String> materialSet,List<String> adxNameList,
-						  boolean isDimension,List<String> adxNamePushList,boolean isFeed3) throws Exception {
+						  boolean isDimension,List<String> adxNamePushList) throws Exception {
 		// 筛选审核通过的物料
 		if(material.getApproved_adx() == null || material.getApproved_adx().trim().equals("")){
 			return false;
@@ -203,10 +203,9 @@ public class RuleMatching {
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
 							int widthDeviation, int heightDeviation, String adxName, String extStr, String ip,
-							String appPackageName,List<String> adxNameList,boolean isDimension,String requestId)
+							String appPackageName,List<String> adxNameList,boolean isDimension,String requestId,String tagId)
 			throws Exception {
 		MDC.put("sift", "rtb");
-		boolean isFeed3 = false;
 		String reason = null;
 		List<AdBean> machedAdList = new ArrayList<AdBean>();// 匹配到的广告资源列表
 		Map<String, Material> metrialMap = new HashMap<String, Material>();
@@ -249,50 +248,54 @@ public class RuleMatching {
 		//多尺寸
 		if(!isDimension){
 			//多尺寸不按尺寸筛选广告
-			auidList = new ArrayList(rtbIns.getAdMap().keySet());
+			auidList = new ArrayList<String>(rtbIns.getAdMap().keySet());
 			materialSet = new HashSet<String>();
 			
 			ListIterator<String> adLocationIt = adxNameList.listIterator();
 			boolean adLocationFlag = false;
-			while(adLocationIt.hasNext()){
-				String adx = adLocationIt.next();
-				String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+adx;
-				if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
-					adLocationIt.remove();
-					LOG.info("["+adLocationStr+"]广告位未开启投放");
-				}else{
-					adLocationFlag = true;
+			if(appPackageName != null && appPackageName.trim().equals("")){
+				while(adLocationIt.hasNext()){
+					String adx = adLocationIt.next();
+					String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+adx;
+					if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
+						adLocationIt.remove();
+						LOG.info("["+adLocationStr+"]广告位未开启投放");
+					}else{
+						adLocationFlag = true;
+					}
+				}
+				if(!adLocationFlag){
+					LOG.info("["+adLocationId+"]广告位都未开启投放,该请求停止投放");
+					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
+							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
+					//另起目录记录原因
+					MDC.put("phoenix", "rtb-bid-notice");
+					LOG.info(reason);
+					MDC.remove("phoenix");
+					MDC.put("sift", "rtb");
+					return null; 
 				}
 			}
-			if(!adLocationFlag){
-				LOG.info("["+adLocationId+"]广告位都未开启投放,该请求停止投放");
-				reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
-						""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
-				//另起目录记录原因
-				MDC.put("phoenix", "rtb-bid-notice");
-				LOG.info(reason);
-				MDC.remove("phoenix");
-				MDC.put("sift", "rtb");
-				return null; 
-			}
 		}else{
-			int divisor = MathTools.division(width, height);
-			widthHeightRatio = width / divisor + "/" + height / divisor;
-			//materialRatioKey = widthHeightRatio;
-			auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
-			materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
-			
-			String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
-			if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
-				LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
-				reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
-						""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
-				//另起目录记录原因
-				MDC.put("phoenix", "rtb-bid-notice");
-				LOG.info(reason);
-				MDC.remove("phoenix");
-				MDC.put("sift", "rtb");
-				return null; 
+				if(appPackageName != null && appPackageName.trim().equals("")){
+				int divisor = MathTools.division(width, height);
+				widthHeightRatio = width / divisor + "/" + height / divisor;
+				//materialRatioKey = widthHeightRatio;
+				auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
+				materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
+				
+				String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
+				if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
+					LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
+					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
+							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
+					//另起目录记录原因
+					MDC.put("phoenix", "rtb-bid-notice");
+					LOG.info(reason);
+					MDC.remove("phoenix");
+					MDC.put("sift", "rtb");
+					return null; 
+				}
 			}
 		}
 
@@ -313,7 +316,8 @@ public class RuleMatching {
 		}
 		//String adxNameTemp = adxName;
 		String adxAndMedia = "";
-
+		boolean packageFlag = false;
+		List<Long> mediaTempList = new ArrayList<Long>();
 		if (adxName != null) {
 //			if (adxNameTemp.contains("_")) {
 //				String adxNameSplit[] = adxNameTemp.split("_");
@@ -323,6 +327,16 @@ public class RuleMatching {
 			
 			if(appPackageName != null){
 				adxAndMedia = adxName + "_" + appPackageName;
+				packageFlag = true;
+			}else{
+				if(!isDimension){
+				for(String adLocationIdTemp:adxNameList){
+					if(rtbIns.getAdLocationMap().containsKey(adLocationIdTemp)){
+						mediaTempList.add(rtbIns.getAdLocationMap().get(adLocationIdTemp).getMedia().getId());
+						packageFlag = false;
+					}
+				}
+				}
 			}
 			
 			FlowTaskBean adxFlowTaskBean = rtbIns.getMapFlowTask().get(adxName);
@@ -436,7 +450,7 @@ public class RuleMatching {
 		String audienceReason = null;
 
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName,appPackageName,adxAndMedia);
+			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName,appPackageName,adxAndMedia,packageFlag,mediaTempList);
 
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			String advertierId = "";
@@ -467,16 +481,16 @@ public class RuleMatching {
 			temp:for(CreativeGroupBean creativeGroup:creativeGroupList){
 				List<CreativeBean> creativeList = creativeGroup.getCreativeList();
 				for(CreativeBean creative:creativeList){
-					List<Material> materialList = creative.getMaterialList();
-					if(isFeed3 && materialList != null && materialList.size() != 3){
-						continue;
-					}
+					List<Material> materialList = creative.getMaterialList();	
 					for (Material material : materialList) {
 						List<Image> imageList = material.getImageList();
+						if(isDimension && imageList.size() >= 3){
+							continue;
+						}
 						for(Image image:imageList){
 							if (filter(width, height, image.getWidth(), image.getHeight(), isResolutionRatio, widthDeviation,
 									heightDeviation, adxName, material,image, extStr, materialSet,adxNameList,
-									isDimension,adxNamePushList,isFeed3)) {
+									isDimension,adxNamePushList)) {
 								metrialMap.put(ad.getAdUid(), material);
 								creativeGroupMap.put(ad.getAdUid(), creativeGroup);
 								creativeMap.put(ad.getAdUid(), creative);
@@ -620,7 +634,7 @@ public class RuleMatching {
 		if (!machedAdList.isEmpty()) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, audienceMap,
 					adxName, ip, rtbIpMap, demographicMap,appPackageName,requestId,width,height,
-					adxNamePushList,isDimension,adLocationId,creativeGroupMap,creativeMap,isFeed3);
+					adxNamePushList,isDimension,adLocationId,creativeGroupMap,creativeMap);
 			// 上传请求数
 			if (rtbIns.getBidMap().get(targetDuFlowBean.getAdUid()) != null) {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(),
@@ -682,7 +696,7 @@ public class RuleMatching {
 		String ipAddr, Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap,
 		String appPackageName,String requestId,int width,int height,List<String> adxNamePushList,
 		boolean isDimension,String adLocationId,Map<String,CreativeGroupBean> creativeGroupMap,
-		Map<String,CreativeBean> creativeMap,boolean isFeed3) throws Exception {
+		Map<String,CreativeBean> creativeMap) throws Exception {
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = null;
 		List<AdBean> gradeList = new ArrayList<AdBean>();
@@ -716,7 +730,7 @@ public class RuleMatching {
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, audienceMap,
 					adxName, ipAddr, rtbIpMap, demographicMap,appPackageName,requestId,width,height,
-					adxNamePushList,isDimension,adLocationId,creativeGroupMap,creativeMap,isFeed3);
+					adxNamePushList,isDimension,adLocationId,creativeGroupMap,creativeMap);
 		} else {
 			// long startOrder = System.currentTimeMillis();
 			AdBean ad = null;
@@ -733,7 +747,7 @@ public class RuleMatching {
 			Material material = metrialMap.get(ad.getAdUid());
 			targetDuFlowBean = packageDUFlowData(material, deviceId, ad, tagBean, widthHeightRatio, audienceMap,
 					adxName, ipAddr, rtbIpMap, demographicMap,appPackageName,requestId,width,height,
-					adxNamePushList,isDimension,adLocationId,creativeGroupMap,creativeMap,isFeed3);
+					adxNamePushList,isDimension,adLocationId,creativeGroupMap,creativeMap);
 		}
 
 		return targetDuFlowBean;
@@ -880,7 +894,7 @@ public class RuleMatching {
 										Map<String, Boolean> rtbIpMap, Map<String, Boolean> demographicMap,String appPackageName,
 										String requestId,int width,int height,List<String> adxNamePushList,boolean isDimension,
 										String adLocationId,Map<String,CreativeGroupBean> creativeGroupMap,
-										Map<String,CreativeBean> creativeMap,boolean isFeed3) throws Exception {
+										Map<String,CreativeBean> creativeMap) throws Exception {
 		MDC.put("sift", "rtb");
 		DUFlowBean targetDuFlowBean = new DUFlowBean();
 //		CreativeBean creative = ad.getCreativeList().get(0);
@@ -1087,7 +1101,7 @@ public class RuleMatching {
 			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
 			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 640, 100, false, 5, 5, "1", "jpg,gif", "127.0.0.1",
-					"com.iflytek.inputmethod",new ArrayList(),true,"123");
+					"com.iflytek.inputmethod",new ArrayList(),true,"123","aaa");
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
 //			}

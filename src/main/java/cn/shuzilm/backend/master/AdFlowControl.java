@@ -1255,7 +1255,7 @@ public class AdFlowControl {
                 ad.setMediaForm(mediaForm);
                 if(mediaForm != null){
             		List<Long> mediaIdList = taskService.queryMediaIdByAdUid(adUid);
-            		ad.setMediaIdList(mediaIdList);
+            		ad.setMediaIdList(new HashSet<Long>(mediaIdList));
                 }
                 ad.setCreativeForm(map.getInteger("creative_form"));
                 //如果是价格和配额发生了变化，直接通知

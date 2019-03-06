@@ -8,6 +8,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by thunders on 2018/7/10.
@@ -165,6 +166,6 @@ public class AdBean implements ICommand  {
      * 广告单元所投放的媒体ID列表
      */
     @Setter
-    private List<Long> mediaIdList;
+    private Set<Long> mediaIdList;
 
 }
