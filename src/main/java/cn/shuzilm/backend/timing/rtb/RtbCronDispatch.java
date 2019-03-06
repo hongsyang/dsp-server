@@ -146,10 +146,10 @@ public class RtbCronDispatch {
                dispatch(BlackListTask.class,"0 0 * * * ?");
                break;
            case 10:
-        	   dispatch(RtbPullAndUpdateMediaTask.class,"0 0/5 * * * ?");
+        	   dispatch(RtbPullAndUpdateMediaTask.class,"0/5 * * * * ?");
         	   break;
            case 11:
-        	   dispatch(RtbPullAndUpdateAdLocationTask.class,"0 0/5 * * * ?");
+        	   dispatch(RtbPullAndUpdateAdLocationTask.class,"0/5 * * * * ?");
         	   break;
            default:
                break;

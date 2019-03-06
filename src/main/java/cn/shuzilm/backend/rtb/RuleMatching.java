@@ -436,7 +436,7 @@ public class RuleMatching {
 		String audienceReason = null;
 
 		for (String adUid : auidList) {
-			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName,adxAndMedia,appPackageName);
+			boolean isAvaliable = rtbIns.checkAvalable(adUid,deviceId,adxName,appPackageName,adxAndMedia);
 
 			AdBean ad = rtbIns.getAdMap().get(adUid);
 			String advertierId = "";

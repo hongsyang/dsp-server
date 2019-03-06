@@ -673,30 +673,32 @@ public class RtbFlowControl {
     }
     
     /**
-     * 每隔5分钟获取媒体列表
+     * 每隔5秒获取媒体列表
      */
     public void pullAndUpdateMediaList(){
     	MDC.put("sift", "rtb");
-    	mediaMap.clear();
+    	
     	List<MediaBean> mediaList = MsgControlCenter.recvMediaList(nodeName);
     	if(mediaList == null || mediaList.isEmpty()){
     		return;
     	}
+    	mediaMap.clear();
     	for(MediaBean media:mediaList){
-    		mediaMap.put(media.getMasterMediaId(), media);
+    		mediaMap.put(media.getId(), media);
     	}
     }
     
     /**
-     * 每隔5分钟获取在投广告位列表
+     * 每隔5秒获取在投广告位列表
      */
     public void pullAndUpdateAdLocationSet(){
     	MDC.put("sift", "rtb");
-    	adLocationSet.clear();
+    	
     	List<AdLocationBean> adLocationList = MsgControlCenter.recvAdLocationList(nodeName);
     	if(adLocationList == null || adLocationList.isEmpty()){
     		return;
     	}
+    	adLocationSet.clear();
     	for(AdLocationBean adLocation:adLocationList){
     		Long adxId = adLocation.getAdxId();
     		MediaBean media = adLocation.getMedia();
@@ -795,12 +797,7 @@ public class RtbFlowControl {
         	if(startTime > now || endTime < now){
         		return false;
         	}
-        	//判断广告投放时间窗
-        	String scheduleTime = adBean.getScheduleTime();
-        	//代表时间窗选择了不限
-        	if(scheduleTime != null && scheduleTime.trim().equals("{}")){
-        		return true;
-        	}
+        	
         	
         	if(deviceId != null && deviceLimitMapDaiyly.get(auid) != null && 
         			deviceLimitMapDaiyly.get(auid).contains(deviceId)){
@@ -845,6 +842,13 @@ public class RtbFlowControl {
 	        		return false;
 	        	}
         	} 
+        	
+        	//判断广告投放时间窗
+        	String scheduleTime = adBean.getScheduleTime();
+        	//代表时间窗选择了不限
+        	if(scheduleTime != null && scheduleTime.trim().equals("{}")){
+        		return true;
+        	}
         	        	
         	Integer weekNum = weekAndDayNumMap.get("EEEE");
         	Integer dayNum = weekAndDayNumMap.get("HH");
