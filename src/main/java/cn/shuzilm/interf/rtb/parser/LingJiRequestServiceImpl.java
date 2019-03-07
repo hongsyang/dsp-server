@@ -69,6 +69,9 @@ public class LingJiRequestServiceImpl implements RequestService {
             Integer height = null;//广告位的高
             Integer showtype = userImpression.getExt().getShowtype();//广告类型
             String adType = convertAdType(showtype); //对应内部 广告类型
+
+            String tagid = userImpression.getTagid();//广告位id
+
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
             String appPackageName = null;//应用包名
@@ -179,8 +182,14 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
             List adxNameList = new ArrayList();//
+            adxNameList.add(ADX_ID + "_" + tagid);//添加广告位id
+
             //是否匹配长宽
             Boolean isDimension = true;
+            //广告位不为空
+            if (tagid != null) {
+                isDimension = false;
+            }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
                     adType,//广告类型
@@ -195,7 +204,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                     appPackageName,//APP包名
                     adxNameList,
                     isDimension,
-                    bidRequestBean.getId()
+                    bidRequestBean.getId(),
+                    tagid
             );
             if (targetDuFlowBean == null) {
                 response = "";

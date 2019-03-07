@@ -76,6 +76,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             YouYiAdzone adzone = bidRequestBean.getAdzone().get(0);//曝光信息
             YouYiUser user = bidRequestBean.getUser();//用户信息
 
+            String tagid = adzone.getPid();
             Integer width = null;//广告位的宽
             Integer height = null;//广告位的高
 //            Integer showtype = userImpression.getExt().getShowtype();//广告类型
@@ -177,7 +178,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                     appPackageName,//APP包名
                     adxNameList,//长宽列表
                     isDimension,
-                    bidRequestBean.getSession_id()
+                    bidRequestBean.getSession_id(),
+                    tagid
             );
             if (targetDuFlowBean == null) {
                 response = "204session_id:" + session_id;

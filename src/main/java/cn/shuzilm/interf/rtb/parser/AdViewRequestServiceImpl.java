@@ -59,6 +59,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             //创建返回结果  bidRequest请求参数保持不变
             Device userDevice = bidRequestBean.getDevice();//设备信息
             Impression userImpression = bidRequestBean.getImp().get(0);//曝光信息
+
             App app = bidRequestBean.getApp();//应用信息
             Integer width = null;//广告位的宽
             Integer height = null;//广告位的高
@@ -67,10 +68,10 @@ public class AdViewRequestServiceImpl implements RequestService {
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
             String appPackageName = null;//应用包名
+            String tagid = userImpression.getTagid();//广告位id
             if (app != null) {
                 appPackageName = app.getBundle();
             }
-
 
 
             //设备的设备号：用于匹配数盟库中的数据
@@ -98,7 +99,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName, userDevice.getIp());//过滤规则的返回结果
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp());//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
@@ -195,8 +196,15 @@ public class AdViewRequestServiceImpl implements RequestService {
 
             //广告位列表 只有悠易和广点通需要
             List adxNameList = new ArrayList();//
+
+            adxNameList.add(ADX_ID + "_" + tagid);//添加广告位id
+
             //是否匹配长宽
             Boolean isDimension = true;
+            //广告位不为空
+            if (tagid != null) {
+                isDimension = false;
+            }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
                     adType,//广告类型
@@ -210,8 +218,9 @@ public class AdViewRequestServiceImpl implements RequestService {
                     userDevice.getIp(),//用户ip
                     appPackageName,//APP包名
                     adxNameList,//宽列表
-                    isDimension,//高列表
-                    bidRequestBean.getId()
+                    isDimension,
+                    bidRequestBean.getId(),
+                    userImpression.getTagid()
             );
             if (targetDuFlowBean == null) {
                 response = "";
