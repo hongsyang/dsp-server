@@ -43,10 +43,6 @@ public class RtbRequestParser {
      */
     public String parseData(String url, String dataStr, String remoteIp) throws Exception {
         String responseStr = "";
-        if (Boolean.valueOf(configs.getString("FILTER_RTB"))) {
-            responseStr = "测试请求";
-            return responseStr;
-        }
         List<String> urlList = UrlParserUtil.urlParser(url);
         reflections = instance("cn.shuzilm.interf.rtb.parser");
         Set<Class<? extends RequestService>> monitorClasses = reflections.getSubTypesOf(RequestService.class);
