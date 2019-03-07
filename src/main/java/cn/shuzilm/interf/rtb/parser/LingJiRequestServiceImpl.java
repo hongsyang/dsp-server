@@ -187,7 +187,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             //是否匹配长宽
             Boolean isDimension = true;
             //广告位不为空
-            if (tagid != null) {
+            if (tagid != null && !tagid.trim().equals("")) {
                 isDimension = false;
             }
             DUFlowBean targetDuFlowBean = ruleMatching.match(

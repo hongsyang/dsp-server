@@ -117,6 +117,14 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String,AdLocationBean> getAdLocationMap(){
     	return adLocationMap;
     }
+    
+    public ConcurrentHashMap<Long,MediaBean> getMediaUselessMap(){
+    	return mediaUselessMap;
+    }
+    
+    public ConcurrentHashMap<String,MediaBean> getPackageUselessMap(){
+    	return packageUselessMap;
+    }
 
 	private String nodeName;
     /**
@@ -181,7 +189,14 @@ public class RtbFlowControl {
     private static HashMap<String,HashSet<String>> deviceLimitMapDaiyly = new HashMap<>();
     private static HashMap<String,HashSet<String>> deviceLimitMapHourly = new HashMap<>();
     
+    /**
+     * 正在使用的媒体
+     */
     private static ConcurrentHashMap<Long,MediaBean> mediaMap = null;
+    
+    private static ConcurrentHashMap<Long,MediaBean> mediaUselessMap = null;
+    
+    private static ConcurrentHashMap<String,MediaBean> packageUselessMap = null;
     
     private static ConcurrentHashMap<String,Set<String>> adMediaMap = null;
     
@@ -214,6 +229,8 @@ public class RtbFlowControl {
         bidList = new ArrayList<AdBidBean>();
         weekAndDayNumMap = new ConcurrentHashMap<String,Integer>();
         mediaMap = new ConcurrentHashMap<Long,MediaBean>();
+        mediaUselessMap = new ConcurrentHashMap<Long,MediaBean>();
+        packageUselessMap = new ConcurrentHashMap<String,MediaBean>();
         adLocationSet = Collections.synchronizedSet(new HashSet<String>());
         adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
@@ -690,8 +707,19 @@ public class RtbFlowControl {
     		return;
     	}
     	mediaMap.clear();
+    	mediaUselessMap.clear();
+    	packageUselessMap.clear();
     	for(MediaBean media:mediaList){
-    		mediaMap.put(media.getId(), media);
+    		if(media.getOpStatus() == 1 && media.getMediaStatus() == 1){
+    			mediaMap.put(media.getId(), media);
+    		}else{
+    			mediaUselessMap.put(media.getId(), media);
+    			List<String> packageList = media.getPackageNameList();
+    			Integer adxId = media.getAdxId();
+    			for(String packageName:packageList){
+    				packageUselessMap.put(adxId+"_"+packageName, media);
+    			}
+    		}
     	}
     }
     
@@ -726,7 +754,7 @@ public class RtbFlowControl {
     			height = item.getHeight();
     		}
     		for(String packageName:mediaAppPackageNameList){
-	    		String adLocationStr1 = adxId+"_"+mediaAdx+"_"+packageName+"_"+placeId;
+	    		String adLocationStr1 = adxId+"_"+mediaAdx+"_"+packageName+"_"+adxId+"_"+placeId;
 	    		String adLocationStr2 = adxId+"_"+mediaAdx+"_"+packageName+"_"+width+"_"+height;
 	    		adLocationSet.add(adLocationStr1);
 	    		adLocationSet.add(adLocationStr2);
@@ -838,7 +866,23 @@ public class RtbFlowControl {
         	//媒体管理控制
         	Integer mediaForm = adBean.getMediaForm();
         	if(mediaForm != null && mediaForm == 0){//不限
-        		//媒体管理不做限制，不做任何处理
+        		//媒体管理不做限制，屏蔽无用媒体
+        		if(packageFlag){
+        			if(packageUselessMap.containsKey(adxAndMedia)){
+        				myLog.info("广告["+auid+"]不参与["+adxAndMedia+"]媒体投放!");
+        				return false;
+        			}
+        		}else{
+        			if(!mediaTempList.isEmpty()){
+        				for(Long mediaId:mediaTempList){
+	        					if(mediaUselessMap.containsKey(mediaId)){
+	        						myLog.info("广告["+auid+"]不参与["+adxAndMedia+"]媒体投放!");
+	        						return false;
+	        					}	
+        					}
+        				}
+        				
+        		}
         	}else{
         		if(packageFlag){//有包名
 		        	if(adMediaMap.containsKey(auid)){

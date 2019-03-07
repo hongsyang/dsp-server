@@ -794,7 +794,8 @@ public class TaskServicve extends Service {
      * @return
      */
     public ArrayList<MediaBean> queryMediaAll(){
-    	String sql = "SELECT * FROM media where op_status = 1 and media_status = 1";
+    	//String sql = "SELECT * FROM media where op_status = 1 and media_status = 1";
+    	String sql = "SELECT * FROM media";
     	ResultList rl = new ResultList(); 
     	ArrayList<MediaBean> mediaList = new ArrayList<MediaBean>();
     	try {
@@ -990,19 +991,7 @@ public class TaskServicve extends Service {
     	TaskServicve taskService = new TaskServicve();
     	
     	try {
-    		List<CreativeGroupBean> creativeGroupList = taskService.queryCreativeGroupByAdUid("ec5cba9e-3a2b-4c22-bd53-251c60b206da");
-            for(CreativeGroupBean creativeGroup:creativeGroupList){
-            	String creativeGroupUid = creativeGroup.getUid();
-            	List<CreativeBean> creativeList = taskService.queryCreativeByGroupId(creativeGroupUid);
-            	for(CreativeBean creative:creativeList){
-            		//根据创意 ID 查询 物料
-            	  String creativeUid = creative.getUid();
-            	  String creativeType = creative.getType();
-                  List<Material> materialList = taskService.queryMaterialByCreativeId(creativeUid,creativeType);
-                  creative.setMaterialList(materialList);
-            	}
-            	creativeGroup.setCreativeList(creativeList);
-            }
+    		taskService.queryAdLocationList();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -128,18 +128,22 @@ public class RuleMatching {
 						  boolean isDimension,List<String> adxNamePushList) throws Exception {
 		// 筛选审核通过的物料
 		if(material.getApproved_adx() == null || material.getApproved_adx().trim().equals("")){
+			LOG.info("-------------11111111");
 			return false;
 		}
 
 		if (!extStr.equals("") && !extStr.contains(image.getExt())) {
+			LOG.info("-------------222222");
 			return false;
 		}
 		if (isDimension && !materialSet.contains(material.getUid())) {
+			LOG.info("-------------333333");
 			return false;
 		}
 
 		if(isDimension){
 			if (!material.getApprovedAdxSet().contains(adxName)) {
+				LOG.info("-------------444444");
 				return false;
 			}
 		}else{
@@ -154,6 +158,7 @@ public class RuleMatching {
 					}
 				}
 				if(!dimensionFlag){
+					LOG.info("-------------555555");
 					return false;
 				}else{
 					return true;
@@ -215,7 +220,8 @@ public class RuleMatching {
 		Map<String, Boolean> rtbIpMap = new HashMap<String, Boolean>();
 		Map<String, Boolean> demographicMap = new HashMap<String, Boolean>();
 		List<String> adxNamePushList = new ArrayList<String>();
-
+		
+		long startTime = System.currentTimeMillis();
 		// 匹配
 		DUFlowBean targetDuFlowBean = null;
 		TagBean tagBean = null;
@@ -253,7 +259,7 @@ public class RuleMatching {
 			
 			ListIterator<String> adLocationIt = adxNameList.listIterator();
 			boolean adLocationFlag = false;
-			if(appPackageName != null && appPackageName.trim().equals("")){
+			if(appPackageName != null && !appPackageName.trim().equals("")){
 				while(adLocationIt.hasNext()){
 					String adx = adLocationIt.next();
 					String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+adx;
@@ -277,13 +283,14 @@ public class RuleMatching {
 				}
 			}
 		}else{
-				if(appPackageName != null && appPackageName.trim().equals("")){
+				
 				int divisor = MathTools.division(width, height);
 				widthHeightRatio = width / divisor + "/" + height / divisor;
 				//materialRatioKey = widthHeightRatio;
 				auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
 				materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
 				
+			if(appPackageName != null && !appPackageName.trim().equals("")){
 				String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
 				if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
 					LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
@@ -325,7 +332,7 @@ public class RuleMatching {
 
 //			}
 			
-			if(appPackageName != null){
+			if(appPackageName != null && !appPackageName.trim().equals("")){
 				adxAndMedia = adxName + "_" + appPackageName;
 				packageFlag = true;
 			}else{
@@ -668,7 +675,8 @@ public class RuleMatching {
 			MDC.remove("phoenix");
 			MDC.put("sift", "rtb");
 		}
-
+	
+		LOG.info("总花费时间:"+(System.currentTimeMillis()-startTime));
 
 		machedAdList = null;
 		metrialMap = null;
