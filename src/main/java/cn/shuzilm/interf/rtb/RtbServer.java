@@ -11,10 +11,15 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.stream.ChunkedWriteHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -77,7 +83,7 @@ public class RtbServer {
             ipBlacklist = IpBlacklistUtil.getInstance();
             jedisManager = JedisManager.getInstance();
             redisManager = RedisManager.getInstance();
-//            ruleMatching = RuleMatching.getInstance();
+            ruleMatching = RuleMatching.getInstance();
             subTypesOf = reflections.getSubTypesOf(RequestService.class);
 //            for (Class<? extends RequestService> aClass : subTypesOf) {
 //                System.out.println(aClass.getName());
@@ -113,14 +119,14 @@ public class RtbServer {
     public void start(int port) {
 
         // boss线程池
-        bossGroup = new NioEventLoopGroup();
-//        log.debug("BOSS_THREADS :{}", configs.getInt("BOSS_THREADS"));
-//        bossGroup = new NioEventLoopGroup(configs.getInt("BOSS_THREADS"));
+//        bossGroup = new NioEventLoopGroup();
+        log.debug("BOSS_THREADS :{}", configs.getInt("BOSS_THREADS"));
+        bossGroup = new NioEventLoopGroup(configs.getInt("BOSS_THREADS"));
 
         // worker线程池
-        workerGroup = new NioEventLoopGroup();
-//        log.debug("WORK_THREADS :{}", configs.getInt("WORK_THREADS"));
-//        workerGroup = new NioEventLoopGroup(configs.getInt("WORK_THREADS"));
+//        workerGroup = new NioEventLoopGroup();
+        log.debug("WORK_THREADS :{}", configs.getInt("WORK_THREADS"));
+        workerGroup = new NioEventLoopGroup(configs.getInt("WORK_THREADS"));
 
 
         bootstrap = new ServerBootstrap();
@@ -154,11 +160,12 @@ public class RtbServer {
 
     }
 
-    private class ServerPipelineFactory extends ChannelInitializer<NioSocketChannel> {
+    private class ServerPipelineFactory extends ChannelInitializer<SocketChannel> {
 
         @Override
-        protected void initChannel(NioSocketChannel nioSocketChannel) throws Exception {
-            ChannelPipeline pipeline = nioSocketChannel.pipeline();
+        protected void initChannel(SocketChannel ch) throws Exception {
+
+            ChannelPipeline pipeline = ch.pipeline();
 
 
             // ----Protobuf处理器，这里的配置是关键----
@@ -170,23 +177,23 @@ public class RtbServer {
             //配置Protobuf编码器，发送的消息会先经过编码
 //            pipeline.addLast("protobufEncoder", new ProtobufEncoder());
 
-//            pipeline.addLast(new ReadTimeoutHandler(60));
-//            pipeline.addLast(new WriteTimeoutHandler(10, TimeUnit.MILLISECONDS));
-
+            pipeline.addLast(new ReadTimeoutHandler(60));
+            pipeline.addLast(new WriteTimeoutHandler(10, TimeUnit.MILLISECONDS));
             //http服务器端对request解码
             pipeline.addLast("decoder", new HttpRequestDecoder());
             //http服务器端对response编码
             pipeline.addLast("encoder", new HttpResponseEncoder());
             //将多个消息转化成一个
-//            pipeline.addLast("http-aggregator",new HttpObjectAggregator(65535));
+            pipeline.addLast("http-aggregator",new HttpObjectAggregator(65535));
             //解决大码流的问题
-//            pipeline.addLast("http-chunked",new ChunkedWriteHandler());
-
+            pipeline.addLast("http-chunked",new ChunkedWriteHandler());
             //http处理handler
-            pipeline.addLast("handler",  new RtbHandler(executor,requestParser));
+            pipeline.addLast("handler", new RtbHandler(executor,requestParser));
+
 
         }
     }
+
 
 
 

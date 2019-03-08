@@ -44,7 +44,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private FullHttpRequest httpRequest;
 
-    private static RtbRequestParser parser ;
+    private static RtbRequestParser parser =new RtbRequestParser();
 
     private String remoteIp = null;
     private String dataStr = "";
@@ -70,9 +70,10 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      * @throws Exception
      */
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) {
         try {
             long start = new Date().getTime();
+//            log.debug("msg:{}", msg);
             if (!(msg instanceof FullHttpRequest)) {
                 result = "未知请求!";
                 send(ctx, result, HttpResponseStatus.OK);
@@ -81,12 +82,12 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             httpRequest = msg;
 
             this.remoteIp = ctx.channel().remoteAddress().toString().split(":")[0].replace("/", "");
-            this.url = httpRequest.uri();          //获取路径
+            this.url = httpRequest.uri().replace("/","");          //获取路径
             this.dataStr = getBody(httpRequest, url);     //获取参数
             HttpMethod method = httpRequest.method();//获取请求方法
             if (HttpMethod.GET.equals(method)) {
                 //接受到的消息，做业务逻辑处理...
-                log.debug("GET请求 ：{}",url);
+                log.debug("GET请求 ：{}", url);
                 send(ctx, result, HttpResponseStatus.OK);
                 return;
             }
@@ -96,14 +97,18 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 //接受到的消息，做业务逻辑处理...
                 log.debug("POST请求 ：{}", dataStr);
                 //返回结果
-                result = parser.parseData(url, dataStr, remoteIp,requestParser);
+                result = parser.parseData(url, dataStr, remoteIp, requestParser);
                 send(ctx, result, HttpResponseStatus.OK);
             }
 
 
         } catch (Exception e) {
             MDC.put("sift", "rtb-exception");
-            send(ctx, result, HttpResponseStatus.NO_CONTENT);
+            try {
+                send(ctx, result, HttpResponseStatus.NO_CONTENT);
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
             log.error("", e);
         }
 
