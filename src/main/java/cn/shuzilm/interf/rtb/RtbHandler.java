@@ -1,17 +1,26 @@
 package cn.shuzilm.interf.rtb;
 
 
+import bidserver.BidserverSsp;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
+import com.googlecode.protobuf.format.JsonFormat;
+import gdt.adx.GdtRtb;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,11 +65,25 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static String dataStr = "";
     private static String url = null;
 
+    //log日志参数
+    private String requestId = null;
+    private Integer adxId = 0;
+    private String appName = "";
+    private String appPackageName = "";
+    private Integer ipBlackListFlag = null;
+    private Integer bundleBlackListFlag = null;
+    private Integer deviceIdBlackListFlag = null;
+    private Integer timeOutFlag = 1;
+    private Integer bidPriceFlag = 0;
+    private String price = "-1";
+    private Integer exceptionFlag = 1;
+
+
     private String result = "";
 
     static {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            log.debug("当前连接数为:{},连接的服务器ip:{}", atomicInteger.get(), remoteIpGroup);
+            log.debug("当前通道连接数为:{},连接的服务器ip:{}", atomicInteger.get(), remoteIpGroup);
         }, 0, 3, TimeUnit.SECONDS);
     }
 
@@ -81,46 +104,78 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) {
+
+        long start = System.currentTimeMillis();
         try {
-            long start = new Date().getTime();
-//            log.debug("msg:{}", msg);
+            //开始时间
+            //判断是否是 http请求
             if (!(msg instanceof FullHttpRequest)) {
                 result = "未知请求!";
-                send(ctx, result, HttpResponseStatus.OK);
+                send(ctx, result, url, 0);
                 return;
             }
+            //解析参数
             httpRequest = msg;
-
             this.remoteIp = ctx.channel().remoteAddress().toString().split(":")[0].replace("/", "");
             this.url = httpRequest.uri().replace("/", "");          //获取路径
             this.dataStr = getBody(httpRequest, url);     //获取参数
+//            log.debug("dataStr ：{}", dataStr);
             HttpMethod method = httpRequest.method();//获取请求方法
-            if (HttpMethod.GET.equals(method)) {
-                //接受到的消息，做业务逻辑处理...
-                log.debug("GET请求 ：{}", url);
-                result=dataStr;
-                send(ctx, result, HttpResponseStatus.OK);
-                return;
-            }
+
+            //获取get参数
+//            if (HttpMethod.GET.equals(method)) {
+//                //接受到的消息，做业务逻辑处理...
+//                log.debug("GET请求 ：{}", url);
+//                result=dataStr;
+//                send(ctx, result, HttpResponseStatus.OK);
+//                return;
+//            }
 
             //获取post参数
             if (HttpMethod.POST.equals(method)) {
                 //接受到的消息，做业务逻辑处理...
-                log.debug("POST请求 ：{}", dataStr);
-                //返回结果
-                result = parser.parseData(url, dataStr, remoteIp, requestParser);
-                send(ctx, result, HttpResponseStatus.OK);
+//                log.debug("POST请求 ：{}", dataStr);
+                //增加超时线程池
+                Future<Object> future = executor.submit(new Callable<Object>() {
+                    @Override
+                    public Object call() throws Exception {
+                        //主业务逻辑
+                        return result = parser.parseData(url, dataStr, remoteIp, requestParser);
+                    }
+                });
+                //设置超时时间
+                try {
+                    result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
+                } catch (TimeoutException e) {
+                    timeOutFlag = 0;
+                    long end = System.currentTimeMillis();
+                    MDC.put("sift", "timeOut");
+                    log.error("超时timeMs:{},url:{}", end - start, url);
+                    MDC.remove("sift");
+                    send(ctx, result, url, timeOutFlag);
+                    future.cancel(true);// 中断执行此任务的线程
+                    return;
+                }
+
+                //正常状态 返回结果
+                send(ctx, result, url, 1);
             }
 
 
         } catch (Exception e) {
-            MDC.put("sift", "rtb-exception");
             try {
-                send(ctx, result, HttpResponseStatus.NO_CONTENT);
+                exceptionFlag = 0;
+                long end = System.currentTimeMillis();
+                MDC.put("sift", "rtb-exception");
+                log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
+                log.error("timeMs:{},Exception:{}", end - start, e);
+                send(ctx, result, url, exceptionFlag);
             } catch (Exception e1) {
+                log.error("发送", e1);
                 e1.printStackTrace();
             }
-            log.error("", e);
+        } finally {
+
         }
 
     }
@@ -133,11 +188,24 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      * @return
      */
     private String getBody(FullHttpRequest request, String url) throws Exception {
+        //悠易请求
+        BidserverSsp.BidRequest bidRequest = null;
+        //广点通请求
+        GdtRtb.BidRequest tencentBidRequest = null;
+
+        //解决 IllegalReferenceCountException
+        ByteBuf buf = request.content();
+        buf.retain();
         if (request != null) {
-            ByteBuf buf = request.content();
-            //解决 IllegalReferenceCountException
-            buf.retain();
-            dataStr = buf.toString(CharsetUtil.UTF_8);
+            if (url.contains("youyi")) {
+                bidRequest = BidserverSsp.BidRequest.parseFrom(request.content().array());
+                dataStr = JsonFormat.printToString(bidRequest);
+            } else if (url.contains("tencent")) {
+                tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.content().array());
+                dataStr = JsonFormat.printToString(tencentBidRequest);
+            } else {
+                dataStr = buf.toString(CharsetUtil.UTF_8);
+            }
         }
         return dataStr;
     }
@@ -148,16 +216,70 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
      *
      * @param ctx    返回
      * @param result 消息
-     * @param status 状态
+     * @param url    adx厂商
      */
-    private void send(ChannelHandlerContext ctx, String result, HttpResponseStatus status) throws Exception {
-        HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer(result, CharsetUtil.UTF_8));
+    private void send(ChannelHandlerContext ctx, String result, String url, Integer exceptionStatus) {
+        //设置返回头 默认状态为200
+        DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html");
         response.headers().set(HttpHeaderNames.ACCEPT_RANGES, "bytes");
         //保持连接
         response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
-        //关闭通道
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+        //悠易返回结果
+        BidserverSsp.BidResponse.Builder youyiBuilder = BidserverSsp.BidResponse.newBuilder();
+        //广点通返回结果
+        GdtRtb.BidResponse.Builder tencentbuilder = GdtRtb.BidResponse.newBuilder();
+
+        //返回接口
+        byte[] content = null;
+        try {
+            //大于0位正常状态
+            if (url.contains("youyi")) {
+                if (result.contains("204session_id")) {
+                    String substring = result.substring(result.indexOf("204session_id") + 14);
+                    youyiBuilder.setSessionId(substring);
+//                    builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
+                    content = youyiBuilder.build().toByteArray();
+                    response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
+                    response.replace(Unpooled.copiedBuffer(content));
+                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                } else {
+                    JsonFormat.merge(result, youyiBuilder);
+                    BidserverSsp.BidResponse build = youyiBuilder.build();
+                    content = build.toByteArray();
+                    response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
+                    response.replace(Unpooled.copiedBuffer(content));
+                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                }
+            } else if (url.contains("tencent")) {
+                JsonFormat.merge(result, tencentbuilder);
+                GdtRtb.BidResponse build = tencentbuilder.build();
+                content = build.toByteArray();
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
+                response.replace(Unpooled.copiedBuffer(content));
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            } else {
+                if ("".equals(result) ||
+                        "ipBlackList".equals(result) ||
+                        "bundleBlackList".equals(result) ||
+                        "deviceIdBlackList".equals(result) ||
+                        exceptionStatus > 0
+                        ) {
+                    response.setStatus(HttpResponseStatus.NO_CONTENT);
+                    result = "";
+                }
+                content = result.getBytes("utf-8");
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, content.length);
+                response.replace(Unpooled.copiedBuffer(content));
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            }
+
+
+            //关闭通道
+        } catch (Exception e) {
+            MDC.put("sift", "send-message-exception");
+            log.error("send-message-exception:{}", e);
+        }
     }
 
 
@@ -171,7 +293,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         try {
             this.remoteIp = ctx.channel().remoteAddress().toString().split(":")[0].replace("/", "");
             atomicInteger.incrementAndGet();
-            log.debug("客户端ip:{} 连接", remoteIp);
+//            log.debug("客户端ip:{}, Channel连接", remoteIp);
             if (remoteIpGroup.get(remoteIp) != null) {
                 Integer linkNum = remoteIpGroup.get(remoteIp);
                 linkNum++;//连接次数 + 1
@@ -181,7 +303,8 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
         } catch (Exception e) {
             MDC.put("sift", "dsp-netty-exception");
-            log.error("", e);
+            log.error("dsp-netty-exception", e);
+            MDC.remove("sift");
         }
 
     }
@@ -196,7 +319,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         try {
             this.remoteIp = ctx.channel().remoteAddress().toString().split(":")[0].replace("/", "");
             atomicInteger.decrementAndGet();
-            log.debug("客户端ip:{} 断开", remoteIp);
+//            log.debug("客户端ip:{} ,Channel断开", remoteIp);
             if (remoteIpGroup.get(remoteIp) != null) {
                 Integer linkNum = remoteIpGroup.get(remoteIp);
                 linkNum--;//连接次数 - 1
@@ -204,10 +327,9 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             }
         } catch (Exception e) {
             MDC.put("sift", "dsp-netty-exception");
-            log.error("", e);
+            log.error("dsp-netty-exception", e);
         }
     }
-
 
 
     /**
@@ -219,7 +341,6 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         MDC.put("sift", "dsp-netty-exception");
-        cause.printStackTrace();
         log.error("exceptionCaught:{}", cause.getStackTrace());
     }
 }

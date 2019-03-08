@@ -119,12 +119,9 @@ public class RtbServer {
     public void start(int port) {
 
         // boss线程池
-//        bossGroup = new NioEventLoopGroup();
         log.debug("BOSS_THREADS :{}", configs.getInt("BOSS_THREADS"));
         bossGroup = new NioEventLoopGroup(configs.getInt("BOSS_THREADS"));
-
         // worker线程池
-//        workerGroup = new NioEventLoopGroup();
         log.debug("WORK_THREADS :{}", configs.getInt("WORK_THREADS"));
         workerGroup = new NioEventLoopGroup(configs.getInt("WORK_THREADS"));
 
