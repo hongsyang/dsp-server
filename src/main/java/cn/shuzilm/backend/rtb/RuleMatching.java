@@ -9,6 +9,7 @@ import cn.shuzilm.bean.control.CreativeGroupBean;
 import cn.shuzilm.bean.control.FlowTaskBean;
 import cn.shuzilm.bean.control.Image;
 import cn.shuzilm.bean.control.Material;
+import cn.shuzilm.bean.control.MediaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.TagBean;
@@ -338,9 +339,13 @@ public class RuleMatching {
 			}else{
 				if(!isDimension){
 				for(String adLocationIdTemp:adxNameList){
-					if(rtbIns.getAdLocationMap().containsKey(adLocationIdTemp)){
-						mediaTempList.add(rtbIns.getAdLocationMap().get(adLocationIdTemp).getMedia().getId());
-						packageFlag = false;
+					if(rtbIns.getAdLocationMap().containsKey(adLocationIdTemp)){						
+						MediaBean media = rtbIns.getAdLocationMap().get(adLocationIdTemp).getMedia();
+						if(media != null){
+							mediaTempList.add(media.getId());
+							packageFlag = false;
+						}
+						
 					}
 				}
 				}
