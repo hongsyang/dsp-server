@@ -117,8 +117,9 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setHost(configs.getString("HOST"));
                 String price = urlRequest.get("price");
-                Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
-                bean.setCost(Double.valueOf(priceLong)/ 10000);
+//                Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
+//                bean.setCost(Double.valueOf(priceLong)/ 10000);
+                bean.setCost(Double.valueOf(price)/ 10000);
                 bean.setWinNoticeNums(1);
                 //pixel服务器发送到主控模块
                 log.debug("pixel服务器发送到主控模块的AdViewNurlBean：{}", bean);
@@ -127,7 +128,8 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
 //                pixel服务器发送到Phoenix
                 element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
                 element.setRequestId(requestId);
-                element.setActualPrice(Double.valueOf(priceLong)/ 10000);//成本价
+//                element.setActualPrice(Double.valueOf(priceLong)/ 10000);//成本价
+                element.setActualPrice(Double.valueOf(price)/ 10000);//成本价
                 element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
