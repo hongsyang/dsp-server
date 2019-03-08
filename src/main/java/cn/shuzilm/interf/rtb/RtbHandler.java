@@ -2,8 +2,12 @@ package cn.shuzilm.interf.rtb;
 
 
 import bidserver.BidserverSsp;
+import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.tencent.request.TencentBidRequest;
+import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
+import com.alibaba.fastjson.JSON;
 import com.googlecode.protobuf.format.JsonFormat;
 import gdt.adx.GdtRtb;
 import io.netty.buffer.ByteBuf;
@@ -21,6 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.net.URLDecoder;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,7 +91,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     static {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             log.debug("当前通道连接数为:{},连接的服务器ip:{}", atomicInteger.get(), remoteIpGroup);
-        }, 0, 3, TimeUnit.SECONDS);
+        }, 0, 1, TimeUnit.MINUTES);
     }
 
     public RtbHandler(ExecutorService executor, ConcurrentHashMap<String, Object> requestParser) {
@@ -161,20 +168,143 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
                 send(ctx, result, url, 1);
             }
 
-
         } catch (Exception e) {
-            try {
-                exceptionFlag = 0;
-                long end = System.currentTimeMillis();
-                MDC.put("sift", "rtb-exception");
-                log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
-                log.error("timeMs:{},Exception:{}", end - start, e);
-                send(ctx, result, url, exceptionFlag);
-            } catch (Exception e1) {
-                log.error("发送", e1);
-                e1.printStackTrace();
-            }
+            exceptionFlag = 0;
+            long end = System.currentTimeMillis();
+            MDC.put("sift", "rtb-exception");
+            log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
+            log.error("timeMs:{},Exception:{}", end - start, e);
+            send(ctx, result, url, exceptionFlag);
+
         } finally {
+            try {
+                long end = System.currentTimeMillis();
+                MDC.put("sift", configs.getString("ADX_REQUEST"));
+                log.debug("timeMs:{},url:{},body:{},remoteIp:{}", end - start, url, dataStr, remoteIp);
+                MDC.remove("sift");
+
+
+                //ip， 设备 ，媒体 黑名单
+                ipBlackListFlag = 1;
+                bundleBlackListFlag = 1;
+                deviceIdBlackListFlag = 1;
+                if (url.contains("lingji")) {
+                    adxId = 1;
+                    BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
+                    requestId = bidRequestBean.getId();
+                    if (bidRequestBean.getApp() != null) {
+                        appName = bidRequestBean.getApp().getName();
+                        appPackageName = bidRequestBean.getApp().getBundle();
+                    }
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf("}"));
+                        }
+                    }
+                } else if (url.contains("adview")) {
+                    adxId = 2;
+                    BidRequestBean bidRequestBean = JSON.parseObject(dataStr, BidRequestBean.class);
+                    requestId = bidRequestBean.getId();
+                    if (bidRequestBean.getApp() != null) {
+                        appName = bidRequestBean.getApp().getName();
+                        appPackageName = bidRequestBean.getApp().getBundle();
+                    }
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                        }
+                    }
+                } else if (url.contains("youyi")) {
+                    adxId = 3;
+                    YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
+                    requestId = bidRequestBean.getSession_id();
+                    if (bidRequestBean.getMobile() != null) {
+                        appName = bidRequestBean.getMobile().getApp_name();
+                        appPackageName = bidRequestBean.getMobile().getApp_bundle();
+                    }
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                        }
+                    }
+                } else if (url.contains("tencent")) {
+                    adxId = 4;
+                    TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
+                    requestId = bidRequestBean.getId();
+                    if (bidRequestBean.getApp() != null) {
+                        appPackageName = bidRequestBean.getApp().getApp_bundle_id();
+                    }
+                    if (result != null) {
+                        if (result.contains("ipBlackList")) {
+                            ipBlackListFlag = 0;
+                        }
+                        if (result.contains("bundleBlackList")) {
+                            bundleBlackListFlag = 0;
+                        }
+                        if (result.contains("deviceIdBlackList")) {
+                            deviceIdBlackListFlag = 0;
+                        }
+                        if (result.contains("price\":")) {
+                            bidPriceFlag = 1;
+                            String substring = result.substring(result.indexOf("price\":"));
+                            price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                        }
+                    }
+
+                }
+
+                MDC.put("phoenix", "rtb-houkp");
+                log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
+                                "\t{}\t{}\t{}\t{}\t{}\t{}",
+                        LocalDateTime.now().toString(), new Date().getTime(),
+                        LocalDate.now().toString(), LocalTime.now().getHour(),
+                        LocalTime.now().getMinute(), requestId,
+                        adxId, appName,
+                        appPackageName, ipBlackListFlag,
+                        bundleBlackListFlag, deviceIdBlackListFlag,
+                        timeOutFlag, bidPriceFlag,
+                        price, exceptionFlag
+                );
+                MDC.remove("phoenix");
+            } catch (Exception e1) {
+                MDC.put("sift", "rtb-exception");
+                log.error("最后的异常Exception:{}", e1);
+                MDC.remove("sift");
+            }
+
 
         }
 

@@ -20,8 +20,12 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
         ByteBuf content = response.content();
         HttpHeaders headers = response.headers();
 
+
+
         System.out.println("content:" + System.getProperty("line.separator") + content.toString(CharsetUtil.UTF_8));
         System.out.println("headers:" + System.getProperty("line.separator") + headers.toString());
+        System.out.println("-------------------------------------------------------");
+
     }
 
 
@@ -43,6 +47,10 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
 
         //发送数据
         ctx.writeAndFlush(request);
+//        for (int i = 0; i <1000 ; i++) {
+//
+//            ctx.writeAndFlush(request);
+//        }
     }
 
 }
