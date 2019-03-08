@@ -35,20 +35,26 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
-
+    //各家adx解析器
     private static ConcurrentHashMap<String, Object> requestParser = null;
+
+    //各家adx 服务器ip和连接次数
+    private static ConcurrentHashMap<String, Integer> remoteIpGroup = new ConcurrentHashMap();
+    //初始连接次数
+    private static Integer remoteIpLinkNum = 1;
+
     private static ExecutorService executor = null;
 
 
     private static AtomicInteger atomicInteger = new AtomicInteger();
 
-    private FullHttpRequest httpRequest;
+    private static FullHttpRequest httpRequest;
 
-    private static RtbRequestParser parser =new RtbRequestParser();
+    private static RtbRequestParser parser = new RtbRequestParser();
 
-    private String remoteIp = null;
-    private String dataStr = "";
-    private String url = null;
+    private static String remoteIp = null;
+    private static String dataStr = "";
+    private static String url = null;
 
     private String result = "";
 
@@ -82,7 +88,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             httpRequest = msg;
 
             this.remoteIp = ctx.channel().remoteAddress().toString().split(":")[0].replace("/", "");
-            this.url = httpRequest.uri().replace("/","");          //获取路径
+            this.url = httpRequest.uri().replace("/", "");          //获取路径
             this.dataStr = getBody(httpRequest, url);     //获取参数
             HttpMethod method = httpRequest.method();//获取请求方法
             if (HttpMethod.GET.equals(method)) {
@@ -160,6 +166,13 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             this.remoteIp = ctx.channel().remoteAddress().toString().split(":")[0].replace("/", "");
             atomicInteger.incrementAndGet();
             log.debug("客户端ip:{} 连接", remoteIp);
+            if (remoteIpGroup.get(remoteIp) != null) {
+                Integer linkNum = remoteIpGroup.get(remoteIp);
+                linkNum++;//连接次数 + 1
+                remoteIpGroup.put(remoteIp, linkNum);
+            } else {
+                remoteIpGroup.put(remoteIp, remoteIpLinkNum);
+            }
         } catch (Exception e) {
             MDC.put("sift", "dsp-netty-exception");
             log.error("", e);
@@ -178,6 +191,11 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             this.remoteIp = ctx.channel().remoteAddress().toString().split(":")[0].replace("/", "");
             atomicInteger.decrementAndGet();
             log.debug("客户端ip:{} 断开", remoteIp);
+            if (remoteIpGroup.get(remoteIp) != null) {
+                Integer linkNum = remoteIpGroup.get(remoteIp);
+                linkNum--;//连接次数 - 1
+                remoteIpGroup.put(remoteIp, linkNum);
+            }
         } catch (Exception e) {
             MDC.put("sift", "dsp-netty-exception");
             log.error("", e);
