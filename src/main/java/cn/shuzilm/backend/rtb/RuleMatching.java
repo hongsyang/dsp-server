@@ -230,7 +230,6 @@ public class RuleMatching {
 			LOG.warn("deviceId[" + deviceId + "]为空!");
 			// return null;
 		} else {
-
 			deviceId = deviceId.toLowerCase();
 			// 取出标签
 			String tagJson = redis.getAsync(deviceId);
