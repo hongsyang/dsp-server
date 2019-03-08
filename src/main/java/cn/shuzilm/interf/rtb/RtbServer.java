@@ -139,6 +139,7 @@ public class RtbServer {
         // 是否启用心跳保活机制。在双方TCP套接字建立连接后（即都进入ESTABLISHED状态）并且在两个小时左右上层没有任何数据传输的情况下，这套机制才会被激活。
         bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
         // 在TCP/IP协议中，无论发送多少数据，总是要在数据前面加上协议头，同时，对方接收到数据，也需要发送ACK表示确认。为了尽可能的利用网络带宽，TCP总是希望尽可能的发送足够大的数据。这里就涉及到一个名为Nagle的算法，该算法的目的就是为了尽可能发送大块数据，避免网络中充斥着许多小数据块。
+        //默认是false。设置为true：表示实时发送
         bootstrap.childOption(ChannelOption.TCP_NODELAY, Boolean.TRUE);
         //SO_REUSEADDR允许启动一个监听服务器并捆绑其众所周知端口，即使以前建立的将此端口用做他们的本地端口的连接仍存在。这通常是重启监听服务器时出现，若不设置此选项，则bind时将出错。
         bootstrap.childOption(ChannelOption.SO_REUSEADDR, Boolean.TRUE);
@@ -177,8 +178,8 @@ public class RtbServer {
             //配置Protobuf编码器，发送的消息会先经过编码
 //            pipeline.addLast("protobufEncoder", new ProtobufEncoder());
 
-            pipeline.addLast(new ReadTimeoutHandler(60));
-            pipeline.addLast(new WriteTimeoutHandler(10, TimeUnit.MILLISECONDS));
+//            pipeline.addLast(new ReadTimeoutHandler(60));
+//            pipeline.addLast(new WriteTimeoutHandler(10, TimeUnit.MILLISECONDS));
             //http服务器端对request解码
             pipeline.addLast("decoder", new HttpRequestDecoder());
             //http服务器端对response编码
@@ -186,7 +187,7 @@ public class RtbServer {
             //将多个消息转化成一个
             pipeline.addLast("http-aggregator",new HttpObjectAggregator(65535));
             //解决大码流的问题
-            pipeline.addLast("http-chunked",new ChunkedWriteHandler());
+//            pipeline.addLast("http-chunked",new ChunkedWriteHandler());
             //http处理handler
             pipeline.addLast("handler", new RtbHandler(executor,requestParser));
 

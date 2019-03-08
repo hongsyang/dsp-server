@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @UpdateRemark: netty 4.1.24
  * @Version: 1.0
  */
-@ChannelHandler.Sharable
+@ChannelHandler.Sharable//可以被共享使用
 public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
 
@@ -58,13 +58,17 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private String result = "";
 
+    static {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            log.debug("当前连接数为:{},连接的服务器ip:{}", atomicInteger.get(), remoteIpGroup);
+        }, 0, 3, TimeUnit.SECONDS);
+    }
+
     public RtbHandler(ExecutorService executor, ConcurrentHashMap<String, Object> requestParser) {
         this.executor = executor;
         this.requestParser = requestParser;
-        log.debug("executor:{},requestParser:{}", executor, requestParser);
-//        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-//            log.debug("当前连接数为:{}", atomicInteger.get());
-//        }, 0, 3, TimeUnit.SECONDS);
+//        log.debug("executor:{},requestParser:{}", executor, requestParser);
+
     }
 
 
@@ -94,6 +98,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
             if (HttpMethod.GET.equals(method)) {
                 //接受到的消息，做业务逻辑处理...
                 log.debug("GET请求 ：{}", url);
+                result=dataStr;
                 send(ctx, result, HttpResponseStatus.OK);
                 return;
             }
@@ -149,9 +154,10 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         HttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer(result, CharsetUtil.UTF_8));
         response.headers().set(HttpHeaderNames.CONTENT_TYPE, "text/html");
         response.headers().set(HttpHeaderNames.ACCEPT_RANGES, "bytes");
+        //保持连接
         response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);
+        //关闭通道
         ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-
     }
 
 
@@ -203,6 +209,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     }
 
 
+
     /**
      * 异常捕获
      *
@@ -212,6 +219,7 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         MDC.put("sift", "dsp-netty-exception");
-        log.error("exceptionCaught:{}", cause);
+        cause.printStackTrace();
+        log.error("exceptionCaught:{}", cause.getStackTrace());
     }
 }
