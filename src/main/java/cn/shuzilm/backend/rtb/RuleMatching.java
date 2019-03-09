@@ -129,22 +129,18 @@ public class RuleMatching {
 						  boolean isDimension,List<String> adxNamePushList) throws Exception {
 		// 筛选审核通过的物料
 		if(material.getApproved_adx() == null || material.getApproved_adx().trim().equals("")){
-			LOG.info("-------------11111111");
 			return false;
 		}
 
 		if (!extStr.equals("") && !extStr.contains(image.getExt())) {
-			LOG.info("-------------222222");
 			return false;
 		}
 		if (isDimension && !materialSet.contains(material.getUid())) {
-			LOG.info("-------------333333");
 			return false;
 		}
 
 		if(isDimension){
 			if (!material.getApprovedAdxSet().contains(adxName)) {
-				LOG.info("-------------444444");
 				return false;
 			}
 		}else{
@@ -159,7 +155,6 @@ public class RuleMatching {
 					}
 				}
 				if(!dimensionFlag){
-					LOG.info("-------------555555");
 					return false;
 				}else{
 					return true;
@@ -222,7 +217,6 @@ public class RuleMatching {
 		Map<String, Boolean> demographicMap = new HashMap<String, Boolean>();
 		List<String> adxNamePushList = new ArrayList<String>();
 		
-		long startTime = System.currentTimeMillis();
 		// 匹配
 		DUFlowBean targetDuFlowBean = null;
 		TagBean tagBean = null;
@@ -470,7 +464,7 @@ public class RuleMatching {
 			}
 			// 是否投当前的广告
 			if (!isAvaliable) {
-				LOG.debug("ID[" + adUid + "]广告不参与投放!");
+				//LOG.debug("ID[" + adUid + "]广告不参与投放!");
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t广告投放策略触发广告停投\t";
 				adAvalableReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+0+"\t"+
@@ -513,7 +507,7 @@ public class RuleMatching {
 				}
 			}
 			if (!filterFlag) {
-				LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
+				//LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
 				//"\t"+ip+"\t未匹配到满足要求的物料\t";
 				materialReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
@@ -680,8 +674,6 @@ public class RuleMatching {
 			MDC.put("sift", "rtb");
 		}
 	
-		LOG.info("总花费时间:"+(System.currentTimeMillis()-startTime));
-
 		machedAdList = null;
 		metrialMap = null;
 		audienceMap = null;
