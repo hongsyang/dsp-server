@@ -236,7 +236,9 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             response = JSON.toJSONString(bidResponseBean);
             MDC.put("sift", "dsp-server");
-            log.debug("没有过滤的bidResponseBean:{}", response);
+            log.debug("没有过滤的bidResponseBean:{}", response);//
+            //合并Jenkins
+            
             //测试环境自动发送曝光
             Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
             Double v = bidfloorcur * 1.3;
