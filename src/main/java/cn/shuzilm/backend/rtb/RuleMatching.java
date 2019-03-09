@@ -622,7 +622,6 @@ public class RuleMatching {
 				}
 			}
 			
-			//materialList = null;
 			audienceList = null;
 			
 			if(!audienceFlag){
