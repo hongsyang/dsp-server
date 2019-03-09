@@ -240,21 +240,22 @@ public class LingJiRequestServiceImpl implements RequestService {
             //合并Jenkins
             
             //测试环境自动发送曝光
-            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
-            Double v = bidfloorcur * 1.3;
-            String price = "&price=" + v;
-            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
-            String serviceUrl = configs.getString("SERVICE_URL");
-            String s = serviceUrl + "lingjiclick?";
-            if (response.contains(s)) {
-                String substring = response.substring(response.indexOf(s));
-                String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
-                String lingjiexpUrl = lingjiexp + price + pf;
-                Boolean flag = sendGetUrl(lingjiexpUrl);
-                log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
-            }
+//            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
+//            Double v = bidfloorcur * 1.3;
+//            String price = "&price=" + v;
+//            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
+//            String serviceUrl = configs.getString("SERVICE_URL");
+//            String s = serviceUrl + "lingjiclick?";
+//            if (response.contains(s)) {
+//                String substring = response.substring(response.indexOf(s));
+//                String lingjiexp = substring.substring(0, substring.indexOf('"')).replace("lingjiclick", "lingjiexp");
+//                String lingjiexpUrl = lingjiexp + price + pf;
+//                Boolean flag = sendGetUrl(lingjiexpUrl);
+//                log.debug("是否曝光成功：{},lingjiexpUrl:{}", flag, lingjiexpUrl);
+//            }
 
 
+            //jenkins 合并1
             targetDuFlowBean = null;
             bidRequestBean = null;
             return response;
