@@ -19,10 +19,13 @@ import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.MathTools;
 import cn.shuzilm.util.TimeUtil;
+import cn.shuzilm.util.db.Select;
 import cn.shuzilm.util.geo.GeoHash;
 import cn.shuzilm.util.geo.GridMark;
 import cn.shuzilm.util.geo.GridMark2;
 
+import com.yao.util.db.bean.ResultList;
+import org.apache.commons.lang.StringUtils;
 import org.python.jline.internal.Log;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -171,6 +174,11 @@ public class RtbFlowControl {
 
     private AsyncRedisClient redis;
     /* end 广告超投设备 */
+
+    /**
+     * 动态出价缓存
+     */
+    private static ConcurrentHashMap<String,Float> dynamicPriceMap = null;
 
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
@@ -745,5 +753,91 @@ public class RtbFlowControl {
         	return false;
         }
         return false;
+    }
+
+
+    public void updateDynamicPriceMap() {
+        Select select = new Select();
+        ConcurrentHashMap<String,Float> tempMap = new ConcurrentHashMap<>();
+        try{
+            String sql = "select * from dynamic_price";
+            ResultList rsList = select.select(sql);
+            rsList.forEach(rsMap -> {
+                try{
+                    String key = "";
+                    String packageName = rsMap.getString("package_name");
+                    String adTagId = rsMap.getString("ad_tag_id");
+                    String width = "null";
+                    String height = "null";
+                    if(StringUtils.isEmpty(adTagId)) {
+                        width = rsMap.getString("width");
+                        height = rsMap.getString("height");
+                        key = packageName + "_" + width + "_" + height;
+                    }else {
+                        key = packageName + "_" + adTagId;
+                    }
+                    float price = rsMap.getFloat("price");
+                    tempMap.put(key,price);
+                }catch(Exception e) {
+                    myLog.error("转map元素报错", e);
+                }
+            });
+            this.dynamicPriceMap = tempMap;
+        }catch (Exception e) {
+            myLog.error("更新动态出价map报错", e);
+        }
+    }
+
+
+    /**
+     * 获取广告动态出价
+     * @param packageName   包名
+     * @param adTagId       广告位id
+     * @param width         广告位宽
+     * @param height        广告位高
+     * @return
+     */
+    public float getDynamicPrice(String packageName, String adTagId,String width,String height){
+        String key = getMapKey(packageName, adTagId, width, height);
+        if(StringUtils.isEmpty(key)) {
+            return 0f;
+        }
+        if(StringUtils.isEmpty(adTagId)) {
+            key = packageName + "_" + width + "_" + height;
+        }else {
+            key = packageName + "_" + adTagId;
+        }
+        return this.dynamicPriceMap.get(key);
+    }
+
+    /**
+     * 生成动态出价Map的key
+     * @param packageName
+     * @param adTagId
+     * @param width
+     * @param height
+     * @return
+     */
+    private String getMapKey(String packageName,
+                             String adTagId, String width, String height){
+        packageName = StringUtils.isEmpty(packageName) ? "null" : packageName;
+        adTagId = StringUtils.isEmpty(adTagId) ? "null" : adTagId;
+        width = StringUtils.isEmpty(width) ? "null" : width;
+        height = StringUtils.isEmpty(height) ? "null" : height;
+
+        String key = packageName + "_";
+        if(!"null".equals(adTagId)) {
+            key += adTagId;
+        }else if(!"null".equals(width) && !"null".equals(height)){
+            key += width + "_" + height;
+        }else {
+            return null;
+        }
+        return key;
+    }
+
+
+    public static void main(String[] args) {
+
     }
 }

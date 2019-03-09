@@ -21,7 +21,7 @@ public class GainDataFromPIXCELQueue implements Runnable {
 
 	@Override
 	public void run() {
-		
+
 		while (true) {
 			try {
 				MDC.put("sift", "control");
@@ -32,6 +32,9 @@ public class GainDataFromPIXCELQueue implements Runnable {
 				AdFlowControl.getInstance().updatePixel(pix.getAdUid(), pix.getWinNoticeNums(),
 						Float.valueOf(pix.getFinalCost().toString()), -1, pix.getClickNums(), pix.getType(),
 						pix.isLower());
+
+				// 更新动态出价缓存map
+				AdFlowControl.getInstance().updateDynamicPriceMap("PIXEL", 1,"","","","",0f);
 			} catch (Exception e) {
 				e.printStackTrace();
 				try {
