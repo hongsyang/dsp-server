@@ -1,6 +1,5 @@
 package cn.shuzilm.interf.rtb.parser;
 
-import cn.shuzilm.bean.adview.request.BidRequestBean;
 
 /**
 * @Description:    Bid Request 解析

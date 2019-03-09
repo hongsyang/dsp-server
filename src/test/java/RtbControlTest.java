@@ -22,6 +22,5 @@ public class RtbControlTest {
 //        System.out.println(MD5Util.MD5(code).equals(MD5Util.MD5("&bidid=7a90a45f816a481e54ffdbee7ef8a13e")));
 //        System.out.println(MD5Util.MD5(MD5Util.MD5(code)).equals("7a90a45f816a481e54ffdbee7ef8a13e"));
 //        System.out.println(hashCode);
-        System.out.println(  JedisQueueManager.getLength("EXP"));
     }
 }

@@ -5,10 +5,9 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
-import cn.shuzilm.util.MD5Util;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import com.alibaba.fastjson.JSON;
@@ -60,25 +59,33 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             impression.setId(impid);
             list.add(impression);
 
+            if (urlRequest.get("dmat")!=null) {
+                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+                element.setMaterialId(dmat);//素材id
+            }
+
+            String price = urlRequest.get("price");
+
+            String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
+            element.setAdvertiserUid(dade);
+            String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
+            element.setAgencyUid(dage);
+            String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
+            element.setAdUid(daduid);
 
             String act = urlRequest.get("act");
             element.setWinNoticeTime(new Date().getTime());
-
             String adx = urlRequest.get("adx");
             element.setAdxId(adx);
-
-            String did = urlRequest.get("did");
+            String did = urlRequest.get("device");
             element.setDid(did);
-
-            String device = urlRequest.get("device");
-            element.setDeviceId(device);
-
-            String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-            element.setAppName(URLDecoder.decode(app));
             String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
             element.setAppPackageName(appn);
-            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-            element.setAppVersion(appv);
+            String device = urlRequest.get("device");
+            element.setDeviceId(device);
+            String premiumFactor = urlRequest.get("pf");//溢价系数
+            element.setPremiumFactor(Double.valueOf(premiumFactor));
+
             String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
             element.setAudienceuid(ddem);
             String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
@@ -87,24 +94,23 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             element.setProvince(dpro);
             String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
             element.setCity(dcit);
-            String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
-            element.setCountry(dcou);
-            String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
-            element.setAdvertiserUid(dade);
-            String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
-            element.setAgencyUid(dage);
-            String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
-            element.setAdUid(daduid);
-            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
-            element.setDealid(pmp);
-            if (urlRequest.get("dmat")!=null) {
-                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
-                element.setMaterialId(dmat);//素材id
-            }
+
             String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
             element.setIpAddr(userip);
-            String premiumFactor = urlRequest.get("pf");//溢价系数
-            element.setPremiumFactor(Double.valueOf(premiumFactor));
+
+            String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
+            element.setCountry(dcou);
+
+
+//            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
+//            element.setDealid(pmp);
+
+            String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
+            element.setAppName(URLDecoder.decode(app));
+
+            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+            element.setAppVersion(appv);
+
             element.setAdxSource("YouYi");
 
             log.debug("YouYiExp曝光的requestid:{},element对象:{}", requestId, element);
@@ -115,7 +121,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             }
             bean.setPremiumFactor(element.getPremiumFactor());
             bean.setHost(configs.getString("HOST"));
-            String price = urlRequest.get("price");
+
             Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("YOUYI_EKEY"), configs.getString("YOUYI_IKEY"));
             bean.setCost(Double.valueOf(priceLong) / 100000);
             bean.setWinNoticeNums(1);
@@ -154,7 +160,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
 
             MDC.remove("phoenix");
             MDC.put("sift", "YouYiExp");
-            boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+            boolean lingJiClick = RedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
             if (lingJiClick) {
                 log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
             } else {
@@ -164,7 +170,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
         } catch (Exception e) {
             Help.sendAlert("发送到" + configs.getString("HOST") + "失败,YouYiExp");
             MDC.put("sift", "exception");
-            boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+            boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到EXP_ERROR队列：{}", exp_error);
             log.debug("element:{}", JSON.toJSONString(element));
             log.error("异常信息:{}", e);

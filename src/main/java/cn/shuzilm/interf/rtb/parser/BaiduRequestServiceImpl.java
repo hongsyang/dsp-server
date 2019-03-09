@@ -1,27 +1,17 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
-import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.tencent.request.*;
-import cn.shuzilm.bean.tencent.response.TencentBid;
 import cn.shuzilm.bean.tencent.response.TencentBidResponse;
-import cn.shuzilm.bean.tencent.response.TencentSeatBid;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.WidthAndHeightListUtil;
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * @Description: YouYiParser 灵集post参数解析

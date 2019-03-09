@@ -115,11 +115,11 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList";
+                return "ipBlackList"+bidRequestBean.getId();
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList";
+                return "bundleBlackList"+bidRequestBean.getId();
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList";
+                return "deviceIdBlackList"+bidRequestBean.getId();
             }
 
             //支持的文件类型
@@ -195,7 +195,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     adType,//广告类型
                     width,//广告位的宽
                     height,//广告位的高
-                    true,// 是否要求分辨率
+                    false,// 是否要求分辨率
                     5,//宽误差值
                     5,// 高误差值;
                     ADX_ID,//ADX 服务商ID
@@ -261,8 +261,6 @@ public class LingJiRequestServiceImpl implements RequestService {
         }
     }
 
-    private void filterRuleBidRequest(BidRequestBean bidRequestBean, Map msg, String adxId) {
-    }
 
     /**
      * 发送曝光请求
@@ -493,7 +491,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
         LJResponseExt ljResponseExt = new LJResponseExt();
 
-        ljResponseExt.setLdp(landingUrl);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
+        ljResponseExt.setLdp(landingUrlA);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
         //曝光监测数组
         List pm = new ArrayList();
 

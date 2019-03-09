@@ -5,7 +5,7 @@ import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
 import cn.shuzilm.util.MD5Util;
@@ -165,7 +165,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                         element.getMaterialId());
 
                 MDC.remove("phoenix");
-                boolean lingJiExp = JedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
+                boolean lingJiExp = RedisQueueManager.putElementToQueue("EXP", element, Priority.MAX_PRIORITY);
                 MDC.put("sift", "LingJiExp");
                 if (lingJiExp) {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiExp);
@@ -177,7 +177,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
             } catch (Exception e) {
                 Help.sendAlert("发送到" + configs.getString("HOST")+"失败,LingJiExp");
                 MDC.put("sift", "exception");
-                boolean exp_error = JedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+                boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
                 log.debug("发送element：{}到EXP_ERROR队列：{}", element, exp_error);
                 log.debug("element:{}", JSON.toJSONString(element));
                 log.error("异常信息:{}", e);

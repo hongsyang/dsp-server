@@ -1,19 +1,27 @@
 package cn.shuzilm.common;
 
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class PixelConstants
 {
-    private static Properties p = null;
+    private static Properties p =  new Properties();
     private PixelConstants()
     {
         try
         {
             p = new java.util.Properties();
-            InputStream fis = PixelConstants.class.getClassLoader().getResourceAsStream("pixel.properties");
+            //测试环境
+//            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties";
+            //正式环境
+            String FileName = "/home/srvadmin/dsp/pixel.properties";
+            //读取属性文件a.properties
+            InputStream fis = new BufferedInputStream(new FileInputStream(FileName));
+//            InputStream fis = PixelConstants.class.getClassLoader().getResourceAsStream("pixel.properties");
             try {
                 p.load(fis);
             } catch (IOException e) {

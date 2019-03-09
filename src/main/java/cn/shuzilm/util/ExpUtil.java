@@ -4,7 +4,7 @@ import cn.shuzilm.backend.pixel.PixelFlowControl;
 import cn.shuzilm.backend.timing.pixel.PixelCronDispatch;
 import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 
 import java.util.UUID;
@@ -28,8 +28,8 @@ public class ExpUtil {
             System.out.println("redis取数据");
             while (true) {
 
-                DUFlowBean exp_error = (DUFlowBean) JedisQueueManager.getElementFromQueue("EXP_ERROR");
-                Long size = JedisQueueManager.getLength("EXP_ERROR");
+                DUFlowBean exp_error = (DUFlowBean) RedisQueueManager.getElementFromQueue("EXP_ERROR");
+                Long size = RedisQueueManager.getLength("EXP_ERROR");
                 System.out.println("EXP_ERROR的个数：" + size);
                 System.out.println(exp_error);
                 if (exp_error.getRequestId() != null) {
@@ -53,7 +53,7 @@ public class ExpUtil {
                     exp_error.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                     exp_error.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
 
-                    boolean lingJiClick = JedisQueueManager.putElementToQueue("EXP", exp_error, Priority.MAX_PRIORITY);
+                    boolean lingJiClick = RedisQueueManager.putElementToQueue("EXP", exp_error, Priority.MAX_PRIORITY);
                     if (lingJiClick) {
                         System.out.println("到Phoenix是否成功:" + lingJiClick + "   发送elemen :{}" + exp_error);
                     } else {
