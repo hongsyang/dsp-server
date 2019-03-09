@@ -220,7 +220,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     adxNameList,//宽列表
                     isDimension,
                     bidRequestBean.getId(),
-                    userImpression.getTagid()
+                    tagid//广告id
             );
             if (targetDuFlowBean == null) {
                 response = "";
