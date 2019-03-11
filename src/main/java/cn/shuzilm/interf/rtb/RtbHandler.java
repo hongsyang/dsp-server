@@ -88,12 +88,12 @@ public class RtbHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private String result = "";
 
+
     static {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             log.debug("当前通道连接数为:{},连接的服务器ip:{}", atomicInteger.get(), remoteIpGroup);
         }, 0, 1, TimeUnit.MINUTES);
     }
-
     public RtbHandler(ExecutorService executor, ConcurrentHashMap<String, Object> requestParser) {
         this.executor = executor;
         this.requestParser = requestParser;

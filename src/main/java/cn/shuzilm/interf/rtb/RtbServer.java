@@ -81,6 +81,7 @@ public class RtbServer {
             configs = AppConfigs.getInstance(FILTER_CONFIG);
             //初始化 加载配置
             ipBlacklist = IpBlacklistUtil.getInstance();
+            //TODO redis的线程数bug
             jedisManager = JedisManager.getInstance();
             redisManager = RedisManager.getInstance();
             ruleMatching = RuleMatching.getInstance();
@@ -120,6 +121,7 @@ public class RtbServer {
 
         // boss线程池
         log.debug("BOSS_THREADS :{}", configs.getInt("BOSS_THREADS"));
+        //TODO 线程池参考阿里框架
         bossGroup = new NioEventLoopGroup(configs.getInt("BOSS_THREADS"));
         // worker线程池
         log.debug("WORK_THREADS :{}", configs.getInt("WORK_THREADS"));
