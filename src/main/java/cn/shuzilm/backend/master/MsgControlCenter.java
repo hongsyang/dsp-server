@@ -27,6 +27,8 @@ public class MsgControlCenter {
     public static final String ADX_FLOW = "_adx_flow";
     public static final String APP_FLOW = "_app_flow";
     public static final String FLOW_DOWN = "_flow_tdown";
+    public static final String MEDIA_DOWN = "_media_tdown";
+    public static final String ADLOCATION_DOWN = "_adlocation_tdown";
 
     public static ICommand getCommandFromMasterQueue(){
         Object obj = JedisQueueManager.getElementFromQueue(MASTER_QUEUE_NAME);
@@ -116,6 +118,30 @@ public class MsgControlCenter {
         else
             return (ArrayList<FlowTaskBean>)obj;
     }
+    
+    public static boolean sendMediaList(String nodeName, ArrayList<MediaBean> beanList, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + MEDIA_DOWN,beanList,priority);
+    }
+    
+    public static ArrayList<MediaBean> recvMediaList(String nodeName){
+        Object obj = JedisQueueManager.getElementFromQueue(nodeName + MEDIA_DOWN);
+        if(obj == null)
+            return null;
+        else
+            return (ArrayList<MediaBean>)obj;
+    }
+    
+    public static boolean sendAdLocationList(String nodeName, ArrayList<AdLocationBean> beanList, Priority priority){
+        return JedisQueueManager.putElementToQueue(nodeName + ADLOCATION_DOWN,beanList,priority);
+    }
+    
+    public static ArrayList<AdLocationBean> recvAdLocationList(String nodeName){
+        Object obj = JedisQueueManager.getElementFromQueue(nodeName + ADLOCATION_DOWN);
+        if(obj == null)
+            return null;
+        else
+            return (ArrayList<AdLocationBean>)obj;
+    }
 
     /**
      * 转码机接收主控发送的指令
@@ -185,7 +211,8 @@ public class MsgControlCenter {
     	JedisQueueManager.removeAll(nodeId.concat(DOWN));
     	JedisQueueManager.removeAll(nodeId.concat(AD_BEAN));
     	JedisQueueManager.removeAll(nodeId.concat(FLOW_DOWN));
-    	
+    	JedisQueueManager.removeAll(nodeId.concat(MEDIA_DOWN));
+    	JedisQueueManager.removeAll(nodeId.concat(ADLOCATION_DOWN));
     }
     
     /**

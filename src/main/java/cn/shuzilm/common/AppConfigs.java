@@ -88,7 +88,7 @@ public class AppConfigs {
         try {
 //            URL url = this.getClass().getClassLoader().getResource(name);
             //测试环境
-//            String FileName = "C:\\Users\\houkp\\Desktop\\test\\rtb.properties";
+//            String FileName = "C:\\Users\\houkp\\Desktop\\test\\"+ name;
             //正式环境
             String FileName = "/home/srvadmin/dsp/" + name;
 //            InputStream in = url.openStream();

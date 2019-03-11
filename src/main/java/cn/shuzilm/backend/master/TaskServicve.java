@@ -23,7 +23,7 @@ public class TaskServicve extends Service {
 	private SimpleDateFormat yydDateFM = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private SimpleDateFormat hourDateFM = new SimpleDateFormat("HH");
-		
+			
 	private static final int INTERVAL = 5 * 60 * 1000;
     /**
      * 查找 10 分钟前的 人群包条件
@@ -238,7 +238,7 @@ public class TaskServicve extends Service {
     }
 
     /**
-     * 根据 AD UID 查询 创意
+     * 根据 AD UID 查询 创意(已失效)
      * @param creativeUid
      * @return
      */
@@ -275,7 +275,7 @@ public class TaskServicve extends Service {
     }
     
     /**
-     * 查找5分钟前的创意
+     * 查找5分钟前的创意(已失效)
      * @return
      */
     public List<CreativeBean> queryCreativeByUpTime() {
@@ -320,11 +320,105 @@ public class TaskServicve extends Service {
     }
     
     /**
+     * 查找5分钟前的创意组
+     * @return
+     */
+    public List<CreativeGroupBean> queryCreativeGroupByUpTime() {
+    	List<CreativeGroupBean> creativeGroupList = new ArrayList<CreativeGroupBean>();
+    	long timeNow = System.currentTimeMillis();
+        long timeBefore = timeNow - INTERVAL;
+        Object[] arr = new Object[1];
+        arr[0] = timeBefore / 1000;
+        arr[0] = specDateFM.format(new Date(timeBefore));
+        String sql = "SELECT m.ad_uid,a.* FROM creative_group a JOIN map_ad_creative m ON m.creative_group_uid = a.uid where refresh_ts >= ? and a.deleted = 0";
+        try {           
+            ResultList list =  select.select(sql,arr);
+            for(ResultMap cMap : list) {
+            	CreativeGroupBean creativeGroup = new CreativeGroupBean();
+            	creativeGroup.setAdUid(cMap.getString("ad_uid"));
+            	creativeGroup.setUid(cMap.getString("uid"));
+            	creativeGroup.setName(cMap.getString("name"));
+            	creativeGroup.setLink_type(Integer.parseInt(cMap.getString("link_type")));
+            	creativeGroup.setLink(cMap.getString("link_uri"));
+            	creativeGroup.setTracking(cMap.getString("tracking_uri"));
+            	creativeGroup.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
+            	creativeGroupList.add(creativeGroup);
+            }
+            
+            return creativeGroupList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return creativeGroupList;
+        }
+    }
+    
+    /**
+     * 根据广告单元ID加载创意组
+     * @param adUid
+     * @return
+     */
+    public List<CreativeGroupBean> queryCreativeGroupByAdUid(String adUid){
+    	List<CreativeGroupBean> aList = new ArrayList<>();
+
+        Object[] arr = new Object[1];
+        arr[0] = adUid;
+        String sql = "SELECT c.* FROM ad JOIN map_ad_creative b ON ad.uid = b.ad_uid JOIN creative_group c ON b.creative_group_uid = c.uid WHERE b.ad_uid = ? and c.deleted = 0";
+        try {           
+            ResultList list =  select.select(sql,arr);
+            for(ResultMap cMap : list) {
+            	CreativeGroupBean creativeGroup = new CreativeGroupBean();
+            	creativeGroup.setUid(cMap.getString("uid"));
+            	creativeGroup.setName(cMap.getString("name"));
+            	creativeGroup.setLink_type(Integer.parseInt(cMap.getString("link_type")));
+            	creativeGroup.setLink(cMap.getString("link_uri"));
+            	creativeGroup.setTracking(cMap.getString("tracking_uri"));
+            	creativeGroup.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
+            	aList.add(creativeGroup);
+            }
+            return aList;
+        } catch (SQLException e){
+        	e.printStackTrace();
+        	return aList;
+        }
+    }
+    
+    /**
+     * 根据 创意组ID 查询 创意
+     * @param creativeUid
+     * @return
+     */
+    public List<CreativeBean> queryCreativeByGroupId(String creativeGroupUid){
+    	List<CreativeBean> creativeList = new ArrayList<CreativeBean>();
+    	Object[] arr = new Object[1];
+        arr[0] = creativeGroupUid;
+        String sql = "select * from creative where creative_group_uid = ? and deleted = 0";
+        try {            
+            ResultList list = select.select(sql,arr);
+            for(ResultMap cMap:list){
+            	CreativeBean creativeBean = new CreativeBean();
+	           // creativeBean.setName(cMap.getString("name"));
+	            creativeBean.setUid(cMap.getString("uid"));
+	            creativeBean.setBrand(cMap.getString("brand"));
+	            creativeBean.setDesc(cMap.getString("desc"));
+	            creativeBean.setTitle(cMap.getString("title"));
+	            creativeBean.setType(cMap.getString("type"));
+	            creativeList.add(creativeBean);
+            }
+            return creativeList;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return creativeList;
+        }
+    }
+    
+    
+    
+    /**
      * 根据创意 ID 查询 物料
      * @return
      */
-    public ArrayList<Material> queryMaterialByCreativeId(String creativeUid){
-        String sql = "select * from material where creative_uid = '"+ creativeUid +"' and deleted = 0";
+    public ArrayList<Material> queryMaterialByCreativeId(String creativeUid,String creativeType){
+        String sql = "select * from material where creative_uid = '"+ creativeUid +"' and deleted = 0 and op_status = 1";
         ResultList rl = null;
         try {
             rl = select.select(sql);
@@ -334,15 +428,25 @@ public class TaskServicve extends Service {
                 material.setUid(rm.getString("uid"));
                 material.setNid(rm.getString("nid"));
                 material.setCreativeUid(creativeUid);
-                material.setType(rm.getString("type"));
-                material.setFileName(rm.getString("filename"));
-                material.setExt(rm.getString("ext"));
-                material.setSize(rm.getInteger("size"));
-                material.setWidth(rm.getInteger("w"));
-                material.setHeight(rm.getInteger("h"));
+                //material.setType(rm.getString("type"));
+                //material.setFileName(rm.getString("filename"));
+                //material.setExt(rm.getString("ext"));
+                //material.setSize(rm.getInteger("size"));
+                //material.setWidth(rm.getInteger("w"));
+                //material.setHeight(rm.getInteger("h"));
                 material.setApproved_adx(rm.getString("approved_adx"));
-                material.setDuration(rm.getInteger("duration"));
+                //material.setDuration(rm.getInteger("duration"));
                 material.setAuditId(rm.getString("audit_id"));
+                List<Image> imageList = new ArrayList<Image>();
+                String file1 = rm.getString("file1");
+                imageList.add(queryImageByfileId(file1));
+                if("feed3".equals(creativeType)){
+                	String file2 = rm.getString("file2");
+                	String file3 = rm.getString("file3");               	
+                	imageList.add(queryImageByfileId(file2));
+                	imageList.add(queryImageByfileId(file3));
+                }
+                material.setImageList(imageList);
                 list.add(material);
             }
             return list;
@@ -350,6 +454,35 @@ public class TaskServicve extends Service {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    /**
+     * 根据文件ID查询某一个图片
+     * @param fileId
+     * @return
+     */
+    public Image queryImageByfileId(String fileId){
+    	Object[] arr = new Object[1];
+    	arr[0] = fileId;
+    	String sql = "SELECT * FROM img where uid = ? and status = 1";
+    	 try {           
+    		 Image image = new Image();
+             ResultMap cMap =  select.selectSingle(sql,arr);
+             if(cMap == null){
+            	 return null;
+             }
+             image.setUid(cMap.getString("uid"));
+             image.setFileName(cMap.getString("filename"));
+             image.setExt(cMap.getString("ext"));
+             image.setSize(cMap.getInteger("size"));
+             image.setWidth(cMap.getInteger("w"));
+             image.setHeight(cMap.getInteger("h"));
+             image.setDuration(cMap.getInteger("duration"));
+             return image;
+         } catch (SQLException e) {
+             e.printStackTrace();
+             return null;
+         }
     }
 
     /**
@@ -656,72 +789,209 @@ public class TaskServicve extends Service {
 		}
     }
     
+    /**
+     * 查询所有媒体
+     * @return
+     */
+    public ArrayList<MediaBean> queryMediaAll(){
+    	//String sql = "SELECT * FROM media where op_status = 1 and media_status = 1";
+    	String sql = "SELECT * FROM media";
+    	ResultList rl = new ResultList(); 
+    	ArrayList<MediaBean> mediaList = new ArrayList<MediaBean>();
+    	try {
+			rl = select.select(sql);
+			for(ResultMap rm : rl){
+				MediaBean media = new MediaBean();
+				Long mediaId = rm.getLong("id");
+				media.setId(mediaId);
+				media.setAdxId(rm.getInteger("adx_id"));
+				List<String> packageNameList = queryPackageNameByMediaId(mediaId);
+				media.setPackageNameList(packageNameList);
+				media.setAppName(rm.getString("name"));
+				media.setMediaType(rm.getInteger("media_type"));
+				media.setSetOther(rm.getInteger("set_other"));
+				media.setIsMaster(rm.getInteger("is_master"));
+				media.setMasterMediaId(rm.getInteger("master_media_id").longValue());
+				media.setOpStatus(rm.getInteger("op_status"));
+				media.setMediaStatus(rm.getInteger("media_status"));
+				mediaList.add(media);
+			}
+			
+			return mediaList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return mediaList;
+		}
+    }
+    
+    public ArrayList<String> queryPackageNameByMediaId(Long mediaId){
+    	Object arr[] = new Object[1];
+    	arr[0] = mediaId;
+    	String sql = "SELECT package_name FROM map_media_package where media_id = ? and deleted = 0";
+    	ResultList rl = new ResultList(); 
+    	ArrayList<String> packageNameList = new ArrayList<String>();
+    	try {
+			rl = select.select(sql,arr);
+			for(ResultMap rm : rl){
+				packageNameList.add(rm.getString("package_name"));
+			}
+			
+			return packageNameList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return packageNameList;
+		}
+    }
+    
+    /**
+     * 根据媒体ID查询媒体
+     * @return
+     */
+    public MediaBean queryMediaById(Long id){
+    	Object arr[] = new Object[1];
+    	arr[0] = id;
+    	String sql = "SELECT * FROM media where op_status = 1 and media_status = 1 and id = ?";
+    	MediaBean media = new MediaBean();
+    	try {
+			ResultMap rm = select.selectSingle(sql,arr);
+			if(rm == null){
+				return null;
+			}
+			Long mediaId = rm.getLong("id");
+			media.setId(mediaId);
+			media.setAdxId(rm.getInteger("adx_id"));
+			List<String> packageNameList = queryPackageNameByMediaId(mediaId);
+			media.setPackageNameList(packageNameList);
+			media.setAppName(rm.getString("name"));
+			media.setMediaType(rm.getInteger("media_type"));
+			media.setSetOther(rm.getInteger("set_other"));
+			media.setIsMaster(rm.getInteger("is_master"));
+			media.setMasterMediaId(rm.getInteger("master_media_id").longValue());
+			media.setOpStatus(rm.getInteger("op_status"));
+			media.setMediaStatus(rm.getInteger("media_status"));			
+			return media;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return media;
+		}
+    }
+    
+    /**
+     * 根据广告单元ID获取媒体包名
+     * @param adUid
+     * @return
+     */
+    public ArrayList<Long> queryMediaIdByAdUid(String adUid){
+    	Object arr[] = new Object[1];
+    	arr[0] = adUid;
+    	String sql = "SELECT media_uid from map_ad_media where ad_uid = ? and deleted = 0";
+    	ArrayList<Long> mediaIdList = new ArrayList<Long>();
+    	ResultList rl = new ResultList(); 
+    	try {
+			rl = select.select(sql,arr);
+			for(ResultMap rm : rl){
+				Long mediaId = rm.getInteger("media_uid").longValue();
+				ArrayList<Long> mediaIdTempList = queryMediaIdByMasterMediaId(mediaId);
+				if(mediaIdTempList != null && !mediaIdTempList.isEmpty()){
+					mediaIdList.addAll(mediaIdTempList);
+				}
+				mediaIdList.add(mediaId);
+			}
+			
+			return mediaIdList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return mediaIdList;
+		}
+    }
+    
+    public ArrayList<Long> queryMediaIdByMasterMediaId(Long masterMediaId){
+    	Object arr[] = new Object[1];
+    	arr[0] = masterMediaId;
+    	String sql = "SELECT id from media where master_media_id <> 0 and master_media_id = ?";
+    	ArrayList<Long> mediaIdList = new ArrayList<Long>();
+    	ResultList rl = new ResultList(); 
+    	try {
+			rl = select.select(sql,arr);
+			for(ResultMap rm : rl){
+				Long mediaId = rm.getLong("id");				
+				mediaIdList.add(mediaId);
+			}
+			
+			return mediaIdList;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return mediaIdList;
+		}
+    }
+    
+    /**
+     * 每隔10分钟获取一次开启的广告位列表
+     * @return
+     */
+    public ArrayList<AdLocationBean> queryAdLocationList(){
+    	String sql = "SELECT * FROM adx_media_placement where active = 0 and deleted = 0";
+    	ArrayList<AdLocationBean> adLocationList = new ArrayList<AdLocationBean>();
+    	ResultList rl = new ResultList();
+    	try{
+    		rl = select.select(sql);
+    		for(ResultMap rm:rl){
+    			AdLocationBean adLocation = new AdLocationBean();
+    			Long id = rm.getInteger("id").longValue();  		
+    			String type = rm.getString("type");
+    			String fields = rm.getString("fields");
+    			Long mediaId = rm.getInteger("media_id").longValue();
+    			adLocation.setId(id);
+    			adLocation.setAdxId(rm.getInteger("adx_id").longValue());
+    			adLocation.setMediaId(mediaId);
+    			adLocation.setAdLocationId(rm.getString("place_id"));
+    			adLocation.setType(type);
+    			adLocation.setFields(fields);
+    			AdLocationItemBean item = queryAdLocationItemLit(id);
+    			adLocation.setAdLocationItem(item);
+    			MediaBean media = queryMediaById(mediaId);
+    			adLocation.setMedia(media);
+    			adLocationList.add(adLocation);
+    		}
+    		return adLocationList;
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		return adLocationList;
+    	}
+    }
+ 
+    public AdLocationItemBean queryAdLocationItemLit(Long id){
+    	Object arr[] = new Object[1];
+    	arr[0] = id;
+    	String sql = "SELECT * FROM adx_media_placement_item where placement_id = ? order by item_limit_key";
+    	AdLocationItemBean item = new AdLocationItemBean();
+    	ResultList rl = new ResultList();
+    	try{
+    		rl = select.select(sql,arr);
+    		for(ResultMap rm:rl){
+    			String itemLimitKey = rm.getString("item_limit_key");
+    			if(itemLimitKey.contains("_width")){
+    				String itemLimitValue = rm.getString("item_limit_value");   				    				
+    				item.setWidth(Integer.parseInt(itemLimitValue));
+    			}
+    			if(itemLimitKey.contains("_height")){
+    				String itemLimitValue = rm.getString("item_limit_value");  
+    				item.setHeight(Integer.parseInt(itemLimitValue));
+    			}
+    		}
+    		return item;
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		return item;
+    	}
+    }
+    
     
     public static void main(String[] args) {
-    	TaskServicve task = new TaskServicve();
-    	AdNoticeDetailBean adNoticeDetail = new AdNoticeDetailBean();
-    	adNoticeDetail.setAdUid("123");
-    	adNoticeDetail.setAdName("test");
-    	adNoticeDetail.setAdvertiserUid("123");
-    	adNoticeDetail.setAdvertiserName("TEST");
-    	adNoticeDetail.setWinNums(10000);
-    	adNoticeDetail.setClickNums(12);
-    	adNoticeDetail.setBidNums(100000);
-    	adNoticeDetail.setWinRatio(adNoticeDetail.getWinNums()*1.0f/adNoticeDetail.getBidNums());
-    	adNoticeDetail.setClickRatio(adNoticeDetail.getClickNums()*1.0f/adNoticeDetail.getWinNums());
+    	TaskServicve taskService = new TaskServicve();
+    	
     	try {
-			//task.insertDataToNoticeDetailPerHour(adNoticeDetail);
-    		//Map map = task.getNoticeDetailByHourPerDay();
-    		long timeNow = System.currentTimeMillis();
-           long timeBefore = timeNow - 10 * 60 *1000;
-//    		List<FlowControlBean> list = task.getAdxFlowControl(timeBefore);
-//    		System.out.println(list);
-//    		ResultMap balanceMap = task.queryAdviserAccountById("1e3ebfc0-db29-49fc-b39f-82543606e887");
-//    		Integer updatedAt = balanceMap.getInteger("updated_at");
-//    		long timeNow = System.currentTimeMillis();
-//            long timeBefore = timeNow - 10 * 60 * 1000;
-//            timeBefore  = timeBefore / 1000;
-//            if(updatedAt != null && updatedAt != 0 && updatedAt >= timeBefore){
-//            	System.out.println("ok");
-//            }
-//    		SimpleDateFormat specDateFM = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//    		String s = specDateFM.format(new Date(timeBefore));
-//    		System.out.println(s);
-           //ResultList adList = task.queryAdByUpTime(timeBefore);
-           //System.out.println(adList.size());
-           ConcurrentHashMap<String,AdBean> mapAd = new ConcurrentHashMap<String,AdBean>();
-           
-           ResultList adList = task.queryAdByUpTime(0);
-           for(ResultMap map:adList){
-        	   AdBean ad = new AdBean();
-               ad.setAdUid(map.getString("uid"));
-               //广告组
-               String groupId = map.getString("group_uid");
-               ad.setGroupId(groupId);
-               mapAd.put(ad.getAdUid(), ad);
-           }
-           ConcurrentHashMap<String, ReportBean> reportMapTotal = task.statAdCostTotal();
-           Map<String, Double> map = new HashMap<>();
-           Iterator iter = reportMapTotal.entrySet().iterator();
-           while (iter.hasNext()) {
-        	   	Map.Entry entry = (Map.Entry) iter.next();
-        	   	String key = (String) entry.getKey();
-        	   	ReportBean value = (ReportBean) entry.getValue();
-        	   	AdBean ad = mapAd.get(key);
-        	   	if(ad != null){
-        	   		String groupId = ad.getGroupId();
-        	   		if(map.containsKey(groupId)){
-        	   			if(groupId.equals("58a38bd5-a8c0-4866-b988-926512c90a2b")){
-        	   				System.out.println(value.getExpense().doubleValue()*1000);
-        	   			}
-        	   			map.put(groupId, map.get(groupId)+value.getExpense().doubleValue()*1000);
-        	   		}else{
-        	   			map.put(groupId, value.getExpense().doubleValue()*1000);
-        	   		}
-        	   	}
-           }
-           System.out.println(map);
-           
+    		taskService.queryAdLocationList();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -81,6 +81,8 @@ public class TencentRequestServiceImpl implements RequestService {
             String adType = ""; //对应内部 广告类型
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
+            String tagid = String.valueOf(adzone.getPlacement_id());
+
 
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
@@ -134,7 +136,8 @@ public class TencentRequestServiceImpl implements RequestService {
                     appPackageName,//APP包名
                     adxNameList,//长宽列表
                     isDimension,
-                    bidRequestBean.getId()
+                    bidRequestBean.getId(),
+                    tagid
             );
             if (targetDuFlowBean == null) {
                 response = "";

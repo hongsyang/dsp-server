@@ -1,9 +1,15 @@
 package cn.shuzilm.interf.rtb.parser;
 
+import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.filter.FilterRule;
+import cn.shuzilm.util.AppBlackListUtil;
+import cn.shuzilm.util.DeviceBlackListUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
+import cn.shuzilm.util.MD5Util;
+import com.google.common.collect.Lists;
 
+import bidserver.BidserverSsp;
 import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.youyi.request.YouYiAdzone;
@@ -15,6 +21,8 @@ import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import com.alibaba.fastjson.JSON;
+import com.google.protobuf.InvalidProtocolBufferException;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -56,28 +64,30 @@ public class YouYiRequestServiceImpl implements RequestService {
     public String parseRequest(String dataStr) throws Exception {
         String adxId = "3";
         String response = "";
-        this.configs = AppConfigs.getInstance(FILTER_CONFIG);
-        MDC.put("sift", "dsp-server");
-        log.debug(" BidRequest参数入参：{}", dataStr);
-        //请求报文解析
-        YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
-        String session_id = bidRequestBean.getSession_id();
-        //创建返回结果  bidRequest请求参数保持不变
-        YouYiMobile userDevice = bidRequestBean.getMobile();//设备APP信息
-        YouYiAdzone adzone = bidRequestBean.getAdzone().get(0);//曝光信息
-        YouYiUser user = bidRequestBean.getUser();//用户信息
+        if (StringUtils.isNotBlank(dataStr)) {
+            this.configs = AppConfigs.getInstance(FILTER_CONFIG);
+            MDC.put("sift", "dsp-server");
+            log.debug(" BidRequest参数入参：{}", dataStr);
+            //请求报文解析
+            YouYiBidRequest bidRequestBean = JSON.parseObject(dataStr, YouYiBidRequest.class);
+            String session_id = bidRequestBean.getSession_id();
+            //创建返回结果  bidRequest请求参数保持不变
+            YouYiMobile userDevice = bidRequestBean.getMobile();//设备APP信息
+            YouYiAdzone adzone = bidRequestBean.getAdzone().get(0);//曝光信息
+            YouYiUser user = bidRequestBean.getUser();//用户信息
 
-        Integer width = null;//广告位的宽
-        Integer height = null;//广告位的高
+            String tagid = adzone.getPid();
+            Integer width = null;//广告位的宽
+            Integer height = null;//广告位的高
 //            Integer showtype = userImpression.getExt().getShowtype();//广告类型
-        String adType = null; //对应内部 广告类型
-        String stringSet = null;//文件类型列表
-        String deviceId = null;//设备号
+            String adType = null; //对应内部 广告类型
+            String stringSet = null;//文件类型列表
+            String deviceId = null;//设备号
 
-        String appPackageName = null;//应用包名
-        if (userDevice != null) {
-            appPackageName = userDevice.getApp_bundle();
-        }
+            String appPackageName = null;//应用包名
+            if (userDevice != null) {
+                appPackageName = userDevice.getApp_bundle();
+            }
 //            if (StringUtils.isBlank(adType)) {
 //                response = "没有对应的广告类型";
 //                return response;
@@ -87,127 +97,122 @@ public class YouYiRequestServiceImpl implements RequestService {
 
 //            //设备的设备号：用于匹配数盟库中的数据
 
-        if (userDevice != null) {
-            if ("ios".equals(userDevice.getDevice_os().toLowerCase())) {
-                deviceId = userDevice.getIdfa();
-            } else if ("android".equalsIgnoreCase(userDevice.getDevice_os().toLowerCase())) {
-                //竞价请求进来之前对imei和mac做过滤
-                if (userDevice.getMd5_imei() != null) {
-                    if (userDevice.getMd5_imei().length() == 32) {
+            if (userDevice != null) {
+                if ("ios".equals(userDevice.getDevice_os().toLowerCase())) {
+                    deviceId = userDevice.getIdfa();
+                } else if ("android".equalsIgnoreCase(userDevice.getDevice_os().toLowerCase())) {
+                    //竞价请求进来之前对imei和mac做过滤
+                    if (userDevice.getMd5_imei() != null) {
+                        if (userDevice.getMd5_imei().length() == 32) {
+                        }
+                    } else if (userDevice.getMd5_mac() != null) {
+                        if (userDevice.getMd5_mac().length() == 32) {
+                            userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
+                        }
+                    } else {
+                        log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
+                        response = session_id + "deviceIdBlackList";
+                        return response;
                     }
-                } else if (userDevice.getMd5_mac() != null) {
-                    if (userDevice.getMd5_mac().length() == 32) {
-                        userDevice.setMd5_imei("mac-" + userDevice.getMd5_mac());
-                    }
-                } else {
-                    log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
-                    response = "deviceIdBlackList" + "204session_id:" + session_id;
-                    return response;
+                    deviceId = userDevice.getMd5_imei();
                 }
-                deviceId = userDevice.getMd5_imei();
             }
-        }
 
 
-        Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip());//过滤规则的返回结果
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip());//过滤规则的返回结果
 
-        //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
-        if (msg.get("ipBlackList") != null) {
-            return "ipBlackList" + "204session_id:" + session_id;
-        } else if (msg.get("bundleBlackList") != null) {
-            return "bundleBlackList" + "204session_id:" + session_id;
-        } else if (msg.get("deviceIdBlackList") != null) {
-            return "deviceIdBlackList" + "204session_id:" + session_id;
-        }
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList" + session_id;
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList" + session_id;
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList" + session_id;
+            }
 
 
-        //是否匹配长宽
-        Boolean isDimension = true;
-        //通过广告id获取长宽
-        List adxNameList = new ArrayList();//
-//            //支持的文件类型
-        String adz_type = adzone.getAdz_type();
-        if (adz_type.equals("ADZONE_TYPE_INAPP_BANNER") | adz_type.equals("ADZONE_TYPE_WAP_BANNER")) {
-            stringSet = "[image/jpeg, image/png]";
-            //广告位的宽和高
-            width = adzone.getAdz_width();
-            height = adzone.getAdz_height();
-        } else if (adz_type.equals("ADZONE_TYPE_INAPP_VIDEO") | adz_type.equals("ADZONE_TYPE_WAP_VIDEO")) {
-            stringSet = "[ application/x-shockwave-flash，video/x-flv]";
-            //广告位的宽和高
-            width = adzone.getAdz_width();
-            height = adzone.getAdz_height();
-        } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
-            stringSet = "[image/jpeg, image/png]";
-            adxNameList.add(adxId + "_" + adzone.getNative().get(0).getNative_id());
-            log.debug("adxNameList:{}", adxNameList);
-            //广告位的宽和高
-            width = adzone.getAdz_width();
-            height = adzone.getAdz_height();
             //是否匹配长宽
-            isDimension = false;
-        }
-        if (width == null || width == 0 || height == null || height == 0) {
-            width = -1;
-            height = -1;
+            Boolean isDimension = true;
+            //通过广告id获取长宽
+            List adxNameList = new ArrayList();//
+//            //支持的文件类型
+            String adz_type = adzone.getAdz_type();
+            if (adz_type.equals("ADZONE_TYPE_INAPP_BANNER") | adz_type.equals("ADZONE_TYPE_WAP_BANNER")) {
+                stringSet = "[image/jpeg, image/png]";
+                //广告位的宽和高
+                width = adzone.getAdz_width();
+                height = adzone.getAdz_height();
+            } else if (adz_type.equals("ADZONE_TYPE_INAPP_VIDEO") | adz_type.equals("ADZONE_TYPE_WAP_VIDEO")) {
+                stringSet = "[ application/x-shockwave-flash，video/x-flv]";
+                //广告位的宽和高
+                width = adzone.getAdz_width();
+                height = adzone.getAdz_height();
+            } else if (adz_type.equals("ADZONE_TYPE_INAPP_NATIVE")) {
+                stringSet = "[image/jpeg, image/png]";
+                adxNameList.add(adxId + "_" + adzone.getNative().get(0).getNative_id());
+                log.debug("adxNameList:{}", adxNameList);
+                //广告位的宽和高
+                width = adzone.getAdz_width();
+                height = adzone.getAdz_height();
+                isDimension = false;
+            }
+            if (width == null || width==0|| height == null||height==0) {
+                width = -1;
+                height = -1;
+                //是否匹配长宽
+            }
 
-        }
-//        MDC.put("sift", "youyi-ruleMatching");
-//        log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-//                        "\t{}\t",
-//                deviceId, adType,
-//                width,height,
-//                adxId,stringSet,
-//                user.getUser_ip(),appPackageName,
-//                adxNameList,isDimension,
-//                bidRequestBean.getSession_id());
-//        MDC.remove("sift");
-        //广告匹配规则
-        DUFlowBean targetDuFlowBean = ruleMatching.match(
-                deviceId,//设备mac的MD5
-                adType,//广告类型
-                width,//广告位的宽
-                height,//广告位的高
-                false,// 是否要求分辨率
-                0,//宽误差值
-                0,// 高误差值;
-                adxId,//ADX 服务商ID
-                stringSet,//文件扩展名
-                user.getUser_ip(),//用户ip
-                appPackageName,//APP包名
-                adxNameList,//长宽列表
-                isDimension,
-                bidRequestBean.getSession_id()
-        );
-        if (targetDuFlowBean == null) {
-            response = "204session_id:" + session_id;
+
+            //广告匹配规则
+            DUFlowBean targetDuFlowBean = ruleMatching.match(
+                    deviceId,//设备mac的MD5
+                    adType,//广告类型
+                    width,//广告位的宽
+                    height,//广告位的高
+                    true,// 是否要求分辨率
+                    0,//宽误差值
+                    0,// 高误差值;
+                    adxId,//ADX 服务商ID
+                    stringSet,//文件扩展名
+                    user.getUser_ip(),//用户ip
+                    appPackageName,//APP包名
+                    adxNameList,//长宽列表
+                    isDimension,
+                    bidRequestBean.getSession_id(),
+                    tagid
+            );
+            if (targetDuFlowBean == null) {
+                response = "204session_id:" + session_id;
+                return response;
+            }
+            //需要添加到Phoenix中的数据
+            targetDuFlowBean.setRequestId(bidRequestBean.getSession_id());//bidRequest id
+            //曝光id
+            List<Impression> list = new ArrayList();
+            Impression impression = new Impression();
+            impression.setId(adzone.getAdz_id());
+            list.add(impression);
+            targetDuFlowBean.setImpression(list);//曝光id
+            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+            targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
+            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+            String format = LocalDateTime.now().format(formatter);//时间戳
+            targetDuFlowBean.setBidid(format + UUID.randomUUID());//bid id  时间戳+随机数不去重
+            targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
+            targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
+            targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
+            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+            response = JSON.toJSONString(bidResponseBean);
+            targetDuFlowBean = null;
+            bidRequestBean = null;
+            MDC.put("sift", "dsp-server");
+            log.debug("bidResponseBean:{}", response);
+            return response;
+        } else {
             return response;
         }
-        //需要添加到Phoenix中的数据
-        targetDuFlowBean.setRequestId(bidRequestBean.getSession_id());//bidRequest id
-        //曝光id
-        List<Impression> list = new ArrayList();
-        Impression impression = new Impression();
-        impression.setId(adzone.getAdz_id());
-        list.add(impression);
-        targetDuFlowBean.setImpression(list);//曝光id
-        targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-        targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-        targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-        String format = LocalDateTime.now().format(formatter);//时间戳
-        targetDuFlowBean.setBidid(format + UUID.randomUUID());//bid id  时间戳+随机数不去重
-        targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
-        targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
-        targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
-        MDC.put("sift", "dsp-server");
-        log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-        YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-        response = JSON.toJSONString(bidResponseBean);
-        targetDuFlowBean = null;
-        bidRequestBean = null;
-        log.debug("bidResponseBean:{}", response);
-        return response;
 
     }
 
@@ -233,6 +238,7 @@ public class YouYiRequestServiceImpl implements RequestService {
         youYiAd.setBid_price((int) biddingPrice);
         youYiAd.setAdvertiser_id(targetDuFlowBean.getAdvertiserUid());//广告主id
         youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
+        //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid().substring(0, 20) +
                 "&impid=" + youYiAdzone.getAdz_id() +
@@ -254,32 +260,30 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dcou=" + targetDuFlowBean.getCountry() +// 县
                 "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName())+//app中文名称
                 "&appv=" + targetDuFlowBean.getAppVersion();//app版本
-        //曝光通知Nurl
+
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid() +
+                "&bidid=" + targetDuFlowBean.getBidid().substring(0, 20) +
                 "&impid=" + youYiAdzone.getAdz_id() +
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&price=" + "__PRICE__" +
+                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&act=" + format +
                 "&adx=" + targetDuFlowBean.getAdxId() +
-                "&did=" + targetDuFlowBean.getDid() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
-                "&appv=" + targetDuFlowBean.getAppVersion() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
                 "&dcit=" + targetDuFlowBean.getCity() +// 市
+                "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
                 "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
-                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
-                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName())+//app中文名称
+                "&appv=" + targetDuFlowBean.getAppVersion();//app版本
         youYiAd.setImp_para(nurl);//曝光通知
         String curl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +

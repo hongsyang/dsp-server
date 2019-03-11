@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: DUFlowBean 数盟流转Bean
@@ -33,7 +34,7 @@ public class DUFlowBean implements Serializable {
     private String bidid;//DSP给出的该次竞价的ID
     private String dspid;//DSP对该次出价分配的ID
     private String seat;//SeatBid 的标识,由 DSP 生成
-    private String adm;//广告材料数据
+    private Map<Integer,String> admMap;//广告材料数据Map
     private Integer adw;//(F/admt=1|2|3|4) 广告物料宽度
     private Integer adh;//(F/admt=1|2|3|4) 广告物料高度
     private String crid;//广告物料 ID
