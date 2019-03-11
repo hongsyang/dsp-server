@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -1979,7 +1980,7 @@ public class AdFlowControl {
         }
         Object[] value = dynamicPriceMap.get(key);
 
-        if(value != null && value.length == 3) {
+        if(value != null) {
             // 如果是出手数据
             if(type.equals("RTB")) {
                 ((AtomicInteger)value[0]).addAndGet(amount);
@@ -1988,6 +1989,7 @@ public class AdFlowControl {
                 ((AtomicInteger)value[1]).addAndGet(amount);
             }
         }else {
+            // TODO 并发问题
             Object[] array = new Object[3];
             // 如果是出手数据
             if(type.equals("RTB")) {
@@ -2011,10 +2013,8 @@ public class AdFlowControl {
         Update update = new Update();
         dynamicPriceMap.forEach((key,value) -> {
             try{
-
                 String adTagId = "";
-                String width = "";
-                String height = "";
+                String size = "";
                 String [] keysArray = key.split("_");
                 String packageName = keysArray[0];
 
@@ -2023,35 +2023,43 @@ public class AdFlowControl {
                 // 计算价格
                 int rtbAmount = ((AtomicInteger)value[0]).get();
                 int pixelAmount = ((AtomicInteger)value[1]).get();
-                double winRate = pixelAmount / rtbAmount;
 
                 float price = (float)value[2];
-                if(winRate < 0.8) {
-                    price = (float) (price * 1.5);
-                }else if (winRate > 0.8){
-                    price = (float) (price * 0.1);
+                // 出手数大于赢价数
+
+                float rate = 1;
+                if(rtbAmount > 0 && rtbAmount >= pixelAmount) {
+                    double winRate = pixelAmount / rtbAmount;
+                    if(winRate < 0.8) {
+                        rate = 1.5f;
+                    }else if (winRate > 0.8){
+                        rate = 0.9f;
+                    }
+                    price *= rate;
+                    myLog.debug("winRate: {}  rate: {}", winRate, rate, price);
                 }
 
 
-                String uuid = UUID.randomUUID().toString().replace("-","");
                 String sql = "";
-                Date now = new Date();
-                if(keysArray.length == 2) {
-                    adTagId = keysArray[1];
-                    sql = "insert into dynamic_price (uid,package_name,ad_tag_id,price,create_time)" +
-                            " values ("+uuid+","+packageName+","+adTagId+","+price+","+now+") " +
-                            " ON DUPLICATE KEY UPDATE price=" + price;
-                }else if(keysArray.length == 3){
-                    width = keysArray[1];
-                    height = keysArray[2];
-                    sql = "insert into dynamic_price (uid,package_name,ad_tag_id,width,height,create_time)" +
-                            " values ("+uuid+","+packageName+","+adTagId+","+width+","+height+","+now+") " +
-                            " ON DUPLICATE KEY UPDATE price=" + price;
-                }else{
+                LocalDateTime timestamp = LocalDateTime.now();
+                adTagId = keysArray[1];
+                size = keysArray[2];
+                if(!"null".equals(adTagId)) {
+                    sql = "insert into dynamic_price (package_name,ad_tag_id,price,create_time,update_time)" +
+                            " values ('"+packageName+"','"+adTagId+"',"+price+",'"+timestamp+"','"+timestamp+"') " +
+                            " ON DUPLICATE KEY UPDATE price = price * " +rate;
+                }else if(!"null".equals(size)) {
+                    String [] sizeArray = size.split("#");
+                    sql = "insert into dynamic_price (package_name,price, ,height,create_time,update_time)" +
+                            " values ('"+packageName+"','"+price+"',"+sizeArray[0]+","+sizeArray[1]+",'"+timestamp+"','"+timestamp+"') " +
+                            " ON DUPLICATE KEY UPDATE price = price * " + rate;
+                }else {
                     return;
                 }
 
                 update.doUpdate(sql);
+
+                //System.out.println(sql);
 
                 // 重置出手数和赢价数
                 //value[0] = new AtomicInteger(0);
@@ -2082,9 +2090,9 @@ public class AdFlowControl {
 
         String key = packageName + "_";
         if(!"null".equals(adTagId)) {
-            key += adTagId + "_null_null";
+            key += adTagId + "_null";
         }else if(!"null".equals(width) && !"null".equals(height)){
-            key += "null_" + width + "_" + height;
+            key += "null_" + width + "#" + height;
         }else {
             return null;
         }
@@ -2115,6 +2123,7 @@ public class AdFlowControl {
                             "5","200","100",4.3f);
         }
         System.out.println("");
+        AdFlowControl.getInstance().dumpDynamicPriceDateToMysql();
     }
 
 }

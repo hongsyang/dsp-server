@@ -827,9 +827,9 @@ public class RtbFlowControl {
 
         String key = packageName + "_";
         if(!"null".equals(adTagId)) {
-            key += adTagId;
+            key += adTagId + "_null";
         }else if(!"null".equals(width) && !"null".equals(height)){
-            key += width + "_" + height;
+            key += "null_" + width + "#" + height;
         }else {
             return null;
         }
