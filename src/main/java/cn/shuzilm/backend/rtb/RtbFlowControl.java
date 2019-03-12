@@ -105,6 +105,10 @@ public class RtbFlowControl {
     	return appFlowMap;
     }
     
+    public ConcurrentHashMap<String,Long> getBidNoticeMap(){
+    	return bidNoticeMap;
+    }
+    
     public ArrayList<AdBidBean> getBidList(){
     	return bidList;
     }
@@ -113,9 +117,9 @@ public class RtbFlowControl {
 		return mapFlowTask;
 	}
     
-    public Set<String> getAdLocationSet(){
-    	return adLocationSet;
-    }
+//    public Set<String> getAdLocationSet(){
+//    	return adLocationSet;
+//    }
     
     public ConcurrentHashMap<String,AdLocationBean> getAdLocationMap(){
     	return adLocationMap;
@@ -171,18 +175,20 @@ public class RtbFlowControl {
     //每个广告5秒内的rtb请求数量
     private static ConcurrentHashMap<String,Long> bidMap = null;
     
-    //5秒内adx流量数
+    //1分钟内adx流量数
     private static ConcurrentHashMap<String,Long> adxFlowMap = null;
     
-    //5秒内app流量数
+    //1分钟内app流量数
     private static ConcurrentHashMap<String,Long> appFlowMap = null;
+    
+    private static ConcurrentHashMap<String,Long> bidNoticeMap = null;
     
     private static ArrayList<AdBidBean> bidList = null;
     
     /**
      * 在投广告位集合
      */
-    private static Set<String> adLocationSet = null;
+   // private static Set<String> adLocationSet = null;
     
     private static ConcurrentHashMap<String,AdLocationBean> adLocationMap = null;
     
@@ -239,7 +245,7 @@ public class RtbFlowControl {
         mediaMap = new ConcurrentHashMap<Long,MediaBean>();
         mediaUselessMap = new ConcurrentHashMap<Long,MediaBean>();
         packageUselessMap = new ConcurrentHashMap<String,MediaBean>();
-        adLocationSet = Collections.synchronizedSet(new HashSet<String>());
+//        adLocationSet = Collections.synchronizedSet(new HashSet<String>());
         adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
@@ -307,12 +313,18 @@ public class RtbFlowControl {
 //        ArrayList<GpsBean> gpsWorkList = new ArrayList<>();
 //        ArrayList<GpsBean> gpsActiveList = new ArrayList<>();
         if (adBeanList != null && !adBeanList.isEmpty()) {
-        	areaMap.clear();
-        	demographicMap.clear();
-        	mapAdMaterial.clear();
-        	mapAdMaterialRatio.clear();
-        	mapMaterialRatio.clear();
-        	adMediaMap.clear();
+//        	areaMap.clear();
+//        	demographicMap.clear();
+//        	mapAdMaterial.clear();
+//        	mapAdMaterialRatio.clear();
+//        	mapMaterialRatio.clear();
+//        	adMediaMap.clear();
+        	ConcurrentHashMap<String,Set<String>> areaTempMap = new ConcurrentHashMap<String,Set<String>>();
+        	ConcurrentHashMap<String,Set<String>> demographicTempMap = new ConcurrentHashMap<String,Set<String>>();
+        	ConcurrentHashMap<String,List<String>> mapAdMaterialTempMap = new ConcurrentHashMap<String,List<String>>();
+        	ConcurrentHashMap<String,List<String>> mapAdMaterialRatioTempMap = new ConcurrentHashMap<String,List<String>>();
+        	ConcurrentHashMap<String,Set<String>> mapMaterialRatioTempMap = new ConcurrentHashMap<String,Set<String>>();
+        	ConcurrentHashMap<String,Set<String>> adMediaTempMap = new ConcurrentHashMap<String,Set<String>>();
             for (AdBean adBean : adBeanList) {
                 // 广告ID
                 String uid = adBean.getAdUid();
@@ -328,12 +340,12 @@ public class RtbFlowControl {
                 		List<String> packageNameList = media.getPackageNameList();
                 		for(String packageName:packageNameList){
                 		String mediaAdxAndPackage = media.getAdxId()+"_"+packageName;
-                		if (!adMediaMap.containsKey(uid)) {
+                		if (!adMediaTempMap.containsKey(uid)) {
                             Set<String> uidSet = new HashSet<String>();
                             uidSet.add(mediaAdxAndPackage);
-                            adMediaMap.put(uid, uidSet);
+                            adMediaTempMap.put(uid, uidSet);
                         } else {
-                            Set<String> uidSet = adMediaMap.get(uid);
+                            Set<String> uidSet = adMediaTempMap.get(uid);
                             if (!uidSet.contains(mediaAdxAndPackage)) {
                             	uidSet.add(mediaAdxAndPackage);
                             }
@@ -346,36 +358,8 @@ public class RtbFlowControl {
                 if (audienceList.size() == 0) {
                     myLog.error(adBean.getAdUid() + "\t" + adBean.getName() + " 没有设置人群包..");
                 }
-//                ArrayList<GpsBean> gpsList = null;
                 for (AudienceBean audience : audienceList) {
                     if (audience != null) {
-                        //加载人群中的GEO位置信息
-//                        gpsList = audience.getGeoList();
-//                        if (gpsList != null) {
-//                            for (GpsBean gps : gpsList) {
-//                                gps.setPayload(uid);
-//                            }
-//                            switch (audience.getMobilityType()) {
-//                                case 0:
-//                                    gpsResidenceList.addAll(gpsList);
-//                                    gpsWorkList.addAll(gpsList);
-//                                    gpsActiveList.addAll(gpsList);
-//                                    break;
-//                                case 1://居住地
-//                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
-//                                    gpsResidenceList.addAll(gpsList);
-//                                    break;
-//                                case 2://工作地
-//                                    gpsWorkList.addAll(gpsList);
-//                                    break;
-//                                case 3://活动地
-//                                    // 将 经纬度坐标装载到 MAP 中，便于快速查找
-//                                    gpsActiveList.addAll(gpsList);
-//                                    break;
-//                                default:
-//                                    break;
-//                            }
-//                        }
                             // 将 省、地级、县级装载到 MAP 中，便于快速查找
                             List<AreaBean> areaList = audience.getCityList();
                             String key = null;
@@ -396,12 +380,12 @@ public class RtbFlowControl {
                                     key = area.getProvinceId() + "_" + area.getCityId() + "_" + area.getCountyId();
                                 }
 
-                                if (!areaMap.containsKey(key)) {
+                                if (!areaTempMap.containsKey(key)) {
                                     Set<String> set = new HashSet<String>();
                                     set.add(adBean.getAdUid());
-                                    areaMap.put(key, set);
+                                    areaTempMap.put(key, set);
                                 } else {
-                                    Set<String> set = areaMap.get(key);
+                                    Set<String> set = areaTempMap.get(key);
                                     set.add(adBean.getAdUid());
                                 }
                             }
@@ -425,12 +409,12 @@ public class RtbFlowControl {
                                 	demoKey = area.getProvinceId() + "_" + area.getCityId() + "_" + area.getCountyId();
                                 }
 
-                                if (!demographicMap.containsKey(demoKey)) {
+                                if (!demographicTempMap.containsKey(demoKey)) {
                                     Set<String> set = new HashSet<String>();
                                     set.add(adBean.getAdUid());
-                                    demographicMap.put(demoKey, set);
+                                    demographicTempMap.put(demoKey, set);
                                 } else {
-                                    Set<String> set = demographicMap.get(demoKey);
+                                    Set<String> set = demographicTempMap.get(demoKey);
                                     set.add(adBean.getAdUid());
                                 }
                             }
@@ -456,34 +440,34 @@ public class RtbFlowControl {
                     String materialKey = width + "_" +height;
                     String materialRatioKey = width / divisor + "/" + height / divisor;
 
-                    if (!mapAdMaterial.containsKey(materialKey)) {
+                    if (!mapAdMaterialTempMap.containsKey(materialKey)) {
                         List<String> uidList = new ArrayList<String>();
                         uidList.add(uid);
-                        mapAdMaterial.put(materialKey, uidList);
+                        mapAdMaterialTempMap.put(materialKey, uidList);
                     } else {
-                        List<String> uidList = mapAdMaterial.get(materialKey);
+                        List<String> uidList = mapAdMaterialTempMap.get(materialKey);
                         if (!uidList.contains(uid)) {
                             uidList.add(uid);
                         }
                     }
 
-                    if (!mapAdMaterialRatio.containsKey(materialRatioKey)) {
+                    if (!mapAdMaterialRatioTempMap.containsKey(materialRatioKey)) {
                         List<String> uidList = new ArrayList<String>();
                         uidList.add(uid);
-                        mapAdMaterialRatio.put(materialRatioKey, uidList);
+                        mapAdMaterialRatioTempMap.put(materialRatioKey, uidList);
                     } else {
-                        List<String> uidList = mapAdMaterialRatio.get(materialRatioKey);
+                        List<String> uidList = mapAdMaterialRatioTempMap.get(materialRatioKey);
                         if (!uidList.contains(uid)) {
                             uidList.add(uid);
                         }
                     }
                     
-                    if (!mapMaterialRatio.containsKey(materialRatioKey)) {
+                    if (!mapMaterialRatioTempMap.containsKey(materialRatioKey)) {
                         Set<String> uidSet = new HashSet<String>();
                         uidSet.add(materialUid);
-                        mapMaterialRatio.put(materialRatioKey, uidSet);
+                        mapMaterialRatioTempMap.put(materialRatioKey, uidSet);
                     } else {
-                        Set<String> uidSet = mapMaterialRatio.get(materialRatioKey);
+                        Set<String> uidSet = mapMaterialRatioTempMap.get(materialRatioKey);
                         if (!uidSet.contains(materialUid)) {
                         	uidSet.add(materialUid);
                         }
@@ -493,6 +477,18 @@ public class RtbFlowControl {
             	}
             }
             }
+            areaMap = areaTempMap;
+            demographicMap = demographicTempMap;
+            mapAdMaterial = mapAdMaterialTempMap;
+            mapAdMaterialRatio = mapAdMaterialRatioTempMap;
+            mapMaterialRatio = mapMaterialRatioTempMap;
+            adMediaMap = adMediaTempMap;
+            areaTempMap = null;
+            demographicTempMap = null;
+            mapAdMaterialTempMap = null;
+            mapAdMaterialRatioTempMap = null;
+            mapMaterialRatioTempMap = null;
+            adMediaTempMap = null;
 //                gridMap.clear();
 //                // 将 GPS 坐标加载到 栅格快速比对处理类中
 //                gridMap.put(0, new GridMark2(gpsResidenceList,redisGeoMap));
@@ -714,21 +710,30 @@ public class RtbFlowControl {
     	if(mediaList == null || mediaList.isEmpty()){
     		return;
     	}
-    	mediaMap.clear();
-    	mediaUselessMap.clear();
-    	packageUselessMap.clear();
+//    	mediaMap.clear();
+//    	mediaUselessMap.clear();
+//    	packageUselessMap.clear();
+    	ConcurrentHashMap<Long,MediaBean> mediaTempMap = new ConcurrentHashMap<Long,MediaBean>();
+    	ConcurrentHashMap<Long,MediaBean> mediaUselessTempMap = new ConcurrentHashMap<Long,MediaBean>();
+    	ConcurrentHashMap<String,MediaBean> packageUselessTempMap = new ConcurrentHashMap<String,MediaBean>();
     	for(MediaBean media:mediaList){
     		if(media.getOpStatus() == 1 && media.getMediaStatus() == 1){
-    			mediaMap.put(media.getId(), media);
+    			mediaTempMap.put(media.getId(), media);
     		}else{
-    			mediaUselessMap.put(media.getId(), media);
+    			mediaUselessTempMap.put(media.getId(), media);
     			List<String> packageList = media.getPackageNameList();
     			Integer adxId = media.getAdxId();
     			for(String packageName:packageList){
-    				packageUselessMap.put(adxId+"_"+packageName, media);
+    				packageUselessTempMap.put(adxId+"_"+packageName, media);
     			}
     		}
     	}
+    	mediaMap = mediaTempMap;
+    	mediaUselessMap = mediaUselessTempMap;
+    	packageUselessMap = packageUselessTempMap;
+    	mediaTempMap = null;
+    	mediaUselessTempMap = null;
+    	packageUselessTempMap = null;
     }
     
     /**
@@ -741,33 +746,36 @@ public class RtbFlowControl {
     	if(adLocationList == null || adLocationList.isEmpty()){
     		return;
     	}
-    	adLocationSet.clear();
-    	adLocationMap.clear();
+    //	adLocationSet.clear();
+    //	adLocationMap.clear();
+    	ConcurrentHashMap<String,AdLocationBean> adLocationTempMap = new ConcurrentHashMap<String,AdLocationBean>();
     	for(AdLocationBean adLocation:adLocationList){    		
     		Long adxId = adLocation.getAdxId();
-    		adLocationMap.put(adxId+"_"+adLocation.getAdLocationId(), adLocation);
-    		MediaBean media = adLocation.getMedia();
-    		Integer mediaAdx = null;
-    		List<String> mediaAppPackageNameList = new ArrayList<String>();
-    		if(media != null){
-    			mediaAdx = media.getAdxId();
-    			mediaAppPackageNameList = media.getPackageNameList();
-    		}
-    		String placeId = adLocation.getAdLocationId();
-    		AdLocationItemBean item = adLocation.getAdLocationItem();
-    		Integer width = null;
-    		Integer height = null;
-    		if(item != null){
-    			width = item.getWidth();
-    			height = item.getHeight();
-    		}
-    		for(String packageName:mediaAppPackageNameList){
-	    		String adLocationStr1 = adxId+"_"+mediaAdx+"_"+packageName+"_"+adxId+"_"+placeId;
-	    		String adLocationStr2 = adxId+"_"+mediaAdx+"_"+packageName+"_"+width+"_"+height;
-	    		adLocationSet.add(adLocationStr1);
-	    		adLocationSet.add(adLocationStr2);
-    		}
+    		adLocationTempMap.put(adxId+"_"+adLocation.getAdLocationId(), adLocation);
+//    		MediaBean media = adLocation.getMedia();
+//    		Integer mediaAdx = null;
+//    		List<String> mediaAppPackageNameList = new ArrayList<String>();
+//    		if(media != null){
+//    			mediaAdx = media.getAdxId();
+//    			mediaAppPackageNameList = media.getPackageNameList();
+//    		}
+//    		String placeId = adLocation.getAdLocationId();
+//    		AdLocationItemBean item = adLocation.getAdLocationItem();
+//    		Integer width = null;
+//    		Integer height = null;
+//    		if(item != null){
+//    			width = item.getWidth();
+//    			height = item.getHeight();
+//    		}
+//    		for(String packageName:mediaAppPackageNameList){
+//	    		String adLocationStr1 = adxId+"_"+mediaAdx+"_"+packageName+"_"+adxId+"_"+placeId;
+//	    		String adLocationStr2 = adxId+"_"+mediaAdx+"_"+packageName+"_"+width+"_"+height;
+//	    		adLocationSet.add(adLocationStr1);
+//	    		adLocationSet.add(adLocationStr2);
+//    		}
     	}
+    	adLocationMap = adLocationTempMap;
+    	adLocationTempMap = null;
     }
 
     /**

@@ -251,31 +251,31 @@ public class RuleMatching {
 			auidList = new ArrayList<String>(rtbIns.getAdMap().keySet());
 			materialSet = new HashSet<String>();
 			
-			ListIterator<String> adLocationIt = adxNameList.listIterator();
-			boolean adLocationFlag = false;
-			if(appPackageName != null && !appPackageName.trim().equals("")){
-				while(adLocationIt.hasNext()){
-					String adx = adLocationIt.next();
-					String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+adx;
-					if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
-						adLocationIt.remove();
-						LOG.info("["+adLocationStr+"]广告位未开启投放");
-					}else{
-						adLocationFlag = true;
-					}
-				}
-				if(!adLocationFlag){
-					LOG.info("["+adLocationId+"]广告位都未开启投放,该请求停止投放");
-					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
-							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
-					//另起目录记录原因
-					MDC.put("phoenix", "rtb-bid-notice");
-					LOG.info(reason);
-					MDC.remove("phoenix");
-					MDC.put("sift", "rtb");
-					return null; 
-				}
-			}
+//			ListIterator<String> adLocationIt = adxNameList.listIterator();
+//			boolean adLocationFlag = false;
+//			if(appPackageName != null && !appPackageName.trim().equals("")){
+//				while(adLocationIt.hasNext()){
+//					String adx = adLocationIt.next();
+//					String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+adx;
+//					if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
+//						adLocationIt.remove();
+//						LOG.info("["+adLocationStr+"]广告位未开启投放");
+//					}else{
+//						adLocationFlag = true;
+//					}
+//				}
+//				if(!adLocationFlag){
+//					LOG.info("["+adLocationId+"]广告位都未开启投放,该请求停止投放");
+//					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
+//							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
+//					//另起目录记录原因
+//					MDC.put("phoenix", "rtb-bid-notice");
+//					LOG.info(reason);
+//					MDC.remove("phoenix");
+//					MDC.put("sift", "rtb");
+//					return null; 
+//				}
+//			}
 		}else{
 				
 				int divisor = MathTools.division(width, height);
@@ -284,20 +284,20 @@ public class RuleMatching {
 				auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
 				materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
 				
-			if(appPackageName != null && !appPackageName.trim().equals("")){
-				String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
-				if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
-					LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
-					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
-							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
-					//另起目录记录原因
-					MDC.put("phoenix", "rtb-bid-notice");
-					LOG.info(reason);
-					MDC.remove("phoenix");
-					MDC.put("sift", "rtb");
-					return null; 
-				}
-			}
+//			if(appPackageName != null && !appPackageName.trim().equals("")){
+//				String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
+//				if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
+//					LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
+//					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
+//							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
+//					//另起目录记录原因
+//					MDC.put("phoenix", "rtb-bid-notice");
+//					LOG.info(reason);
+//					MDC.remove("phoenix");
+//					MDC.put("sift", "rtb");
+//					return null; 
+//				}
+//			}
 		}
 
 
