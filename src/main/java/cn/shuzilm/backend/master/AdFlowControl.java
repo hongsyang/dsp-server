@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 广告流量控制
@@ -2066,7 +2067,7 @@ public class AdFlowControl {
      * @param width         广告位宽
      * @param height        广告位高
      */
-    public void updateDynamicPriceMap(String type, int amount, String packageName,
+    public void updateDynamicPriceMap(String type, long amount, String packageName,
                                       String adTagId, String width, String height, float price ){
         String key = getMapKey(packageName, adTagId, width, height);
         if(StringUtils.isEmpty(key)) {
@@ -2077,31 +2078,31 @@ public class AdFlowControl {
         if(value != null) {
             // 如果是出手数据
             if(type.equals("RTB")) {
-                ((AtomicInteger)value[0]).addAndGet(amount);
+                ((AtomicLong)value[0]).addAndGet(amount);
             }else if(type.equals("PIXEL")) {
                 // 如果是赢价数据
-                ((AtomicInteger)value[1]).addAndGet(amount);
+                ((AtomicLong)value[1]).addAndGet(amount);
             }
         }else {
             Object[] array = new Object[3];
             // 如果是出手数据
             if(type.equals("RTB")) {
-                array[0] = new AtomicInteger(amount);
-                array[1] = new AtomicInteger(0);
+                array[0] = new AtomicLong(amount);
+                array[1] = new AtomicLong(0L);
             }else if(type.equals("PIXEL")) {
                 // 如果是赢价数据
-                array[0] = new AtomicInteger(0);
-                array[1] = new AtomicInteger(amount);
+                array[0] = new AtomicLong(0L);
+                array[1] = new AtomicLong(amount);
             }
             array[2] = price;
             // 解决线程并发问题
             Object [] previous = dynamicPriceMap.putIfAbsent(key, array);
             if(previous != null) {
                 if(type.equals("RTB")) {
-                    ((AtomicInteger)previous[0]).addAndGet(amount);
+                    ((AtomicLong)previous[0]).addAndGet(amount);
                 }else if(type.equals("PIXEL")) {
                     // 如果是赢价数据
-                    ((AtomicInteger)previous[1]).addAndGet(amount);
+                    ((AtomicLong)previous[1]).addAndGet(amount);
                 }
             }
             dynamicPriceMap.put(key, array);
@@ -2124,8 +2125,8 @@ public class AdFlowControl {
                 // String sql = sql = "update dynamic_price set price = <PRICE> where package_name = '" + packageName + "'";
 
                 // 计算价格
-                int rtbAmount = ((AtomicInteger)value[0]).get();
-                int pixelAmount = ((AtomicInteger)value[1]).get();
+                long rtbAmount = ((AtomicLong)value[0]).get();
+                long pixelAmount = ((AtomicLong)value[1]).get();
 
                 float price = (float)value[2];
                 // 出手数大于赢价数
@@ -2190,6 +2191,12 @@ public class AdFlowControl {
         adTagId = StringUtils.isEmpty(adTagId) ? "null" : adTagId;
         width = StringUtils.isEmpty(width) ? "null" : width;
         height = StringUtils.isEmpty(height) ? "null" : height;
+
+        if(StringUtils.isEmpty(packageName) && StringUtils.isEmpty(adTagId)
+                && StringUtils.isEmpty(width) && StringUtils.isEmpty(height)) {
+            return null;
+        }
+
 
         String key = packageName + "_";
         if(!"null".equals(adTagId)) {

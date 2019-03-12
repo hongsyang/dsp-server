@@ -1028,6 +1028,12 @@ public class RtbFlowControl {
         width = StringUtils.isEmpty(width) ? "null" : width;
         height = StringUtils.isEmpty(height) ? "null" : height;
 
+        if(StringUtils.isEmpty(packageName) && StringUtils.isEmpty(adTagId)
+                && StringUtils.isEmpty(width) && StringUtils.isEmpty(height)) {
+            return null;
+        }
+
+
         String key = packageName + "_";
         if(!"null".equals(adTagId)) {
             key += adTagId + "_null";
