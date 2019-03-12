@@ -175,6 +175,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //                response.setStatus(HttpResponseStatus.NO_CONTENT);
                 String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
                 builder.setSessionId(substring);
+                //回滚
 //                builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
                 content = builder.build().toByteArray();
             } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
