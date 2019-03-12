@@ -28,9 +28,17 @@ public class GainDataFromRTBQueue implements Runnable {
 					continue;
 				ArrayList<AdBidBean> bidList = bean.getBidList();
 				for (AdBidBean bid : bidList) {
-					AdFlowControl.getInstance().updateBids(bid.getUid(), bid.getBidNums());
-					// 更新动态出价缓存map
-					AdFlowControl.getInstance().updateDynamicPriceMap("RTB", 1,"","","","",0f);
+					String id = bid.getUid();
+					if(id.contains("dynamic_")) {
+						String [] values = id.split("_");
+						if(values.length == 3) {
+
+						}
+						// 更新动态出价缓存map
+						AdFlowControl.getInstance().updateDynamicPriceMap("RTB", bid.getBidNums(),"","","","",0f);
+					}else {
+						AdFlowControl.getInstance().updateBids(bid.getUid(), bid.getBidNums());
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
