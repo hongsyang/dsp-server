@@ -646,6 +646,10 @@ public class RuleMatching {
 			} else {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(), 1L);
 			}
+
+			// 动态出价累计
+			rtbIns.getDynamicMap().put("",new Object[]{});
+
 			// 上传adx流量数
 			if (rtbIns.getAdxFlowMap().get(adxName) != null) {
 				rtbIns.getAdxFlowMap().put(adxName, rtbIns.getAdxFlowMap().get(adxName) + 1);

@@ -96,6 +96,10 @@ public class RtbFlowControl {
     public ConcurrentHashMap<String,Long> getBidMap(){
     	return bidMap;
     }
+
+    public ConcurrentHashMap<String,Object[]> getDynamicMap(){
+        return dynamicMap;
+    }
     
     public ConcurrentHashMap<String,Long> getAdxFlowMap(){
     	return adxFlowMap;
@@ -170,7 +174,8 @@ public class RtbFlowControl {
     
     //每个广告5秒内的rtb请求数量
     private static ConcurrentHashMap<String,Long> bidMap = null;
-    
+    private static ConcurrentHashMap<String,Object[]> dynamicMap = null;
+
     //5秒内adx流量数
     private static ConcurrentHashMap<String,Long> adxFlowMap = null;
     
@@ -231,6 +236,7 @@ public class RtbFlowControl {
         mapAdMaterialRatio = new ConcurrentHashMap<>();
         mapMaterialRatio = new ConcurrentHashMap<>();
         bidMap = new ConcurrentHashMap<>();
+        dynamicMap = new ConcurrentHashMap<>();
         adxFlowMap = new ConcurrentHashMap<>();
         appFlowMap = new ConcurrentHashMap<>();
         adMediaMap = new ConcurrentHashMap<>();
@@ -573,9 +579,11 @@ public class RtbFlowControl {
     	if(bidList.size() > 0){
     		NodeStatusBean bean = new NodeStatusBean();
     		bean.setBidList(bidList);
+    		bean.setDynamicMap(dynamicMap);
     		MsgControlCenter.sendBidStatus(nodeName, bean);
     	}
-    	
+
+    	dynamicMap.clear();
     	bidMap.clear();
         
     }
@@ -1045,8 +1053,4 @@ public class RtbFlowControl {
         return key;
     }
 
-
-    public static void main(String[] args) {
-
-    }
 }
