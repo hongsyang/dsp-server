@@ -75,7 +75,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent) {
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent messageEvent)  {
         long start = System.currentTimeMillis();
         //返回状态
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
@@ -150,9 +150,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     buffer.writeBytes(content);
                     response.setContent(buffer);
                 } else {
+                    String responseStr="";
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
+                    response.setHeader("Content-Length", content.length);
                     ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-                    content="".getBytes("utf-8");
+                    content=responseStr.getBytes("utf-8");
                     buffer.writeBytes(content);
                     response.setContent(buffer);
                 }
@@ -179,8 +181,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 //                builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
                 content = builder.build().toByteArray();
             } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
+                String responseStr="";
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
-                content = "".getBytes("utf-8");
+                response.setHeader("Content-Length", content.length);
+                content = responseStr.getBytes("utf-8");
             } else if (resultData.contains("session_id")) {
                 BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                 JsonFormat.merge(resultData, builder);
@@ -214,14 +218,16 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
             log.error("timeMs:{},Exception:{}", end - start, e);
             MDC.remove("sift");
-            response.setStatus(HttpResponseStatus.NO_CONTENT);
-            ChannelBuffer buffer = new DynamicChannelBuffer(2048);
             byte[] content = null;
+            String responseStr="";
+            response.setStatus(HttpResponseStatus.NO_CONTENT);
+            response.setHeader("Content-Length", content.length);
             try {
-                content = "".getBytes("utf-8");
+                content = responseStr.getBytes("utf-8");
             } catch (UnsupportedEncodingException e1) {
                 e1.printStackTrace();
             }
+            ChannelBuffer buffer = new DynamicChannelBuffer(2048);
             buffer.writeBytes(content);
             response.setContent(buffer);
             ChannelFuture future1 = messageEvent.getChannel().write(response);
