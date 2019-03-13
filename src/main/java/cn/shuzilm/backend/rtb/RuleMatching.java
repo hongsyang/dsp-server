@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.timing.rtb.RtbCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
@@ -715,30 +716,29 @@ public class RuleMatching {
 		if(StringUtils.isEmpty(key)) {
 			return;
 		}
-		Object[] value = rtbIns.getDynamicMap().get(key);
+		Object[] value = RtbFlowControl.getDynamicMap().get(key);
 
 		if(value != null) {
 			((AtomicLong)value[0]).addAndGet(amount);
 			((AtomicDouble)value[1]).addAndGet(price);
 		}else {
-			Object[] array = new Object[2];
+			Object[] array = new Object[3];
 			array[0] = new AtomicLong(amount);
 			array[1] = new AtomicDouble(price);
 			array[2] = requestId;
 			// 解决线程并发问题
-			Object [] previous = rtbIns.getDynamicMap().putIfAbsent(key, array);
+			Object [] previous = RtbFlowControl.getDynamicMap().putIfAbsent(key, array);
 			if(previous != null) {
 				((AtomicLong)value[0]).addAndGet(amount);
-				((AtomicDouble)value[0]).addAndGet(price);
+				((AtomicDouble)value[1]).addAndGet(price);
 			}
 		}
 	}
 
 	public static void main(String[] args) {
 		RuleMatching ruleMatching = new RuleMatching();
-
 		for(int i=0;i<10;i++) {
-			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
+				ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
 					,0,0,5.0f,"requestid1");
 		}
 

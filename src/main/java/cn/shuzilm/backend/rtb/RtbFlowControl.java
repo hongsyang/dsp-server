@@ -97,7 +97,7 @@ public class RtbFlowControl {
     	return bidMap;
     }
 
-    public ConcurrentHashMap<String,Object[]> getDynamicMap(){
+    public static ConcurrentHashMap<String,Object[]> getDynamicMap(){
         return dynamicMap;
     }
     
@@ -180,7 +180,7 @@ public class RtbFlowControl {
     private static ConcurrentHashMap<String,Long> bidMap = null;
     
    
-    private static ConcurrentHashMap<String,Object[]> dynamicMap = null;
+    public  static ConcurrentHashMap<String,Object[]> dynamicMap = null;
     
     //1分钟内adx流量数
     private static ConcurrentHashMap<String,Long> adxFlowMap = null;

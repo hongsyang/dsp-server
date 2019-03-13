@@ -11,6 +11,7 @@ import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.TimeSchedulingUtil;
 import cn.shuzilm.util.db.Select;
 import cn.shuzilm.util.db.Update;
+import com.google.common.util.concurrent.AtomicDouble;
 import com.yao.util.db.bean.ResultList;
 import com.yao.util.db.bean.ResultMap;
 import org.apache.commons.lang.StringUtils;
@@ -2091,6 +2092,8 @@ public class AdFlowControl {
                 // 如果是赢价数据
                 ((AtomicLong)value[1]).addAndGet(amount);
             }
+            // 价格累加
+            ((AtomicDouble)value[2]).addAndGet(price);
         }else {
             Object[] array = new Object[3];
             // 如果是出手数据
@@ -2102,7 +2105,7 @@ public class AdFlowControl {
                 array[0] = new AtomicLong(0L);
                 array[1] = new AtomicLong(amount);
             }
-            array[2] = price;
+            array[2] = new AtomicDouble(price);
             // 解决线程并发问题
             Object [] previous = dynamicPriceMap.putIfAbsent(key, array);
             if(previous != null) {
@@ -2135,7 +2138,7 @@ public class AdFlowControl {
                 long rtbAmount = ((AtomicLong)value[0]).get();
                 long pixelAmount = ((AtomicLong)value[1]).get();
 
-                float price = (float)value[2];
+                float price = ((AtomicDouble)value[2]).floatValue() / rtbAmount;
                 // 出手数大于赢价数
 
                 float rate = 1;
