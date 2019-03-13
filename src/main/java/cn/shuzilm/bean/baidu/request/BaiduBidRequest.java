@@ -75,19 +75,19 @@ public class BaiduBidRequest implements Serializable {
 
     // flash版本
     private String flash_version;// 10;
-
-    // 默认每次请求一个广告位
-    private List<BaiduAdSlot> adslot;// 20;
-
     // **** 系统使用 ****
     private Boolean is_test;// 26 [default;//false];
     private Boolean is_ping;// 27 [default;//false];
 
-    //用户位置信息
+    // 默认每次请求一个广告位
+    private List<BaiduAdSlot> adslot;// 20;
+
+
+    // 用户位置信息
     private BaiduUserGeoInfo user_geo_info;// 28;
 
 
-    // **** 移动设备信息 ****
+    // 移动设备信息
     private  BaiduMobile  mobile;
 
 
