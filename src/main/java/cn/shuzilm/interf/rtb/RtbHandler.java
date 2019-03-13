@@ -138,7 +138,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 MDC.put("sift", "timeOut");
                 log.error("超时timeMs:{},url:{}", end - start, url);
                 MDC.remove("sift");
-                String resultData = result;
+                String resultData = "";
+                if (result != null) {
+                    resultData = result;
+                }
                 if (resultData.contains("204session_id")) {
                     BidserverSsp.BidResponse.Builder builder = BidserverSsp.BidResponse.newBuilder();
                     String substring = resultData.substring(resultData.indexOf("204session_id") + 14);
@@ -152,7 +155,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 } else {
                     response.setStatus(HttpResponseStatus.NO_CONTENT);
                     ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-                    content="".getBytes("utf-8");
+                    content = "".getBytes("utf-8");
+                    response.setHeader("Content-Length", content.length);
                     buffer.writeBytes(content);
                     response.setContent(buffer);
                 }
@@ -213,9 +217,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("timeMs:{},Exception:{},url:{},body:{},remoteIp:{}", end - start, e.getMessage(), url, dataStr, remoteIp);
             log.error("timeMs:{},Exception:{}", end - start, e);
             MDC.remove("sift");
+            byte[] content = null;
             response.setStatus(HttpResponseStatus.NO_CONTENT);
             ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-            byte[] content = null;
             try {
                 content = "".getBytes("utf-8");
             } catch (UnsupportedEncodingException e1) {
@@ -386,4 +390,5 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
 
 }
+
 

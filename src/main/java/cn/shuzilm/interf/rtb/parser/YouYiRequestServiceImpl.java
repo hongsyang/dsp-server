@@ -111,7 +111,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
-                        response = session_id + "deviceIdBlackList";
+                        response =  "204session_id:" + session_id + "deviceIdBlackList";
                         return response;
                     }
                     deviceId = userDevice.getMd5_imei();
@@ -123,11 +123,11 @@ public class YouYiRequestServiceImpl implements RequestService {
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList" + session_id;
+                return "ipBlackList" +  "204session_id:" + session_id;
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList" + session_id;
+                return "bundleBlackList" +  "204session_id:" + session_id;
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList" + session_id;
+                return "deviceIdBlackList" +  "204session_id:" + session_id;
             }
 
 
