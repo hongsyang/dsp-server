@@ -102,6 +102,11 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         }
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
+
+        //广告主出价
+        String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
+        element.setBiddingPrice(Double.valueOf(dbidp));
+
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("LingJi");
@@ -115,6 +120,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     bean.setAdUid(element.getAdUid());
                 }
                 bean.setHost(configs.getString("HOST"));
+                bean.setRequestId(requestId);//请求id
+                bean.setBidPrice(Double.valueOf(dbidp));//广告主出价
                 String price = urlRequest.get("price");
                 String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
                 log.debug("price解析结果：{}", price);
@@ -122,6 +129,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 Double money = Double.valueOf(split[0]) / 100;
 //                Double money=Double.valueOf(price);
                 bean.setCost(money);
+
+
                 bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
 //                bean.setWinNoticeTime(new Date().getTime());//设置对账时间
                 bean.setWinNoticeNums(1);
