@@ -80,10 +80,6 @@ public class LingJiRequestServiceImpl implements RequestService {
             }
 
 
-
-
-
-
             //设备的设备号：用于匹配数盟库中的数据
             if (userDevice != null) {
                 if (userDevice.getOs() != null) {
@@ -111,15 +107,15 @@ public class LingJiRequestServiceImpl implements RequestService {
                 }
             }
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId,appPackageName, userDevice.getIp());//过滤规则的返回结果
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp());//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList"+bidRequestBean.getId();
+                return "ipBlackList" + bidRequestBean.getId();
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList"+bidRequestBean.getId();
+                return "bundleBlackList" + bidRequestBean.getId();
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList"+bidRequestBean.getId();
+                return "deviceIdBlackList" + bidRequestBean.getId();
             }
 
             //支持的文件类型
@@ -164,7 +160,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                             height = asset.getImg().getH();
                             stringSet = Arrays.toString(asset.getImg().getMimes());
                         }
-                    } else  if (asset.getImg() != null && asset.getRequired() != null) {
+                    } else if (asset.getImg() != null && asset.getRequired() != null) {
                         if (asset.getRequired().equals(true)) {
                             width = asset.getVideo().getW();
                             height = asset.getVideo().getH();
@@ -178,7 +174,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                 width = -1;
                 height = -1;
             }
-
 
 
             List adxNameList = new ArrayList();//
@@ -238,7 +233,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             MDC.put("sift", "dsp-server");
             log.debug("没有过滤的bidResponseBean:{}", response);//
             //合并Jenkins
-            
+
             //测试环境自动发送曝光
 //            Double bidfloorcur = Double.valueOf(userImpression.getBidfloor());
 //            Double v = bidfloorcur * 1.3;
@@ -329,12 +324,12 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + duFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + duFlowBean.getProvince() +// 省
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
@@ -343,7 +338,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
-                "&userip=" + duFlowBean.getIpAddr();//用户ip
+                "&userip=" + duFlowBean.getIpAddr() +//用户ip
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName());//
         bid.setNurl(nurl);
 
         //曝光检测地址
@@ -356,12 +352,12 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + duFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + duFlowBean.getProvince() +// 省
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
@@ -370,7 +366,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
-                "&userip=" + duFlowBean.getIpAddr();//用户ip
+                "&userip=" + duFlowBean.getIpAddr() +//用户ip
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName());
 
         String curl = serviceUrl + "lingjiclick?" +
                 "id=" + duFlowBean.getRequestId() +

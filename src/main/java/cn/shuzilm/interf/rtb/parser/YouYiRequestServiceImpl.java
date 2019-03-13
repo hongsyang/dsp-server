@@ -254,6 +254,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
                 "&dcit=" + targetDuFlowBean.getCity() +// 市
                 "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
@@ -278,6 +279,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
                 "&dcit=" + targetDuFlowBean.getCity() +// 市
                 "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
