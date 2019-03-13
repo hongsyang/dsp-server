@@ -1031,7 +1031,7 @@ public class RuleMatching {
 		double price = ad.getPrice();
 		
 		float tempPrice = rtbIns.getDynamicPrice(appPackageName, isDimension?null:adxNamePushList.get(0), width, height);
-		if(tempPrice != 0 && tempPrice < price * 1.5){
+		if(tempPrice != 0 && tempPrice < price){
 			price = tempPrice;
 		}
 		// 动态出价累计
