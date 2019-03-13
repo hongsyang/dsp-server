@@ -148,10 +148,26 @@ public class RuleMatching {
 			if(adxNameList != null){
 				boolean dimensionFlag = false;
 				for(String adxNameTemp:adxNameList){
+					//是否在推审通过列表中
 					if (material.getApprovedAdxSet().contains(adxNameTemp)) {
-						dimensionFlag = true;
-						adxNamePushList.add(adxNameTemp);
-						break;
+						//是否满足尺寸
+						if(width != 0 && width != -1 && height != 0 && height != -1){
+							if (isResolutionRatio) {
+								if (adWidth >= width && adHeight >= height) {
+									dimensionFlag = true;
+									adxNamePushList.add(adxNameTemp);
+									break;
+								}
+							} else {
+								if ((width + widthDeviation >= adWidth && width - widthDeviation <= adWidth)
+										&& (height + heightDeviation >= adHeight && height - heightDeviation <= adHeight)) {
+									dimensionFlag = true;
+									adxNamePushList.add(adxNameTemp);
+									break;
+								}
+							}
+						}
+						
 					}
 				}
 				if(!dimensionFlag){
