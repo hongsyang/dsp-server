@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.master.node;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -34,7 +35,20 @@ public class GainDataFromPIXCELQueue implements Runnable {
 						pix.isLower());
 
 				// 更新动态出价缓存map
-				AdFlowControl.getInstance().updateDynamicPriceMap("PIXEL", pix.getClickNums(),"","",0,0,0f);
+				String reqestId = pix.getRequestId();
+				if(StringUtils.isNotEmpty(reqestId)) {
+					String mapKey = AdFlowControl.getDynamicTransferMap().get(reqestId);
+					if(StringUtils.isNotEmpty(mapKey)) {
+						String [] keys = mapKey.split("_");
+						if(keys.length == 3) {
+							String packageName = keys[0];
+							String tagId = keys[1];
+							String size = keys[2];
+							double price = pix.getBidPrice();
+							AdFlowControl.getInstance().updateDynamicPriceMap("PIXEL", 1,packageName,tagId,size,price);
+						}
+					}
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 				try {
@@ -46,4 +60,10 @@ public class GainDataFromPIXCELQueue implements Runnable {
 			}
 		}
 	}
+
+	/*public static void main(String[] args) {
+		AdFlowControl.getInstance();
+		AdFlowControl.getDynamicTransferMap().put("requestid1","com.dengjian.ios_null_200#300");
+		new Thread(new GainDataFromPIXCELQueue("rtb-101")).start();
+	}*/
 }

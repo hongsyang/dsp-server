@@ -142,6 +142,9 @@ public class PixelFlowControl {
 		bean.setCost(5.01);
 		bean.setPremiumFactor(1.0);
 		bean.setAdUid("123");
+		bean.setBidPrice(10d);
+		bean.setRequestId("requestid1");
+		bean.setClickNums(1);
 		AdBean ad = new AdBean();
         ad.setAdUid("123");
         String adverUid = "123";

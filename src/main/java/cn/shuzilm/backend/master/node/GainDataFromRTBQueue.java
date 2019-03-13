@@ -48,13 +48,13 @@ public class GainDataFromRTBQueue implements Runnable {
 							String tagId = keys[1];
 							String[] size = keys[2].split("#");
 							if(StringUtils.isNotEmpty(tagId)) {
-								AdFlowControl.getInstance().updateDynamicPriceMap("RTB", ((AtomicLong)value[0]).longValue(),packageName,tagId,0,0,((AtomicDouble)value[1]).floatValue());
+								AdFlowControl.getInstance().updateDynamicPriceMap("RTB", ((AtomicLong)value[0]).longValue(),packageName,tagId,"",((AtomicDouble)value[1]).doubleValue());
 							}else {
 								if(size.length == 2) {
 									int width = Integer.parseInt(size[0]);
 									int height = Integer.parseInt(size[1]);
 									if(width > 0 && height > 0) {
-										AdFlowControl.getInstance().updateDynamicPriceMap("RTB", ((AtomicLong)value[0]).longValue(),packageName,"",width,height,((AtomicDouble)value[1]).floatValue());
+										AdFlowControl.getInstance().updateDynamicPriceMap("RTB", ((AtomicLong)value[0]).longValue(),packageName,"",width+"#"+height,((AtomicDouble)value[1]).doubleValue());
 									}
 								}
 							}
