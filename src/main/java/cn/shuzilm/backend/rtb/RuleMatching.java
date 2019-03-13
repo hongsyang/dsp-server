@@ -665,9 +665,7 @@ public class RuleMatching {
 			} else {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(), 1L);
 			}
-
-			// 动态出价累计
-			updateDynamicPriceMap(1L, "", "", 0, 0, 0f, "");
+			
 			// 上传adx流量数
 			if (rtbIns.getAdxFlowMap().get(adxName) != null) {
 				rtbIns.getAdxFlowMap().put(adxName, rtbIns.getAdxFlowMap().get(adxName) + 1);
@@ -747,19 +745,6 @@ public class RuleMatching {
 				((AtomicLong)value[0]).addAndGet(amount);
 				((AtomicDouble)value[1]).addAndGet(price);
 			}
-		}
-	}
-
-	public static void main(String[] args) {
-		RuleMatching ruleMatching = new RuleMatching();
-		for(int i=0;i<10;i++) {
-				ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
-					,0,0,5.0f,"requestid1");
-		}
-
-		for(int i=0;i<10;i++) {
-			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid",""
-					,300,600,6.0f,"requestid2");
 		}
 	}
 
@@ -1044,10 +1029,13 @@ public class RuleMatching {
 		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价
 		//if(appPackageName != null && appPackageName.contains("com.moji")){
 		double price = ad.getPrice();
+		
 		float tempPrice = rtbIns.getDynamicPrice(appPackageName, isDimension?null:adxNamePushList.get(0), width, height);
-		if(tempPrice != 0){
+		if(tempPrice != 0 && tempPrice < price * 1.5){
 			price = tempPrice;
 		}
+		// 动态出价累计
+		updateDynamicPriceMap(1L, appPackageName, isDimension?null:adxNamePushList.get(0), width, height, (float)price, requestId);
 //		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
 //			targetDuFlowBean.setBiddingPrice(price*0.6);
 //		}else{
@@ -1195,5 +1183,18 @@ public class RuleMatching {
 			e.getMessage();
 		}
 	}*/
+	
+	public static void main(String[] args) {
+		RuleMatching ruleMatching = new RuleMatching();
+		for(int i=0;i<10;i++) {
+				ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
+					,0,0,5.0f,"requestid1");
+		}
+
+		for(int i=0;i<10;i++) {
+			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid",""
+					,300,600,6.0f,"requestid2");
+		}
+	}
 
 }
