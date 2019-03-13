@@ -18,7 +18,7 @@ public class NodeStatusBean implements ICommand{
     private int nodeId;
     private String nodeName;
 
-    private ConcurrentHashMap<String,Object[]> dynamicMap;
+    private ConcurrentHashMap<String,String> dynamicMap;
     /**
      * 总的竞价次数
      */
@@ -117,11 +117,11 @@ public class NodeStatusBean implements ICommand{
 		this.lastUpdateTime = lastUpdateTime;
 	}
 
-    public ConcurrentHashMap<String, Object[]> getDynamicMap() {
+    public ConcurrentHashMap<String, String> getDynamicMap() {
         return dynamicMap;
     }
 
-    public void setDynamicMap(ConcurrentHashMap<String, Object[]> dynamicMap) {
+    public void setDynamicMap(ConcurrentHashMap<String, String> dynamicMap) {
         this.dynamicMap = dynamicMap;
     }
 }

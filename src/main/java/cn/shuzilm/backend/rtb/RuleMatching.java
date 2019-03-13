@@ -724,14 +724,23 @@ public class RuleMatching {
 	 * @param requestId
 	 */
 
-	public void updateDynamicPriceMap(long amount, String packageName,
+    public void updateDynamicPriceMap(long amount, String packageName,
+                                      String adTagId, int width, int height, float price ,
+                                      String requestId) {
+        String key = rtbIns.getMapKey(packageName, adTagId, width, height);
+        if(StringUtils.isEmpty(key)) {
+            return;
+        }
+        RtbFlowControl.getDynamicMap().put(requestId,key + "&" +price);
+    }
+	/*public void updateDynamicPriceMap(long amount, String packageName,
 									  String adTagId, int width, int height, float price ,
 									  String requestId) {
 		String key = rtbIns.getMapKey(packageName, adTagId, width, height);
 		if(StringUtils.isEmpty(key)) {
 			return;
 		}
-		Object[] value = RtbFlowControl.getDynamicMap().get(key);
+		String value = RtbFlowControl.getDynamicMap().get(key);
 
 		if(value != null) {
 			((AtomicLong)value[0]).addAndGet(amount);
@@ -748,20 +757,32 @@ public class RuleMatching {
 				((AtomicDouble)value[1]).addAndGet(price);
 			}
 		}
-	}
+	}*/
 
 	public static void main(String[] args) {
 		RuleMatching ruleMatching = new RuleMatching();
-		for(int i=0;i<10;i++) {
-				ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
-					,0,0,5.0f,"requestid1");
-		}
+        long start = System.currentTimeMillis();
+        for(int k=0;k<100;k++) {
+            ruleMatching.updateDynamicPriceMap(1l,k+"","1"
+                    ,0,0,5.0f,"requestid1");
+        }
+        System.out.println(System.currentTimeMillis() - start);
+		/*HashMap<String,String> test = new HashMap<>();
+		for(int j=0;j<10000;j++) {
 
-		for(int i=0;i<10;i++) {
-			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid",""
-					,300,600,6.0f,"requestid2");
-		}
-	}
+		    new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    long start = System.currentTimeMillis();
+                    for(int k=0;k<100000;k++) {
+                        ruleMatching.updateDynamicPriceMap(1l,"k","1"
+                                ,0,0,5.0f,"requestid1");
+                    }
+                    System.out.println(System.currentTimeMillis() - start);
+                }
+            }).start();
+        }*/
+    }
 
 	/**
 	 * 对匹配的广告按照规则进行排序

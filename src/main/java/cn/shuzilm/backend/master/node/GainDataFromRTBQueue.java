@@ -37,30 +37,39 @@ public class GainDataFromRTBQueue implements Runnable {
 					AdFlowControl.getInstance().updateBids(bid.getUid(), bid.getBidNums());
 				}
 
-				ConcurrentHashMap<String,Object[]> dynamicMap = bean.getDynamicMap();
+				ConcurrentHashMap<String,String> dynamicMap = bean.getDynamicMap();
 
-				dynamicMap.forEach((key, value) -> {
+				dynamicMap.forEach((requestId, value) -> {
 					try{
-						String [] keys = key.split("_");
-						if(keys.length == 3 && value.length == 3) {
+
+						String [] valueArray = value.split("&");
+						if(valueArray.length < 2) {
+							return;
+						}
+						String key = valueArray[0];
+						String price = valueArray[1];
+						AdFlowControl.getInstance().updateDynamicPriceMap("RTB", 1,key,Double.parseDouble(price));
+						// 更新转换Map
+						AdFlowControl.getDynamicTransferMap().put(requestId, key);
+						/*if(keys.length == 3) {
 							// 更新动态出价缓存map
 							String packageName = keys[0];
 							String tagId = keys[1];
 							String[] size = keys[2].split("#");
 							if(StringUtils.isNotEmpty(tagId)) {
-								AdFlowControl.getInstance().updateDynamicPriceMap("RTB", ((AtomicLong)value[0]).longValue(),packageName,tagId,"",((AtomicDouble)value[1]).doubleValue());
+								AdFlowControl.getInstance().updateDynamicPriceMap("RTB", 1,packageName,tagId,"",Double.parseDouble(price));
 							}else {
 								if(size.length == 2) {
 									int width = Integer.parseInt(size[0]);
 									int height = Integer.parseInt(size[1]);
 									if(width > 0 && height > 0) {
-										AdFlowControl.getInstance().updateDynamicPriceMap("RTB", ((AtomicLong)value[0]).longValue(),packageName,"",width+"#"+height,((AtomicDouble)value[1]).doubleValue());
+										AdFlowControl.getInstance().updateDynamicPriceMap("RTB", 1,packageName,"",width+"#"+height,Double.parseDouble(price));
 									}
 								}
 							}
 							// 更新转换Map
-							AdFlowControl.getDynamicTransferMap().put((String)value[2], key);
-						}
+							AdFlowControl.getDynamicTransferMap().put(requestId, key);
+						}*/
 					}catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -78,7 +87,7 @@ public class GainDataFromRTBQueue implements Runnable {
 		}
 	}
 
-	/*public static void main(String[] args) {
+	public static void main(String[] args) {
 		new Thread(new GainDataFromRTBQueue("rtb-101")).start();
-	}*/
+	}
 }
