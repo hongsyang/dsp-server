@@ -1,6 +1,7 @@
 package cn.shuzilm.backend.master.node;
 
-import java.util.ArrayList;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.MDC;
 
@@ -28,18 +29,36 @@ public class GainDataFromRTBQueue implements Runnable {
 					continue;
 				ArrayList<AdBidBean> bidList = bean.getBidList();
 				for (AdBidBean bid : bidList) {
-					String id = bid.getUid();
-					if(id.contains("dynamic_")) {
-						String [] values = id.split("_");
-						if(values.length == 3) {
 
-						}
-						// 更新动态出价缓存map
-						AdFlowControl.getInstance().updateDynamicPriceMap("RTB", bid.getBidNums(),"","","","",0f);
-					}else {
 						AdFlowControl.getInstance().updateBids(bid.getUid(), bid.getBidNums());
-					}
+
 				}
+
+				ConcurrentHashMap<String,Object[]> dynamicMap = bean.getDynamicMap();
+
+				dynamicMap.forEach((key, value) -> {
+					try{
+						String [] keys = key.split("_");
+						if(keys.length == 3 && value.length == 3) {
+							// 更新动态出价缓存map
+							String packageName = keys[0];
+							String tagId = keys[1];
+							String[] size = keys[2].split("#");
+							if(size.length == 2) {
+								int width = Integer.parseInt(size[0]);
+								int height = Integer.parseInt(size[1]);
+								if(width > 0 && height > 0) {
+									AdFlowControl.getInstance().updateDynamicPriceMap("RTB", (long)value[0],packageName,tagId,width,height,(float)value[1]);
+									// 更新转换Map
+									AdFlowControl.getDynamicTransferMap().put((String)value[2], key);
+								}
+							}
+						}
+					}catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				});
 			} catch (Exception e) {
 				e.printStackTrace();
 				try {

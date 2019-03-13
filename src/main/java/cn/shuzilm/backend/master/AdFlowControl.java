@@ -274,7 +274,15 @@ public class AdFlowControl {
      * 动态出价缓存
      */
     private static ConcurrentHashMap<String,Object []> dynamicPriceMap = null;
+    /**
+     * 将reqiest_id转换成包名，广告位信息
+     */
+    private static ConcurrentHashMap<String,String> dynamicTransferMap = null;
 
+
+    public static ConcurrentHashMap<String, String> getDynamicTransferMap() {
+        return dynamicTransferMap;
+    }
 
     public AdFlowControl() {
 
@@ -307,7 +315,7 @@ public class AdFlowControl {
         queue = DataTransQueue.getInstance();
 //        adviserMap = new HashMap<>();
         dynamicPriceMap = new ConcurrentHashMap<>();
-
+        dynamicTransferMap = new ConcurrentHashMap<>();
     }
 
 
@@ -2068,7 +2076,7 @@ public class AdFlowControl {
      * @param height        广告位高
      */
     public void updateDynamicPriceMap(String type, long amount, String packageName,
-                                      String adTagId, String width, String height, float price ){
+                                      String adTagId, int width, int height, float price ){
         String key = getMapKey(packageName, adTagId, width, height);
         if(StringUtils.isEmpty(key)) {
             return;
@@ -2105,7 +2113,6 @@ public class AdFlowControl {
                     ((AtomicLong)previous[1]).addAndGet(amount);
                 }
             }
-            dynamicPriceMap.put(key, array);
         }
     }
 
@@ -2132,6 +2139,12 @@ public class AdFlowControl {
                 // 出手数大于赢价数
 
                 float rate = 1;
+
+                if(rtbAmount < 10) {
+                    myLog.info("出手数小于10，基数太小，不具备参考价值，不参与此次价格调整 key: {}", key );
+                    return;
+                }
+
                 if(rtbAmount > 0 && rtbAmount >= pixelAmount) {
                     double winRate = Double.valueOf(pixelAmount+"") / Double.valueOf(rtbAmount+"");
                     if(winRate < 0.8) {
@@ -2175,6 +2188,7 @@ public class AdFlowControl {
 
         // 重置动态出价map
         dynamicPriceMap = new ConcurrentHashMap<>();
+        dynamicTransferMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -2185,15 +2199,13 @@ public class AdFlowControl {
      * @param height
      * @return
      */
-    private String getMapKey(String packageName,
-                             String adTagId, String width, String height){
+    public String getMapKey(String packageName,
+                            String adTagId, int width, int height){
         packageName = StringUtils.isEmpty(packageName) ? "null" : packageName;
         adTagId = StringUtils.isEmpty(adTagId) ? "null" : adTagId;
-        width = StringUtils.isEmpty(width) ? "null" : width;
-        height = StringUtils.isEmpty(height) ? "null" : height;
 
         if(StringUtils.isEmpty(packageName) && StringUtils.isEmpty(adTagId)
-                && StringUtils.isEmpty(width) && StringUtils.isEmpty(height)) {
+                && (width <=0 || height <=0)) {
             return null;
         }
 
@@ -2201,7 +2213,7 @@ public class AdFlowControl {
         String key = packageName + "_";
         if(!"null".equals(adTagId)) {
             key += adTagId + "_null";
-        }else if(!"null".equals(width) && !"null".equals(height)){
+        }else if(width > 0 && height > 0){
             key += "null_" + width + "#" + height;
         }else {
             return null;
@@ -2215,20 +2227,20 @@ public class AdFlowControl {
         for(int i=0;i<10;i++) {
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("RTB", 1,"com.dengjian.android",
-                            "1","","",2.1f);
+                            "1",0,0,2.1f);
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("PIXEL", 1,"com.dengjian.android",
-                            "1","","",2.0f);
+                            "1",0,0,2.0f);
         }
         // 赢价率 < 80%
         for(int i=0;i<10;i++) {
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("RTB", 1,"com.dengjian.ios",
-                            "2","","",3.2f);
+                            "2",0,0,3.2f);
             if(i<5) {
                 AdFlowControl.getInstance()
                         .updateDynamicPriceMap("PIXEL", 1,"com.dengjian.ios",
-                                "2","","",3.0f);
+                                "2",0,0,3.0f);
             }
         }
 
@@ -2236,11 +2248,11 @@ public class AdFlowControl {
         for(int i=0;i<10;i++) {
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("RTB", 1,"com.dengjian.ios",
-                            "","200","100",4.3f);
+                            "",200,100,4.3f);
             if(i<8) {
                 AdFlowControl.getInstance()
                         .updateDynamicPriceMap("PIXEL", 1,"com.dengjian.ios",
-                                "","200","100",4.3f);
+                                "",200,100,4.3f);
             }
         }
 
@@ -2248,21 +2260,21 @@ public class AdFlowControl {
         for(int i=0;i<10;i++) {
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("RTB", 5,"com.dengjian.ios",
-                            "100","","",4.0f);
+                            "100",0,0,4.0f);
         }
 
         // 只有赢价没有出手
         for(int i=0;i<10;i++) {
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("PIXEL", 5,"com.dengjian.ios",
-                            "101","","",4.3f);
+                            "101",0,0,4.3f);
         }
 
         // 模拟新加入的流量
         for(int i=0;i<10;i++) {
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("RTB", 1,"com.dengjian.ios",
-                            "10","200","100",10f);
+                            "10",200,100,10f);
         }
         System.out.println("");
         AdFlowControl.getInstance().dumpDynamicPriceDateToMysql();

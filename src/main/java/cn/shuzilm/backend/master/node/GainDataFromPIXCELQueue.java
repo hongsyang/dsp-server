@@ -34,7 +34,7 @@ public class GainDataFromPIXCELQueue implements Runnable {
 						pix.isLower());
 
 				// 更新动态出价缓存map
-				AdFlowControl.getInstance().updateDynamicPriceMap("PIXEL", pix.getClickNums(),"","","","",0f);
+				AdFlowControl.getInstance().updateDynamicPriceMap("PIXEL", pix.getClickNums(),"","",0,0,0f);
 			} catch (Exception e) {
 				e.printStackTrace();
 				try {

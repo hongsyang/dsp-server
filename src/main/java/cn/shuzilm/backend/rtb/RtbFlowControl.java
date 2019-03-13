@@ -1018,16 +1018,16 @@ public class RtbFlowControl {
      * @param height        广告位高
      * @return
      */
-    public float getDynamicPrice(String packageName, String adTagId,String width,String height){
+    public float getDynamicPrice(String packageName, String adTagId,int width,int height){
         String key = getMapKey(packageName, adTagId, width, height);
         if(StringUtils.isEmpty(key)) {
             return 0f;
         }
-        if(StringUtils.isEmpty(adTagId)) {
+        /*if(StringUtils.isEmpty(adTagId)) {
             key = packageName + "_" + width + "_" + height;
         }else {
             key = packageName + "_" + adTagId;
-        }
+        }*/
         return this.dynamicPriceMap.get(key);
     }
 
@@ -1039,23 +1039,20 @@ public class RtbFlowControl {
      * @param height
      * @return
      */
-    private String getMapKey(String packageName,
-                             String adTagId, String width, String height){
+    public String getMapKey(String packageName,
+                            String adTagId, int width, int height){
         packageName = StringUtils.isEmpty(packageName) ? "null" : packageName;
         adTagId = StringUtils.isEmpty(adTagId) ? "null" : adTagId;
-        width = StringUtils.isEmpty(width) ? "null" : width;
-        height = StringUtils.isEmpty(height) ? "null" : height;
 
         if(StringUtils.isEmpty(packageName) && StringUtils.isEmpty(adTagId)
-                && StringUtils.isEmpty(width) && StringUtils.isEmpty(height)) {
+                && (width <=0 || height <=0)) {
             return null;
         }
-
 
         String key = packageName + "_";
         if(!"null".equals(adTagId)) {
             key += adTagId + "_null";
-        }else if(!"null".equals(width) && !"null".equals(height)){
+        }else if(width > 0 && height > 0){
             key += "null_" + width + "#" + height;
         }else {
             return null;

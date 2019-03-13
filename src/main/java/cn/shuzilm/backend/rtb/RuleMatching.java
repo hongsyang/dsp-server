@@ -21,6 +21,8 @@ import cn.shuzilm.util.GPSDistance;
 import cn.shuzilm.util.JsonTools;
 import cn.shuzilm.util.MathTools;
 import cn.shuzilm.util.TimeUtil;
+import com.google.common.util.concurrent.AtomicDouble;
+import org.apache.commons.lang.StringUtils;
 import redis.clients.jedis.Jedis;
 
 import java.text.SimpleDateFormat;
@@ -37,6 +39,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -648,8 +651,7 @@ public class RuleMatching {
 			}
 
 			// 动态出价累计
-			rtbIns.getDynamicMap().put("",new Object[]{});
-
+			updateDynamicPriceMap(1L, "", "", 0, 0, 0f, "");
 			// 上传adx流量数
 			if (rtbIns.getAdxFlowMap().get(adxName) != null) {
 				rtbIns.getAdxFlowMap().put(adxName, rtbIns.getAdxFlowMap().get(adxName) + 1);
@@ -693,6 +695,57 @@ public class RuleMatching {
 		audienceTagIdSet = null;
 
 		return targetDuFlowBean;
+	}
+
+	/**
+	 * 更新动态出价缓存map
+	 * @param amount
+	 * @param packageName
+	 * @param adTagId
+	 * @param width
+	 * @param height
+	 * @param price
+	 * @param requestId
+	 */
+
+	public void updateDynamicPriceMap(long amount, String packageName,
+									  String adTagId, int width, int height, float price ,
+									  String requestId) {
+		String key = rtbIns.getMapKey(packageName, adTagId, width, height);
+		if(StringUtils.isEmpty(key)) {
+			return;
+		}
+		Object[] value = rtbIns.getDynamicMap().get(key);
+
+		if(value != null) {
+			((AtomicLong)value[0]).addAndGet(amount);
+			((AtomicDouble)value[1]).addAndGet(price);
+		}else {
+			Object[] array = new Object[2];
+			array[0] = new AtomicLong(amount);
+			array[1] = new AtomicDouble(price);
+			array[2] = requestId;
+			// 解决线程并发问题
+			Object [] previous = rtbIns.getDynamicMap().putIfAbsent(key, array);
+			if(previous != null) {
+				((AtomicLong)value[0]).addAndGet(amount);
+				((AtomicDouble)value[0]).addAndGet(price);
+			}
+		}
+	}
+
+	public static void main(String[] args) {
+		RuleMatching ruleMatching = new RuleMatching();
+
+		for(int i=0;i<10;i++) {
+			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
+					,0,0,5.0f,"requestid1");
+		}
+
+		for(int i=0;i<10;i++) {
+			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid",""
+					,300,600,6.0f,"requestid2");
+		}
 	}
 
 	/**
@@ -1104,7 +1157,7 @@ public class RuleMatching {
 		return isInBoundReturn;
 	}
 
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		try {
 			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
@@ -1121,6 +1174,6 @@ public class RuleMatching {
 		} catch (Exception e) {
 			e.getMessage();
 		}
-	}
+	}*/
 
 }
