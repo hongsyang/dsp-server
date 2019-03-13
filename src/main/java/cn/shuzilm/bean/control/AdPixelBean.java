@@ -59,5 +59,15 @@ public class AdPixelBean implements ICommand {
      * 代理商利润
      */
     private Double rebateProfit;
+    
+    /**
+     * 出价
+     */
+    private Double bidPrice;
+    
+    /**
+     * 请求ID
+     */
+    private String requestId;
 
 }

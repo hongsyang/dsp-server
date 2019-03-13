@@ -81,7 +81,13 @@ public class PixelFlowControl {
 		double rebateProfit = 0.0;
 		double cost = pixel.getCost();
 		double premiumFactor = pixel.getPremiumFactor();
-		double price = (double) (Math.round(ad.getPrice() * 100000)/100000.0);
+		double price = 0.0;
+		if(pixel.getBidPrice() != null && pixel.getBidPrice() > 0){
+			price = (double) (Math.round(pixel.getBidPrice() * 100000)/100000.0);
+		}else{
+			price = (double) (Math.round(ad.getPrice() * 100000)/100000.0);
+		}
+		
 		
 		
 		if(premiumFactor >= 1){

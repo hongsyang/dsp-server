@@ -1028,11 +1028,16 @@ public class RuleMatching {
 		double premiumRatio = constant.getRtbVar(type);
 		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价
 		//if(appPackageName != null && appPackageName.contains("com.moji")){
-		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
-			targetDuFlowBean.setBiddingPrice((double) ad.getPrice()*0.6);
-		}else{
-			targetDuFlowBean.setBiddingPrice((double) ad.getPrice());
+		double price = ad.getPrice();
+		float tempPrice = rtbIns.getDynamicPrice(appPackageName, isDimension?null:adxNamePushList.get(0), width, height);
+		if(tempPrice != 0){
+			price = tempPrice;
 		}
+//		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
+//			targetDuFlowBean.setBiddingPrice(price*0.6);
+//		}else{
+		targetDuFlowBean.setBiddingPrice(price);
+//		}
 		targetDuFlowBean.setPremiumFactor(premiumRatio);
 		targetDuFlowBean.setLandingUrl(creativeGroup.getLink());
 		targetDuFlowBean.setLinkUrl(creativeGroup.getClickTrackingUrl());
