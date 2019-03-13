@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb;
 
 import bidserver.BidserverSsp;
+import cn.shuzilm.BaiduRealtimeBidding;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
 import cn.shuzilm.bean.tencent.request.TencentBidRequest;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
@@ -101,6 +102,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 BidserverSsp.BidRequest bidRequest = null;
                 GdtRtb.BidRequest tencentBidRequest = null;
+                BaiduRealtimeBidding.BidRequest baiduBidRequest = null;
+
 
                 if (url.contains("youyi")) {
                     bidRequest = BidserverSsp.BidRequest.parseFrom(request.getContent().array());
@@ -108,6 +111,9 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 } else if (url.contains("tencent")) {
                     tencentBidRequest = GdtRtb.BidRequest.parseFrom(request.getContent().array());
                     dataStr = JsonFormat.printToString(tencentBidRequest);
+                } else if (url.contains("baidu")) {
+                    baiduBidRequest = BaiduRealtimeBidding.BidRequest.parseFrom(request.getContent().array());
+                    dataStr = JsonFormat.printToString(baiduBidRequest);
                 } else {
                     dataStr = URLDecoder.decode(dataStr, "utf-8");
                 }
