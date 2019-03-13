@@ -60,8 +60,6 @@ public class AdPixelBean implements ICommand {
      */
     private Double rebateProfit;
     
-    private String packageName;
-    
     /**
      * 出价
      */
