@@ -806,6 +806,8 @@ public class RtbFlowControl {
 		
 		weekAndDayNumMap.put("EEEE", weekNum);
 		weekAndDayNumMap.put("HH", dayNum);
+		
+		myLog.info("weekNum="+weekNum+"\tdayNum="+dayNum);
     	
         for (String auid : mapTask.keySet()) {
             TaskBean bean = mapTask.get(auid);
