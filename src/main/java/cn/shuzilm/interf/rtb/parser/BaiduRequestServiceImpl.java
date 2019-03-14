@@ -2,6 +2,7 @@ package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
 import cn.shuzilm.bean.baidu.request.BaiduBidRequest;
+import cn.shuzilm.bean.baidu.response.BaiduAd;
 import cn.shuzilm.bean.baidu.response.BaiduBidResponse;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.tencent.request.*;
@@ -61,7 +62,6 @@ public class BaiduRequestServiceImpl implements RequestService {
             BaiduBidRequest bidRequestBean = JSON.parseObject(dataStr, BaiduBidRequest.class);
 //            //创建返回结果  bidRequest请求参数保持不变
             log.debug(" baiduBidRequest：{}", bidRequestBean);
-
 
 
 //            TencentDevice userDevice = bidRequestBean.getDevice();//设备信息
@@ -152,7 +152,7 @@ public class BaiduRequestServiceImpl implements RequestService {
 //            targetDuFlowBean.setAppName("");//APP名称
 //            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
 //            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-            DUFlowBean targetDuFlowBean =new DUFlowBean();
+            DUFlowBean targetDuFlowBean = new DUFlowBean();
             BaiduBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
             MDC.put("sift", "dsp-server");
@@ -177,9 +177,14 @@ public class BaiduRequestServiceImpl implements RequestService {
     private BaiduBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, BaiduBidRequest bidRequestBean) {
         BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
         baiduBidResponse.setId(bidRequestBean.getId());
-        //        //广告信息
+        //广告信息
         List ads = new ArrayList();
-        //        //广告信息
+        //广告信息
+        BaiduAd baiduAd = new BaiduAd();
+        //当前页面广告位顺序 id，同一页面从 1 开始
+        baiduAd.setSequence_id(bidRequestBean.getAdslot().get(0).getSequence_id());
+        ads.add(baiduAd);
+
 //        TencentSeatBid tencentSeatBid = new TencentSeatBid();
 //        baiduBidResponse.setAds();
 //        TencentBidResponse.setRequest_id(bidRequestBean.getId());
