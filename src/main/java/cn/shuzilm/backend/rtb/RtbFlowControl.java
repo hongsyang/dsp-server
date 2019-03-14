@@ -230,7 +230,7 @@ public class RtbFlowControl {
     /**
      * 动态出价缓存
      */
-    private static ConcurrentHashMap<String,Float> dynamicPriceMap = null;
+    private static ConcurrentHashMap<String,Float> dynamicPriceMap;
 
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
@@ -262,6 +262,7 @@ public class RtbFlowControl {
         String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
         String nodes [] = nodeStr.split(";");
         redis = AsyncRedisClient.getInstance(nodes);
+        dynamicPriceMap = new ConcurrentHashMap<>();
     }
     
 
