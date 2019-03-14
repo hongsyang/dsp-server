@@ -2127,6 +2127,7 @@ public class AdFlowControl {
      * 导出动态出价数据到mysql
      */
     public void dumpDynamicPriceDateToMysql() {
+        myLog.info("开始导出动态出价数据到mysql");
         Update update = new Update();
         dynamicPriceMap.forEach((key,value) -> {
             try{
@@ -2195,6 +2196,8 @@ public class AdFlowControl {
         // 重置动态出价map
         dynamicPriceMap = new ConcurrentHashMap<>();
         dynamicTransferMap = new ConcurrentHashMap<>();
+        myLog.info("导出动态出价数据到mysql结束");
+
     }
 
 

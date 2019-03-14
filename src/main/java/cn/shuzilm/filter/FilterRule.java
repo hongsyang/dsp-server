@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,8 +55,8 @@ public class FilterRule {
      * @param userIp,bundle,deviceId
      * @return
      */
-    public static Map<String, String> filterRuleBidRequest(String deviceId, String bundle,String userIp,
-                                                           String adxId, String adTagId, int width, int heigth) {
+    public static Map<String, String> filterRuleBidRequest(String deviceId, String bundle, String userIp,
+                                                           String adxId, List<String> adTagIdList, int width, int heigth) {
         Map<String, String> msg = new HashMap();
 
         //ip 黑名单规则  在黑名单内直接返回
@@ -85,8 +86,8 @@ public class FilterRule {
 
         // 过滤广告位黑名单
         if (Boolean.valueOf(configs.getString("AD_TAG_BLACK_LIST"))) {
-            if (AdTagBlackListUtil.inAdTagBlackList(adxId,bundle,adTagId,width,heigth)) {
-                log.debug("广告位黑名单: adxId:{} bundle: {} adTagId:{} width:{} heigth:{} ", adxId,bundle,adTagId,width,heigth);
+            if (AdTagBlackListUtil.inAdTagBlackList(adxId,bundle,adTagIdList,width,heigth)) {
+                log.debug("广告位黑名单: adxId:{} bundle: {} adTagId:{} width:{} heigth:{} ", adxId,bundle,adTagIdList,width,heigth);
                 msg.put("AdTagBlackList", "0");
             }
         }

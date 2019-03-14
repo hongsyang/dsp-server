@@ -285,6 +285,8 @@ public class RtbFlowControl {
         //1分钟上报一次ADX与APP流量数
         pushAdxAndAppFlow();
         updateDeviceLimitMap();
+        // 更新动态出价map
+        updateDynamicPriceMap();
 
         //5秒钟获取一次流量任务
         pullAndUpdateFlowTask();
@@ -978,6 +980,7 @@ public class RtbFlowControl {
 
 
     public void updateDynamicPriceMap() {
+        myLog.info("开始更新动态出价map");
         Select select = new Select();
         ConcurrentHashMap<String,Float> tempMap = new ConcurrentHashMap<>();
         try{
@@ -1004,6 +1007,7 @@ public class RtbFlowControl {
                 }
             });
             this.dynamicPriceMap = tempMap;
+            myLog.info("更新动态出价map结束");
         }catch (Exception e) {
             myLog.error("更新动态出价map报错", e);
         }

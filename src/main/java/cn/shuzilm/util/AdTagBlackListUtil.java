@@ -50,7 +50,8 @@ public class AdTagBlackListUtil {
                    long adxId = rm.getInteger("adx_id").longValue();
 
                    for(String packageName:mediaAppPackageNameList){
-                       String adLocationStr1 = adxId+"_"+packageName+"_"+placeId;
+
+                       String adLocationStr1 = adxId+"_"+packageName+"_"+adxId+"_"+placeId;
                        String adLocationStr2 = adxId+"_"+packageName+"_"+width+"_"+height;
                        tempSet.add(adLocationStr1);
                        tempSet.add(adLocationStr2);
@@ -65,27 +66,36 @@ public class AdTagBlackListUtil {
         }
     }
 
+    public static void main(String[] args) {
+        updateAdTagBlackList();
+        System.out.println("");
+    }
 
-    public static boolean inAdTagBlackList(String adxId, String appPackageName, String adTagId, int width,int height) {
 
-        if(StringUtils.isEmpty(adxId) || StringUtils.isEmpty(appPackageName)) {
+    public static boolean inAdTagBlackList(String adxId, String appPackageName, List<String> adTagIdList, int width,int height) {
+
+        // adxId 和 appPackageName 为空，直接放过
+        if(adxId == null || "".equals(adxId.trim())
+            || appPackageName == null || "".equals(appPackageName.trim())) {
             return false;
         }
 
-        String adLocationStr = "";
-        if(StringUtils.isNotEmpty(adTagId)) {
-            adLocationStr = adxId+"_"+appPackageName+"_"+adTagId;
-        }else if(width > 0 && height > 0) {
-            adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
-        }else {
-            return false;
-        }
-        if(adLocationSet.contains(adLocationStr)){
-            return true;
-        }else{
-            return false;
-        }
 
+        for(String adTagId : adTagIdList) {
+            String adLocationStr = "";
+            if(StringUtils.isNotEmpty(adTagId)) {
+                adLocationStr = adxId+"_"+appPackageName+"_"+adTagId;
+            }else if(width > 0 && height > 0) {
+                adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
+            }else {
+                // 不符合规范，直接放过
+                return false;
+            }
+            if(!adLocationSet.contains(adLocationStr)){
+                return false;
+            }
+        }
+        return true;
     }
 
 
