@@ -119,22 +119,11 @@ public class YouYiRequestServiceImpl implements RequestService {
             }
 
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip());//过滤规则的返回结果
-
-            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
-            if (msg.get("ipBlackList") != null) {
-                return "ipBlackList" +  "204session_id:" + session_id;
-            } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList" +  "204session_id:" + session_id;
-            } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList" +  "204session_id:" + session_id;
-            }
-
 
             //是否匹配长宽
             Boolean isDimension = true;
             //通过广告id获取长宽
-            List adxNameList = new ArrayList();//
+            List<String> adxNameList = new ArrayList();//
 //            //支持的文件类型
             String adz_type = adzone.getAdz_type();
             if (adz_type.equals("ADZONE_TYPE_INAPP_BANNER") | adz_type.equals("ADZONE_TYPE_WAP_BANNER")) {
@@ -163,6 +152,17 @@ public class YouYiRequestServiceImpl implements RequestService {
             }
 
 
+
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip(),adxId,adxNameList,width,height);//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList" +  "204session_id:" + session_id;
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList" +  "204session_id:" + session_id;
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList" +  "204session_id:" + session_id;
+            }
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5

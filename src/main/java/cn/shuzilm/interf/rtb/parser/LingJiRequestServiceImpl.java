@@ -107,16 +107,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 }
             }
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp());//过滤规则的返回结果
 
-            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
-            if (msg.get("ipBlackList") != null) {
-                return "ipBlackList" + bidRequestBean.getId();
-            } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList" + bidRequestBean.getId();
-            } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList" + bidRequestBean.getId();
-            }
 
             //支持的文件类型
             List<LJAssets> assets = new ArrayList<>();
@@ -184,6 +175,18 @@ public class LingJiRequestServiceImpl implements RequestService {
             //广告位不为空
             if (tagid != null && !tagid.trim().equals("")) {
                 isDimension = false;
+            }
+
+
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(),ADX_ID,adxNameList,width,height);//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList" + bidRequestBean.getId();
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList" + bidRequestBean.getId();
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList" + bidRequestBean.getId();
             }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
