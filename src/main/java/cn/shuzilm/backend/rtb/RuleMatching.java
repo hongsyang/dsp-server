@@ -757,30 +757,30 @@ public class RuleMatching {
 		}
 	}*/
 
-	public static void main(String[] args) {
-		RuleMatching ruleMatching = new RuleMatching();
-        long start = System.currentTimeMillis();
-        for(int k=0;k<100;k++) {
-            ruleMatching.updateDynamicPriceMap(1l,k+"","1"
-                    ,0,0,5.0f,"requestid1");
-        }
-        System.out.println(System.currentTimeMillis() - start);
-		/*HashMap<String,String> test = new HashMap<>();
-		for(int j=0;j<10000;j++) {
-
-		    new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    long start = System.currentTimeMillis();
-                    for(int k=0;k<100000;k++) {
-                        ruleMatching.updateDynamicPriceMap(1l,"k","1"
-                                ,0,0,5.0f,"requestid1");
-                    }
-                    System.out.println(System.currentTimeMillis() - start);
-                }
-            }).start();
-        }*/
-    }
+//	public static void main(String[] args) {
+//		RuleMatching ruleMatching = new RuleMatching();
+//        long start = System.currentTimeMillis();
+//        for(int k=0;k<100;k++) {
+//            ruleMatching.updateDynamicPriceMap(1l,k+"","1"
+//                    ,0,0,5.0f,"requestid1");
+//        }
+//        System.out.println(System.currentTimeMillis() - start);
+//		/*HashMap<String,String> test = new HashMap<>();
+//		for(int j=0;j<10000;j++) {
+//
+//		    new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    long start = System.currentTimeMillis();
+//                    for(int k=0;k<100000;k++) {
+//                        ruleMatching.updateDynamicPriceMap(1l,"k","1"
+//                                ,0,0,5.0f,"requestid1");
+//                    }
+//                    System.out.println(System.currentTimeMillis() - start);
+//                }
+//            }).start();
+//        }*/
+//    }
 
 	/**
 	 * 对匹配的广告按照规则进行排序
