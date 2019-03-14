@@ -2169,12 +2169,12 @@ public class AdFlowControl {
                 size = keysArray[2];
                 if(!"null".equals(adTagId)) {
                     sql = "insert into dynamic_price (package_name,ad_tag_id,price,limit_price,create_time,update_time)" +
-                            " values ('"+packageName+"','"+adTagId+"',"+price+","+price+",'"+timestamp+"','"+timestamp+"') " +
+                            " values ('"+packageName+"','"+adTagId+"',"+price+","+price * 1.5+",'"+timestamp+"','"+timestamp+"') " +
                             " ON DUPLICATE KEY UPDATE price = if(price * " +rate + " > limit_price,limit_price,price * "+rate+")";
                 }else if(!"null".equals(size)) {
                     String [] sizeArray = size.split("#");
                     sql = "insert into dynamic_price (package_name,width,height,price,limit_price,create_time,update_time)" +
-                            " values ('"+packageName+"',"+sizeArray[0]+","+sizeArray[1]+","+price+","+price+",'"+timestamp+"','"+timestamp+"') " +
+                            " values ('"+packageName+"',"+sizeArray[0]+","+sizeArray[1]+","+price+","+price * 1.5+",'"+timestamp+"','"+timestamp+"') " +
                             " ON DUPLICATE KEY UPDATE price = if(price * " +rate + " > limit_price,limit_price,price * "+rate+")";
                 }else {
                     return;
