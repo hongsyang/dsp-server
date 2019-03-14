@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * @Description: YouYiParser 灵集post参数解析
@@ -174,12 +177,15 @@ public class BaiduRequestServiceImpl implements RequestService {
     private BaiduBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, BaiduBidRequest bidRequestBean) {
         BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
         baiduBidResponse.setId(bidRequestBean.getId());
+        //        //广告信息
+        List ads = new ArrayList();
+        //        //广告信息
+//        TencentSeatBid tencentSeatBid = new TencentSeatBid();
+//        baiduBidResponse.setAds();
 //        TencentBidResponse.setRequest_id(bidRequestBean.getId());
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 //        String format = LocalDateTime.now().format(formatter);//时间戳
-//        //广告信息
-//        List ads = new ArrayList();
-//        TencentSeatBid tencentSeatBid = new TencentSeatBid();
+
 //        //曝光信息
 //        TencentImpressions tencentImpressions = bidRequestBean.getImpressions().get(0);
 //        //曝光id
