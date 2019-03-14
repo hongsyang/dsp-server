@@ -1025,7 +1025,7 @@ public class RtbFlowControl {
      * @param height        广告位高
      * @return
      */
-    public float getDynamicPrice(String packageName, String adTagId,int width,int height){
+    public Float getDynamicPrice(String packageName, String adTagId,int width,int height){
         String key = getMapKey(packageName, adTagId, width, height);
         if(StringUtils.isEmpty(key)) {
             return 0f;
