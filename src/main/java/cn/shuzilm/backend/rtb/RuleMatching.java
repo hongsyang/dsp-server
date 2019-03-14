@@ -1064,8 +1064,8 @@ public class RuleMatching {
 		//if(appPackageName != null && appPackageName.contains("com.moji")){
 		double price = ad.getPrice();
 
-		float tempPrice = rtbIns.getDynamicPrice(appPackageName, isDimension?null:adxNamePushList.get(0), width, height);
-		if(tempPrice != 0 && tempPrice < price){
+		Float tempPrice = rtbIns.getDynamicPrice(appPackageName, isDimension?null:adxNamePushList.get(0), width, height);
+		if(tempPrice != null && tempPrice != 0 && tempPrice < price){
 			price = tempPrice;
 		}
 		// 动态出价累计
