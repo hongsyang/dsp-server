@@ -1075,12 +1075,21 @@ public class RuleMatching {
 		//if(appPackageName != null && appPackageName.contains("com.moji")){
 		double price = ad.getPrice();
 
-		Float tempPrice = rtbIns.getDynamicPrice(appPackageName, isDimension?null:adxNamePushList.get(0), width, height);
+		String adTagId = null;
+		if(!isDimension){
+			String adxNamePush = adxNamePushList.get(0);
+			String []adxNameTemp = adxNamePush.split("_");
+			if(adxNameTemp.length>1){
+				adTagId = adxNameTemp[1];
+			}
+		}
+		Float tempPrice = rtbIns.getDynamicPrice(appPackageName, adTagId, width, height);
 		if(tempPrice != null && tempPrice != 0 && tempPrice < price){
 			price = tempPrice;
 		}
 		// 动态出价累计
-		updateDynamicPriceMap(1L, appPackageName, isDimension?null:adxNamePushList.get(0), width, height, (float)price, requestId);
+		
+		updateDynamicPriceMap(1L, appPackageName, adTagId, width, height, (float)price, requestId);
 //		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
 //			targetDuFlowBean.setBiddingPrice(price*0.6);
 //		}else{
