@@ -2179,7 +2179,7 @@ public class AdFlowControl {
                 }else {
                     return;
                 }
-
+                myLog.debug(sql);
                 update.doUpdate(sql);
 
                 //System.out.println(sql);
