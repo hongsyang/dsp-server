@@ -162,6 +162,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                 return "bundleBlackList" +  "204session_id:" + session_id;
             } else if (msg.get("deviceIdBlackList") != null) {
                 return "deviceIdBlackList" +  "204session_id:" + session_id;
+            }else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList"+ "204session_id:" + session_id;
             }
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(

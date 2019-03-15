@@ -187,6 +187,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                 return "bundleBlackList" + bidRequestBean.getId();
             } else if (msg.get("deviceIdBlackList") != null) {
                 return "deviceIdBlackList" + bidRequestBean.getId();
+            }else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList";
             }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5

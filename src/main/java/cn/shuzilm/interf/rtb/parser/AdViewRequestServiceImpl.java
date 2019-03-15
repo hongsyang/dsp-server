@@ -206,6 +206,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                 return "bundleBlackList";
             } else if (msg.get("deviceIdBlackList") != null) {
                 return "deviceIdBlackList";
+            }else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList";
             }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5

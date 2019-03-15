@@ -121,6 +121,8 @@ public class TencentRequestServiceImpl implements RequestService {
                 return "bundleBlackList";
             } else if (msg.get("deviceIdBlackList") != null) {
                 return "deviceIdBlackList";
+            }else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList";
             }
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
