@@ -76,27 +76,32 @@ public class AdTagBlackListUtil {
 
 
     public static boolean inAdTagBlackList(String adxId, String appPackageName, List<String> adTagIdList, int width,int height) {
-
+        LOG.debug("adxId:{}, appPackageName: {}  width: {} height: {}", adxId, appPackageName, width, height);
         // adxId 和 appPackageName 为空，直接放过
         if(adxId == null || "".equals(adxId.trim())
             || appPackageName == null || "".equals(appPackageName.trim())) {
             return false;
         }
-        for(String adTagId : adTagIdList) {
-            String adLocationStr = "";
-            if(StringUtils.isNotEmpty(adTagId)) {
-                adLocationStr = adxId+"_"+appPackageName+"_"+adTagId;
-            }else if(width > 0 && height > 0) {
-                adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
-            }else {
-                // 不符合规范，直接放过
-                return false;
+        if(adTagIdList.size() > 0) {
+            for(String adTagId : adTagIdList) {
+                LOG.debug(" adTagId : {}", adTagId);
+                String adLocationStr = "";
+                if(StringUtils.isNotEmpty(adTagId)) {
+                    adLocationStr = adxId+"_"+appPackageName+"_"+adTagId;
+                }else if(width > 0 && height > 0) {
+                    adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
+                }else {
+                    // 不符合规范，直接放过
+                    return false;
+                }
+                if(!adLocationSet.contains(adLocationStr)){
+                    return false;
+                }
             }
-            if(!adLocationSet.contains(adLocationStr)){
-                return false;
-            }
+            return true;
+        }else {
+            return false;
         }
-        return true;
     }
 
 
