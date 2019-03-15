@@ -39,6 +39,10 @@ public class GainDataFromRTBQueue implements Runnable {
 
 				ConcurrentHashMap<String,String> dynamicMap = bean.getDynamicMap();
 
+				if(dynamicMap == null || dynamicMap.size() ==0) {
+					continue;
+				}
+
 				dynamicMap.forEach((requestId, value) -> {
 					try{
 
