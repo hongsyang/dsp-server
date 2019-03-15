@@ -24,12 +24,14 @@ public class AdTagBlackListUtil {
     private static Set<String> adLocationSet = new HashSet();
 
     public static void updateAdTagBlackList(){
+        LOG.error("开始加载广告位黑名单");
         String sql = "SELECT * FROM adx_media_placement where active = 1 or deleted = 1";
         ArrayList<AdLocationBean> adLocationList = new ArrayList<AdLocationBean>();
         ResultList rl = new ResultList();
         Set<String> tempSet = new HashSet();
         try{
             rl = select.select(sql);
+            LOG.error("广告位黑名单数量：{}", rl.size());
             for(ResultMap rm:rl){
                try{
                    Long id = rm.getInteger("id").longValue();
@@ -61,6 +63,7 @@ public class AdTagBlackListUtil {
                    LOG.error("转换广告位黑名单失败 ",e);
                }
             }
+            LOG.error("最终广告位黑名单数量：{}", adLocationSet.size());
         } catch (Exception e){
             LOG.error("获取广告位黑名单失败 ",e);
         }
@@ -79,8 +82,6 @@ public class AdTagBlackListUtil {
             || appPackageName == null || "".equals(appPackageName.trim())) {
             return false;
         }
-
-
         for(String adTagId : adTagIdList) {
             String adLocationStr = "";
             if(StringUtils.isNotEmpty(adTagId)) {
