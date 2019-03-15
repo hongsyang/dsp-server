@@ -991,18 +991,25 @@ public class RtbFlowControl {
             ResultList rsList = select.select(sql);
             rsList.forEach(rsMap -> {
                 try{
-                    String key = "";
+
                     String packageName = rsMap.getString("package_name");
                     String adTagId = rsMap.getString("ad_tag_id");
-                    String width = "null";
-                    String height = "null";
-                    if(StringUtils.isEmpty(adTagId)) {
-                        width = rsMap.getString("width");
-                        height = rsMap.getString("height");
+                    Integer width = rsMap.getInteger("width");
+                    Integer height = rsMap.getInteger("height");
+                    String key = getMapKey(packageName,adTagId,width,height);
+                    if(StringUtils.isEmpty(key)) {
+                        return;
+                    }
+                   /* if(StringUtils.isEmpty(adTagId)) {
+                        width = rsMap.getInteger("width");
+                        height = rsMap.getInteger("height");
+                        if(width == null || width == 0 || height == null || height == 0) {
+                            return;
+                        }
                         key = packageName + "_" + width + "_" + height;
                     }else {
                         key = packageName + "_" + adTagId;
-                    }
+                    }*/
                     float price = rsMap.getFloat("price");
                     tempMap.put(key,price);
                 }catch(Exception e) {
