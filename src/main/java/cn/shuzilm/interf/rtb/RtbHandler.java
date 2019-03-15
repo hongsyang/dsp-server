@@ -379,7 +379,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 MDC.put("phoenix", "rtb-houkp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                                "\t{}\t{}\t{}\t{}\t{}\t{}",
+                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                         LocalDateTime.now().toString(), new Date().getTime(),
                         LocalDate.now().toString(), LocalTime.now().getHour(),
                         LocalTime.now().getMinute(), requestId,
