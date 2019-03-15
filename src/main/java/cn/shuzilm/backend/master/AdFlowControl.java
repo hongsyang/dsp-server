@@ -2085,6 +2085,7 @@ public class AdFlowControl {
         if(StringUtils.isEmpty(key)) {
             return;
         }*/
+        myLog.debug("updateDynamicPriceMap: type:{} amount；{} key:{} price:{}", type,amount,key,price);
         Object[] value = dynamicPriceMap.get(key);
 
         if(value != null) {
@@ -2131,6 +2132,7 @@ public class AdFlowControl {
         myLog.info("开始导出动态出价数据到mysql");
         Update update = new Update();
         dynamicPriceMap.forEach((key,value) -> {
+            myLog.debug("dumpDynamicPriceDateToMysql key: {} value:{}", key, value);
             try{
 
                 if(value.length != 3) {
@@ -2210,7 +2212,7 @@ public class AdFlowControl {
 
     public static void main(String[] args) {
 
-            // 赢价率 > 80%
+          /*  // 赢价率 > 80%
             for(int i=0;i<10;i++) {
                 AdFlowControl.getInstance()
                         .updateDynamicPriceMap("RTB", 1,"com.dengjian.android_1_null",2.1f);
@@ -2256,7 +2258,15 @@ public class AdFlowControl {
             }
 
         System.out.println("");
-        AdFlowControl.getInstance().dumpDynamicPriceDateToMysql();
+        AdFlowControl.getInstance().dumpDynamicPriceDateToMysql();*/
+        // 模拟新加入的流量
+        for(int i=0;i<10;i++) {
+            AdFlowControl.getInstance()
+                    .updateDynamicPriceMap("RTB", 1,"com.pdragon.tetris_1297_null",25.0f);
+            AdFlowControl.getInstance()
+                    .updateDynamicPriceMap("PIXEL", 1,"com.pdragon.tetris_1297_null",25.0f);
+        }
+        System.out.println("");
     }
 
 }
