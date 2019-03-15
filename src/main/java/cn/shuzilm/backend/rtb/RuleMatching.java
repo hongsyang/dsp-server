@@ -170,6 +170,10 @@ public class RuleMatching {
 									break;
 								}
 							}
+						}else{
+							dimensionFlag = true;
+							adxNamePushList.add(adxNameTemp);
+							break;
 						}
 						
 					}
@@ -266,10 +270,17 @@ public class RuleMatching {
 
 		//多尺寸
 		if(!isDimension){
-			//多尺寸不按尺寸筛选广告
-			auidList = new ArrayList<String>(rtbIns.getAdMap().keySet());
-			materialSet = new HashSet<String>();
-			
+			//多尺寸不按尺寸筛选广告			
+			if(width != 0 && width != -1 && height != 0 && height != -1){
+				int divisor = MathTools.division(width, height);
+				widthHeightRatio = width / divisor + "/" + height / divisor;
+				//materialRatioKey = widthHeightRatio;
+				auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
+				materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
+			}else{
+				auidList = new ArrayList<String>(rtbIns.getAdMap().keySet());
+				materialSet = new HashSet<String>();
+			}
 //			ListIterator<String> adLocationIt = adxNameList.listIterator();
 //			boolean adLocationFlag = false;
 //			if(appPackageName != null && !appPackageName.trim().equals("")){
@@ -1199,11 +1210,11 @@ public class RuleMatching {
 		return isInBoundReturn;
 	}
 
-	/*public static void main(String[] args) {
+	public static void main(String[] args) {
 		try {
 			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
-			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 640, 100, false, 5, 5, "1", "jpg,gif", "127.0.0.1",
+			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 200, 200, false, 5, 5, "1", "jpg,gif,png", "127.0.0.1",
 					"com.iflytek.inputmethod",new ArrayList(),true,"123","aaa");
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
@@ -1216,19 +1227,19 @@ public class RuleMatching {
 		} catch (Exception e) {
 			e.getMessage();
 		}
-	}*/
-
-	public static void main(String[] args) {
-		RuleMatching ruleMatching = new RuleMatching();
-		for(int i=0;i<10;i++) {
-				ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
-					,0,0,5.0f,"requestid1");
-		}
-
-		for(int i=0;i<10;i++) {
-			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid",""
-					,300,600,6.0f,"requestid2");
-		}
 	}
+
+//	public static void main(String[] args) {
+//		RuleMatching ruleMatching = new RuleMatching();
+//		for(int i=0;i<10;i++) {
+//				ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
+//					,0,0,5.0f,"requestid1");
+//		}
+//
+//		for(int i=0;i<10;i++) {
+//			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid",""
+//					,300,600,6.0f,"requestid2");
+//		}
+//	}
 
 }
