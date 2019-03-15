@@ -2091,24 +2091,25 @@ public class AdFlowControl {
             // 如果是出手数据
             if(type.equals("RTB")) {
                 ((AtomicLong)value[0]).addAndGet(amount);
+                // 价格累加
+                ((AtomicDouble)value[2]).addAndGet(price);
             }else if(type.equals("PIXEL")) {
                 // 如果是赢价数据
                 ((AtomicLong)value[1]).addAndGet(amount);
             }
-            // 价格累加
-            ((AtomicDouble)value[2]).addAndGet(price);
         }else {
             Object[] array = new Object[3];
             // 如果是出手数据
             if(type.equals("RTB")) {
                 array[0] = new AtomicLong(amount);
                 array[1] = new AtomicLong(0L);
+                array[2] = new AtomicDouble(price);
             }else if(type.equals("PIXEL")) {
                 // 如果是赢价数据
                 array[0] = new AtomicLong(0L);
                 array[1] = new AtomicLong(amount);
+                array[2] = new AtomicDouble(0D);
             }
-            array[2] = new AtomicDouble(price);
             // 解决线程并发问题
             Object [] previous = dynamicPriceMap.putIfAbsent(key, array);
             if(previous != null) {
@@ -2131,6 +2132,12 @@ public class AdFlowControl {
         Update update = new Update();
         dynamicPriceMap.forEach((key,value) -> {
             try{
+
+                if(value.length != 3) {
+                    myLog.debug("数组长度不足，跳过此次动态出价调整");
+                    return;
+                }
+
                 String adTagId = "";
                 String size = "";
                 String [] keysArray = key.split("_");
