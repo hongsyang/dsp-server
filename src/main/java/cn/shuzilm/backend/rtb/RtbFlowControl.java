@@ -230,7 +230,7 @@ public class RtbFlowControl {
     /**
      * 动态出价缓存
      */
-    private static ConcurrentHashMap<String,Float> dynamicPriceMap = null;
+    private static ConcurrentHashMap<String,Float> dynamicPriceMap;
 
     private RtbFlowControl() {
         MDC.put("sift", "rtb");
@@ -262,6 +262,7 @@ public class RtbFlowControl {
         String nodeStr = constant.getRtbStrVar(RtbConstants.REDIS_CLUSTER_URI);
         String nodes [] = nodeStr.split(";");
         redis = AsyncRedisClient.getInstance(nodes);
+        dynamicPriceMap = new ConcurrentHashMap<>();
     }
     
 
@@ -806,6 +807,8 @@ public class RtbFlowControl {
 		
 		weekAndDayNumMap.put("EEEE", weekNum);
 		weekAndDayNumMap.put("HH", dayNum);
+		
+		myLog.info("weekNum="+weekNum+"\tdayNum="+dayNum);
     	
         for (String auid : mapTask.keySet()) {
             TaskBean bean = mapTask.get(auid);
@@ -1022,7 +1025,7 @@ public class RtbFlowControl {
      * @param height        广告位高
      * @return
      */
-    public float getDynamicPrice(String packageName, String adTagId,int width,int height){
+    public Float getDynamicPrice(String packageName, String adTagId,int width,int height){
         String key = getMapKey(packageName, adTagId, width, height);
         if(StringUtils.isEmpty(key)) {
             return 0f;
