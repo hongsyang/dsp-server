@@ -63,7 +63,9 @@ public class AdTagBlackListUtil {
                    LOG.error("转换广告位黑名单失败 ",e);
                }
             }
-            LOG.error("最终广告位黑名单数量：{}", adLocationSet.size());
+            for(String adTagId : adLocationSet) {
+                LOG.error("最终广告位黑名单： ", adTagId);
+            }
         } catch (Exception e){
             LOG.error("获取广告位黑名单失败 ",e);
         }
