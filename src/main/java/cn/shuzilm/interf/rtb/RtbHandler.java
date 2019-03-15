@@ -60,6 +60,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     private Integer ipBlackListFlag = null;
     private Integer bundleBlackListFlag = null;
     private Integer deviceIdBlackListFlag = null;
+    private Integer AdTagBlackListFlag = null;
+    private Integer filterRuleBidRequestFlag = null;
     private Integer timeOutFlag = 1;
     private Integer bidPriceFlag = 0;
     private String price = "-1";
@@ -246,6 +248,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 ipBlackListFlag = 1;
                 bundleBlackListFlag = 1;
                 deviceIdBlackListFlag = 1;
+                filterRuleBidRequestFlag = 1;
+                AdTagBlackListFlag = 1;
                 //不知道超时会不会增加
                 if (url.contains("lingji")) {
                     adxId = 1;
@@ -258,12 +262,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -282,12 +293,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -306,12 +324,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -329,12 +354,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -355,7 +387,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         appPackageName, ipBlackListFlag,
                         bundleBlackListFlag, deviceIdBlackListFlag,
                         timeOutFlag, bidPriceFlag,
-                        price, exceptionFlag
+                        price, exceptionFlag, String.valueOf(filterRuleBidRequestFlag) + "," + AdTagBlackListFlag
                 );
                 MDC.remove("phoenix");
             } catch (Exception e1) {
