@@ -181,7 +181,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 builder.setSessionId(substring);
 //                builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
                 content = builder.build().toByteArray();
-            } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
+            } else if ("".equals(resultData) || "ipBlackList".equals(resultData)
+                    || "bundleBlackList".equals(resultData)
+                    || "deviceIdBlackList".equals(resultData)
+                    || "AdTagBlackList".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 content = "".getBytes("utf-8");
             } else if (resultData.contains("session_id")) {
