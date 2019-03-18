@@ -2073,7 +2073,7 @@ public class AdFlowControl {
      * @param amount        次数
      * @param key           包名_广告位id_广告位宽高
      */
-    public void updateDynamicPriceMap(String type, long amount, String key, double price ){
+    public void updateDynamicPriceMap(String type, long amount, String key, Double price ){
         /*String[] wh = size.split("#");
         int width = 0;
         int height = 0;
@@ -2093,7 +2093,8 @@ public class AdFlowControl {
             if(type.equals("RTB")) {
                 ((AtomicLong)value[0]).addAndGet(amount);
                 // 价格累加
-                ((AtomicDouble)value[2]).addAndGet(price);
+                double actruePrice = (price == null) ? 0d : price.doubleValue();
+                ((AtomicDouble)value[2]).addAndGet(actruePrice);
             }else if(type.equals("PIXEL")) {
                 // 如果是赢价数据
                 ((AtomicLong)value[1]).addAndGet(amount);
@@ -2104,7 +2105,8 @@ public class AdFlowControl {
             if(type.equals("RTB")) {
                 array[0] = new AtomicLong(amount);
                 array[1] = new AtomicLong(0L);
-                array[2] = new AtomicDouble(price);
+                double actruePrice = (price == null) ? 0d : price.doubleValue();
+                array[2] = new AtomicDouble(actruePrice);
             }else if(type.equals("PIXEL")) {
                 // 如果是赢价数据
                 array[0] = new AtomicLong(0L);
@@ -2260,13 +2262,13 @@ public class AdFlowControl {
         System.out.println("");
         AdFlowControl.getInstance().dumpDynamicPriceDateToMysql();*/
         // 模拟新加入的流量
-        for(int i=0;i<10;i++) {
+        /*for(int i=0;i<10;i++) {
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("RTB", 1,"com.pdragon.tetris_1297_null",25.0f);
             AdFlowControl.getInstance()
                     .updateDynamicPriceMap("PIXEL", 1,"com.pdragon.tetris_1297_null",25.0f);
         }
-        System.out.println("");
+        System.out.println("");*/
     }
 
 }
