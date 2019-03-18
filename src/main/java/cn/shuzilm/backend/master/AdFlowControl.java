@@ -2085,7 +2085,7 @@ public class AdFlowControl {
         if(StringUtils.isEmpty(key)) {
             return;
         }*/
-        myLog.debug("updateDynamicPriceMap: type:{} amount；{} key:{} price:{}", type,amount,key,price);
+        //myLog.debug("updateDynamicPriceMap: type:{} amount；{} key:{} price:{}", type,amount,key,price);
         Object[] value = dynamicPriceMap.get(key);
 
         if(value != null) {
@@ -2134,7 +2134,7 @@ public class AdFlowControl {
         myLog.info("开始导出动态出价数据到mysql");
         Update update = new Update();
         dynamicPriceMap.forEach((key,value) -> {
-            myLog.debug("dumpDynamicPriceDateToMysql key: {} value:{}", key, value);
+            //myLog.debug("dumpDynamicPriceDateToMysql key: {} value:{}", key, value);
             try{
 
                 if(value.length != 3) {
@@ -2171,7 +2171,7 @@ public class AdFlowControl {
                         rate = 0.9f;
                     }
                     price *= rate;
-                    myLog.debug("key: {} winRate: {}  rate: {} price: {}", key, winRate, rate, price);
+                   // myLog.debug("key: {} winRate: {}  rate: {} price: {}", key, winRate, rate, price);
                 }
 
                 String sql = "";
@@ -2190,7 +2190,7 @@ public class AdFlowControl {
                 }else {
                     return;
                 }
-                myLog.debug(sql);
+                //myLog.debug(sql);
                 update.doUpdate(sql);
 
                 //System.out.println(sql);
