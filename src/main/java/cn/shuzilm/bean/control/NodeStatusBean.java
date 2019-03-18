@@ -2,6 +2,7 @@ package cn.shuzilm.bean.control;
 
 
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 工作机节点状态Bean
@@ -11,11 +12,14 @@ import java.util.ArrayList;
  *
  */
 public class NodeStatusBean implements ICommand{
+	private static final long serialVersionUID = 3456333997029863081L;
     private ArrayList<AdPixelBean> pixelList;
     private ArrayList<AdBidBean> bidList;
 
     private int nodeId;
     private String nodeName;
+
+    private ConcurrentHashMap<String,String> dynamicMap;
     /**
      * 总的竞价次数
      */
@@ -114,5 +118,11 @@ public class NodeStatusBean implements ICommand{
 		this.lastUpdateTime = lastUpdateTime;
 	}
 
-    
+    public ConcurrentHashMap<String, String> getDynamicMap() {
+        return dynamicMap;
+    }
+
+    public void setDynamicMap(ConcurrentHashMap<String, String> dynamicMap) {
+        this.dynamicMap = dynamicMap;
+    }
 }

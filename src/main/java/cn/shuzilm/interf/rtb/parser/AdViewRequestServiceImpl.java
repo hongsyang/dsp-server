@@ -99,16 +99,6 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp());//过滤规则的返回结果
-
-            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
-            if (msg.get("ipBlackList") != null) {
-                return "ipBlackList";
-            } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList";
-            } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList";
-            }
 
 
             //支持的文件类型
@@ -204,6 +194,20 @@ public class AdViewRequestServiceImpl implements RequestService {
             //广告位不为空
             if (tagid != null && !tagid.trim().equals("")) {
                 isDimension = false;
+            }
+
+
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(),ADX_ID,adxNameList,width,height);//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList";
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList";
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList";
+            }else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList";
             }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
@@ -442,12 +446,12 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + duFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + duFlowBean.getProvince() +// 省
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
@@ -456,7 +460,9 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
-                "&userip=" + duFlowBean.getIpAddr();//用户ip
+                "&userip=" + duFlowBean.getIpAddr()+//用户ip
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) ;
+
 
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
@@ -471,12 +477,12 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&adx=" + duFlowBean.getAdxId() +
                 "&did=" + duFlowBean.getDid() +
                 "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
                 "&appn=" + duFlowBean.getAppPackageName() +
                 "&appv=" + duFlowBean.getAppVersion() +
                 "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + duFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + duFlowBean.getProvince() +// 省
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
@@ -485,7 +491,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&pmp=" + duFlowBean.getDealid() + //私有交易
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
-                "&userip=" + duFlowBean.getIpAddr();//用户ip
+                "&userip=" + duFlowBean.getIpAddr()+   //用户ip
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) ;
 
         Map nurlMap = new HashMap();
         List<String> trackingurls = new ArrayList<>();

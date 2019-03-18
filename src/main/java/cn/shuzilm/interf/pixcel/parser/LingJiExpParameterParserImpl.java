@@ -48,6 +48,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
+        try {
         element.setInfoId(requestId + UUID.randomUUID());
         element.setRequestId(requestId);
         element.setBidid(urlRequest.get("bidid"));
@@ -102,12 +103,17 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         }
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
+
+        //广告主出价
+        String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
+        element.setBiddingPrice(Double.valueOf(dbidp));
+
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("LingJi");
 
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
-            try {
+
                 log.debug("LingJiExp曝光的requestid:{},element值:{}", requestId, element);
                 MDC.put("sift", "pixel");
                 AdPixelBean bean = new AdPixelBean();
@@ -115,6 +121,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     bean.setAdUid(element.getAdUid());
                 }
                 bean.setHost(configs.getString("HOST"));
+                bean.setRequestId(requestId);//请求id
+                bean.setBidPrice(Double.valueOf(dbidp));//广告主出价
                 String price = urlRequest.get("price");
                 String result = AES.decrypt(price, configs.getString("ADX_TOKEN"));
                 log.debug("price解析结果：{}", price);
@@ -122,6 +130,8 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 Double money = Double.valueOf(split[0]) / 100;
 //                Double money=Double.valueOf(price);
                 bean.setCost(money);
+
+
                 bean.setWinNoticeTime(Long.valueOf(split[1]));//设置对账时间
 //                bean.setWinNoticeTime(new Date().getTime());//设置对账时间
                 bean.setWinNoticeNums(1);
@@ -174,21 +184,24 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                     throw new RuntimeException();
                 }
 
-            } catch (Exception e) {
-                Help.sendAlert("发送到" + configs.getString("HOST")+"失败,LingJiExp");
-                MDC.put("sift", "exception");
-                boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
-                log.debug("发送element：{}到EXP_ERROR队列：{}", element, exp_error);
-                log.debug("element:{}", JSON.toJSONString(element));
-                log.error("异常信息:{}", e);
-                MDC.remove("sift");
-            }
+
             String duFlowBeanJson = JSON.toJSONString(element);
             log.debug("duFlowBeanJson:{}", duFlowBeanJson);
         } else {
             MDC.put("sift", "repeat");
             log.debug("本次请求requestId:{}；bidid:{}", requestId, element.getBidid());
         }
+
+        } catch (Exception e) {
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,LingJiExp");
+            MDC.put("sift", "exception");
+            boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+            log.debug("发送element：{}到EXP_ERROR队列：{}", element, exp_error);
+            log.debug("element:{}", JSON.toJSONString(element));
+            log.error("异常信息:{}", e);
+            MDC.remove("sift");
+        }
+
         return requestId;
     }
 

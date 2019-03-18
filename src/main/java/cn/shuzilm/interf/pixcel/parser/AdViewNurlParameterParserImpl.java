@@ -46,8 +46,8 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         log.debug("AdViewNurl曝光转换之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
-
         String requestId = urlRequest.get("id");
+        try {
         element.setInfoId(requestId + UUID.randomUUID());
         element.setRequestId(requestId);
         element.setBidid(urlRequest.get("bidid"));
@@ -102,12 +102,15 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
         }
         String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
         element.setIpAddr(userip);
+        //广告主出价
+        String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
+        element.setBiddingPrice(Double.valueOf(dbidp));
 
         String premiumFactor = urlRequest.get("pf");//溢价系数
         element.setPremiumFactor(Double.valueOf(premiumFactor));
         element.setAdxSource("AdView");
         if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
-            try {
+
                 log.debug("AdViewNurl曝光的requestid:{},element对象:{}", requestId, element);
                 MDC.put("sift", "pixel");
                 AdPixelBean bean = new AdPixelBean();
@@ -116,6 +119,8 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 }
                 bean.setPremiumFactor(element.getPremiumFactor());
                 bean.setHost(configs.getString("HOST"));
+                bean.setRequestId(requestId);//请求id
+                bean.setBidPrice(Double.valueOf(dbidp));//广告主出价
                 String price = urlRequest.get("price");
                 Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("EKEY"), configs.getString("IKEY"));
                 bean.setCost(Double.valueOf(priceLong)/ 10000);
@@ -164,15 +169,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                     log.debug("发送elemen :{}到Phoenix是否成功：{}", element, lingJiClick);
                     throw new RuntimeException();
                 }
-            } catch (Exception e) {
-                Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewNurl");
-                MDC.put("sift", "exception");
-                boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
-                log.debug("发送到EXP_ERROR队列：{}", exp_error);
-                log.debug("element:{}", JSON.toJSONString(element));
-                log.error("异常信息:{}", e);
-                MDC.remove("sift");
-            }
+
 
             String duFlowBeanJson = JSON.toJSONString(element);
             log.debug("duFlowBeanJson:{}", duFlowBeanJson);
@@ -180,6 +177,15 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
             MDC.put("sift", "repeat");
             log.debug("本次请求requestId:{}；bidid:{}",requestId,element.getBidid());
 
+        }
+        } catch (Exception e) {
+            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewNurl");
+            MDC.put("sift", "exception");
+            boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
+            log.debug("发送到EXP_ERROR队列：{}", exp_error);
+            log.debug("element:{}", JSON.toJSONString(element));
+            log.error("异常信息:{}", e);
+            MDC.remove("sift");
         }
         return requestId;
     }

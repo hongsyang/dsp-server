@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.timing.rtb.RtbCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
@@ -21,6 +22,8 @@ import cn.shuzilm.util.GPSDistance;
 import cn.shuzilm.util.JsonTools;
 import cn.shuzilm.util.MathTools;
 import cn.shuzilm.util.TimeUtil;
+import com.google.common.util.concurrent.AtomicDouble;
+import org.apache.commons.lang.StringUtils;
 import redis.clients.jedis.Jedis;
 
 import java.text.SimpleDateFormat;
@@ -37,6 +40,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,10 +152,30 @@ public class RuleMatching {
 			if(adxNameList != null){
 				boolean dimensionFlag = false;
 				for(String adxNameTemp:adxNameList){
+					//是否在推审通过列表中
 					if (material.getApprovedAdxSet().contains(adxNameTemp)) {
-						dimensionFlag = true;
-						adxNamePushList.add(adxNameTemp);
-						break;
+						//是否满足尺寸
+						if(width != 0 && width != -1 && height != 0 && height != -1){
+							if (isResolutionRatio) {
+								if (adWidth >= width && adHeight >= height) {
+									dimensionFlag = true;
+									adxNamePushList.add(adxNameTemp);
+									break;
+								}
+							} else {
+								if ((width + widthDeviation >= adWidth && width - widthDeviation <= adWidth)
+										&& (height + heightDeviation >= adHeight && height - heightDeviation <= adHeight)) {
+									dimensionFlag = true;
+									adxNamePushList.add(adxNameTemp);
+									break;
+								}
+							}
+						}else{
+							dimensionFlag = true;
+							adxNamePushList.add(adxNameTemp);
+							break;
+						}
+						
 					}
 				}
 				if(!dimensionFlag){
@@ -161,7 +185,6 @@ public class RuleMatching {
 				}
 			}
 		}
-
 
 		if(isDimension){
 			if (isResolutionRatio) {
@@ -247,35 +270,42 @@ public class RuleMatching {
 
 		//多尺寸
 		if(!isDimension){
-			//多尺寸不按尺寸筛选广告
-			auidList = new ArrayList<String>(rtbIns.getAdMap().keySet());
-			materialSet = new HashSet<String>();
-			
-			ListIterator<String> adLocationIt = adxNameList.listIterator();
-			boolean adLocationFlag = false;
-			if(appPackageName != null && !appPackageName.trim().equals("")){
-				while(adLocationIt.hasNext()){
-					String adx = adLocationIt.next();
-					String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+adx;
-					if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
-						adLocationIt.remove();
-						LOG.info("["+adLocationStr+"]广告位未开启投放");
-					}else{
-						adLocationFlag = true;
-					}
-				}
-				if(!adLocationFlag){
-					LOG.info("["+adLocationId+"]广告位都未开启投放,该请求停止投放");
-					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
-							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
-					//另起目录记录原因
-					MDC.put("phoenix", "rtb-bid-notice");
-					LOG.info(reason);
-					MDC.remove("phoenix");
-					MDC.put("sift", "rtb");
-					return null; 
-				}
+			//多尺寸不按尺寸筛选广告			
+			if(width != 0 && width != -1 && height != 0 && height != -1){
+				int divisor = MathTools.division(width, height);
+				widthHeightRatio = width / divisor + "/" + height / divisor;
+				//materialRatioKey = widthHeightRatio;
+				auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
+				materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
+			}else{
+				auidList = new ArrayList<String>(rtbIns.getAdMap().keySet());
+				materialSet = new HashSet<String>();
 			}
+//			ListIterator<String> adLocationIt = adxNameList.listIterator();
+//			boolean adLocationFlag = false;
+//			if(appPackageName != null && !appPackageName.trim().equals("")){
+//				while(adLocationIt.hasNext()){
+//					String adx = adLocationIt.next();
+//					String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+adx;
+//					if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
+//						adLocationIt.remove();
+//						LOG.info("["+adLocationStr+"]广告位未开启投放");
+//					}else{
+//						adLocationFlag = true;
+//					}
+//				}
+//				if(!adLocationFlag){
+//					LOG.info("["+adLocationId+"]广告位都未开启投放,该请求停止投放");
+//					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
+//							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
+//					//另起目录记录原因
+//					MDC.put("phoenix", "rtb-bid-notice");
+//					LOG.info(reason);
+//					MDC.remove("phoenix");
+//					MDC.put("sift", "rtb");
+//					return null; 
+//				}
+//			}
 		}else{
 				
 				int divisor = MathTools.division(width, height);
@@ -284,20 +314,20 @@ public class RuleMatching {
 				auidList = rtbIns.getMaterialRatioMap().get(widthHeightRatio);
 				materialSet = rtbIns.getMaterialByRatioMap().get(widthHeightRatio);
 				
-			if(appPackageName != null && !appPackageName.trim().equals("")){
-				String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
-				if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
-					LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
-					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
-							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
-					//另起目录记录原因
-					MDC.put("phoenix", "rtb-bid-notice");
-					LOG.info(reason);
-					MDC.remove("phoenix");
-					MDC.put("sift", "rtb");
-					return null; 
-				}
-			}
+//			if(appPackageName != null && !appPackageName.trim().equals("")){
+//				String adLocationStr = adxName+"_"+adxName+"_"+appPackageName+"_"+width+"_"+height;
+//				if(!rtbIns.getAdLocationSet().contains(adLocationStr)){
+//					LOG.info("["+adLocationStr+"]尺寸都未开启投放,该请求停止投放");
+//					reason = requestId+"\t"+widthHeightRatio+"\t"+0+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+""+"\t"+
+//							""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+""+"\t"+deviceId;
+//					//另起目录记录原因
+//					MDC.put("phoenix", "rtb-bid-notice");
+//					LOG.info(reason);
+//					MDC.remove("phoenix");
+//					MDC.put("sift", "rtb");
+//					return null; 
+//				}
+//			}
 		}
 
 
@@ -646,6 +676,7 @@ public class RuleMatching {
 			} else {
 				rtbIns.getBidMap().put(targetDuFlowBean.getAdUid(), 1L);
 			}
+
 			// 上传adx流量数
 			if (rtbIns.getAdxFlowMap().get(adxName) != null) {
 				rtbIns.getAdxFlowMap().put(adxName, rtbIns.getAdxFlowMap().get(adxName) + 1);
@@ -690,6 +721,77 @@ public class RuleMatching {
 
 		return targetDuFlowBean;
 	}
+
+	/**
+	 * 更新动态出价缓存map
+	 * @param amount
+	 * @param packageName
+	 * @param adTagId
+	 * @param width
+	 * @param height
+	 * @param price
+	 * @param requestId
+	 */
+
+    public void updateDynamicPriceMap(long amount, String packageName,
+                                      String adTagId, int width, int height, float price ,
+                                      String requestId) {
+        String key = rtbIns.getMapKey(packageName, adTagId, width, height);
+        if(StringUtils.isEmpty(key)) {
+            return;
+        }
+        RtbFlowControl.getDynamicMap().put(requestId,key + "&" +price);
+    }
+	/*public void updateDynamicPriceMap(long amount, String packageName,
+									  String adTagId, int width, int height, float price ,
+									  String requestId) {
+		String key = rtbIns.getMapKey(packageName, adTagId, width, height);
+		if(StringUtils.isEmpty(key)) {
+			return;
+		}
+		String value = RtbFlowControl.getDynamicMap().get(key);
+
+		if(value != null) {
+			((AtomicLong)value[0]).addAndGet(amount);
+			((AtomicDouble)value[1]).addAndGet(price);
+		}else {
+			Object[] array = new Object[3];
+			array[0] = new AtomicLong(amount);
+			array[1] = new AtomicDouble(price);
+			array[2] = requestId;
+			// 解决线程并发问题
+			Object [] previous = RtbFlowControl.getDynamicMap().putIfAbsent(key, array);
+			if(previous != null) {
+				((AtomicLong)value[0]).addAndGet(amount);
+				((AtomicDouble)value[1]).addAndGet(price);
+			}
+		}
+	}*/
+
+//	public static void main(String[] args) {
+//		RuleMatching ruleMatching = new RuleMatching();
+//        long start = System.currentTimeMillis();
+//        for(int k=0;k<100;k++) {
+//            ruleMatching.updateDynamicPriceMap(1l,k+"","1"
+//                    ,0,0,5.0f,"requestid1");
+//        }
+//        System.out.println(System.currentTimeMillis() - start);
+//		/*HashMap<String,String> test = new HashMap<>();
+//		for(int j=0;j<10000;j++) {
+//
+//		    new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    long start = System.currentTimeMillis();
+//                    for(int k=0;k<100000;k++) {
+//                        ruleMatching.updateDynamicPriceMap(1l,"k","1"
+//                                ,0,0,5.0f,"requestid1");
+//                    }
+//                    System.out.println(System.currentTimeMillis() - start);
+//                }
+//            }).start();
+//        }*/
+//    }
 
 	/**
 	 * 对匹配的广告按照规则进行排序
@@ -971,11 +1073,28 @@ public class RuleMatching {
 		double premiumRatio = constant.getRtbVar(type);
 		// targetDuFlowBean.setActualPricePremium(premiumRatio*((double)ad.getPrice()));//溢价
 		//if(appPackageName != null && appPackageName.contains("com.moji")){
-		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
-			targetDuFlowBean.setBiddingPrice((double) ad.getPrice()*0.6);
-		}else{
-			targetDuFlowBean.setBiddingPrice((double) ad.getPrice());
+		double price = ad.getPrice();
+
+		String adTagId = null;
+		if(!isDimension){
+			String adxNamePush = adxNamePushList.get(0);
+			String []adxNameTemp = adxNamePush.split("_");
+			if(adxNameTemp.length>1){
+				adTagId = adxNameTemp[1];
+			}
 		}
+		Float tempPrice = rtbIns.getDynamicPrice(appPackageName, adTagId, width, height);
+		if(tempPrice != null && tempPrice != 0 && tempPrice < price){
+			price = tempPrice;
+		}
+		// 动态出价累计
+		
+		updateDynamicPriceMap(1L, appPackageName, adTagId, width, height, (float)price, requestId);
+//		if(appPackageName != null && (appPackageName.equals("com.moji.mjweather") || appPackageName.equals("com.moji.MojiWeather"))){
+//			targetDuFlowBean.setBiddingPrice(price*0.6);
+//		}else{
+		targetDuFlowBean.setBiddingPrice(price);
+//		}
 		targetDuFlowBean.setPremiumFactor(premiumRatio);
 		targetDuFlowBean.setLandingUrl(creativeGroup.getLink());
 		targetDuFlowBean.setLinkUrl(creativeGroup.getClickTrackingUrl());
@@ -1104,7 +1223,7 @@ public class RuleMatching {
 		try {
 			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
-			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 640, 100, false, 5, 5, "1", "jpg,gif", "127.0.0.1",
+			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 200, 200, false, 5, 5, "1", "jpg,gif,png", "127.0.0.1",
 					"com.iflytek.inputmethod",new ArrayList(),true,"123","aaa");
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
@@ -1118,5 +1237,18 @@ public class RuleMatching {
 			e.getMessage();
 		}
 	}
+
+//	public static void main(String[] args) {
+//		RuleMatching ruleMatching = new RuleMatching();
+//		for(int i=0;i<10;i++) {
+//				ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid","1"
+//					,0,0,5.0f,"requestid1");
+//		}
+//
+//		for(int i=0;i<10;i++) {
+//			ruleMatching.updateDynamicPriceMap(1l,"com.dengjian.andrid",""
+//					,300,600,6.0f,"requestid2");
+//		}
+//	}
 
 }

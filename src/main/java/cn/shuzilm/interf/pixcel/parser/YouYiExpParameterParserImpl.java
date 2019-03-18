@@ -105,11 +105,16 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
 //            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
 //            element.setDealid(pmp);
 
+            //广告主出价
+            String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
+            element.setBiddingPrice(Double.valueOf(dbidp));
+
             String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
             element.setAppName(URLDecoder.decode(app));
 
             String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
             element.setAppVersion(appv);
+
 
             element.setAdxSource("YouYi");
 
@@ -121,6 +126,8 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             }
             bean.setPremiumFactor(element.getPremiumFactor());
             bean.setHost(configs.getString("HOST"));
+            bean.setRequestId(requestId);//请求id
+            bean.setBidPrice(Double.valueOf(dbidp));//广告主出价
 
             Long priceLong = AdViewDecodeUtil.priceDecode(price, configs.getString("YOUYI_EKEY"), configs.getString("YOUYI_IKEY"));
             bean.setCost(Double.valueOf(priceLong) / 100000);
