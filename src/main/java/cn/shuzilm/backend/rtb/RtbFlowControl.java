@@ -1017,10 +1017,10 @@ public class RtbFlowControl {
                 }
             });
             this.dynamicPriceMap = tempMap;
-            // TODO 测试
+            /*
             dynamicPriceMap.forEach((key,value) -> {
                 myLog.debug("动态出价map  key: {}, value: {}", key,value);
-            });
+            });*/
 
             myLog.info("更新动态出价map结束");
         }catch (Exception e) {
@@ -1048,7 +1048,7 @@ public class RtbFlowControl {
             key = packageName + "_" + adTagId;
         }*/
         Float price = dynamicPriceMap.get(key);
-        myLog.debug("出手价： {} ", price);
+        //myLog.debug("出手价： {} ", price);
         return price;
     }
 
