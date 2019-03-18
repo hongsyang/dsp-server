@@ -36,10 +36,10 @@ public class GainDataFromPIXCELQueue implements Runnable {
 
 				// 更新动态出价缓存map
 				String reqestId = pix.getRequestId();
-				LOG.debug("requestId: {}",reqestId);
-				AdFlowControl.getDynamicTransferMap().forEach((key,value) -> {
+				//LOG.debug("requestId: {}",reqestId);
+				/*AdFlowControl.getDynamicTransferMap().forEach((key,value) -> {
 					LOG.debug("转换keyMap： key: {} valuke: {}", key,value);
-				});
+				});*/
 				if(StringUtils.isNotEmpty(reqestId)) {
 					String mapKey = AdFlowControl.getDynamicTransferMap().get(reqestId);
 					if(StringUtils.isNotEmpty(mapKey)) {
@@ -66,9 +66,9 @@ public class GainDataFromPIXCELQueue implements Runnable {
 		}
 	}
 
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		AdFlowControl.getInstance();
 		AdFlowControl.getDynamicTransferMap().put("requestid1","com.dengjian.ios_null_200#300");
 		new Thread(new GainDataFromPIXCELQueue("rtb-101")).start();
-	}
+	}*/
 }
