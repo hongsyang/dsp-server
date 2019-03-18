@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class NodeStatusBean implements ICommand{
+	private static final long serialVersionUID = 3456333997029863081L;
     private ArrayList<AdPixelBean> pixelList;
     private ArrayList<AdBidBean> bidList;
 
