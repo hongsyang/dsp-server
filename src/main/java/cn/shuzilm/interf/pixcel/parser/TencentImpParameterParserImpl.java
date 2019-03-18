@@ -105,9 +105,10 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             element.setIpAddr(userip);
 
             //广告主出价
-            String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
-            element.setBiddingPrice(Double.valueOf(dbidp));
-
+            if (urlRequest.get("dbidp")!=null) {
+                String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
+                element.setBiddingPrice(Double.valueOf(dbidp));
+            }
             String premiumFactor = urlRequest.get("pf");//溢价系数
             element.setPremiumFactor(Double.valueOf(premiumFactor));
             element.setAdxSource("Tencent");
@@ -121,7 +122,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             bean.setPremiumFactor(element.getPremiumFactor());
             bean.setHost(configs.getString("HOST"));
             bean.setRequestId(requestId);//请求id
-            bean.setBidPrice(Double.valueOf(dbidp));//广告主出价
+            bean.setBidPrice(element.getBiddingPrice());//广告主出价
             String price = urlRequest.get("win");
             GdtWinPriceDecoder gdtWinPriceDecoder =new GdtWinPriceDecoder();
             String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();

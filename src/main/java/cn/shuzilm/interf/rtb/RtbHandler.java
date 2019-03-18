@@ -135,6 +135,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
             } catch (TimeoutException e) {
                 timeOutFlag = 0;
+                exceptionFlag = 0;
                 // 超时情况
                 long end = System.currentTimeMillis();
                 MDC.put("sift", "timeOut");
