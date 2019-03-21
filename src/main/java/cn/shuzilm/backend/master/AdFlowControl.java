@@ -2163,15 +2163,17 @@ public class AdFlowControl {
                 long rtbAmount = ((AtomicLong)value[0]).get();
                 long pixelAmount = ((AtomicLong)value[1]).get();
 
-                float price = ((AtomicDouble)value[2]).floatValue() / rtbAmount;
-                float winPrice = ((AtomicDouble)value[3]).floatValue() / pixelAmount;
-
                 // 出手数大于赢价数
                 float rate = 1;
                 if(rtbAmount < 10) {
                     myLog.info("出手数小于10，基数太小，不具备参考价值，不参与竞价调整 key: {}", key );
                     return;
                 }
+                // 平均出手价
+                double price = ((AtomicDouble)value[2]).doubleValue() / rtbAmount;
+                // 平均竞得价
+                double winPrice = pixelAmount <= 0L ? 0D : ((AtomicDouble)value[3]).doubleValue() / pixelAmount;
+
                 double winRate = 0D;
                 if(rtbAmount > 0 && rtbAmount >= pixelAmount) {
                     winRate = Double.valueOf(pixelAmount+"") / Double.valueOf(rtbAmount+"");
@@ -2223,7 +2225,7 @@ public class AdFlowControl {
                 //value[1] = new AtomicInteger(0);
 
             }catch (Exception e) {
-                myLog.error("导出动态出价数据到mysql报错", e);
+                myLog.error("导出动态出价数据到mysql报错， key: {}",key, e);
             }
         });
 
@@ -2235,7 +2237,7 @@ public class AdFlowControl {
     }
 
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
 
             // 赢价率 > 80%
             for(int i=0;i<10;i++) {
@@ -2276,22 +2278,8 @@ public class AdFlowControl {
                         .updateDynamicPriceMap("PIXEL", 5,"pixelOnly_null_200#100",4.3D);
             }
 
-            /*// 模拟新加入的流量
-            for(int i=0;i<10;i++) {
-                AdFlowControl.getInstance()
-                        .updateDynamicPriceMap("RTB", 1,"com.dengjian.ios_1000_200#100",10D);
-            }*/
-
         System.out.println("");
         AdFlowControl.getInstance().dumpDynamicPriceDateToMysql();
-       /* // 模拟新加入的流量
-        for(int i=0;i<10;i++) {
-            AdFlowControl.getInstance()
-                    .updateDynamicPriceMap("RTB", 1,"com.pdragon.tetris_1297_null",25.0D);
-            AdFlowControl.getInstance()
-                    .updateDynamicPriceMap("PIXEL", 1,"com.pdragon.tetris_1297_null",25.0D);
-        }
-        System.out.println("");*/
-    }
+    }*/
 
 }
