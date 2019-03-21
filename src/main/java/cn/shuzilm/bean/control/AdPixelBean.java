@@ -9,7 +9,9 @@ import lombok.Data;
  */
 @Data
 public class AdPixelBean implements ICommand {
-    /**
+
+	private static final long serialVersionUID = -535817675496569809L;
+	/**
      * type = 0 : 曝光
      * type = 1 : 点击
      */
@@ -59,5 +61,15 @@ public class AdPixelBean implements ICommand {
      * 代理商利润
      */
     private Double rebateProfit;
+    
+    /**
+     * 出价
+     */
+    private Double bidPrice;
+    
+    /**
+     * 请求ID
+     */
+    private String requestId;
 
 }

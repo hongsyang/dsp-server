@@ -111,7 +111,7 @@ public class YouYiRequestServiceImpl implements RequestService {
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
-                        response = "204session_id:" + session_id + "deviceIdBlackList";
+                        response =  "204session_id:" + session_id + "deviceIdBlackList";
                         return response;
                     }
                     deviceId = userDevice.getMd5_imei();
@@ -119,22 +119,11 @@ public class YouYiRequestServiceImpl implements RequestService {
             }
 
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip());//过滤规则的返回结果
-
-            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
-            if (msg.get("ipBlackList") != null) {
-                return "ipBlackList" + "204session_id:" + session_id;
-            } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList" + "204session_id:" + session_id;
-            } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList" + "204session_id:" + session_id;
-            }
-
 
             //是否匹配长宽
             Boolean isDimension = true;
             //通过广告id获取长宽
-            List adxNameList = new ArrayList();//
+            List<String> adxNameList = new ArrayList();//
 //            //支持的文件类型
             String adz_type = adzone.getAdz_type();
             if (adz_type.equals("ADZONE_TYPE_INAPP_BANNER") | adz_type.equals("ADZONE_TYPE_WAP_BANNER")) {
@@ -156,14 +145,27 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = adzone.getAdz_height();
                 isDimension = false;
             }
-            if (width == null || width == 0 || height == null || height == 0) {
+            if (width == null || width==0|| height == null||height==0) {
                 width = -1;
                 height = -1;
                 //是否匹配长宽
             }
 
 
-            //广告匹配规则1
+
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip(),adxId,adxNameList,width,height);//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList" +  "204session_id:" + session_id;
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList" +  "204session_id:" + session_id;
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList" +  "204session_id:" + session_id;
+            }else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList"+ "204session_id:" + session_id;
+            }
+            //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
                     deviceId,//设备mac的MD5
                     adType,//广告类型
@@ -254,11 +256,12 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
                 "&dcit=" + targetDuFlowBean.getCity() +// 市
                 "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
                 "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +//app中文名称
+                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName())+//app中文名称
                 "&appv=" + targetDuFlowBean.getAppVersion();//app版本
 
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
@@ -278,11 +281,12 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
                 "&dpro=" + targetDuFlowBean.getProvince() +// 省
                 "&dcit=" + targetDuFlowBean.getCity() +// 市
                 "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
                 "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +//app中文名称
+                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName())+//app中文名称
                 "&appv=" + targetDuFlowBean.getAppVersion();//app版本
         youYiAd.setImp_para(nurl);//曝光通知
         String curl = "id=" + targetDuFlowBean.getRequestId() +

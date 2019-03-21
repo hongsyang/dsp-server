@@ -61,6 +61,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     private Integer ipBlackListFlag = null;
     private Integer bundleBlackListFlag = null;
     private Integer deviceIdBlackListFlag = null;
+    private Integer AdTagBlackListFlag = null;
+    private Integer filterRuleBidRequestFlag = null;
     private Integer timeOutFlag = 1;
     private Integer bidPriceFlag = 0;
     private String price = "-1";
@@ -140,6 +142,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
             } catch (TimeoutException e) {
                 timeOutFlag = 0;
+                exceptionFlag = 0;
                 // 超时情况
                 long end = System.currentTimeMillis();
                 MDC.put("sift", "timeOut");
@@ -188,7 +191,10 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 builder.setSessionId(substring);
 //                builder.setAds(0, BidserverSsp.BidResponse.Ad.newBuilder().build() );
                 content = builder.build().toByteArray();
-            } else if ("".equals(resultData) || "ipBlackList".equals(resultData) || "bundleBlackList".equals(resultData) || "deviceIdBlackList".equals(resultData)) {
+            } else if ("".equals(resultData) || "ipBlackList".equals(resultData)
+                    || "bundleBlackList".equals(resultData)
+                    || "deviceIdBlackList".equals(resultData)
+                    || "AdTagBlackList".equals(resultData)) {
                 response.setStatus(HttpResponseStatus.NO_CONTENT);
                 content = "".getBytes("utf-8");
             } else if (resultData.contains("session_id")) {
@@ -250,6 +256,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 ipBlackListFlag = 1;
                 bundleBlackListFlag = 1;
                 deviceIdBlackListFlag = 1;
+                filterRuleBidRequestFlag = 1;
+                AdTagBlackListFlag = 1;
                 //不知道超时会不会增加
                 if (url.contains("lingji")) {
                     adxId = 1;
@@ -262,12 +270,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -286,12 +301,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -310,12 +332,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -333,12 +362,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     if (result != null) {
                         if (result.contains("ipBlackList")) {
                             ipBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("bundleBlackList")) {
                             bundleBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("deviceIdBlackList")) {
                             deviceIdBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
+                        }
+                        if (result.contains("AdTagBlackListFlag")) {
+                            AdTagBlackListFlag = 0;
+                            filterRuleBidRequestFlag = 0;
                         }
                         if (result.contains("price\":")) {
                             bidPriceFlag = 1;
@@ -351,7 +387,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
                 MDC.put("phoenix", "rtb-houkp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
-                                "\t{}\t{}\t{}\t{}\t{}\t{}",
+                                "\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
                         LocalDateTime.now().toString(), new Date().getTime(),
                         LocalDate.now().toString(), LocalTime.now().getHour(),
                         LocalTime.now().getMinute(), requestId,
@@ -359,7 +395,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         appPackageName, ipBlackListFlag,
                         bundleBlackListFlag, deviceIdBlackListFlag,
                         timeOutFlag, bidPriceFlag,
-                        price, exceptionFlag
+                        price, exceptionFlag, String.valueOf(filterRuleBidRequestFlag) + "," + AdTagBlackListFlag
                 );
                 MDC.remove("phoenix");
             } catch (Exception e1) {

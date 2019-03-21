@@ -1,6 +1,7 @@
 package cn.shuzilm.backend.timing.rtb;
 
 import cn.shuzilm.backend.rtb.RtbFlowControl;
+import cn.shuzilm.util.AdTagBlackListUtil;
 import cn.shuzilm.util.AppBlackListUtil;
 import cn.shuzilm.util.DeviceBlackListUtil;
 import org.quartz.DisallowConcurrentExecution;
@@ -17,6 +18,7 @@ public  class BlackListTask implements Job {
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         AppBlackListUtil.updateAppBlackList();
         DeviceBlackListUtil.updateDeviceBlackList();
+        AdTagBlackListUtil.updateAdTagBlackList();
     }
 
     /*public static void main(String[] args) {

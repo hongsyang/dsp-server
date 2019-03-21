@@ -104,6 +104,9 @@ public class CronDispatch {
         CronDispatch.startTimer(13);
         
         CronDispatch.startTimer(14);
+
+        CronDispatch.startTimer(15);
+
     }
 
     /**
@@ -162,6 +165,9 @@ public class CronDispatch {
            case 14:
         	   dispatch(UpdateAndPushAdLocationTask.class,"0 0/10 * * * ?");
         	   break;
+           case 15:
+               dispatch(DynamicPriceTask.class,"0 5/10 * * * ?");
+               break;
            default:
                break;
        }

@@ -81,7 +81,13 @@ public class PixelFlowControl {
 		double rebateProfit = 0.0;
 		double cost = pixel.getCost();
 		double premiumFactor = pixel.getPremiumFactor();
-		double price = (double) (Math.round(ad.getPrice() * 100000)/100000.0);
+		double price = 0.0;
+		if(pixel.getBidPrice() != null && pixel.getBidPrice() > 0){
+			price = (double) (Math.round(pixel.getBidPrice() * 100000)/100000.0);
+		}else{
+			price = (double) (Math.round(ad.getPrice() * 100000)/100000.0);
+		}
+		
 		
 		
 		if(premiumFactor >= 1){
@@ -136,6 +142,9 @@ public class PixelFlowControl {
 		bean.setCost(5.01);
 		bean.setPremiumFactor(1.0);
 		bean.setAdUid("123");
+		bean.setBidPrice(10d);
+		bean.setRequestId("requestid1");
+		bean.setClickNums(1);
 		AdBean ad = new AdBean();
         ad.setAdUid("123");
         String adverUid = "123";
