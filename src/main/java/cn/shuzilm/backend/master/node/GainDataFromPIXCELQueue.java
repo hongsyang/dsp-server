@@ -43,7 +43,7 @@ public class GainDataFromPIXCELQueue implements Runnable {
 				if(StringUtils.isNotEmpty(reqestId)) {
 					String mapKey = AdFlowControl.getDynamicTransferMap().get(reqestId);
 					if(StringUtils.isNotEmpty(mapKey)) {
-						AdFlowControl.getInstance().updateDynamicPriceMap("PIXEL", 1,mapKey,pix.getBidPrice());
+						AdFlowControl.getInstance().updateDynamicPriceMap("PIXEL", 1,mapKey,pix.getCost());
 						/*String [] keys = mapKey.split("_");
 						if(keys.length == 3) {
 							String packageName = keys[0];
@@ -66,9 +66,9 @@ public class GainDataFromPIXCELQueue implements Runnable {
 		}
 	}
 
-	/*public static void main(String[] args) {
+	public static void main(String[] args) {
 		AdFlowControl.getInstance();
 		AdFlowControl.getDynamicTransferMap().put("requestid1","com.dengjian.ios_null_200#300");
 		new Thread(new GainDataFromPIXCELQueue("rtb-101")).start();
-	}*/
+	}
 }
