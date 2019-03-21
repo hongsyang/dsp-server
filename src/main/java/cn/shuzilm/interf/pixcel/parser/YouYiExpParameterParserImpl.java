@@ -8,6 +8,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.SSDBUtil;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
 import com.alibaba.fastjson.JSON;
@@ -48,77 +49,81 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
         DUFlowBean element = new DUFlowBean();
         String requestId = urlRequest.get("id");
         try {
-            element.setInfoId(requestId + UUID.randomUUID());
-            element.setRequestId(requestId);
-            element.setBidid(urlRequest.get("bidid"));
+            if (SSDBUtil.getDUFlowBean(requestId) != null) {
+                element = SSDBUtil.getDUFlowBean(requestId);
+            } else {
+                element.setInfoId(requestId + UUID.randomUUID());
+                element.setRequestId(requestId);
+                element.setBidid(urlRequest.get("bidid"));
 
-            String impid = urlRequest.get("impid");
-            List<Impression> list = new ArrayList();
-            Impression impression = new Impression();
-            element.setImpression(list);
-            impression.setId(impid);
-            list.add(impression);
+                String impid = urlRequest.get("impid");
+                List<Impression> list = new ArrayList();
+                Impression impression = new Impression();
+                element.setImpression(list);
+                impression.setId(impid);
+                list.add(impression);
 
-            if (urlRequest.get("dmat")!=null) {
-                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
-                element.setMaterialId(dmat);//素材id
-            }
+                if (urlRequest.get("dmat") != null) {
+                    String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+                    element.setMaterialId(dmat);//素材id
+                }
 
-            String price = urlRequest.get("price");
 
-            String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
-            element.setAdvertiserUid(dade);
-            String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
-            element.setAgencyUid(dage);
-            String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
-            element.setAdUid(daduid);
+                String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
+                element.setAdvertiserUid(dade);
+                String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
+                element.setAgencyUid(dage);
+                String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
+                element.setAdUid(daduid);
 
-            String act = urlRequest.get("act");
-            element.setWinNoticeTime(new Date().getTime());
-            String adx = urlRequest.get("adx");
-            element.setAdxId(adx);
-            String did = urlRequest.get("device");
-            element.setDid(did);
-            String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
-            element.setAppPackageName(appn);
-            String device = urlRequest.get("device");
-            element.setDeviceId(device);
-            String premiumFactor = urlRequest.get("pf");//溢价系数
-            element.setPremiumFactor(Double.valueOf(premiumFactor));
+                String act = urlRequest.get("act");
+                element.setWinNoticeTime(new Date().getTime());
+                String adx = urlRequest.get("adx");
+                element.setAdxId(adx);
+                String did = urlRequest.get("device");
+                element.setDid(did);
+                String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
+                element.setAppPackageName(appn);
+                String device = urlRequest.get("device");
+                element.setDeviceId(device);
+                String premiumFactor = urlRequest.get("pf");//溢价系数
+                element.setPremiumFactor(Double.valueOf(premiumFactor));
 
-            String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
-            element.setAudienceuid(ddem);
-            String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
-            element.setCreativeUid(dcuid);
-            String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
-            element.setProvince(dpro);
-            String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
-            element.setCity(dcit);
+                String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
+                element.setAudienceuid(ddem);
+                String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
+                element.setCreativeUid(dcuid);
+                String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
+                element.setProvince(dpro);
+                String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
+                element.setCity(dcit);
 
-            String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
-            element.setIpAddr(userip);
+                String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
+                element.setIpAddr(userip);
 
-            String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
-            element.setCountry(dcou);
+                String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
+                element.setCountry(dcou);
 
 
 //            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
 //            element.setDealid(pmp);
 
-            //广告主出价
-            if (urlRequest.get("dbidp")!=null) {
-                String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
-                element.setBiddingPrice(Double.valueOf(dbidp));
+                //广告主出价
+                if (urlRequest.get("dbidp") != null) {
+                    String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
+                    element.setBiddingPrice(Double.valueOf(dbidp));
+                }
+                String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
+                element.setAppName(URLDecoder.decode(app));
+
+                String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+                element.setAppVersion(appv);
+
+
+                element.setAdxSource("YouYi");
             }
-            String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-            element.setAppName(URLDecoder.decode(app));
 
-            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-            element.setAppVersion(appv);
-
-
-            element.setAdxSource("YouYi");
-
+            String price = urlRequest.get("price");
             log.debug("YouYiExp曝光的requestid:{},element对象:{}", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();

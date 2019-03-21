@@ -8,6 +8,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.SSDBUtil;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.tencent.GdtWinPriceDecoder;
 import com.alibaba.fastjson.JSON;
@@ -47,72 +48,75 @@ public class TencentImpParameterParserImpl implements ParameterParser {
         DUFlowBean element = new DUFlowBean();
         String requestId = urlRequest.get("impparam");
         try {
-            element.setInfoId(requestId + UUID.randomUUID());
-            element.setRequestId(requestId);
-            element.setBidid(urlRequest.get("bidid"));
+            if (SSDBUtil.getDUFlowBean(requestId) != null) {
+                element = SSDBUtil.getDUFlowBean(requestId);
+            } else {
+                element.setInfoId(requestId + UUID.randomUUID());
+                element.setRequestId(requestId);
+                element.setBidid(urlRequest.get("bidid"));
 
-            String impid = urlRequest.get("impid");
-            List<Impression> list = new ArrayList();
-            Impression impression = new Impression();
-            element.setImpression(list);
-            impression.setId(impid);
-            list.add(impression);
+                String impid = urlRequest.get("impid");
+                List<Impression> list = new ArrayList();
+                Impression impression = new Impression();
+                element.setImpression(list);
+                impression.setId(impid);
+                list.add(impression);
 
 
-            String act = urlRequest.get("act");
-            element.setWinNoticeTime(new Date().getTime());
+                String act = urlRequest.get("act");
+                element.setWinNoticeTime(new Date().getTime());
 
-            String adx = urlRequest.get("adx");
-            element.setAdxId(adx);
+                String adx = urlRequest.get("adx");
+                element.setAdxId(adx);
 
-            String did = urlRequest.get("did");
-            element.setDid(did);
+                String did = urlRequest.get("did");
+                element.setDid(did);
 
-            String device = urlRequest.get("device");
-            element.setDeviceId(device);
+                String device = urlRequest.get("device");
+                element.setDeviceId(device);
 //            if (urlRequest.get("app")!=null){
 //                String app = "null".equals(urlRequest.get("app")) ? "" : urlRequest.get("app");
 //                element.setAppName(URLDecoder.decode(app));
 //            }
-            String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
-            element.setAppPackageName(appn);
+                String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
+                element.setAppPackageName(appn);
 
 //            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
 //            element.setAppVersion(appv);
-            String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
-            element.setAudienceuid(ddem);
-            String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
-            element.setCreativeUid(dcuid);
-            String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
-            element.setProvince(dpro);
-            String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
-            element.setCity(dcit);
-            String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
-            element.setCountry(dcou);
-            String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
-            element.setAdvertiserUid(dade);
-            String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
-            element.setAgencyUid(dage);
-            String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
-            element.setAdUid(daduid);
+                String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
+                element.setAudienceuid(ddem);
+                String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
+                element.setCreativeUid(dcuid);
+                String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
+                element.setProvince(dpro);
+                String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
+                element.setCity(dcit);
+                String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
+                element.setCountry(dcou);
+                String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
+                element.setAdvertiserUid(dade);
+                String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
+                element.setAgencyUid(dage);
+                String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
+                element.setAdUid(daduid);
 //            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
 //            element.setDealid(pmp);
-            if (urlRequest.get("dmat")!=null) {
-                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
-                element.setMaterialId(dmat);//素材id
-            }
-            String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
-            element.setIpAddr(userip);
+                if (urlRequest.get("dmat") != null) {
+                    String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+                    element.setMaterialId(dmat);//素材id
+                }
+                String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
+                element.setIpAddr(userip);
 
-            //广告主出价
-            if (urlRequest.get("dbidp")!=null) {
-                String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
-                element.setBiddingPrice(Double.valueOf(dbidp));
+                //广告主出价
+                if (urlRequest.get("dbidp") != null) {
+                    String dbidp = urlRequest.get("dbidp").equals("null") ? "" : urlRequest.get("dbidp");
+                    element.setBiddingPrice(Double.valueOf(dbidp));
+                }
+                String premiumFactor = urlRequest.get("pf");//溢价系数
+                element.setPremiumFactor(Double.valueOf(premiumFactor));
+                element.setAdxSource("Tencent");
             }
-            String premiumFactor = urlRequest.get("pf");//溢价系数
-            element.setPremiumFactor(Double.valueOf(premiumFactor));
-            element.setAdxSource("Tencent");
-
             log.debug("TencentImp曝光的requestid:{},element对象:{}", requestId, element);
             MDC.put("sift", "pixel");
             AdPixelBean bean = new AdPixelBean();
@@ -124,9 +128,9 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             bean.setRequestId(requestId);//请求id
             bean.setBidPrice(element.getBiddingPrice());//广告主出价
             String price = urlRequest.get("win");
-            GdtWinPriceDecoder gdtWinPriceDecoder =new GdtWinPriceDecoder();
+            GdtWinPriceDecoder gdtWinPriceDecoder = new GdtWinPriceDecoder();
             String price_str = gdtWinPriceDecoder.DecodePrice(price, configs.getString("TENCENT_EKEY")).trim();
-            bean.setCost(Double.valueOf( Integer.valueOf(price_str)) / 100);
+            bean.setCost(Double.valueOf(Integer.valueOf(price_str)) / 100);
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的TencentImpBean：{}", bean);
@@ -135,7 +139,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
             element.setRequestId(requestId);
-            element.setActualPrice(Double.valueOf( Integer.valueOf(price_str)) / 100);//成本价
+            element.setActualPrice(Double.valueOf(Integer.valueOf(price_str)) / 100);//成本价
             element.setActualPricePremium(adPixelBean.getFinalCost());//最终价格
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
@@ -158,7 +162,7 @@ public class TencentImpParameterParserImpl implements ParameterParser {
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
                     element.getDealid(), element.getAppId(), element.getBidid(),
-                    price,element.getIpAddr(),urlRequest.get("remoteIp"),
+                    price, element.getIpAddr(), urlRequest.get("remoteIp"),
                     element.getMaterialId());
 
             MDC.remove("phoenix");
@@ -171,11 +175,11 @@ public class TencentImpParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,TencentImp");
+            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,TencentImp");
             MDC.put("sift", "exception");
             boolean exp_error = RedisQueueManager.putElementToQueue("EXP_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到EXP_ERROR队列：{}", exp_error);
-            log.debug("element:{}",JSON.toJSONString(element));
+            log.debug("element:{}", JSON.toJSONString(element));
             log.error("异常信息:{}", e);
             MDC.remove("sift");
         }
