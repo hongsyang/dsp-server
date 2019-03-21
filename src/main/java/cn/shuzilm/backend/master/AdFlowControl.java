@@ -748,7 +748,6 @@ public class AdFlowControl {
                 status4.setUid(auid);
                 status4.setName(name);
                 mapMonitorAdvertiserDaily.put(adverUid, status4);
-
                 
                 if(mapTask.containsKey(auid)){
                 	TaskBean task = mapTask.get(auid);
