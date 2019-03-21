@@ -43,6 +43,8 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
 
         String requestId = urlRequest.get("id");
         try {
+
+
             element.setInfoId(requestId + UUID.randomUUID());
             element.setRequestId(requestId);
             element.setBidid(urlRequest.get("bidid"));

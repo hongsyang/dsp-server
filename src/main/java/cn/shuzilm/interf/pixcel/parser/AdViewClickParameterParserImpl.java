@@ -8,6 +8,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.SSDBUtil;
 import cn.shuzilm.util.UrlParserUtil;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -44,62 +45,65 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
         DUFlowBean element = new DUFlowBean();
 
         String requestId = urlRequest.get("id");
-        element.setInfoId(requestId + UUID.randomUUID());
-        element.setRequestId(requestId);
-        element.setBidid(urlRequest.get("bidid"));
-
-        String impid = urlRequest.get("impid");
-        List<Impression> list = new ArrayList();
-        Impression impression = new Impression();
-        element.setImpression(list);
-        impression.setId(impid);
-        list.add(impression);
-
-
-        String act = urlRequest.get("act");
-        element.setWinNoticeTime(Long.valueOf(act));
-
-        String adx = urlRequest.get("adx");
-        element.setAdxId(adx);
-
-        String did = urlRequest.get("did");
-        element.setDid(did);
-
-        String device = urlRequest.get("device");
-        element.setDeviceId(device);
-
-        String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-        element.setAppName(URLDecoder.decode(app));
-        String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
-        element.setAppPackageName(appn);
-        String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-        element.setAppVersion(appv);
-        String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
-        element.setAudienceuid(ddem);
-        String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
-        element.setCreativeUid(dcuid);
-        String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
-        element.setProvince(dpro);
-        String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
-        element.setCity(dcit);
-        String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
-        element.setCountry(dcou);
-        String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
-        element.setAdvertiserUid(dade);
-        String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
-        element.setAgencyUid(dage);
-        String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
-        element.setAdUid(daduid);
-        String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
-        element.setDealid(pmp);
-        if (urlRequest.get("dmat")!=null) {
-            String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
-            element.setMaterialId(dmat);//素材id
-        }
-        String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
-        element.setIpAddr(userip);
-        element.setAdxSource("AdView");
         try {
+
+
+            element.setInfoId(requestId + UUID.randomUUID());
+            element.setRequestId(requestId);
+            element.setBidid(urlRequest.get("bidid"));
+
+            String impid = urlRequest.get("impid");
+            List<Impression> list = new ArrayList();
+            Impression impression = new Impression();
+            element.setImpression(list);
+            impression.setId(impid);
+            list.add(impression);
+
+
+            String act = urlRequest.get("act");
+            element.setWinNoticeTime(Long.valueOf(act));
+
+            String adx = urlRequest.get("adx");
+            element.setAdxId(adx);
+
+            String did = urlRequest.get("did");
+            element.setDid(did);
+
+            String device = urlRequest.get("device");
+            element.setDeviceId(device);
+
+            String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
+            element.setAppName(URLDecoder.decode(app));
+            String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");
+            element.setAppPackageName(appn);
+            String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+            element.setAppVersion(appv);
+            String ddem = urlRequest.get("ddem").equals("null") ? "" : urlRequest.get("ddem");
+            element.setAudienceuid(ddem);
+            String dcuid = urlRequest.get("dcuid").equals("null") ? "" : urlRequest.get("dcuid");
+            element.setCreativeUid(dcuid);
+            String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
+            element.setProvince(dpro);
+            String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
+            element.setCity(dcit);
+            String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
+            element.setCountry(dcou);
+            String dade = urlRequest.get("dade").equals("null") ? "" : urlRequest.get("dade");
+            element.setAdvertiserUid(dade);
+            String dage = urlRequest.get("dage").equals("null") ? "" : urlRequest.get("dage");
+            element.setAgencyUid(dage);
+            String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");
+            element.setAdUid(daduid);
+            String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
+            element.setDealid(pmp);
+            if (urlRequest.get("dmat") != null) {
+                String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//
+                element.setMaterialId(dmat);//素材id
+            }
+            String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");
+            element.setIpAddr(userip);
+            element.setAdxSource("AdView");
+
             log.debug("AdViewClick点击的requestid:{},element值:{}", requestId, element);
             AdPixelBean bean = new AdPixelBean();
             if (element != null) {
@@ -130,7 +134,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
                     element.getRequestId(), element.getImpression().get(0).getId(),
-                    element.getDealid(), element.getAppId(), element.getBidid(),element.getIpAddr(),urlRequest.get("remoteIp"),
+                    element.getDealid(), element.getAppId(), element.getBidid(), element.getIpAddr(), urlRequest.get("remoteIp"),
                     element.getMaterialId());
             MDC.remove("phoenix");
             boolean lingJiClick = RedisQueueManager.putElementToQueue("CLICK", element, Priority.MAX_PRIORITY);
@@ -141,7 +145,7 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                 throw new RuntimeException();
             }
         } catch (Exception e) {
-            Help.sendAlert("发送到" + configs.getString("HOST")+"失败,AdViewClick");
+            Help.sendAlert("发送到" + configs.getString("HOST") + "失败,AdViewClick");
             MDC.put("sift", "exception");
             boolean click_error = RedisQueueManager.putElementToQueue("CLICK_ERROR", element, Priority.MAX_PRIORITY);
             log.debug("发送到CLICK_ERROR队列：{}", click_error);

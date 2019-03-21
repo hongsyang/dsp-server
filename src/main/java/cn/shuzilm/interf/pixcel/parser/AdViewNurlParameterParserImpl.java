@@ -110,6 +110,8 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
             String premiumFactor = urlRequest.get("pf");//溢价系数
             element.setPremiumFactor(Double.valueOf(premiumFactor));
             element.setAdxSource("AdView");
+
+
             if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {
 
                 log.debug("AdViewNurl曝光的requestid:{},element对象:{}", requestId, element);

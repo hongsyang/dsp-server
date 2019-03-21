@@ -2,6 +2,7 @@ package cn.shuzilm.util;
 
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.nutz.ssdb4j.impl.SimpleClient;
 import org.nutz.ssdb4j.spi.Response;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.IOException;
+import java.util.List;
 
 public class SSDBUtil {
     private static final Logger log = LoggerFactory.getLogger(SSDBUtil.class);
@@ -16,9 +18,12 @@ public class SSDBUtil {
     private static SimpleClient simpleClient = new SimpleClient("47.93.199.93", 8888, 10000);
 
     public static void main(String[] args) throws InterruptedException {
+        DUFlowBean duFlowBean = new DUFlowBean();
+        duFlowBean.setRequestId("1111111");
+        String duFlowBeanJson = JSON.toJSONString(duFlowBean);
         long l = System.currentTimeMillis();
         for (int i = 0; i < 3; i++) {
-            Response set = simpleClient.setx("houkp", "houkptest", 60);
+            Response set = simpleClient.setx(duFlowBean.getRequestId(), duFlowBeanJson, 10);
             System.out.println("第一次");
             if (set.ok()) {
                 System.out.println(set.ok());
@@ -28,8 +33,9 @@ public class SSDBUtil {
         long e = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", e - l);
         for (int i = 0; i < 60; i++) {
-            Response houkp = simpleClient.get("houkp");
-
+            Response houkp = simpleClient.get(duFlowBean.getRequestId());
+            List<String> list = houkp.listString();
+            System.out.println(list.size());
             System.out.println(houkp.ok());
             System.out.println(houkp.listString());
             Thread.sleep(2000L);
@@ -80,5 +86,20 @@ public class SSDBUtil {
         }
     }
 
-
+    /**
+     * 根据请求id获取DUFlowBean 对象
+     *
+     * @param requestId
+     * @return
+     */
+    public static DUFlowBean getDUFlowBean(String requestId) {
+        Response response = simpleClient.get(requestId);
+        if (response.listString().size() > 0) {
+            String duFlowBeanJson = response.listString().get(0);
+            DUFlowBean duFlowBean = JSONObject.parseObject(duFlowBeanJson, DUFlowBean.class);
+            return duFlowBean;
+        }else {
+            return null;
+        }
+    }
 }
