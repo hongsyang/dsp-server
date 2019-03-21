@@ -31,6 +31,9 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static org.nutz.ssdb4j.spi.Cmd.expire;
 
@@ -61,6 +64,8 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
+    //上传到ssdb 业务线程池
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
 
     @Override
     public String parseRequest(String dataStr) throws Exception {
@@ -313,9 +318,14 @@ public class YouYiRequestServiceImpl implements RequestService {
         youYiAd.setClk_para(curl);//点击通知
         ads.add(youYiAd);
         youYiBidResponse.setAds(ads);
-        
         long start = System.currentTimeMillis();
-        SSDBUtil.pushSSDB(targetDuFlowBean);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                SSDBUtil.pushSSDB(targetDuFlowBean);
+            }
+        });
+
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
 

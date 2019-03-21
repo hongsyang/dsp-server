@@ -11,6 +11,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
+import cn.shuzilm.util.SSDBUtil;
 import cn.shuzilm.util.WidthAndHeightListUtil;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @Description: YouYiParser 灵集post参数解析
@@ -52,6 +55,10 @@ public class TencentRequestServiceImpl implements RequestService {
     private static WidthAndHeightListUtil widthAndHeightListUtil = WidthAndHeightListUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
+
+
+    //上传到ssdb 业务线程池
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
 
 
     @Override
@@ -165,6 +172,7 @@ public class TencentRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAppPackageName(appPackageName);//APP包名
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+
             response = JSON.toJSONString(bidResponseBean);
             MDC.put("sift", "dsp-server");
             log.debug("bidResponseBean:{}", response);
@@ -276,6 +284,16 @@ public class TencentRequestServiceImpl implements RequestService {
         //腾讯  seat_bids类型列表
         ads.add(tencentSeatBid);
         TencentBidResponse.setSeat_bids(ads);
+        long start = System.currentTimeMillis();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                SSDBUtil.pushSSDB(targetDuFlowBean);
+            }
+        });
+
+        long end = System.currentTimeMillis();
+        log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
         log.debug("bidResponseBean:{}", JSON.toJSONString(TencentBidResponse));
         return TencentBidResponse;

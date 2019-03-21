@@ -19,6 +19,8 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @Description: KuaiyouParser 快友post参数解析
@@ -30,6 +32,7 @@ import java.util.*;
  * @Version: 1.0
  */
 public class AdViewRequestServiceImpl implements RequestService {
+
 
     private static final Logger log = LoggerFactory.getLogger(AdViewRequestServiceImpl.class);
 
@@ -47,6 +50,8 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static final String FILTER_CONFIG = "filter.properties";
 
+    //上传到ssdb 业务线程池
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
     @Override
     public String parseRequest(String dataStr) throws Exception {
         String response = "空请求";
@@ -518,6 +523,16 @@ public class AdViewRequestServiceImpl implements RequestService {
         seatBid.setBid(bidList);
         seatBidList.add(seatBid);
         bidResponseBean.setSeatbid(seatBidList);
+        long start = System.currentTimeMillis();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                SSDBUtil.pushSSDB(duFlowBean);
+            }
+        });
+
+        long end = System.currentTimeMillis();
+        log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
         log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
