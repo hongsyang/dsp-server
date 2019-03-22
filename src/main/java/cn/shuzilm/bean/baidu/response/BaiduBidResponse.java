@@ -21,7 +21,7 @@ public class BaiduBidResponse implements Serializable {
           private String id ;// 1;
 
           // **** 竞价广告信息 ****
-          private List<BaiduAd> ads;//
+          private BaiduAd ad;//
 
           // **** 系统使用 ****
           // debug接口
