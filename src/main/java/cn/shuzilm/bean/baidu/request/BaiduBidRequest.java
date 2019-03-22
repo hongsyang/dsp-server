@@ -6,14 +6,14 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 /**
-* @Description:    BidRequest 请求体
-* @Author:         houkp
-* @CreateDate:     2019/3/13 17:47
-* @UpdateUser:     houkp
-* @UpdateDate:     2019/3/13 17:47
-* @UpdateRemark:   修改内容
-* @Version:        1.0
-*/
+ * @Description:    BidRequest 请求体
+ * @Author:         houkp
+ * @CreateDate:     2019/3/13 17:47
+ * @UpdateUser:     houkp
+ * @UpdateDate:     2019/3/13 17:47
+ * @UpdateRemark:   修改内容
+ * @Version:        1.0
+ */
 @Data
 public class BaiduBidRequest implements Serializable {
 
@@ -26,32 +26,15 @@ public class BaiduBidRequest implements Serializable {
     // User-Agent
     private String user_agent;// 3;
 
-    // 用户ID，该字段将于2015年4月30日停止使用
-    private String baidu_user_id;// 4;
-    // 用户ID版本，该字段将于2015年4月30日停止使用
-    private Integer baidu_user_id_version;// 5;
+    // 用户分类
+    private List<Integer> user_category;// 6;
+
 
     // 用户ID
     // 在2015年4月30日之前将会同时发送版本1和版本2的cookie
     // 从2015年5月1日起只发送版本2的cookie
+    private List<BaiduIdList>  baidu_id_list;
 
-//    private String baidu_user_id;// 1;
-//    private Integer baidu_user_id_version;// 2;
-
-//        private BaiduId baidu_id_list ;// 8;
-
-    // DSP 托管到 BES的 USER ID
-    private String buyer_user_id;// 32;
-
-    // 用户分类
-    private List<Integer> user_category;// 6;
-
-    // 自定义的用户标签
-    private BaiduCustomizedUserTag customized_user_tag;// 31;
-    // 用户性别
-    private String gender;// 7;
-    // 页面语言
-    private String detected_language;// 9;
     // **** 页面信息 ****
     // 当前页面URL
     private String url;// 11;
@@ -70,6 +53,25 @@ public class BaiduBidRequest implements Serializable {
     private Integer page_quality;// 18;
     // 页面分类
     private Integer page_vertical;// 21;
+
+
+
+    // 默认每次请求一个广告位
+    private List<BaiduAdSlot> adslot;// 20;
+
+
+    // DSP 托管到 BES的 USER ID
+    private String buyer_user_id;// 32;
+
+
+
+    // 自定义的用户标签
+    private BaiduCustomizedUserTag customized_user_tag;// 31;
+    // 用户性别
+    private String gender;// 7;
+    // 页面语言
+    private String detected_language;// 9;
+
     // 发布商不允许的广告行业
     private List<Integer> excluded_product_category;// 19 [packed;//true];
 
@@ -79,8 +81,6 @@ public class BaiduBidRequest implements Serializable {
     private Boolean is_test;// 26 [default;//false];
     private Boolean is_ping;// 27 [default;//false];
 
-    // 默认每次请求一个广告位
-    private List<BaiduAdSlot> adslot;// 20;
 
 
     // 用户位置信息
@@ -94,8 +94,8 @@ public class BaiduBidRequest implements Serializable {
 
 //__________________________________________________________________________________________________
     //测试阶段字段不全，待定
-        // 新版移动设备用户识别号字段，允许多种类型同时存在
-        // 推荐使用本字段获取用户ID，原字段会逐步废弃。
+    // 新版移动设备用户识别号字段，允许多种类型同时存在
+    // 推荐使用本字段获取用户ID，原字段会逐步废弃。
 //        message ForAdvertisingID {
 //        enum IDType {
 //            UNKNOWN;// 0;    // 未知
