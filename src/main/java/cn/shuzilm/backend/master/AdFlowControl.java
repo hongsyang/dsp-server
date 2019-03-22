@@ -75,12 +75,12 @@ public class AdFlowControl {
     /**
      * RTB节点线程数
      */
-    private static final int RTB_NODE_THREAD_NUMS = 300;
+    private static final int RTB_NODE_THREAD_NUMS = 600;
     
     /**
      * PIXCEL节点线程数
      */
-    private static final int PIXCEL_NODE_THREAD_NUMS = 1000;
+    private static final int PIXCEL_NODE_THREAD_NUMS = 2000;
 
 //    /**
 //     * 广告主对应的广告 MAP
