@@ -33,7 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * @Description: YouYiParser 灵集post参数解析
+ * @Description: YouYiParser 悠易post参数解析
  * @Author: houkp
  * @CreateDate: 2018/7/20 14:37
  * @UpdateUser: houkp

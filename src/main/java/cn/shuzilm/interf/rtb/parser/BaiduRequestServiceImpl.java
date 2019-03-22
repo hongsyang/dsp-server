@@ -22,7 +22,7 @@ import java.util.List;
 
 
 /**
- * @Description: YouYiParser 灵集post参数解析
+ * @Description: BaiduParser 百度post参数解析
  * @Author: houkp
  * @CreateDate: 2018/7/20 14:37
  * @UpdateUser: houkp

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * @Description: YouYiParser 灵集post参数解析
+ * @Description: TencentParser 腾讯post参数解析
  * @Author: houkp
  * @CreateDate: 2018/7/20 14:37
  * @UpdateUser: houkp
