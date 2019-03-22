@@ -888,7 +888,6 @@ public class RtbFlowControl {
         		return false;
         	}
   
-        	
 //        	String advertiserUid = adBean.getAdvertiser().getUid();
 //        	//针对推啊过滤快友广告
 //        	if("c5d2db7e-f356-4f78-970a-ccddd4259860".equals(advertiserUid) && "2".equals(adxName)){
