@@ -1,6 +1,9 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
+import cn.shuzilm.bean.baidu.request.BaiduBidRequest;
+import cn.shuzilm.bean.baidu.response.BaiduAd;
+import cn.shuzilm.bean.baidu.response.BaiduBidResponse;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.tencent.request.*;
 import cn.shuzilm.bean.tencent.response.TencentBidResponse;
@@ -8,9 +11,14 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.WidthAndHeightListUtil;
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -47,11 +55,15 @@ public class BaiduRequestServiceImpl implements RequestService {
         String adxId = "5";
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
-//            MDC.put("sift", "dsp-server");
+            MDC.put("sift", "dsp-server");
             log.debug(" BidRequest参数入参：{}", dataStr);
 //            //请求报文解析
-//            TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
+
+            BaiduBidRequest bidRequestBean = JSON.parseObject(dataStr, BaiduBidRequest.class);
 //            //创建返回结果  bidRequest请求参数保持不变
+            log.debug(" baiduBidRequest：{}", bidRequestBean);
+
+
 //            TencentDevice userDevice = bidRequestBean.getDevice();//设备信息
 //            TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
 //            TencentUser user = bidRequestBean.getUser();//用户信息
@@ -140,27 +152,14 @@ public class BaiduRequestServiceImpl implements RequestService {
 //            targetDuFlowBean.setAppName("");//APP名称
 //            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
 //            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-//            TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
-//            response = JSON.toJSONString(bidResponseBean);
-//            MDC.put("sift", "dsp-server");
-//            log.debug("bidResponseBean:{}", response);
-//
-//
-//            //测试环境自动发送曝光
-//            Double bidfloorcur = Double.valueOf(adzone.getBid_floor());
-//            Double v = bidfloorcur * 1.3;
-//            String price = "&price=" + v;
-//            String pf = "&pf=" + targetDuFlowBean.getPremiumFactor();
-//            String s = "click_param";
-//            if (response.contains(s)) {
-//                String substring = response.substring(response.indexOf(s));
-//                String tencentexp = substring.substring(substring.indexOf("id="));
-//                String tencentexpUrl = "http://59.110.220.112:9880/tencentexp?" + tencentexp + price + pf;
-////                Boolean flag = sendGetUrl(tencentexpUrl);
-////                log.debug("是否曝光成功：{},tencentxpUrl:{}", flag, tencentexpUrl);
-//            }
-//            bidRequestBean = null;
-//            targetDuFlowBean = null;
+            DUFlowBean targetDuFlowBean = new DUFlowBean();
+            BaiduBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
+            response = JSON.toJSONString(bidResponseBean);
+            MDC.put("sift", "dsp-server");
+            log.debug("bidResponseBean:{}", response);
+
+            bidRequestBean = null;
+            targetDuFlowBean = null;
             return response;
         } else {
             return response;
@@ -175,14 +174,23 @@ public class BaiduRequestServiceImpl implements RequestService {
      * @param bidRequestBean
      * @return TencentBidResponse
      */
-    private TencentBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, TencentBidRequest bidRequestBean) {
-        TencentBidResponse TencentBidResponse = new TencentBidResponse();
+    private BaiduBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, BaiduBidRequest bidRequestBean) {
+        BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
+        baiduBidResponse.setId(bidRequestBean.getId());
+        //广告信息
+        List ads = new ArrayList();
+        //广告信息
+        BaiduAd baiduAd = new BaiduAd();
+        //当前页面广告位顺序 id，同一页面从 1 开始
+        baiduAd.setSequence_id(bidRequestBean.getAdslot().get(0).getSequence_id());
+        ads.add(baiduAd);
+
+//        TencentSeatBid tencentSeatBid = new TencentSeatBid();
+//        baiduBidResponse.setAds();
 //        TencentBidResponse.setRequest_id(bidRequestBean.getId());
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 //        String format = LocalDateTime.now().format(formatter);//时间戳
-//        //广告信息
-//        List ads = new ArrayList();
-//        TencentSeatBid tencentSeatBid = new TencentSeatBid();
+
 //        //曝光信息
 //        TencentImpressions tencentImpressions = bidRequestBean.getImpressions().get(0);
 //        //曝光id
@@ -269,7 +277,7 @@ public class BaiduRequestServiceImpl implements RequestService {
 //        TencentBidResponse.setSeat_bids(ads);
 //        MDC.put("sift", "bidResponseBean");
 //        log.debug("bidResponseBean:{}", JSON.toJSONString(TencentBidResponse));
-        return TencentBidResponse;
+        return baiduBidResponse;
 
     }
 
