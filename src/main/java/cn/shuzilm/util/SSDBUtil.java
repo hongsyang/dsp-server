@@ -81,13 +81,9 @@ public class SSDBUtil {
 
             }
         } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                simpleClient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            MDC.put("sift", "rtb-exception");
+            log.error("SSDB为空：{}", e);
+            MDC.remove("sift");
         }
     }
 
