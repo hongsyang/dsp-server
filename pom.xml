@@ -292,7 +292,12 @@
             <artifactId>protobuf-java-format</artifactId>
             <version>1.2</version>
         </dependency>
-
+        <!--ssdb jar包-->
+        <dependency>
+            <groupId>org.nutz</groupId>
+            <artifactId>ssdb4j</artifactId>
+            <version>9.4</version>
+        </dependency>
 
     </dependencies>
 

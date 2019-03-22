@@ -22,6 +22,8 @@ import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @Description: LingjiParser 灵集post参数解析
@@ -35,7 +37,6 @@ import java.util.*;
 public class LingJiRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(LingJiRequestServiceImpl.class);
-
 
     private static final String FILTER_CONFIG = "filter.properties";
 
@@ -51,6 +52,8 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
+    //上传到ssdb 业务线程池
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
 
     @Override
     public String parseRequest(String dataStr) throws Exception {
@@ -326,24 +329,24 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&impid=" + "${AUCTION_IMP_ID}" +
                 "&price=" + "${AUCTION_PRICE}" +
                 "&act=" + format +
-                "&adx=" + duFlowBean.getAdxId() +
-                "&did=" + duFlowBean.getDid() +
-                "&device=" + duFlowBean.getDeviceId() +
-                "&appn=" + duFlowBean.getAppPackageName() +
-                "&appv=" + duFlowBean.getAppVersion() +
-                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
-                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
-                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
-                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
-                "&dpro=" + duFlowBean.getProvince() +// 省
-                "&dcit=" + duFlowBean.getCity() +// 市
-                "&dcou=" + duFlowBean.getCountry() +// 县
-                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid() + //私有交易
-                "&dmat=" + duFlowBean.getMaterialId() + //素材id
-                "&userip=" + duFlowBean.getIpAddr() +//用户ip
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&device=" + duFlowBean.getDeviceId() +
+//                "&appn=" + duFlowBean.getAppPackageName() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
+//                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+//                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+//                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+//                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+//                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&dmat=" + duFlowBean.getMaterialId() + //素材id
+//                "&userip=" + duFlowBean.getIpAddr() +//用户ip
                 "&app=" + URLEncoder.encode(duFlowBean.getAppName());//
         bid.setNurl(nurl);
 
@@ -353,25 +356,25 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&bidid=" + "${AUCTION_BID_ID}" +
                 "&impid=" + "${AUCTION_IMP_ID}" +
                 "&price=" + "${AUCTION_PRICE}" +
-                "&act=" + format +
-                "&adx=" + duFlowBean.getAdxId() +
-                "&did=" + duFlowBean.getDid() +
-                "&device=" + duFlowBean.getDeviceId() +
-                "&appn=" + duFlowBean.getAppPackageName() +
-                "&appv=" + duFlowBean.getAppVersion() +
-                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
-                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
-                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
-                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
-                "&dpro=" + duFlowBean.getProvince() +// 省
-                "&dcit=" + duFlowBean.getCity() +// 市
-                "&dcou=" + duFlowBean.getCountry() +// 县
-                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid() + //私有交易
-                "&dmat=" + duFlowBean.getMaterialId() + //素材id
-                "&userip=" + duFlowBean.getIpAddr() +//用户ip
+//                "&act=" + format +
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&device=" + duFlowBean.getDeviceId() +
+//                "&appn=" + duFlowBean.getAppPackageName() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&pf=" + duFlowBean.getPremiumFactor() +//溢价系数
+//                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+//                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+//                "&dbidp=" + duFlowBean.getBiddingPrice() +// 广告主出价
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+//                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+//                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&dmat=" + duFlowBean.getMaterialId() + //素材id
+//                "&userip=" + duFlowBean.getIpAddr() +//用户ip
                 "&app=" + URLEncoder.encode(duFlowBean.getAppName());
 
         String curl = serviceUrl + "lingjiclick?" +
@@ -379,22 +382,22 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
                 "&act=" + format +
-                "&adx=" + duFlowBean.getAdxId() +
-                "&did=" + duFlowBean.getDid() +
-                "&device=" + duFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
-                "&appn=" + duFlowBean.getAppPackageName() +
-                "&appv=" + duFlowBean.getAppVersion() +
-                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
-                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
-                "&dpro=" + duFlowBean.getProvince() +// 省
-                "&dcit=" + duFlowBean.getCity() +// 市
-                "&dcou=" + duFlowBean.getCountry() +// 县
-                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + duFlowBean.getDealid() + //私有交易
-                "&dmat=" + duFlowBean.getMaterialId() + //素材id
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&device=" + duFlowBean.getDeviceId() +
+//                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) +
+//                "&appn=" + duFlowBean.getAppPackageName() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&ddem=" + duFlowBean.getAudienceuid() + //人群id
+//                "&dcuid=" + duFlowBean.getCreativeUid() + // 创意id
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&dade=" + duFlowBean.getAdvertiserUid() +// 广告主id
+//                "&dage=" + duFlowBean.getAgencyUid() + //代理商id
+//                "&daduid=" + duFlowBean.getAdUid() + // 广告id，
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&dmat=" + duFlowBean.getMaterialId() + //素材id
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 
         //人群包，创意id，省，市，广告主id，代理商id，广告id，
@@ -515,34 +518,20 @@ public class LingJiRequestServiceImpl implements RequestService {
         seatBid.setBid(bidList);
         seatBidList.add(seatBid);
         bidResponseBean.setSeatbid(seatBidList);
+        long start = System.currentTimeMillis();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                SSDBUtil.pushSSDB(duFlowBean);
+            }
+        });
+
+        long end = System.currentTimeMillis();
+        log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
         log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
 
-    }
-
-    /**
-     * 把生成的内部流转DUFlowBean上传到redis服务器 设置5分钟失效
-     *
-     * @param targetDuFlowBean
-     */
-    private void pushRedis(DUFlowBean targetDuFlowBean) {
-        log.debug("redis连接时间计数");
-        Jedis jedis = jedisManager.getResource();
-        try {
-            if (jedis != null) {
-                log.debug("jedis：{}", jedis);
-                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
-            } else {
-                log.debug("jedis为空：{}", jedis);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            jedis.close();
-        }
     }
 
     /**
