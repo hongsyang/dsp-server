@@ -493,7 +493,7 @@ public class AdFlowControl {
                     AdFlowStatus threshold = mapThresholdHour.get(adUid);
                     AdFlowStatus monitor = mapMonitorHour.get(adUid);
                     //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
-                    if (threshold != null && monitor != null && threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums() * 0.85) {
+                    if (threshold != null && monitor != null && threshold.getWinNums() != 0 && monitor.getWinNums() >= threshold.getWinNums() * 0.95) {
                         String reason = "#### 小时 CPM 超限，参考指标：" + threshold.getWinNums() + "(CPM)\t" + monitor.getWinNums() + "(CPM) ### " ;
                         pauseAd(adUid, reason, true);
                         myLog.error(monitor.toString() + "\t" + reason);
@@ -514,14 +514,14 @@ public class AdFlowControl {
                     int quota = mapAdGroup.get(groupId).getQuota();
                     int quotaTotal = mapAdGroup.get(groupId).getQuota_total();
                     
-                    if(monitorAdGroup != null && thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney * 0.85){
+                    if(monitorAdGroup != null && thresholdGroupMoney != 0 && quota == 1 && monitorAdGroup.getMoney() >= thresholdGroupMoney * 0.95){
                         //广告组每日限额超限，则发送停止命令，终止该广告投放
                         String reason = "#### 广告组 每日限额 超限，参考指标：" + thresholdGroupMoney + "元(CPM)\t" + monitorAdGroup.getMoney() + "元 (CPM)###";
                         stopAd(adUid, reason, false,0);
                         myLog.error(adUid + "\t" + reason);
                     }
                     
-                    if(monitorTotalAdGroup != null && thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney * 0.85){
+                    if(monitorTotalAdGroup != null && thresholdTotalGroupMoney != 0 && quotaTotal == 1 && monitorTotalAdGroup.getMoney() >= thresholdTotalGroupMoney * 0.95){
                         //广告组总限额超限，则发送停止命令，终止该广告投放
                         String reason = "#### 广告组 总限额 超限，参考指标：" + thresholdTotalGroupMoney + "元(CPM)\t" + monitorTotalAdGroup.getMoney() + "元(CPM) ###";
                         stopAd(adUid, reason, false,0);
@@ -548,19 +548,19 @@ public class AdFlowControl {
                     AdFlowStatus advertiserDaily = mapMonitorAdvertiserDaily.get(advertiserId);
                     AdFlowStatus thresholdAdvertiser = mapMonitorAdvertiserThresholdDaily.get(advertiserId);
                     
-                    if(advertiserDaily != null && thresholdAdvertiser != null && thresholdAdvertiser.getMoney() != 0 && advertiserDaily.getMoney() >= thresholdAdvertiser.getMoney() * 0.85){
+                    if(advertiserDaily != null && thresholdAdvertiser != null && thresholdAdvertiser.getMoney() != 0 && advertiserDaily.getMoney() >= thresholdAdvertiser.getMoney() * 0.95){
                     	String reason = "#### 广告主每日金额 超限，参考指标：" + thresholdAdvertiser.getMoney() + "元(CPM)\t" + advertiserDaily.getMoney() + "元(CPM) ###";
                         stopAd(adUid, reason, false,0);
                         myLog.error(advertiserDaily.toString() + "\t" + reason);
                     }
-                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getMoney() != 0 && monitorDaily.getMoney() >= thresholdDaily.getMoney() * 0.85) {
+                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getMoney() != 0 && monitorDaily.getMoney() >= thresholdDaily.getMoney() * 0.95) {
                         //金额超限，则发送小时控制消息给各个节点，终止该小时广告投放
                         String reason = "#### 每日金额 超限，参考指标：" + thresholdDaily.getMoney() + "元(CPM)\t" + monitorDaily.getMoney() + "元(CPM) ###";
                         stopAd(adUid, reason, false,0);
                         myLog.error(monitorDaily.toString() + "\t" + reason);
                     }
                     
-                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getWinNums() != 0 && monitorDaily.getWinNums() >= thresholdDaily.getWinNums() * 0.85) {
+                    if (monitorDaily != null && thresholdDaily != null && thresholdDaily.getWinNums() != 0 && monitorDaily.getWinNums() >= thresholdDaily.getWinNums() * 0.95) {
                         String reason = "#### 每日 CPM 超限，参考指标：" + thresholdDaily.getWinNums() + "(CPM)\t" + monitorDaily.getWinNums() + "(CPM) ### " ;
                         stopAd(adUid, reason, true,0);
                         myLog.error(monitorDaily.toString() + "\t" + reason);
