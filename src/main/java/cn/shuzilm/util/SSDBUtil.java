@@ -1,6 +1,7 @@
 package cn.shuzilm.util;
 
 import cn.shuzilm.bean.internalflow.DUFlowBean;
+import cn.shuzilm.common.AppConfigs;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.nutz.ssdb4j.impl.SimpleClient;
@@ -15,7 +16,11 @@ import java.util.List;
 public class SSDBUtil {
     private static final Logger log = LoggerFactory.getLogger(SSDBUtil.class);
 
-    private static SimpleClient simpleClient = new SimpleClient("47.93.199.93", 8888, 10000);
+    private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
+
+    private static SimpleClient simpleClient = new SimpleClient(configs.getString("SSBD_HOST"), configs.getInt("SSBD_PORT"), 10000);
 
     public static void main(String[] args) throws InterruptedException {
         DUFlowBean duFlowBean = new DUFlowBean();
@@ -69,7 +74,7 @@ public class SSDBUtil {
                 }
 
             } else {
-                log.debug("jedis为空：{}", simpleClient);
+                log.debug("SSDB为空：{}", simpleClient);
                 MDC.put("sift", "ssdb-exception");
                 log.debug("duFlowBeanJson：{}", duFlowBeanJson);
                 MDC.remove("sift");
