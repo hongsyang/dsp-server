@@ -284,6 +284,8 @@ public class AdFlowControl {
     public static ConcurrentHashMap<String, String> getDynamicTransferMap() {
         return dynamicTransferMap;
     }
+    // 动态出价上限
+    private static double limitPrice = 50.00D;
 
     public AdFlowControl() {
 
@@ -2144,6 +2146,8 @@ public class AdFlowControl {
      */
     public void dumpDynamicPriceDateToMysql() {
         myLog.info("开始导出动态出价数据到mysql");
+        // 动态出价上线
+
         Update update = new Update();
         dynamicPriceMap.forEach((key,value) -> {
             //myLog.debug("dumpDynamicPriceDateToMysql key: {} value:{}", key, value);
@@ -2182,7 +2186,7 @@ public class AdFlowControl {
                     }else if (winRate > 0.8){
                         rate = 0.9f;
                     }
-                    price *= rate;
+                    price = (price * rate > limitPrice) ? limitPrice : (price * rate) ;
                    // myLog.debug("key: {} winRate: {}  rate: {} price: {}", key, winRate, rate, price);
                 }else {
                     myLog.info("没有出手数或者出手数小于赢价数，不参与竞价调整");
@@ -2196,18 +2200,18 @@ public class AdFlowControl {
 
                 // 价格浮动上限
                 //Double limit_price = price * 1.5;
-                Double limit_price = 50.00D;
+
 
                 if(!"null".equals(adTagId)) {
                     sql = "insert into dynamic_price (package_name,ad_tag_id,price,limit_price,win_price,win_rate,create_time,update_time)" +
-                            " values ('"+packageName+"','"+adTagId+"',"+price+","+limit_price+","+winPrice+","+winRate+",'"+timestamp+"','"+timestamp+"') " +
+                            " values ('"+packageName+"','"+adTagId+"',"+price+","+limitPrice+","+winPrice+","+winRate+",'"+timestamp+"','"+timestamp+"') " +
                             " ON DUPLICATE KEY UPDATE price = if(price * " +rate + " > limit_price,limit_price,price * "+rate+")" +
                             ",win_price = " + winPrice +
                             ",win_rate = " + winRate;
                 }else if(!"null".equals(size)) {
                     String [] sizeArray = size.split("#");
                     sql = "insert into dynamic_price (package_name,width,height,price,limit_price,win_price,win_rate,create_time,update_time)" +
-                            " values ('"+packageName+"',"+sizeArray[0]+","+sizeArray[1]+","+price+","+limit_price+","+winPrice+","+winRate+",'"+timestamp+"','"+timestamp+"') " +
+                            " values ('"+packageName+"',"+sizeArray[0]+","+sizeArray[1]+","+price+","+limitPrice+","+winPrice+","+winRate+",'"+timestamp+"','"+timestamp+"') " +
                             " ON DUPLICATE KEY UPDATE price = if(price * " +rate + " > limit_price,limit_price,price * "+rate+")" +
                             ",win_price = " + winPrice +
                             ",win_rate = " + winRate;
