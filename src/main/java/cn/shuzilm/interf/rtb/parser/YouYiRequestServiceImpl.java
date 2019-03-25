@@ -59,10 +59,11 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr) throws Exception {
+    public String parseRequest(String dataStr,ExecutorService executor) throws Exception {
+        this.executor=executor;
         String adxId = "3";
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {

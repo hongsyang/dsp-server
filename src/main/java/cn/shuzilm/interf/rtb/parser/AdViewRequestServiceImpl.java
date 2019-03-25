@@ -53,9 +53,11 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
-    private ExecutorService executor = Executors.newSingleThreadExecutor();
+    private ExecutorService executor = null;
+
     @Override
-    public String parseRequest(String dataStr) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
+        this.executor = executor;
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
             MDC.put("sift", "dsp-server");
@@ -104,8 +106,6 @@ public class AdViewRequestServiceImpl implements RequestService {
                     deviceId = userDevice.getDidmd5();
                 }
             }
-
-
 
 
             //支持的文件类型
@@ -204,7 +204,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
 
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(),ADX_ID,adxNameList,width,height);//过滤规则的返回结果
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(), ADX_ID, adxNameList, width, height);//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
@@ -213,7 +213,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 return "bundleBlackList";
             } else if (msg.get("deviceIdBlackList") != null) {
                 return "deviceIdBlackList";
-            }else if (msg.get("AdTagBlackList") != null) {
+            } else if (msg.get("AdTagBlackList") != null) {
                 return "AdTagBlackList";
             }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
@@ -469,7 +469,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 //                "&pmp=" + duFlowBean.getDealid() + //私有交易
 //                "&dmat=" + duFlowBean.getMaterialId() + //素材id
 //                "&userip=" + duFlowBean.getIpAddr()+//用户ip
-                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) ;
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName());
 
 
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
@@ -500,7 +500,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 //                "&pmp=" + duFlowBean.getDealid() + //私有交易
 //                "&dmat=" + duFlowBean.getMaterialId() + //素材id
 //                "&userip=" + duFlowBean.getIpAddr()+   //用户ip
-                "&app=" + URLEncoder.encode(duFlowBean.getAppName()) ;
+                "&app=" + URLEncoder.encode(duFlowBean.getAppName());
 
         Map nurlMap = new HashMap();
         List<String> trackingurls = new ArrayList<>();

@@ -132,7 +132,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 @Override
                 public Object call() throws Exception {
                     //主业务逻辑
-                    return parser.parseData(url, dataStr, remoteIp);
+                    return parser.parseData(url, dataStr, remoteIp,executor);
                 }
             });
 
@@ -424,7 +424,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
      */
     public String parseRequest(String url, String dataStr, String remoteIp) throws Exception {
         /**********		POST主业务逻辑		***************/
-        String resultData = parser.parseData(url, dataStr, remoteIp);//SDK 2.0.1
+        String resultData = parser.parseData(url, dataStr, remoteIp,  executor);//SDK 2.0.1
 
         byte[] content = null;
         content = resultData.getBytes("utf-8");
