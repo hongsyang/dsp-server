@@ -2229,8 +2229,6 @@ public class AdFlowControl {
                 //System.out.println(sql);
 
                 // 重置出手数和赢价数
-                //value[0] = new AtomicInteger(0);
-                //value[1] = new AtomicInteger(0);
                 /*value[0] = new AtomicLong(0);
                 value[1] = new AtomicLong(0);
                 value[2] = new AtomicDouble(0);
