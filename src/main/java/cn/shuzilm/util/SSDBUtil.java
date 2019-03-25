@@ -98,6 +98,7 @@ public class SSDBUtil {
         if (response.listString().size() > 0) {
             String duFlowBeanJson = response.listString().get(0);
             MDC.put("sift", "pixcel-ssdb");
+            MDC.put("phoenix", "pixcel-phoenix");
             log.debug("duFlowBeanJson：{}", duFlowBeanJson);
             MDC.remove("phoenix");
             MDC.remove("sift");
