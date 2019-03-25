@@ -170,6 +170,7 @@ public class TencentRequestServiceImpl implements RequestService {
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppName("");//APP名称
             targetDuFlowBean.setAppPackageName(appPackageName);//APP包名
+            targetDuFlowBean.setCreateTime(System.currentTimeMillis());//创建时间
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
 

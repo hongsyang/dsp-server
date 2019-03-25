@@ -178,12 +178,27 @@ public class BaiduRequestServiceImpl implements RequestService {
         BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
         baiduBidResponse.setId(bidRequestBean.getId());
         //广告信息
-        List ads = new ArrayList();
+//        List ads = new ArrayList();
         //广告信息
         BaiduAd baiduAd = new BaiduAd();
         //当前页面广告位顺序 id，同一页面从 1 开始
         baiduAd.setSequence_id(bidRequestBean.getAdslot().get(0).getSequence_id());
-        ads.add(baiduAd);
+        baiduAd.setCreative_id(123456L);
+        baiduAd.setHtml_snippet("http://rtb.shuzijz.cn");
+        baiduAd.setWidth(bidRequestBean.getAdslot().get(0).getWidth());
+        baiduAd.setHeight(bidRequestBean.getAdslot().get(0).getHeight());
+        baiduAd.setCategory(7901);
+        baiduAd.setType(1);
+        baiduAd.setLanding_page("http://rtb.shuzijz.cn");
+        baiduAd.setTarget_url("http://rtb.shuzijz.cn");
+        baiduAd.setPreferred_order_id("3");
+        baiduAd.setExtdata("test");
+        baiduAd.setAdvertiser_id(654321L);
+        baiduAd.setMax_cpm(100000);
+//        baiduAd.setMonitor_urls("http://rtb.shuzijz.cn");
+//        ads.add(baiduAd);
+        baiduBidResponse.setAd(baiduAd);
+
 
 //        TencentSeatBid tencentSeatBid = new TencentSeatBid();
 //        baiduBidResponse.setAds();

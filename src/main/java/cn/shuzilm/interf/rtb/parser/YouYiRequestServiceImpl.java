@@ -18,24 +18,17 @@ import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import com.alibaba.fastjson.JSON;
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.commons.lang.StringUtils;
-import org.nutz.ssdb4j.impl.SimpleClient;
-import org.nutz.ssdb4j.spi.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
-import static org.nutz.ssdb4j.spi.Cmd.expire;
 
 /**
  * @Description: YouYiParser 灵集post参数解析
@@ -209,6 +202,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
             targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
+            targetDuFlowBean.setCreateTime(System.currentTimeMillis());//创建时间
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);

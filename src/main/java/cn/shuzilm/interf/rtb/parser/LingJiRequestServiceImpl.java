@@ -228,6 +228,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAppName(app.getName());//APP名称
             targetDuFlowBean.setAppPackageName(app.getBundle());//APP包名
             targetDuFlowBean.setAppId(app.getId());//APP包名
+            targetDuFlowBean.setCreateTime(System.currentTimeMillis());//创建时间
             if (app.getExt() != null) {
                 targetDuFlowBean.setAppVersion(app.getExt().getSdk() == null ? "" : app.getExt().getSdk());//APP版本
             }
