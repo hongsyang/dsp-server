@@ -54,7 +54,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     //上传到ssdb 业务线程池
     private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
-
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
     @Override
     public String parseRequest(String dataStr) throws Exception {
         String response = "空请求";
