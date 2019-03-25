@@ -29,6 +29,17 @@ public class CheckAdStatus {
 	public boolean getAdStatus(String adUid,boolean isUpdate){
 		
 		MDC.put("sift", "control");
+		
+		String advertiserId = adFlowControl.getMapAd().get(adUid).getAdvertiser().getUid();
+		
+		 if(adFlowControl.getAdvertiserBalanceMap().containsKey(advertiserId)){
+         	if(adFlowControl.getAdvertiserBalanceMap().get(advertiserId) <= 500){
+         		String reason = advertiserId+"#### 广告主余额不足! ###";
+         		myLog.error(advertiserId+" 广告主未开启原因:"+reason);
+         		return false;
+         	}
+         }
+		
 		AdFlowStatus threshold = adFlowControl.getMapThresholdHour().get(adUid);
         AdFlowStatus monitor = adFlowControl.getMapMonitorHour().get(adUid);
         //每小时曝光超过了设置的最大阀值，则终止该小时的广告投放
@@ -60,7 +71,7 @@ public class CheckAdStatus {
         }
         AdFlowStatus thresholdDaily = adFlowControl.getMapThresholdDaily().get(adUid);
         AdFlowStatus monitorDaily = adFlowControl.getMapMonitorDaily().get(adUid);
-        String advertiserId = adFlowControl.getMapAd().get(adUid).getAdvertiser().getUid();
+        
         AdFlowStatus advertiserDaily = adFlowControl.getMapMonitorAdvertiserDaily().get(advertiserId);
         AdFlowStatus thresholdAdvertiser = adFlowControl.getMapMonitorAdvertiserThresholdDaily().get(advertiserId);
         

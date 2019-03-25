@@ -75,12 +75,12 @@ public class AdFlowControl {
     /**
      * RTB节点线程数
      */
-    private static final int RTB_NODE_THREAD_NUMS = 300;
+    private static final int RTB_NODE_THREAD_NUMS = 600;
     
     /**
      * PIXCEL节点线程数
      */
-    private static final int PIXCEL_NODE_THREAD_NUMS = 1000;
+    private static final int PIXCEL_NODE_THREAD_NUMS = 2000;
 
 //    /**
 //     * 广告主对应的广告 MAP
@@ -154,6 +154,10 @@ public class AdFlowControl {
 	
 	public ConcurrentHashMap<String, Float> getAdMinBidNumsLimitMap() {
 		return adMinBidNumsLimitMap;
+	}
+	
+	public ConcurrentHashMap<String,Float> getAdvertiserBalanceMap(){
+		return advertiserBalanceMap;
 	}
 
 	/**
@@ -539,7 +543,7 @@ public class AdFlowControl {
                     //实时更新判断余额
                     if(advertiserBalanceMap.containsKey(advertiserId)){
                     	advertiserBalanceMap.put(advertiserId, advertiserBalanceMap.get(advertiserId)-addMoney);
-                    	if(advertiserBalanceMap.get(advertiserId) <= 0){
+                    	if(advertiserBalanceMap.get(advertiserId) <= 500){
                     		String reason = advertiserId+"#### 广告主余额不足! ###";
                     		stopAd(adUid, reason, false,0);
                     	}
@@ -2227,6 +2231,10 @@ public class AdFlowControl {
                 // 重置出手数和赢价数
                 //value[0] = new AtomicInteger(0);
                 //value[1] = new AtomicInteger(0);
+                /*value[0] = new AtomicLong(0);
+                value[1] = new AtomicLong(0);
+                value[2] = new AtomicDouble(0);
+                value[3] = new AtomicDouble(0);*/
 
             }catch (Exception e) {
                 myLog.error("导出动态出价数据到mysql报错， key: {}",key, e);
