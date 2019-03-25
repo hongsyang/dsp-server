@@ -383,15 +383,6 @@ public class AdFlowControl {
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
                 if (statusHour == null)
                     break;
-                //只计算和统计计小时点击率就可以
-//                if(pixelType == 0){
-//                    statusHour.setUid(adUid);
-//                    statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
-//                    statusHour.setMoney(statusHour.getMoney() + addMoney);
-//                }else if(pixelType == 1){
-//                    statusHour.setUid(adUid);
-//                    statusHour.setClickNums(statusHour.getClickNums() +  clickNums);
-//                }
                 
                 statusHour.setUid(adUid);
                 statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
