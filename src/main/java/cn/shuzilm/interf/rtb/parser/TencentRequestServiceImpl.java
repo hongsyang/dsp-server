@@ -58,7 +58,7 @@ public class TencentRequestServiceImpl implements RequestService {
 
 
     //上传到ssdb 业务线程池
-    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
 
 
     @Override

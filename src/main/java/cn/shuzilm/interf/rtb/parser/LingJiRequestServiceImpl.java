@@ -53,7 +53,7 @@ public class LingJiRequestServiceImpl implements RequestService {
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
     //上传到ssdb 业务线程池
-    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
+    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
 
     @Override
     public String parseRequest(String dataStr) throws Exception {
