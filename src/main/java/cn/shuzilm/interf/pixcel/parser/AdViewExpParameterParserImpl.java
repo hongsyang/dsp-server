@@ -157,6 +157,7 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                         price, element.getIpAddr(), urlRequest.get("remoteIp"),
                         element.getMaterialId());
 
+                MDC.remove("phoenix");
 
                 String duFlowBeanJson = JSON.toJSONString(element);
                 log.debug("duFlowBeanJson:{}", duFlowBeanJson);
@@ -164,7 +165,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 MDC.put("sift", "repeat");
                 log.debug("本次请求requestId:{}；bidid:{}", requestId, element.getBidid());
             }
-            MDC.remove("phoenix");
         } catch (Exception e) {
             Help.sendAlert("发送到" + configs.getString("HOST") + "失败,AdViewExp");
             MDC.put("sift", "exception");
