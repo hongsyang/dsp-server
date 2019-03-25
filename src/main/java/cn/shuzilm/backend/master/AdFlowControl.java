@@ -2225,8 +2225,10 @@ public class AdFlowControl {
                 //System.out.println(sql);
 
                 // 重置出手数和赢价数
-                //value[0] = new AtomicInteger(0);
-                //value[1] = new AtomicInteger(0);
+                /*value[0] = new AtomicLong(0);
+                value[1] = new AtomicLong(0);
+                value[2] = new AtomicDouble(0);
+                value[3] = new AtomicDouble(0);*/
 
             }catch (Exception e) {
                 myLog.error("导出动态出价数据到mysql报错， key: {}",key, e);
