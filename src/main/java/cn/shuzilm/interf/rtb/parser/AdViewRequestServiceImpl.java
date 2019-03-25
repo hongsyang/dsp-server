@@ -46,9 +46,10 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static final String ADX_ID = "2";
 
-    private AppConfigs configs = null;
 
     private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
     //上传到ssdb 业务线程池
     private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
