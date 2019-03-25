@@ -42,10 +42,10 @@ import java.util.concurrent.Executors;
 public class YouYiRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(YouYiRequestServiceImpl.class);
-
-    private AppConfigs configs = null;
-
+    
     private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
     private static final String ADX_NAME = "YouYi";
 
