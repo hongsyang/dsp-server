@@ -22,6 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import redis.clients.jedis.Jedis;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +52,7 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     private static final String ADX_ID = "3";
 
-    private static JedisManager jedisManager = JedisManager.getInstance();
+    private static JedisManager jedisManager = JedisManager.getInstance("configs_rtb_redis.properties");
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
@@ -200,7 +201,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
             String format = LocalDateTime.now().format(formatter);//时间戳
-            targetDuFlowBean.setBidid(format + UUID.randomUUID());//bid id  时间戳+随机数不去重
+            targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
             targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
@@ -243,74 +244,85 @@ public class YouYiRequestServiceImpl implements RequestService {
         youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
         //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
-//                "&bidid=" + targetDuFlowBean.getBidid().substring(0, 20) +
-//                "&impid=" + youYiAdzone.getAdz_id() +
-//                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id
                 "&price=" + "__PRICE__" +
-//                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-//                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-//                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&act=" + format +
-//                "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
-//                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
-//                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
-//                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
-//                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-//                "&dcit=" + targetDuFlowBean.getCity() +// 市
-//                "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
-//                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +//app中文名称
-                "&appv=" + targetDuFlowBean.getAppVersion();//app版本
+                "&device=" + targetDuFlowBean.getDeviceId() +
+                "&appn=" + targetDuFlowBean.getAppPackageName() +
+                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
+                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
+                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//                "&impid=" + impression.getId() +
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
+
+
 
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
-//                "&bidid=" + targetDuFlowBean.getBidid().substring(0, 20) +
-//                "&impid=" + youYiAdzone.getAdz_id() +
-//                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id
                 "&price=" + "__PRICE__" +
-//                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-//                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-//                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&act=" + format +
-//                "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
-//                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
-//                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
-//                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
-//                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-//                "&dcit=" + targetDuFlowBean.getCity() +// 市
-//                "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
-//                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +//app中文名称
-                "&appv=" + targetDuFlowBean.getAppVersion();//app版本
-        youYiAd.setImp_para(nurl);//曝光通知
-        String curl = "id=" + targetDuFlowBean.getRequestId() +
-//                "&bidid=" + targetDuFlowBean.getBidid() +
-//                "&impid=" + youYiAdzone.getAdz_id() +
-                "&act=" + format +
-//                "&adx=" + targetDuFlowBean.getAdxId() +
-//                "&did=" + targetDuFlowBean.getDid() +
-//                "&device=" + targetDuFlowBean.getDeviceId() +
-//                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
-//                "&appn=" + targetDuFlowBean.getAppPackageName() +
-//                "&appv=" + targetDuFlowBean.getAppVersion() +
-//                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
-//                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
-//                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-//                "&dcit=" + targetDuFlowBean.getCity() +// 市
-//                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-//                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-//                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-//                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-//                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
-//                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&device=" + targetDuFlowBean.getDeviceId() +
+                "&appn=" + targetDuFlowBean.getAppPackageName() +
+                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
+                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
+                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//                "&impid=" + impression.getId() +
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
+
+        youYiAd.setImp_para(nurl);//曝光通知
+
+        String curl = "id=" + targetDuFlowBean.getRequestId() +
+                "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id
+                "&price=" + "__PRICE__" +
+                "&act=" + format +
+                "&device=" + targetDuFlowBean.getDeviceId() +
+                "&appn=" + targetDuFlowBean.getAppPackageName() +
+                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
+                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
+                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//                "&impid=" + impression.getId() +
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
         youYiAd.setClk_para(curl);//点击通知
         ads.add(youYiAd);
         youYiBidResponse.setAds(ads);
@@ -319,6 +331,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(targetDuFlowBean);
+                pushRedis(targetDuFlowBean);
             }
         });
 
@@ -332,6 +345,26 @@ public class YouYiRequestServiceImpl implements RequestService {
     }
 
 
+    /**
+     * 把生成的内部流转DUFlowBean上传到redis服务器 设置60分钟失效
+     *
+     * @param targetDuFlowBean
+     */
+    private void pushRedis(DUFlowBean targetDuFlowBean) {
+        log.debug("redis连接时间计数");
+        Jedis jedis = jedisManager.getResource();
+        try {
+            if (jedis != null) {
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
+            } else {
+                log.debug("jedis为空：{}", jedis);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     /**
      * 广告类型转换
      *

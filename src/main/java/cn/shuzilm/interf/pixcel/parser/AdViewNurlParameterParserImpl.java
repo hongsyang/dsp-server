@@ -70,7 +70,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 String adx = urlRequest.get("adx");
                 element.setAdxId(adx);
 
-                String did = urlRequest.get("did");
+                String did = urlRequest.get("device");
                 element.setDid(did);
 
                 String device = urlRequest.get("device");
