@@ -26,19 +26,21 @@ public class CheckAdStatus {
 		return checkAdStatus;
 	}
 	
-	public boolean getAdStatus(String adUid,boolean isUpdate){
+	public boolean getAdStatus(String adUid,boolean isUpdate,boolean isBalance){
 		
 		MDC.put("sift", "control");
 		
 		String advertiserId = adFlowControl.getMapAd().get(adUid).getAdvertiser().getUid();
 		
+		if(isBalance){
 		 if(adFlowControl.getAdvertiserBalanceMap().containsKey(advertiserId)){
-         	if(adFlowControl.getAdvertiserBalanceMap().get(advertiserId) <= 500){
+         	if(adFlowControl.getAdvertiserBalanceMap().get(advertiserId) <= 1500){
          		String reason = advertiserId+"#### 广告主余额不足! ###";
          		myLog.error(advertiserId+" 广告主未开启原因:"+reason);
          		return false;
          	}
          }
+		}
 		
 		AdFlowStatus threshold = adFlowControl.getMapThresholdHour().get(adUid);
         AdFlowStatus monitor = adFlowControl.getMapMonitorHour().get(adUid);
