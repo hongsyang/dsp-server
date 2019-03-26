@@ -6,6 +6,7 @@ import cn.shuzilm.bean.adview.response.*;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.common.jedis.RtbJedisManager;
 import cn.shuzilm.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.MDC;
@@ -35,7 +36,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewRequestServiceImpl.class);
 
-    private static JedisManager jedisManager = JedisManager.getInstance("configs_rtb_redis.properties");
+    private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 

@@ -9,6 +9,7 @@ import cn.shuzilm.bean.tencent.response.TencentBidResponse;
 import cn.shuzilm.bean.tencent.response.TencentSeatBid;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.common.jedis.RtbJedisManager;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
@@ -54,7 +55,7 @@ public class TencentRequestServiceImpl implements RequestService {
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
-    private static JedisManager jedisManager = JedisManager.getInstance("configs_rtb_redis.properties");
+    private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
     private static WidthAndHeightListUtil widthAndHeightListUtil = WidthAndHeightListUtil.getInstance();
 

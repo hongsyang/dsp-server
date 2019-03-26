@@ -9,6 +9,7 @@ import cn.shuzilm.bean.lj.request.*;
 import cn.shuzilm.bean.lj.response.*;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.common.jedis.RtbJedisManager;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.*;
 import com.alibaba.fastjson.JSON;
@@ -44,7 +45,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static final String ADX_ID = "1";
 
-    private static JedisManager jedisManager = JedisManager.getInstance("configs_rtb_redis.properties");
+    private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 

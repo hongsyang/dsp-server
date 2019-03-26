@@ -2,6 +2,7 @@ package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.common.jedis.RtbJedisManager;
 import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.*;
 import com.google.common.collect.Lists;
@@ -52,7 +53,7 @@ public class YouYiRequestServiceImpl implements RequestService {
 
     private static final String ADX_ID = "3";
 
-    private static JedisManager jedisManager = JedisManager.getInstance("configs_rtb_redis.properties");
+    private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
