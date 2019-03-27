@@ -539,7 +539,6 @@ public class AdViewRequestServiceImpl implements RequestService {
         bidList.add(bid);
         seatBid.setBid(bidList);
         seatBidList.add(seatBid);
-        bidResponseBean.setSeatbid(seatBidList);
         long start = System.currentTimeMillis();
         executor.execute(new Runnable() {
             @Override
@@ -559,6 +558,7 @@ public class AdViewRequestServiceImpl implements RequestService {
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
+        bidResponseBean.setSeatbid(seatBidList);
         log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
     }
