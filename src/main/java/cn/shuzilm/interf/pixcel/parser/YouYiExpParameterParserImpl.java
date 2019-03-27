@@ -48,6 +48,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
         log.debug("YouYiExp曝光转换之后的url值:{}", urlRequest);
 
         DUFlowBean element = new DUFlowBean();
+        element.setWinNoticeTime(new Date().getTime());
         String requestId = urlRequest.get("id");
         try {
             if (SSDBUtil.getDUFlowBean(requestId) != null) {
@@ -66,7 +67,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                 element.setDeviceId(device);
                 String appn = urlRequest.get("appn").equals("null") ? "" : urlRequest.get("appn");//App包名
                 element.setAppPackageName(appn);
-               // 溢价系数
+                // 溢价系数
                 String premiumFactor = urlRequest.get("pf");//溢价系数
                 element.setPremiumFactor(Double.valueOf(premiumFactor));
 
@@ -132,6 +133,10 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的YouYiExpBean：{}", bean);
             AdPixelBean adPixelBean = pixelFlowControl.sendStatus(bean);//价格返回结果
+            String impressionId = null;
+            if (element.getImpression() != null) {
+                impressionId = element.getImpression().get(0).getId();
+            }
 
             //pixel服务器发送到Phoenix
             element.setInfoId(urlRequest.get("id") + UUID.randomUUID());
@@ -157,7 +162,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(), element.getImpression().get(0).getId(),
+                    element.getRequestId(), impressionId,
                     element.getDealid(), element.getAppId(), element.getBidid(),
                     price, element.getIpAddr(), urlRequest.get("remoteIp"),
                     element.getMaterialId());

@@ -44,7 +44,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         log.debug("LingJiExp转换之后曝光的nurl值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
-
+        element.setWinNoticeTime(new Date().getTime());
         String requestId = urlRequest.get("id");
         try {
             if (SSDBUtil.getDUFlowBean(requestId) != null) {

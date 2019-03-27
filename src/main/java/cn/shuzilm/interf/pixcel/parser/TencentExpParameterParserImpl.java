@@ -48,6 +48,7 @@ public class TencentExpParameterParserImpl implements ParameterParser {
         log.debug("TencentExp曝光转换之后的url值:{}", urlRequest);
 
         DUFlowBean element = new DUFlowBean();
+        element.setWinNoticeTime(new Date().getTime());
         String requestId = urlRequest.get("impparam");
         try {
             if (SSDBUtil.getDUFlowBean(requestId) != null) {

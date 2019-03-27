@@ -44,6 +44,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
         Map<String, String> urlRequest = UrlParserUtil.urlRequest(url);
         log.debug("AdViewNurl曝光转换之后的url值:{}", urlRequest);
         DUFlowBean element = new DUFlowBean();
+        element.setWinNoticeTime(new Date().getTime());
         String requestId = urlRequest.get("id");
         try {
             if (SSDBUtil.getDUFlowBean(requestId) != null) {
