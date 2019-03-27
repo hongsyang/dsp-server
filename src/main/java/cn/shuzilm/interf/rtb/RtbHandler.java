@@ -138,6 +138,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
 
             log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
             try {
+
                 result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
 
             } catch (TimeoutException e) {
