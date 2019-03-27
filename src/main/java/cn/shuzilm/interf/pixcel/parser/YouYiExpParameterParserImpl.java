@@ -8,6 +8,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.RedisUtil;
 import cn.shuzilm.util.SSDBUtil;
 import cn.shuzilm.util.UrlParserUtil;
 import cn.shuzilm.util.base64.AdViewDecodeUtil;
@@ -89,25 +90,27 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
                 element.setAdxSource("YouYi");
                 //--------------------------------------------------不一定传过来，从redis中获取，如果没有就不要了
 
-                String impid = urlRequest.get("impid");
-                List<Impression> list = new ArrayList();
-                Impression impression = new Impression();
-                impression.setId(impid);
-                list.add(impression);
-                element.setImpression(list);
+                if (RedisUtil.getDUFlowBean(requestId) != null) {
+                    DUFlowBean duFlowBean = RedisUtil.getDUFlowBean(requestId);
+                    List<Impression> list = new ArrayList();
+                    Impression impression = new Impression();
+                    impression.setId(duFlowBean.getImpression().get(0).getId());
+                    list.add(impression);
+                    element.setImpression(list);
+                    String app = duFlowBean.getAppName().equals("null") ? "" : urlRequest.get("app");
+                    element.setAppName(app);
+                    String appv = duFlowBean.getAppVersion().equals("null") ? "" : urlRequest.get("appv");
+                    element.setAppVersion(appv);
+                    String dpro = duFlowBean.getProvince().equals("null") ? "" : urlRequest.get("dpro");
+                    element.setProvince(dpro);
+                    String dcit = duFlowBean.getCity().equals("null") ? "" : urlRequest.get("dcit");
+                    element.setCity(dcit);
+                    String dcou = duFlowBean.getCountry().equals("null") ? "" : urlRequest.get("dcou");
+                    element.setCountry(dcou);
+                    String pmp = duFlowBean.getDealid().equals("null") ? "" : urlRequest.get("pmp");
+                    element.setDealid(pmp);
 
-
-                String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
-                element.setProvince(dpro);
-                String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
-                element.setCity(dcit);
-                String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
-                element.setCountry(dcou);
-                String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-                element.setAppName(URLDecoder.decode(app));
-                String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-                element.setAppVersion(appv);
-
+                }
 
             }
 
