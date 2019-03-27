@@ -54,7 +54,6 @@ public class SSDBUtil {
      * @param targetDuFlowBean
      */
     public static void pushSSDB(DUFlowBean targetDuFlowBean) {
-        log.debug("ssdb连接时间计数");
         String duFlowBeanJson = JSON.toJSONString(targetDuFlowBean);
         try {
             if (simpleClient != null) {

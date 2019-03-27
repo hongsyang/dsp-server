@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -39,6 +38,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
+
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
@@ -53,13 +53,14 @@ public class AdViewRequestServiceImpl implements RequestService {
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
 
-
     private static final String RTB_REDIS_FILTER_CONFIG = "configs_rtb_redis.properties";
 
     private static AppConfigs redisConfigs = AppConfigs.getInstance(RTB_REDIS_FILTER_CONFIG);
 
 
-    private static  JedisPool resource =  new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"),redisConfigs.getInt("REDIS_SERVER_PORT"));
+    private static JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
+
+    private  static Jedis jedis = resource.getResource();
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
@@ -319,7 +320,7 @@ public class AdViewRequestServiceImpl implements RequestService {
     private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, BidRequestBean bidRequestBean) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         String format = LocalDateTime.now().format(formatter);//时间戳
         bidResponseBean.setId(duFlowBean.getRequestId());//从bidRequestBean里面取 bidRequest的id
         bidResponseBean.setBidid(duFlowBean.getBidid());//BidResponse 的唯一标识,由 DSP生成
@@ -484,7 +485,6 @@ public class AdViewRequestServiceImpl implements RequestService {
 //                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
 
 
-
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
         bid.setAdurl(landingUrl);//广告点击跳转落地页，可以支持重定向
@@ -538,19 +538,28 @@ public class AdViewRequestServiceImpl implements RequestService {
         bidList.add(bid);
         seatBid.setBid(bidList);
         seatBidList.add(seatBid);
-        bidResponseBean.setSeatbid(seatBidList);
         long start = System.currentTimeMillis();
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(duFlowBean);
-                pushRedis(duFlowBean);
+                RedisUtil.pushRedis(duFlowBean);
+//                pushRedis(duFlowBean);
             }
         });
 
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//               RedisUtil.pushRedis(duFlowBean);
+//            }
+//        });
+
+//        RedisUtil.pushRedis(duFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
+        bidResponseBean.setSeatbid(seatBidList);
         log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
     }
@@ -561,25 +570,31 @@ public class AdViewRequestServiceImpl implements RequestService {
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
-        Jedis jedis = resource.getResource();
         MDC.put("sift", "redis");
         try {
             if (jedis != null) {
-
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
-                MDC.remove("sift");
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
             } else {
-                JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
-                this.resource=resource;
-                log.debug("jedis为空：{}", jedis);
-                log.debug("resource：{}", resource);
+                jedis = RtbJedisManager.getInstance("configs_rtb_redis.properties").getResource();
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("jedis为空：{},重新加载", jedis);
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
+                MDC.remove("sift");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            resource.returnBrokenResource(jedis);
+            MDC.put("sift", "redis");
+            log.error(" jedis Exception :{}", e);
+            MDC.remove("sift");
+        } finally {
+            resource.returnResource(jedis);
         }
     }
+
+
 
     /**
      * 广告类型转换
