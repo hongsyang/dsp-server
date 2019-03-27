@@ -11,10 +11,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import cn.shuzilm.common.jedis.RtbJedisManager;
 import cn.shuzilm.filter.FilterRule;
-import cn.shuzilm.util.HttpClientUtil;
-import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.SSDBUtil;
-import cn.shuzilm.util.WidthAndHeightListUtil;
+import cn.shuzilm.util.*;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -322,11 +319,10 @@ public class TencentRequestServiceImpl implements RequestService {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                MDC.put("sift", "redis");
-//                log.debug("duFlowBean:{}", JSON.toJSONString(targetDuFlowBean));
-                pushRedis(targetDuFlowBean);
+                RedisUtil.pushRedis(targetDuFlowBean);
             }
         });
+
 //        pushRedis(targetDuFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);

@@ -84,26 +84,27 @@ public class AdViewClickParameterParserImpl implements ParameterParser {
                 element.setAdxSource("AdView");
                 //--------------------------------------------------不一定传过来，从redis中获取，如果没有就不要了
 
+                if (false) {
+                    String impid = urlRequest.get("impid");
+                    List<Impression> list = new ArrayList();
+                    Impression impression = new Impression();
+                    impression.setId(impid);
+                    list.add(impression);
+                    element.setImpression(list);
+                    String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
+                    element.setAppName(URLDecoder.decode(app));
+                    String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
+                    element.setAppVersion(appv);
+                    String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
+                    element.setProvince(dpro);
+                    String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
+                    element.setCity(dcit);
+                    String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
+                    element.setCountry(dcou);
+                    String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
+                    element.setDealid(pmp);
 
-
-                String impid = urlRequest.get("impid");
-                List<Impression> list = new ArrayList();
-                Impression impression = new Impression();
-                impression.setId(impid);
-                list.add(impression);
-                element.setImpression(list);
-                String app = urlRequest.get("app").equals("null") ? "" : urlRequest.get("app");
-                element.setAppName(URLDecoder.decode(app));
-                String appv = urlRequest.get("appv").equals("null") ? "" : urlRequest.get("appv");
-                element.setAppVersion(appv);
-                String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");
-                element.setProvince(dpro);
-                String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");
-                element.setCity(dcit);
-                String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");
-                element.setCountry(dcou);
-                String pmp = urlRequest.get("pmp").equals("null") ? "" : urlRequest.get("pmp");
-                element.setDealid(pmp);
+                }
 
 
             }

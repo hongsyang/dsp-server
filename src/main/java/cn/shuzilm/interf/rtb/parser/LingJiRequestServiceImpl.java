@@ -541,11 +541,10 @@ public class LingJiRequestServiceImpl implements RequestService {
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                MDC.put("sift", "redis");
-//                log.debug("duFlowBean:{}", JSON.toJSONString(duFlowBean));
-                pushRedis(duFlowBean);
+                RedisUtil.pushRedis(duFlowBean);
             }
         });
+
 //        pushRedis(duFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
