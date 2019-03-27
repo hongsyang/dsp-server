@@ -98,7 +98,7 @@ public class RedisUtil {
             log.error(" jedis Exception :{}", e);
         } finally {
 //            resource.returnResource(jedis);
-            jedis.close();
+//            jedis.close();//不关闭连接
         }
         return duFlowBean;
     }
