@@ -185,5 +185,9 @@ public class AdTagBlackListUtil {
         }
     }
 
+    public static void stopTask(){
+        adLocationSet = new HashSet();
+    }
+
 
 }
