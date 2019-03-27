@@ -105,6 +105,18 @@ public class LingJiImpParameterParserImpl implements ParameterParser {
                     String pmp = duFlowBean.getDealid().equals("null") ? "" : urlRequest.get("pmp");
                     element.setDealid(pmp);
 
+                }else {
+                    List<Impression> list = new ArrayList();
+                    Impression impression = new Impression();
+                    impression.setId("");
+                    list.add(impression);
+                    element.setImpression(list);
+                    element.setAppName("");
+                    element.setAppVersion("");
+                    element.setProvince("");
+                    element.setCity("");
+                    element.setCountry("");
+                    element.setDealid("");
                 }
             }
             if (MD5Util.MD5(MD5Util.MD5(requestId)).equals(element.getBidid())) {

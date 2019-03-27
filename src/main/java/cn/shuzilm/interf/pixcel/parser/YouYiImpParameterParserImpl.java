@@ -105,6 +105,18 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
                     String pmp = duFlowBean.getDealid().equals("null") ? "" : urlRequest.get("pmp");
                     element.setDealid(pmp);
 
+                }else {
+                    List<Impression> list = new ArrayList();
+                    Impression impression = new Impression();
+                    impression.setId("");
+                    list.add(impression);
+                    element.setImpression(list);
+                    element.setAppName("");
+                    element.setAppVersion("");
+                    element.setProvince("");
+                    element.setCity("");
+                    element.setCountry("");
+                    element.setDealid("");
                 }
 
 
@@ -118,6 +130,10 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
             element.setRequestId(requestId);
             MDC.put("sift", "YouYiNurl");
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
+            String impressionId = null;
+            if (element.getImpression() != null) {
+                impressionId = element.getImpression().get(0).getId();
+            }
             MDC.put("phoenix", "Nurl");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
                             "\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
@@ -133,7 +149,7 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
                     element.getAgencyProfit(), element.getOurProfit(),
                     element.getAdxId(), element.getAppName(),
                     element.getAppPackageName(), element.getAppVersion(),
-                    element.getRequestId(), element.getImpression().get(0).getId(),
+                    element.getRequestId(),impressionId,
                     element.getDealid(), element.getAppId(), element.getBidid(),
                     price,element.getIpAddr(),urlRequest.get("remoteIp"),
                     element.getMaterialId());
