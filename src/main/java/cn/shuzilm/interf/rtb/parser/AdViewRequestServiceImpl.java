@@ -543,8 +543,8 @@ public class AdViewRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(duFlowBean);
-//                RedisUtil.pushRedis(duFlowBean);
-                pushRedis(duFlowBean);
+                RedisUtil.pushRedis(duFlowBean);
+//                pushRedis(duFlowBean);
             }
         });
 

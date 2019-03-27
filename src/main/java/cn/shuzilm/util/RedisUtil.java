@@ -3,6 +3,7 @@ package cn.shuzilm.util;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.RtbJedisManager;
+import cn.shuzilm.common.redis.RedisQueueManager;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.nutz.ssdb4j.impl.SimpleClient;
@@ -21,7 +22,8 @@ public class RedisUtil {
 
     private static JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
 
-    private static Jedis jedis = resource.getResource();
+    private static Jedis jedis = new Jedis(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
+
 
 
     public static void main(String[] args) {
@@ -55,11 +57,12 @@ public class RedisUtil {
                 log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
             }
         } catch (Exception e) {
-            resource.returnBrokenResource(jedis);
+//            resource.returnBrokenResource(jedis);
             MDC.put("sift", "redis");
             log.error(" jedis Exception :{}", e);
         } finally {
-            resource.returnResource(jedis);
+//            resource.returnResource(jedis);
+            jedis.close();
         }
 
     }
