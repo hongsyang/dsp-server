@@ -544,10 +544,15 @@ public class AdViewRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(duFlowBean);
-                pushRedis(duFlowBean);
             }
         });
 
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                pushRedis(duFlowBean);
+            }
+        });
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");

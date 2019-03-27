@@ -535,6 +535,11 @@ public class LingJiRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(duFlowBean);
+            }
+        });
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
                 pushRedis(duFlowBean);
             }
         });

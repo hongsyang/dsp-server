@@ -314,10 +314,15 @@ public class TencentRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(targetDuFlowBean);
-                pushRedis(targetDuFlowBean);
             }
         });
 
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                pushRedis(targetDuFlowBean);
+            }
+        });
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");

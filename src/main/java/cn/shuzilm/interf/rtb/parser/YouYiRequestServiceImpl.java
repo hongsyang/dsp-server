@@ -340,6 +340,11 @@ public class YouYiRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(targetDuFlowBean);
+            }
+        });
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
                 pushRedis(targetDuFlowBean);
             }
         });
