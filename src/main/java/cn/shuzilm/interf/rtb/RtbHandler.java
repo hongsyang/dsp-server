@@ -132,14 +132,25 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 @Override
                 public Object call() throws Exception {
                     //主业务逻辑
-                    return parser.parseData(url, dataStr, remoteIp,executor);
+                    return parser.parseData(url, dataStr, remoteIp, executor);
                 }
             });
 
             log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
             try {
-
-                result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
+                if (url.contains("youyi")) {
+                    result = (String) future.get(configs.getInt("YOUYI_TIME_OUT"), TimeUnit.MILLISECONDS);
+                } else if (url.contains("tencent")) {
+                    result = (String) future.get(configs.getInt("TENCENT_TIME_OUT"), TimeUnit.MILLISECONDS);
+                } else if (url.contains("baidu")) {
+                    result = (String) future.get(configs.getInt("BAIDU_TIME_OUT"), TimeUnit.MILLISECONDS);
+                } else if (url.contains("lingji")) {
+                    result = (String) future.get(configs.getInt("LINGJI_TIME_OUT"), TimeUnit.MILLISECONDS);
+                } else if (url.contains("adview")) {
+                    result = (String) future.get(configs.getInt("ADVIEW_TIME_OUT"), TimeUnit.MILLISECONDS);
+                } else {
+                    result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
+                }
 
             } catch (TimeoutException e) {
                 timeOutFlag = 0;
@@ -425,7 +436,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
      */
     public String parseRequest(String url, String dataStr, String remoteIp) throws Exception {
         /**********		POST主业务逻辑		***************/
-        String resultData = parser.parseData(url, dataStr, remoteIp,  executor);//SDK 2.0.1
+        String resultData = parser.parseData(url, dataStr, remoteIp, executor);//SDK 2.0.1
 
         byte[] content = null;
         content = resultData.getBytes("utf-8");
