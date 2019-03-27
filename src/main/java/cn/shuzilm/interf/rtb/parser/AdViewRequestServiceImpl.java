@@ -544,15 +544,16 @@ public class AdViewRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(duFlowBean);
+                RedisUtil.pushRedis(duFlowBean);
             }
         });
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-               RedisUtil.pushRedis(duFlowBean);
-            }
-        });
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//               RedisUtil.pushRedis(duFlowBean);
+//            }
+//        });
 
 //        RedisUtil.pushRedis(duFlowBean);
         long end = System.currentTimeMillis();
