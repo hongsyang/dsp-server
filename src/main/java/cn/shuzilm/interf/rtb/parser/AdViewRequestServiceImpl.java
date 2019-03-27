@@ -548,14 +548,14 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
         });
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-               RedisUtil.pushRedis(duFlowBean);
-            }
-        });
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//               RedisUtil.pushRedis(duFlowBean);
+//            }
+//        });
 
-
+        RedisUtil.pushRedis(duFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
