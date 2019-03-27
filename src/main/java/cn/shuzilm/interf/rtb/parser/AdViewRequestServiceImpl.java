@@ -37,7 +37,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewRequestServiceImpl.class);
 
-    private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
+    private  RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
@@ -571,18 +571,20 @@ public class AdViewRequestServiceImpl implements RequestService {
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
-        Jedis jedis = resource.getResource();
+        Jedis jedis = jedisManager.getResource();
         MDC.put("sift", "redis");
             if (jedis != null) {
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
                 log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
-                MDC.remove("sift");
+               
             } else {
-                JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
-                this.resource=resource;
-                log.debug("jedis为空：{}", jedis);
-                log.debug("resource：{}", resource);
+                jedis = RtbJedisManager.getInstance("configs_rtb_redis.properties").getResource();
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("jedis为空：{},重新加载", jedis);
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
+                MDC.remove("sift");
             }
 
     }
