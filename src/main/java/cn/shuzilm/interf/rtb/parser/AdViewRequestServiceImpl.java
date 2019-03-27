@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -544,7 +543,8 @@ public class AdViewRequestServiceImpl implements RequestService {
             @Override
             public void run() {
                 SSDBUtil.pushSSDB(duFlowBean);
-                RedisUtil.pushRedis(duFlowBean);
+//                RedisUtil.pushRedis(duFlowBean);
+                pushRedis(duFlowBean);
             }
         });
 
@@ -562,6 +562,36 @@ public class AdViewRequestServiceImpl implements RequestService {
         bidResponseBean.setSeatbid(seatBidList);
         log.debug("bidResponseBean:{}", JSON.toJSONString(bidResponseBean));
         return bidResponseBean;
+    }
+
+    /**
+     * 把生成的内部流转DUFlowBean上传到redis服务器 设置60分钟失效
+     *
+     * @param targetDuFlowBean
+     */
+    private void pushRedis(DUFlowBean targetDuFlowBean) {
+        MDC.put("sift", "redis");
+        try {
+            if (jedis != null) {
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
+            } else {
+                jedis = RtbJedisManager.getInstance("configs_rtb_redis.properties").getResource();
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("jedis为空：{},重新加载", jedis);
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
+                MDC.remove("sift");
+            }
+        } catch (Exception e) {
+            resource.returnBrokenResource(jedis);
+            MDC.put("sift", "redis");
+            log.error(" jedis Exception :{}", e);
+            MDC.remove("sift");
+        } finally {
+            resource.returnResource(jedis);
+        }
     }
 
 
