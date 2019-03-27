@@ -37,7 +37,9 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(AdViewRequestServiceImpl.class);
 
-    private  RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
+    private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
+
+    private static Jedis jedis = jedisManager.getResource();
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
@@ -53,13 +55,12 @@ public class AdViewRequestServiceImpl implements RequestService {
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
 
-
     private static final String RTB_REDIS_FILTER_CONFIG = "configs_rtb_redis.properties";
 
     private static AppConfigs redisConfigs = AppConfigs.getInstance(RTB_REDIS_FILTER_CONFIG);
 
 
-    private   JedisPool resource =  new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"),redisConfigs.getInt("REDIS_SERVER_PORT"));
+    private JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
@@ -484,7 +485,6 @@ public class AdViewRequestServiceImpl implements RequestService {
 //                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
 
 
-
         bid.setWurl(wurl);//赢价通知，由 AdView 服务器 发出  编码格式的 CPM 价格*10000，如价格为 CPM 价格 0.6 元，则取值0.6*10000=6000。
 
         bid.setAdurl(landingUrl);//广告点击跳转落地页，可以支持重定向
@@ -571,23 +571,29 @@ public class AdViewRequestServiceImpl implements RequestService {
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
-        Jedis jedis = jedisManager.getResource();
         MDC.put("sift", "redis");
+        try {
             if (jedis != null) {
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
                 jedis.close();
-
             } else {
                 jedis = RtbJedisManager.getInstance("configs_rtb_redis.properties").getResource();
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
                 log.debug("jedis为空：{},重新加载", jedis);
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
                 MDC.remove("sift");
                 jedis.close();
             }
+        } catch (Exception e) {
+            MDC.put("sift", "redis");
+            log.error(" jedis Exception :{}", e);
+            MDC.remove("sift");
+        } finally {
+            jedis.close();
+        }
 
 
     }
