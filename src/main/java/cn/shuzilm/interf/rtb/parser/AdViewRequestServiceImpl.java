@@ -39,7 +39,6 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
-    private  Jedis jedis = jedisManager.getResource();
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
@@ -60,7 +59,9 @@ public class AdViewRequestServiceImpl implements RequestService {
     private static AppConfigs redisConfigs = AppConfigs.getInstance(RTB_REDIS_FILTER_CONFIG);
 
 
-    private JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
+    private static JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
+
+    private  static Jedis jedis = resource.getResource();
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
@@ -586,11 +587,12 @@ public class AdViewRequestServiceImpl implements RequestService {
                 MDC.remove("sift");
             }
         } catch (Exception e) {
+            resource.returnBrokenResource(jedis);
             MDC.put("sift", "redis");
             log.error(" jedis Exception :{}", e);
             MDC.remove("sift");
         } finally {
-            jedis.close();
+            resource.returnResource(jedis);
         }
 
 

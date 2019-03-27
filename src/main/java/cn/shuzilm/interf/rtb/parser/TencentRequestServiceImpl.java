@@ -58,7 +58,6 @@ public class TencentRequestServiceImpl implements RequestService {
 
     private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
-    private  Jedis jedis = jedisManager.getResource();
 
     private static WidthAndHeightListUtil widthAndHeightListUtil = WidthAndHeightListUtil.getInstance();
 
@@ -70,8 +69,9 @@ public class TencentRequestServiceImpl implements RequestService {
     private static AppConfigs redisConfigs = AppConfigs.getInstance(RTB_REDIS_FILTER_CONFIG);
 
 
-    private static  JedisPool resource =  new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"),redisConfigs.getInt("REDIS_SERVER_PORT"));
+    private static JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
 
+    private  static Jedis jedis = resource.getResource();
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
@@ -348,21 +348,22 @@ public class TencentRequestServiceImpl implements RequestService {
             if (jedis != null) {
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
             } else {
                 jedis = RtbJedisManager.getInstance("configs_rtb_redis.properties").getResource();
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
                 log.debug("jedis为空：{},重新加载", jedis);
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
                 MDC.remove("sift");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
+            resource.returnBrokenResource(jedis);
             MDC.put("sift", "redis");
             log.error(" jedis Exception :{}", e);
             MDC.remove("sift");
         } finally {
-            jedis.close();
+            resource.returnResource(jedis);
         }
     }
 
