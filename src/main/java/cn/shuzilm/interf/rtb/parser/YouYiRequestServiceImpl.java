@@ -342,13 +342,13 @@ public class YouYiRequestServiceImpl implements RequestService {
                 SSDBUtil.pushSSDB(targetDuFlowBean);
             }
         });
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                pushRedis(targetDuFlowBean);
-            }
-        });
-
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                pushRedis(targetDuFlowBean);
+//            }
+//        });
+        pushRedis(targetDuFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
 

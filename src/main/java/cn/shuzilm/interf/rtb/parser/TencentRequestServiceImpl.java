@@ -317,12 +317,13 @@ public class TencentRequestServiceImpl implements RequestService {
             }
         });
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                pushRedis(targetDuFlowBean);
-            }
-        });
+//        executor.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                pushRedis(targetDuFlowBean);
+//            }
+//        });
+        pushRedis(targetDuFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
