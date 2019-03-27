@@ -92,11 +92,12 @@ public class RedisUtil {
                 }
             }
         } catch (Exception e) {
-            resource.returnBrokenResource(jedis);
+//            resource.returnBrokenResource(jedis);
             MDC.put("sift", "redis");
             log.error(" jedis Exception :{}", e);
         } finally {
-            resource.returnResource(jedis);
+//            resource.returnResource(jedis);
+            jedis.close();
         }
         return duFlowBean;
     }
