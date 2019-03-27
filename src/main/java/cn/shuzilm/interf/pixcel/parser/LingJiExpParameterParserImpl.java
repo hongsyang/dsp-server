@@ -58,7 +58,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
                 element.setBidid(urlRequest.get("bidid"));//去重id
 
                 String act = urlRequest.get("act");
-                element.setWinNoticeTime(Long.valueOf(act));//竞价的时候，带过来的点击时间
+                element.setWinNoticeTime(new Date().getTime());
                 String did = urlRequest.get("device");//数盟设备id
                 element.setDid(did);
                 String device = urlRequest.get("device");//设备id
