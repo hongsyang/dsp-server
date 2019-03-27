@@ -566,7 +566,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
             Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
             log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
-
+            jedis.close();
         } else {
             jedis = RtbJedisManager.getInstance("configs_rtb_redis.properties").getResource();
             String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
@@ -574,6 +574,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             log.debug("jedis为空：{},重新加载", jedis);
             log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
             MDC.remove("sift");
+            jedis.close();
         }
     }
 

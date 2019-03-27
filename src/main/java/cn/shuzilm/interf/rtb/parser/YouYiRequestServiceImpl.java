@@ -381,6 +381,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             log.debug("jedis为空：{},重新加载", jedis);
             log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire,targetDuFlowBean.getRequestId());
             MDC.remove("sift");
+            jedis.close();
         }
     }
     /**
