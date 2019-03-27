@@ -96,7 +96,7 @@ public class RtbJedisManager {
 //            jedis.select(configs.getInt("REDIS_DBNUM"));
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("Failed to get jedis resource, reason is :" + e.getMessage());
+            log.error(" jedis resource, reason is :{}", e);
         }
         return jedis;
     }
