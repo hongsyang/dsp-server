@@ -51,7 +51,10 @@ public class RtbJedisManager {
         this.jedisPool = new JedisPool(config,configs.getString("REDIS_SERVER_HOST"),configs.getInt("REDIS_SERVER_PORT"),REDIS_POOL_DEFAULT_TIMEOUT);
     }
     public static RtbJedisManager getInstance(String redisConfigName ) {
+
         if(!instanceMap.containsKey(redisConfigName)){
+            MDC.put("sift", "redis");
+            log.debug("redisConfigName:{}",redisConfigName);
             RtbJedisManager ins = null;
             synchronized (lock2) {
                 ins = new RtbJedisManager(redisConfigName);
