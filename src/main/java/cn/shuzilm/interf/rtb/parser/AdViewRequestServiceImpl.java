@@ -59,7 +59,7 @@ public class AdViewRequestServiceImpl implements RequestService {
     private static AppConfigs redisConfigs = AppConfigs.getInstance(RTB_REDIS_FILTER_CONFIG);
 
 
-    private static  JedisPool resource =  new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"),redisConfigs.getInt("REDIS_SERVER_PORT"));
+    private   JedisPool resource =  new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"),redisConfigs.getInt("REDIS_SERVER_PORT"));
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
@@ -553,6 +553,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 pushRedis(duFlowBean);
             }
         });
+        pushRedis(duFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");
@@ -568,9 +569,8 @@ public class AdViewRequestServiceImpl implements RequestService {
     private void pushRedis(DUFlowBean targetDuFlowBean) {
         Jedis jedis = resource.getResource();
         MDC.put("sift", "redis");
-        try {
+ 
             if (jedis != null) {
-
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
                 log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
@@ -581,9 +581,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                 log.debug("jedis为空：{}", jedis);
                 log.debug("resource：{}", resource);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
     }
 
     /**
