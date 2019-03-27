@@ -569,7 +569,6 @@ public class AdViewRequestServiceImpl implements RequestService {
     private void pushRedis(DUFlowBean targetDuFlowBean) {
         Jedis jedis = resource.getResource();
         MDC.put("sift", "redis");
- 
             if (jedis != null) {
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
                 Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
