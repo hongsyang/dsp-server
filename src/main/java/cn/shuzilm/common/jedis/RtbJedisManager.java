@@ -89,8 +89,8 @@ public class RtbJedisManager {
     public Jedis getResource() {
         Jedis jedis = null;
         try {
-            jedis = jedisPool.getResource();
             MDC.put("sift", "redis");
+            jedis = jedisPool.getResource();
             log.debug("redis:{}",jedis);
 //            jedis.auth(configs.getString("REDIS_PASSWORD"));
 //            jedis.select(configs.getInt("REDIS_DBNUM"));

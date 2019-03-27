@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -60,6 +61,14 @@ public class TencentRequestServiceImpl implements RequestService {
     private static WidthAndHeightListUtil widthAndHeightListUtil = WidthAndHeightListUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
+
+
+    private static final String RTB_REDIS_FILTER_CONFIG = "configs_rtb_redis.properties";
+
+    private static AppConfigs redisConfigs = AppConfigs.getInstance(RTB_REDIS_FILTER_CONFIG);
+
+
+    private static  JedisPool resource =  new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"),redisConfigs.getInt("REDIS_SERVER_PORT"));
 
 
     //上传到ssdb 业务线程池
@@ -324,16 +333,20 @@ public class TencentRequestServiceImpl implements RequestService {
      * @param targetDuFlowBean
      */
     private void pushRedis(DUFlowBean targetDuFlowBean) {
-        log.debug("redis连接时间计数");
-        Jedis jedis = jedisManager.getResource();
+        Jedis jedis = resource.getResource();
+        MDC.put("sift", "redis");
         try {
             if (jedis != null) {
-                log.debug("jedis：{}", jedis);
+
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为5分钟
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
                 log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
+                MDC.remove("sift");
             } else {
+                JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
+                this.resource=resource;
                 log.debug("jedis为空：{}", jedis);
+                log.debug("resource：{}", resource);
             }
         } catch (Exception e) {
             e.printStackTrace();
