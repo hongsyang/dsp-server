@@ -140,6 +140,10 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                 element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
                 element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
                 MDC.put("sift", "AdViewNurl");
+                String impressionId = null;
+                if (element.getImpression() != null) {
+                    impressionId = element.getImpression().get(0).getId();
+                }
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
                 MDC.put("phoenix", "Nurl");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
@@ -156,7 +160,7 @@ public class AdViewNurlParameterParserImpl implements ParameterParser {
                         element.getAgencyProfit(), element.getOurProfit(),
                         element.getAdxId(), element.getAppName(),
                         element.getAppPackageName(), element.getAppVersion(),
-                        element.getRequestId(), element.getImpression().get(0).getId(),
+                        element.getRequestId(), impressionId,
                         element.getDealid(), element.getAppId(), element.getBidid(),
                         price, element.getIpAddr(), urlRequest.get("remoteIp"),
                         element.getMaterialId());
