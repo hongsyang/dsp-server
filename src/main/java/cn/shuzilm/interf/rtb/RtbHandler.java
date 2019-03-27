@@ -139,17 +139,15 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("超时时间设置：{}", configs.getInt("TIME_OUT"));
             try {
                 if (url.contains("youyi")) {
-
+                    result = (String) future.get(configs.getInt("YOUYI_TIME_OUT"), TimeUnit.MILLISECONDS);
                 } else if (url.contains("tencent")) {
-
-                    //增加百度解析
+                    result = (String) future.get(configs.getInt("TENCENT_TIME_OUT"), TimeUnit.MILLISECONDS);
                 } else if (url.contains("baidu")) {
-
+                    result = (String) future.get(configs.getInt("BAIDU_TIME_OUT"), TimeUnit.MILLISECONDS);
                 } else if (url.contains("lingji")) {
-
-                } else if (url.contains("baidu")) {
-
-                    result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
+                    result = (String) future.get(configs.getInt("LINGJI_TIME_OUT"), TimeUnit.MILLISECONDS);
+                } else if (url.contains("adview")) {
+                    result = (String) future.get(configs.getInt("ADVIEW_TIME_OUT"), TimeUnit.MILLISECONDS);
                 } else {
                     result = (String) future.get(configs.getInt("TIME_OUT"), TimeUnit.MILLISECONDS);
                 }
