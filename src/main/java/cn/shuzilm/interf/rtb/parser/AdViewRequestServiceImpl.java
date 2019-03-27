@@ -319,7 +319,7 @@ public class AdViewRequestServiceImpl implements RequestService {
     private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, BidRequestBean bidRequestBean) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         String format = LocalDateTime.now().format(formatter);//时间戳
         bidResponseBean.setId(duFlowBean.getRequestId());//从bidRequestBean里面取 bidRequest的id
         bidResponseBean.setBidid(duFlowBean.getBidid());//BidResponse 的唯一标识,由 DSP生成
@@ -547,13 +547,17 @@ public class AdViewRequestServiceImpl implements RequestService {
             }
         });
 
-//        executor.execute(new Runnable() {
-//            @Override
-//            public void run() {
-//                pushRedis(duFlowBean);
-//            }
-//        });
-        pushRedis(duFlowBean);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                MDC.put("sift", "redis");
+                log.debug("duFlowBean:{}", JSON.toJSONString(duFlowBean));
+                pushRedis(duFlowBean);
+            }
+        });
+
+
+//        pushRedis(duFlowBean);
         long end = System.currentTimeMillis();
         log.debug("上传到ssdb的时间:{}", end - start);
         MDC.put("sift", "bidResponseBean");

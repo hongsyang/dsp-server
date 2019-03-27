@@ -305,7 +305,7 @@ public class LingJiRequestServiceImpl implements RequestService {
     private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType, List<LJAssets> ljAssets) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
         String format = LocalDateTime.now().format(formatter);//时间戳
         bidResponseBean.setId(duFlowBean.getRequestId());//从bidRequestBean里面取 bidRequest的id
         bidResponseBean.setBidid(duFlowBean.getBidid());//duFlowBean.getBidid() BidResponse 的唯一标识,由 DSP生成  时间戳+UUID
@@ -389,7 +389,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "id=" + duFlowBean.getRequestId() +
                 "&bidid=" + bidResponseBean.getBidid() +
                 "&impid=" + impression.getId() +
-                "&act=" + format +
                 "&act=" + format +
                 "&device=" + duFlowBean.getDeviceId() +
                 "&appn=" + duFlowBean.getAppPackageName() +
