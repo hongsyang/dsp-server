@@ -887,6 +887,10 @@ public class RtbFlowControl {
         		myLog.info("广告["+auid+"]已达到5秒100次的竞价数,停止投放");
         		return false;
         	}
+
+            if("b1f47c12-4c2f-4213-bd48-3635363acb5c".equals(auid) && !"4".equals(adxName)){
+                return false;
+            }
   
 //        	String advertiserUid = adBean.getAdvertiser().getUid();
 //        	//针对推啊过滤快友广告
