@@ -155,6 +155,10 @@ public class AdFlowControl {
 	public ConcurrentHashMap<String, Float> getAdMinBidNumsLimitMap() {
 		return adMinBidNumsLimitMap;
 	}
+	
+	public ConcurrentHashMap<String,Float> getAdvertiserBalanceMap(){
+		return advertiserBalanceMap;
+	}
 
 	/**
      * 广告资源管理
@@ -379,15 +383,6 @@ public class AdFlowControl {
                 AdFlowStatus statusHour = mapMonitorHour.get(adUid);
                 if (statusHour == null)
                     break;
-                //只计算和统计计小时点击率就可以
-//                if(pixelType == 0){
-//                    statusHour.setUid(adUid);
-//                    statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
-//                    statusHour.setMoney(statusHour.getMoney() + addMoney);
-//                }else if(pixelType == 1){
-//                    statusHour.setUid(adUid);
-//                    statusHour.setClickNums(statusHour.getClickNums() +  clickNums);
-//                }
                 
                 statusHour.setUid(adUid);
                 statusHour.setWinNums(statusHour.getWinNums() + addWinNoticeNums);
@@ -539,7 +534,7 @@ public class AdFlowControl {
                     //实时更新判断余额
                     if(advertiserBalanceMap.containsKey(advertiserId)){
                     	advertiserBalanceMap.put(advertiserId, advertiserBalanceMap.get(advertiserId)-addMoney);
-                    	if(advertiserBalanceMap.get(advertiserId) <= 0){
+                    	if(advertiserBalanceMap.get(advertiserId) <= 1500){
                     		String reason = advertiserId+"#### 广告主余额不足! ###";
                     		stopAd(adUid, reason, false,0);
                     	}
@@ -647,7 +642,7 @@ public class AdFlowControl {
         	TaskBean bean = mapTask.get(auid);
         	int scope = bean.getScope();
             int commandCode = bean.getCommand();
-            if (scope == TaskBean.SCOPE_HOUR && commandCode == TaskBean.COMMAND_PAUSE && checkAdStatus.getAdStatus(auid, false)) {
+            if (scope == TaskBean.SCOPE_HOUR && commandCode == TaskBean.COMMAND_PAUSE && checkAdStatus.getAdStatus(auid, false,true)) {
                 bean.setCommand(TaskBean.COMMAND_START);
                 putDataToAdLogQueue(auid, "小时计数器清零,广告开启", 1);
             }
@@ -753,7 +748,7 @@ public class AdFlowControl {
                 
                 if(mapTask.containsKey(auid)){
                 	TaskBean task = mapTask.get(auid);
-                	if (task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(auid, false)) {
+                	if (task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(auid, false,true)) {
                 		if(task.getCommandResonStatus() == 4){
                 			//广告不开启
 //                			checkAdCpmLimit(false);
@@ -882,7 +877,7 @@ public class AdFlowControl {
                 if(updatedAt != null && updatedAt != 0 && updatedAt >= timeBefore){
                 	if(mapTask.containsKey(auid)){
                 		TaskBean task = mapTask.get(auid);
-                		if(task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(auid, false)){
+                		if(task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(auid, false,false)){
                 			if(task.getCommandResonStatus() == 4){
                 				//广告不开启
 //                    			checkAdCpmLimit(false);
@@ -895,12 +890,12 @@ public class AdFlowControl {
 //                    				putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
 //                    			}
                     		}else{
-                    			advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
                     			task.setCommand(TaskBean.COMMAND_START);
                     			putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
                     		}
                 			
                 		}
+                		advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
                 	}
                 }
             }
@@ -1289,7 +1284,7 @@ public class AdFlowControl {
                 TaskBean task = null;
                 if(mapTask.containsKey(adUid)){
                     task = mapTask.get(adUid);
-                    if(task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(adUid, true)){
+                    if(task.getCommand() != TaskBean.COMMAND_START && checkAdStatus.getAdStatus(adUid, true,true)){
                     	if(task.getCommandResonStatus() == 4){
                     		//广告不开启
 //                			checkAdCpmLimit(false);
@@ -1322,7 +1317,7 @@ public class AdFlowControl {
                     task = new TaskBean(adUid);
                     cpcHandler.updateIndicator(adUid);
                     if(isInitial){
-                    	if(!checkAdStatus.getAdStatus(adUid, false)){
+                    	if(!checkAdStatus.getAdStatus(adUid, false,true)){
                     		task.setCommand(TaskBean.COMMAND_STOP);
                     	}
                     }else{
@@ -2224,8 +2219,10 @@ public class AdFlowControl {
                 //System.out.println(sql);
 
                 // 重置出手数和赢价数
-                //value[0] = new AtomicInteger(0);
-                //value[1] = new AtomicInteger(0);
+                /*value[0] = new AtomicLong(0);
+                value[1] = new AtomicLong(0);
+                value[2] = new AtomicDouble(0);
+                value[3] = new AtomicDouble(0);*/
 
             }catch (Exception e) {
                 myLog.error("导出动态出价数据到mysql报错， key: {}",key, e);

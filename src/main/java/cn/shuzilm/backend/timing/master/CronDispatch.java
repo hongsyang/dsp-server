@@ -166,7 +166,7 @@ public class CronDispatch {
         	   dispatch(UpdateAndPushAdLocationTask.class,"0 0/10 * * * ?");
         	   break;
            case 15:
-               dispatch(DynamicPriceTask.class,"0 5/10 * * * ?");
+               dispatch(DynamicPriceTask.class,"0 0/30 * * * ?");
                break;
            default:
                break;
