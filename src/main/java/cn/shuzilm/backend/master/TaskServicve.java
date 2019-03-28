@@ -342,6 +342,7 @@ public class TaskServicve extends Service {
             	creativeGroup.setLink(cMap.getString("link_uri"));
             	creativeGroup.setTracking(cMap.getString("tracking_uri"));
             	creativeGroup.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
+            	creativeGroup.setTradeId(cMap.getInteger("trade_id"));
             	creativeGroupList.add(creativeGroup);
             }
             
@@ -373,6 +374,7 @@ public class TaskServicve extends Service {
             	creativeGroup.setLink(cMap.getString("link_uri"));
             	creativeGroup.setTracking(cMap.getString("tracking_uri"));
             	creativeGroup.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
+            	creativeGroup.setTradeId(cMap.getInteger("trade_id"));
             	aList.add(creativeGroup);
             }
             return aList;
