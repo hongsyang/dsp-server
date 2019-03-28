@@ -19,6 +19,7 @@ import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 
 /**
@@ -49,9 +50,11 @@ public class BaiduRequestServiceImpl implements RequestService {
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
+    private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
+        this.executor = executor;
         String adxId = "5";
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {

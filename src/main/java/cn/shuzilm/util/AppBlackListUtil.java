@@ -81,4 +81,8 @@ public class AppBlackListUtil {
         }
     }
 
+    public static void stopTask(){
+        appBlackList = new HashSet();;
+    }
+
 }

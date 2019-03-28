@@ -1,6 +1,8 @@
 package cn.shuzilm.interf.rtb.parser;
 
 
+import java.util.concurrent.ExecutorService;
+
 /**
 * @Description:    Bid Request 解析
 * @Author:         houkp
@@ -17,6 +19,6 @@ public interface RequestService {
      * @param dataStr 报文入参
      * @return
      */
-    public String parseRequest(String dataStr) throws Exception;
+    public String parseRequest(String dataStr , ExecutorService executor) throws Exception;
 
 }

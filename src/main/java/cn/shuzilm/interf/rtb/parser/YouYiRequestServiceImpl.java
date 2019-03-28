@@ -2,11 +2,9 @@ package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.bean.adview.request.App;
 import cn.shuzilm.bean.adview.request.Impression;
+import cn.shuzilm.common.jedis.RtbJedisManager;
 import cn.shuzilm.filter.FilterRule;
-import cn.shuzilm.util.AppBlackListUtil;
-import cn.shuzilm.util.DeviceBlackListUtil;
-import cn.shuzilm.util.IpBlacklistUtil;
-import cn.shuzilm.util.MD5Util;
+import cn.shuzilm.util.*;
 import com.google.common.collect.Lists;
 
 import bidserver.BidserverSsp;
@@ -21,16 +19,19 @@ import cn.shuzilm.bean.youyi.response.YouYiBidResponse;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.common.jedis.JedisManager;
 import com.alibaba.fastjson.JSON;
-import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
-import java.net.URLEncoder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 /**
  * @Description: YouYiParser 悠易post参数解析
@@ -44,24 +45,38 @@ import java.util.*;
 public class YouYiRequestServiceImpl implements RequestService {
 
     private static final Logger log = LoggerFactory.getLogger(YouYiRequestServiceImpl.class);
-
-    private AppConfigs configs = null;
-
+    
     private static final String FILTER_CONFIG = "filter.properties";
+
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
     private static final String ADX_NAME = "YouYi";
 
     private static final String ADX_ID = "3";
 
-    private static JedisManager jedisManager = JedisManager.getInstance();
+    private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
+
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
+    private static final String RTB_REDIS_FILTER_CONFIG = "configs_rtb_redis.properties";
+
+    private static AppConfigs redisConfigs = AppConfigs.getInstance(RTB_REDIS_FILTER_CONFIG);
+
+
+    private static JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
+
+    private  static Jedis jedis = resource.getResource();
+
+    //上传到ssdb 业务线程池
+//    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
+    private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr) throws Exception {
+    public String parseRequest(String dataStr,ExecutorService executor) throws Exception {
+        this.executor=executor;
         String adxId = "3";
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
@@ -111,13 +126,12 @@ public class YouYiRequestServiceImpl implements RequestService {
                         }
                     } else {
                         log.debug("imeiMD5和macMD5不符合规则，imeiMD5:{}，macMD5:{}", userDevice.getMd5_imei(), userDevice.getMd5_mac());
-                        response =  "204session_id:" + session_id + "deviceIdBlackList";
+                        response = "204session_id:" + session_id + "deviceIdBlackList";
                         return response;
                     }
                     deviceId = userDevice.getMd5_imei();
                 }
             }
-
 
 
             //是否匹配长宽
@@ -145,25 +159,24 @@ public class YouYiRequestServiceImpl implements RequestService {
                 height = adzone.getAdz_height();
                 isDimension = false;
             }
-            if (width == null || width==0|| height == null||height==0) {
+            if (width == null || width == 0 || height == null || height == 0) {
                 width = -1;
                 height = -1;
                 //是否匹配长宽
             }
 
 
-
-            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip(),adxId,adxNameList,width,height);//过滤规则的返回结果
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, user.getUser_ip(), adxId, adxNameList, width, height);//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList" +  "204session_id:" + session_id;
+                return "ipBlackList" + "204session_id:" + session_id;
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList" +  "204session_id:" + session_id;
+                return "bundleBlackList" + "204session_id:" + session_id;
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList" +  "204session_id:" + session_id;
-            }else if (msg.get("AdTagBlackList") != null) {
-                return "AdTagBlackList"+ "204session_id:" + session_id;
+                return "deviceIdBlackList" + "204session_id:" + session_id;
+            } else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList" + "204session_id:" + session_id;
             }
             //广告匹配规则
             DUFlowBean targetDuFlowBean = ruleMatching.match(
@@ -200,10 +213,11 @@ public class YouYiRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
             String format = LocalDateTime.now().format(formatter);//时间戳
-            targetDuFlowBean.setBidid(format + UUID.randomUUID());//bid id  时间戳+随机数不去重
+            targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppName(userDevice.getApp_name());//APP名称
             targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
+            targetDuFlowBean.setCreateTime(System.currentTimeMillis());//创建时间
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
@@ -242,77 +256,106 @@ public class YouYiRequestServiceImpl implements RequestService {
         youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
         //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid().substring(0, 20) +
-                "&impid=" + youYiAdzone.getAdz_id() +
-                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id
                 "&price=" + "__PRICE__" +
-                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&act=" + format +
-                "&adx=" + targetDuFlowBean.getAdxId() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
-                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-                "&dcit=" + targetDuFlowBean.getCity() +// 市
-                "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
-                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName())+//app中文名称
-                "&appv=" + targetDuFlowBean.getAppVersion();//app版本
+                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//                "&impid=" + impression.getId() +
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
+
+
 
         youYiAd.setWin_para(wurl);//赢价通知，按此收费
         //曝光通知Nurl
         String nurl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid().substring(0, 20) +
-                "&impid=" + youYiAdzone.getAdz_id() +
-                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id
                 "&price=" + "__PRICE__" +
-                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
-                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
-                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&act=" + format +
-                "&adx=" + targetDuFlowBean.getAdxId() +
                 "&device=" + targetDuFlowBean.getDeviceId() +
                 "&appn=" + targetDuFlowBean.getAppPackageName() +
                 "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
                 "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
                 "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
                 "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
-                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-                "&dcit=" + targetDuFlowBean.getCity() +// 市
-                "&userip=" + targetDuFlowBean.getIpAddr() +//用户ip
-                "&dcou=" + targetDuFlowBean.getCountry() +// 县
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName())+//app中文名称
-                "&appv=" + targetDuFlowBean.getAppVersion();//app版本
-        youYiAd.setImp_para(nurl);//曝光通知
-        String curl = "id=" + targetDuFlowBean.getRequestId() +
-                "&bidid=" + targetDuFlowBean.getBidid() +
-                "&impid=" + youYiAdzone.getAdz_id() +
-                "&act=" + format +
-                "&adx=" + targetDuFlowBean.getAdxId() +
-                "&did=" + targetDuFlowBean.getDid() +
-                "&device=" + targetDuFlowBean.getDeviceId() +
-                "&app=" + URLEncoder.encode(targetDuFlowBean.getAppName()) +
-                "&appn=" + targetDuFlowBean.getAppPackageName() +
-                "&appv=" + targetDuFlowBean.getAppVersion() +
-                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
-                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
-                "&dpro=" + targetDuFlowBean.getProvince() +// 省
-                "&dcit=" + targetDuFlowBean.getCity() +// 市
-                "&dcou=" + targetDuFlowBean.getCountry() +// 县
                 "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
-                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
                 "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//                "&impid=" + impression.getId() +
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
+
+        youYiAd.setImp_para(nurl);//曝光通知
+
+        String curl = "id=" + targetDuFlowBean.getRequestId() +
+                "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id
+                "&price=" + "__PRICE__" +
+                "&act=" + format +
+                "&device=" + targetDuFlowBean.getDeviceId() +
+                "&appn=" + targetDuFlowBean.getAppPackageName() +
+                "&pf=" + targetDuFlowBean.getPremiumFactor() +//溢价系数
+                "&ddem=" + targetDuFlowBean.getAudienceuid() + //人群id
+                "&dcuid=" + targetDuFlowBean.getCreativeUid() + // 创意id
+                "&dbidp=" + targetDuFlowBean.getBiddingPrice() +// 广告主出价
+                "&dade=" + targetDuFlowBean.getAdvertiserUid() +// 广告主id
+                "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
+                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
+                "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
+//                "&impid=" + impression.getId() +
+//                "&adx=" + duFlowBean.getAdxId() +
+//                "&did=" + duFlowBean.getDid() +
+//                "&appv=" + duFlowBean.getAppVersion() +
+//                "&dpro=" + duFlowBean.getProvince() +// 省
+//                "&dcit=" + duFlowBean.getCity() +// 市
+//                "&dcou=" + duFlowBean.getCountry() +// 县
+//                "&pmp=" + duFlowBean.getDealid() + //私有交易
+//                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
         youYiAd.setClk_para(curl);//点击通知
         ads.add(youYiAd);
         youYiBidResponse.setAds(ads);
+        long start = System.currentTimeMillis();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                SSDBUtil.pushSSDB(targetDuFlowBean);
+            }
+        });
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                RedisUtil.pushRedis(targetDuFlowBean);
+            }
+        });
+
+//        pushRedis(targetDuFlowBean);
+        long end = System.currentTimeMillis();
+        log.debug("上传到ssdb的时间:{}", end - start);
+
         MDC.put("sift", "bidResponseBean");
         log.debug("bidResponseBean:{}", JSON.toJSONString(youYiBidResponse));
         return youYiBidResponse;
@@ -321,29 +364,34 @@ public class YouYiRequestServiceImpl implements RequestService {
 
 
     /**
-     * 把生成的内部流转DUFlowBean上传到redis服务器 设置5分钟失效
+     * 把生成的内部流转DUFlowBean上传到redis服务器 设置60分钟失效
      *
      * @param targetDuFlowBean
      */
-/*    private void pushRedis(DUFlowBean targetDuFlowBean) {
-        log.debug("redis连接时间计数");
-        Jedis jedis = jedisManager.getResource();
+    private void pushRedis(DUFlowBean targetDuFlowBean) {
+        MDC.put("sift", "redis");
         try {
             if (jedis != null) {
-                log.debug("jedis：{}", jedis);
                 String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
             } else {
-                log.debug("jedis为空：{}", jedis);
+                jedis = RtbJedisManager.getInstance("configs_rtb_redis.properties").getResource();
+                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("jedis为空：{},重新加载", jedis);
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
+                MDC.remove("sift");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            resource.returnBrokenResource(jedis);
+            MDC.put("sift", "redis");
+            log.error(" jedis Exception :{}", e);
+            MDC.remove("sift");
         } finally {
-            jedis.close();
+            resource.returnResource(jedis);
         }
-    }*/
-
+    }
     /**
      * 广告类型转换
      *

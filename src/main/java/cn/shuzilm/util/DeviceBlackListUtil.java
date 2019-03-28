@@ -78,4 +78,8 @@ public class DeviceBlackListUtil {
             return false;
         }
     }
+
+    public static void stopTask(){
+        deviceBlackList = new HashSet();;
+    }
 }
