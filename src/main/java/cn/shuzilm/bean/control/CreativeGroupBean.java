@@ -47,6 +47,11 @@ public class CreativeGroupBean implements ICommand {
     private String tracking;
     
     /**
+     * 创意所属的广告行业ID
+     */
+    private Integer tradeId;
+    
+    /**
      * 创意列表
      */
     private List<CreativeBean> creativeList;
@@ -118,6 +123,14 @@ public class CreativeGroupBean implements ICommand {
 
 	public void setAdUid(String adUid) {
 		this.adUid = adUid;
+	}
+
+	public Integer getTradeId() {
+		return tradeId;
+	}
+
+	public void setTradeId(Integer tradeId) {
+		this.tradeId = tradeId;
 	}
    
 }

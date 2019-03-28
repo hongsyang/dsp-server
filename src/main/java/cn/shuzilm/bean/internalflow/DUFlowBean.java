@@ -82,5 +82,7 @@ public class DUFlowBean implements Serializable {
     private String materialId;//物料ID  materialId 对应数据库material 的 Uid；
     
     private String ipAddr;//ip地址
+    
+    private Integer tradeId;//广告行业ID
 
 }

@@ -53,6 +53,8 @@ public class CronDispatch {
     	//程序初始化 加载程序
     	
     	AdFlowControl.getInstance().loadAllAdInterval(true);
+    	
+    	AdFlowControl.getInstance().updateAdvertiserMap(true);
         
         AdFlowControl.getInstance().loadAdInterval(true);
         
@@ -106,6 +108,8 @@ public class CronDispatch {
         CronDispatch.startTimer(14);
 
         CronDispatch.startTimer(15);
+        
+        CronDispatch.startTimer(16);
 
     }
 
@@ -167,6 +171,9 @@ public class CronDispatch {
         	   break;
            case 15:
                dispatch(DynamicPriceTask.class,"0 0/30 * * * ?");
+               break;
+           case 16:
+        	   dispatch(UpdateAdertiserBalanceTask.class,"0 0/5 * * * ?");
                break;
            default:
                break;
