@@ -1,13 +1,14 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
-import cn.shuzilm.bean.baidu.request.BaiduBidRequest;
+import cn.shuzilm.bean.baidu.request.*;
 import cn.shuzilm.bean.baidu.response.BaiduAd;
 import cn.shuzilm.bean.baidu.response.BaiduBidResponse;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.bean.tencent.request.*;
 import cn.shuzilm.bean.tencent.response.TencentBidResponse;
 import cn.shuzilm.common.AppConfigs;
+import cn.shuzilm.filter.FilterRule;
 import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.IpBlacklistUtil;
 import cn.shuzilm.util.WidthAndHeightListUtil;
@@ -19,6 +20,7 @@ import org.slf4j.MDC;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 
@@ -55,7 +57,7 @@ public class BaiduRequestServiceImpl implements RequestService {
     @Override
     public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
         this.executor = executor;
-        String adxId = "5";
+
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
             MDC.put("sift", "dsp-server");
@@ -67,72 +69,98 @@ public class BaiduRequestServiceImpl implements RequestService {
             log.debug(" baiduBidRequest：{}", bidRequestBean);
 
 
-//            TencentDevice userDevice = bidRequestBean.getDevice();//设备信息
-//            TencentImpressions adzone = bidRequestBean.getImpressions().get(0);//曝光信息
-//            TencentUser user = bidRequestBean.getUser();//用户信息
-//            TencentApp app = bidRequestBean.getApp();
-//            Integer width = -1;//广告位的宽
-//            Integer height = -1;//广告位的高
-////            Integer showtype = userImpression.getExt().getShowtype();//广告类型
-//            String adType = ""; //对应内部 广告类型
-//            String stringSet = null;//文件类型列表
-//            String deviceId = null;//设备号
-//            //ip 黑名单规则  在黑名单内直接返回
-//            if (ipBlacklist.isIpBlacklist(bidRequestBean.getIp())) {
-//                log.debug("IP黑名单:{}", bidRequestBean.getIp());
-//                response = "";
-//                return response;
-//            }
-//            //设备的设备号：用于匹配数盟库中的数据
-//            if (userDevice != null) {
-//                if (userDevice.getOs().toLowerCase().contains("ios")) {
-//                    deviceId = userDevice.getIdfa();
-//                } else if (userDevice.getOs().toLowerCase().contains("android")) {
-//                    //广点通设备mac地址
-//                    deviceId = userDevice.getId();
-//                }
-//            }
-//
-//
-////            //支持的文件类型
-//            if (bidRequestBean.getImpressions().get(0).getMultimedia_type_white_list() != null) {
-//                stringSet = adzone.getMultimedia_type_white_list().toString();
-//            } else {
-//                stringSet = "[video/mp4, application/x-shockwave-flash，video/x-flv,image/jpeg, image/png]";
-//            }
-//
-//            //             长宽列表
-////            List widthList = new ArrayList();//宽列表
-////            List heightList = new ArrayList();//高列表
-////            widthList = widthAndHeightListUtil.getWidthList(adzone.getCreative_specs());
-////            heightList = widthAndHeightListUtil.getHeightList(adzone.getCreative_specs());
-////            长宽列表
-////            log.debug("widthList:{},heightList:{}", widthList, heightList);
-//            //广告位列表 只有悠易和广点通需要
-//            List adxNameList = new ArrayList();//
-//            List<Integer> creative_specs = adzone.getCreative_specs();
-//            for (Integer creative_spec : creative_specs) {
-//                adxNameList.add(adxId+"_"+creative_spec);
-//            }
-//            log.debug("adxNameList:{}", adxNameList);
+            BaiduMobile mobile = bidRequestBean.getMobile();//设备信息
+            BaiduAdSlot baiduAdSlot = bidRequestBean.getAdslot().get(0);//曝光信息
+            BaiduUserGeoInfo user_geo_info = bidRequestBean.getUser_geo_info();//用户信息
+            BadiduMobileApp mobile_app = new BadiduMobileApp();
+
+            String id = bidRequestBean.getId();//请求id
+            String userIp = bidRequestBean.getIp();//用户ip
+            String tagid = "";
+            if (baiduAdSlot.getAd_block_key() != null) {
+                tagid = String.valueOf(baiduAdSlot.getAd_block_key());//广告位id
+            }
+            Integer width = -1;//广告位的宽
+            Integer height = -1;//广告位的高
+
+            if (baiduAdSlot!=null){
+                width=baiduAdSlot.getActual_width();//广告位实际宽度
+                height=baiduAdSlot.getActual_height();// 广告位实际高度
+            }
+            String deviceId = null;//设备号
+            String appPackageName = "";
+            if (mobile != null) {
+                if ("ANDROID".equals(mobile.getPlatform())){
+                    if (mobile.getId()!=null){
+                        List<BaiduID> baiduIDS = mobile.getId();
+                        for (BaiduID baiduID : baiduIDS) {
+                            if ("IMEI".equals(baiduID.getType())){
+                                deviceId=baiduID.getId();
+                            }
+                        }
+                    }
+                }else  if ("IOS".equals(mobile.getPlatform())) {
+                    if (mobile.getFor_advertising_id()!=null){
+                        List<BadiduForAdvertisingId> for_advertising_idList = mobile.getFor_advertising_id();
+                        for (BadiduForAdvertisingId for_advertising_id : for_advertising_idList) {
+                            if ("IDFA".equals(for_advertising_id.getType())){
+                                deviceId=for_advertising_id.getId();
+                            }
+                        }
+                    }
+                }
+
+
+
+                mobile_app = mobile.getMobile_app();//app 信息
+                if (mobile_app!=null){
+                    appPackageName=mobile_app.getApp_bundle_id();
+                }
+            }
+
+            List adxNameList = new ArrayList();//广告位列表
+            adxNameList.add(ADX_ID + "_" + tagid);//添加广告位id
+            log.debug("adxNameList:{}", adxNameList);
+
+            //是否匹配长宽
+            Boolean isDimension = true;
+
+
+
 //            //是否匹配长宽
-//            Boolean  isDimension=false;
-//            //广告匹配规则
-//            DUFlowBean targetDuFlowBean = ruleMatching.match(
-//                    deviceId,//设备mac的MD5
-//                    adType,//广告类型
-//                    width,//广告位的宽
-//                    height,//广告位的高
-//                    true,// 是否要求分辨率
-//                    0,//宽误差值
-//                    0,// 高误差值;
-//                    adxId,//ADX 服务商ID
-//                    stringSet,//文件扩展名
-//                    bidRequestBean.getIp(),//用户ip
-//                    app.getApp_bundle_id(),//APP包名
-//                    adxNameList,//长宽列表
-//                    isDimension
-//            );
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userIp, ADX_ID, adxNameList, width, height);//过滤规则的返回结果
+
+            //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
+            if (msg.get("ipBlackList") != null) {
+                return "ipBlackList";
+            } else if (msg.get("bundleBlackList") != null) {
+                return "bundleBlackList";
+            } else if (msg.get("deviceIdBlackList") != null) {
+                return "deviceIdBlackList";
+            } else if (msg.get("AdTagBlackList") != null) {
+                return "AdTagBlackList";
+            }
+
+
+
+            //广告匹配规则
+            DUFlowBean targetDuFlowBean = ruleMatching.match(
+                    deviceId,//设备mac的MD5
+                    null,//广告类型
+                    width,//广告位的宽
+                    height,//广告位的高
+                    false,// 是否要求分辨率
+                    0,//宽误差值
+                    0,// 高误差值;
+                    ADX_ID,//ADX 服务商ID
+                    null,//文件扩展名
+                    userIp,//用户ip
+                    appPackageName,//APP包名
+                    adxNameList,//广告位列表
+                    isDimension,
+                    id,//请求id
+                    tagid//广告位id
+            );
 //            if (targetDuFlowBean == null) {
 //                response = "";
 //                return response;
@@ -155,7 +183,6 @@ public class BaiduRequestServiceImpl implements RequestService {
 //            targetDuFlowBean.setAppName("");//APP名称
 //            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
 //            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-            DUFlowBean targetDuFlowBean = new DUFlowBean();
             BaiduBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
             MDC.put("sift", "dsp-server");
@@ -201,7 +228,6 @@ public class BaiduRequestServiceImpl implements RequestService {
 //        baiduAd.setMonitor_urls("http://rtb.shuzijz.cn");
 //        ads.add(baiduAd);
         baiduBidResponse.setAd(baiduAd);
-
 
 
 //        TencentSeatBid tencentSeatBid = new TencentSeatBid();
@@ -300,70 +326,6 @@ public class BaiduRequestServiceImpl implements RequestService {
 
     }
 
-
-    /**
-     * 把生成的内部流转DUFlowBean上传到redis服务器 设置5分钟失效
-     *
-     * @param targetDuFlowBean
-     */
-/*    private void pushRedis(DUFlowBean targetDuFlowBean) {
-        log.debug("redis连接时间计数");
-        Jedis jedis = jedisManager.getResource();
-        try {
-            if (jedis != null) {
-                log.debug("jedis：{}", jedis);
-                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 5 * 60);//设置超时时间为5分钟
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{}", set, expire);
-            } else {
-                log.debug("jedis为空：{}", jedis);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            jedis.close();
-        }
-    }*/
-
-    /**
-     * 广告类型转换
-     *
-     * @param showtype
-     * @return
-     */
-    private String convertAdType(Integer showtype) {
-        String adType = "";
-        if (showtype == 14 | showtype == 11) {
-            adType = "banner";//横幅
-            log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 13 | showtype == 20 | showtype == 19) {
-            adType = "feed";//信息流
-            log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 15 | showtype == 12 | showtype == 17) {
-            adType = "fullscreen";//开屏
-            log.debug("广告类型adType:{}", adType);
-        } else if (showtype == 16 | showtype == 18 | showtype == 4) {
-            adType = "interstitial";//插屏
-            log.debug("广告类型adType:{}", adType);
-        } else {
-            adType = null;
-        }
-        return adType;
-    }
-
-    /**
-     * 发送曝光请求
-     *
-     * @param lingjiexp
-     */
-    private Boolean sendGetUrl(String lingjiexp) {
-        String s = HttpClientUtil.get(lingjiexp);
-        if (s != null) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 
 
 }
