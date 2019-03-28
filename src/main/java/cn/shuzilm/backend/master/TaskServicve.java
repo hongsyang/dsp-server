@@ -527,6 +527,40 @@ public class TaskServicve extends Service {
         }
         return null;
     }
+    
+    /**
+     * 读取所有广告主余额
+     * @return
+     */
+    public ResultList queryAdviserAccount(boolean isInit){
+    	 String sql = null;
+    	 ResultList rl = null;
+    	if(isInit){
+    		sql = "select * from balance";    		
+            try {
+                rl = select.select(sql);
+                return rl;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+    	}else{
+    		long timeNow = System.currentTimeMillis();
+            long timeBefore = timeNow - INTERVAL;
+            Object[] arr = new Object[1];
+            arr[0] = timeBefore / 1000;
+    		sql = "select * from balance where updated_at >= ?";
+            try {
+                rl = select.select(sql,arr);
+                return rl;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return null;
+    	}
+
+        
+    }
 
     /**
      * 广告分组查询
@@ -991,7 +1025,8 @@ public class TaskServicve extends Service {
     	TaskServicve taskService = new TaskServicve();
     	
     	try {
-    		taskService.queryAdLocationList();
+    		ResultList rl = taskService.queryAdviserAccount(true);
+    		System.out.println(rl);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

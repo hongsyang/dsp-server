@@ -774,6 +774,25 @@ public class AdFlowControl {
         }
     }
 
+    
+    /**
+     * 程序初次启动加载余额,5分钟检查一次是否有新的余额
+     */
+    public void updateAdvertiserMap(boolean isInit){
+    	MDC.put("sift", "control");
+    	ResultList rl = taskService.queryAdviserAccount(isInit);
+    	if(rl == null){
+    		return;
+    	}
+    	for(ResultMap map:rl){
+    		String advertiserId = map.getString("advertiser_uid");
+    		BigDecimal balance = map.getBigDecimal("balance");
+    		if(!advertiserBalanceMap.containsKey(advertiserId)){
+    			myLog.info("广告主:"+advertiserId+"\t余额:"+balance);
+    			advertiserBalanceMap.put(advertiserId, balance.floatValue()*1000);
+    		}
+    	}
+    }
 
     /**
      * 每隔 10 分钟更新一次天和小时的阀值
@@ -783,7 +802,7 @@ public class AdFlowControl {
     	MDC.put("sift", "control");
         HashSet<String> lowBalanceAdSet = new HashSet<>();
         long timeNow = System.currentTimeMillis();
-        long timeBefore = timeNow - INTERVAL;
+        long timeBefore = timeNow - 18 * 60 * 1000;
         timeBefore  = timeBefore / 1000;
         try {
             for (ResultMap map : adList) {
@@ -795,9 +814,9 @@ public class AdFlowControl {
                     continue;
                 //广告主账户中的余额
                 BigDecimal balance = balanceMap.getBigDecimal("balance");
-                if(isInitial){
-                	advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
-                }
+//                if(isInitial){
+//                	advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
+//                }
                 //如果余额小于0 块钱，则不进行广告投放
                 if(balance.doubleValue() <= 0){
                     lowBalanceAdSet.add(auid);
@@ -891,13 +910,17 @@ public class AdFlowControl {
 //                    				putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
 //                    			}
                     		}else{
-                    			task.setCommand(TaskBean.COMMAND_START);
-                    			putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
+                    			advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
+                    			if(advertiserBalanceMap.get(adviserId) > 0){
+                    				task.setCommand(TaskBean.COMMAND_START);
+                    				putDataToAdLogQueue(auid, "广告主信息修改,广告开启", 1);
+                    			}
                     		}
                 			
                 		}
-                		advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
+                		
                 	}
+                	advertiserBalanceMap.put(adviserId, balance.floatValue()*1000);
                 }
             }
             return lowBalanceAdSet;
