@@ -162,6 +162,7 @@ public class LingJiExpParameterParserImpl implements ParameterParser {
 //                element.setWinNoticeTime(new Date().getTime());//设置对账时间
                 element.setAdxSource("LingJi");
                 MDC.put("sift", "LingJiExp");
+                element.setWinNoticeTime(new Date().getTime());
                 log.debug("发送到Phoenix的DUFlowBean:{}", element);
                 MDC.put("phoenix", "Exp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
