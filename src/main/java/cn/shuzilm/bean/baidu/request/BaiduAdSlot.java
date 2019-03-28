@@ -59,4 +59,14 @@ public class BaiduAdSlot implements Serializable {
     //       因此，需要使用secure字段来决定是否以HTTPS返回资源，而不要依赖url字段
     private  Boolean secure;
 
+
+
+    // 是否允许返回非原生广告创意，
+    // 如果为true，则对于存在原生诉求的情况下可以返回非原生广告创意，
+    // 如果为false，则必须返回原生创意
+    private Boolean  allowed_non_nativead ;
+
+    // 原生广告诉求参数
+    private BaiduNativeAdParam nativead_param ;
+
 }

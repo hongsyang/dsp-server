@@ -175,7 +175,7 @@ public class BaiduRequestServiceImpl implements RequestService {
      *
      * @param targetDuFlowBean
      * @param bidRequestBean
-     * @return TencentBidResponse
+     * @return baiduBidResponse
      */
     private BaiduBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, BaiduBidRequest bidRequestBean) {
         BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
@@ -201,6 +201,7 @@ public class BaiduRequestServiceImpl implements RequestService {
 //        baiduAd.setMonitor_urls("http://rtb.shuzijz.cn");
 //        ads.add(baiduAd);
         baiduBidResponse.setAd(baiduAd);
+
 
 
 //        TencentSeatBid tencentSeatBid = new TencentSeatBid();
@@ -293,8 +294,8 @@ public class BaiduRequestServiceImpl implements RequestService {
 //        //腾讯  seat_bids类型列表
 //        ads.add(tencentSeatBid);
 //        TencentBidResponse.setSeat_bids(ads);
-//        MDC.put("sift", "bidResponseBean");
-//        log.debug("bidResponseBean:{}", JSON.toJSONString(TencentBidResponse));
+        MDC.put("sift", "baidubidResponseBean");
+        log.debug("bidResponseBean:{}", JSON.toJSONString(baiduBidResponse));
         return baiduBidResponse;
 
     }
