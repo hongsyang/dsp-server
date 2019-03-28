@@ -175,7 +175,7 @@ public class BaiduRequestServiceImpl implements RequestService {
      *
      * @param targetDuFlowBean
      * @param bidRequestBean
-     * @return baiduBidResponse
+     * @return baiduBidResponse 
      */
     private BaiduBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, BaiduBidRequest bidRequestBean) {
         BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
