@@ -158,6 +158,7 @@ public class YouYiExpParameterParserImpl implements ParameterParser {
             element.setOurProfit(adPixelBean.getDspProfit());//dsp利润
             element.setAgencyProfit(adPixelBean.getRebateProfit());//代理商利润
             MDC.put("sift", "YouYiExp");
+            element.setWinNoticeTime(new Date().getTime());
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Exp");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
