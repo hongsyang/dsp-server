@@ -211,6 +211,8 @@ public class BaiduRequestServiceImpl implements RequestService {
      * @return baiduBidResponse
      */
     private BaiduBidResponse convertBidResponse(DUFlowBean targetDuFlowBean, BaiduBidRequest bidRequestBean) {
+        log.debug("进入转换为BidResponseBean ，请求id位:{}", bidRequestBean.getId());
+
         BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
         baiduBidResponse.setId(bidRequestBean.getId());
         //广告信息
