@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb.parser;
 
 import cn.shuzilm.backend.rtb.RuleMatching;
+import cn.shuzilm.bean.adview.request.Impression;
 import cn.shuzilm.bean.baidu.request.*;
 import cn.shuzilm.bean.baidu.response.BaiduAd;
 import cn.shuzilm.bean.baidu.response.BaiduBidResponse;
@@ -18,9 +19,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 
@@ -61,15 +65,15 @@ public class BaiduRequestServiceImpl implements RequestService {
         String response = "";
         if (StringUtils.isNotBlank(dataStr)) {
             MDC.put("sift", "dsp-server");
-            log.debug(" BidRequest参数入参：{}", dataStr);
 //            //请求报文解析
+            log.debug(" BidRequest参数入参：{}", dataStr);
 
             BaiduBidRequest bidRequestBean = JSON.parseObject(dataStr, BaiduBidRequest.class);
 //            //创建返回结果  bidRequest请求参数保持不变
             log.debug(" baiduBidRequest：{}", bidRequestBean);
 
 
-            BaiduMobile mobile = bidRequestBean.getMobile();//设备信息
+ /*           BaiduMobile mobile = bidRequestBean.getMobile();//设备信息
             BaiduAdSlot baiduAdSlot = bidRequestBean.getAdslot().get(0);//曝光信息
             BaiduUserGeoInfo user_geo_info = bidRequestBean.getUser_geo_info();//用户信息
             BadiduMobileApp mobile_app = new BadiduMobileApp();
@@ -161,28 +165,30 @@ public class BaiduRequestServiceImpl implements RequestService {
                     id,//请求id
                     tagid//广告位id
             );
-//            if (targetDuFlowBean == null) {
-//                response = "";
-//                return response;
-//            }
-//            //需要添加到Phoenix中的数据
-//            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
-//            //曝光id
-//            List<Impression> list = new ArrayList();
-//            Impression impression = new Impression();
-//            impression.setId(adzone.getId());
-//            list.add(impression);
-//            targetDuFlowBean.setImpression(list);//曝光id
-//            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
-//            targetDuFlowBean.setAdTypeId(adType);//广告大类型ID
-//            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
-//            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
-//            String format = LocalDateTime.now().format(formatter);//时间戳
-//            targetDuFlowBean.setBidid(format+UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
-//            targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
-//            targetDuFlowBean.setAppName("");//APP名称
-//            targetDuFlowBean.setAppPackageName(app.getApp_bundle_id());//APP包名
-//            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            if (targetDuFlowBean == null) {
+                response = "204baidu_id:"+id;
+                return response;
+            }
+//            需要添加到Phoenix中的数据
+            targetDuFlowBean.setRequestId(bidRequestBean.getId());//bidRequest id
+            //曝光id
+            List<Impression> list = new ArrayList();
+            Impression impression = new Impression();
+            impression.setId(tagid);
+            list.add(impression);
+            targetDuFlowBean.setImpression(list);//广告位id
+            targetDuFlowBean.setAdxSource(ADX_NAME);//ADX服务商渠道
+            targetDuFlowBean.setAdxId(ADX_ID);//ADX广告商id
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+            String format = LocalDateTime.now().format(formatter);//时间戳
+            targetDuFlowBean.setBidid(format+ UUID.randomUUID().toString().substring(0,21));//bid id  时间戳+随机数不去重
+            targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
+            targetDuFlowBean.setAppPackageName(appPackageName);//APP包名
+            log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+*/
+
+            //测试使用
+            DUFlowBean targetDuFlowBean = new DUFlowBean();
             BaiduBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
             MDC.put("sift", "dsp-server");
@@ -325,7 +331,6 @@ public class BaiduRequestServiceImpl implements RequestService {
         return baiduBidResponse;
 
     }
-
 
 
 }
