@@ -135,6 +135,12 @@ public class TencentClickParameterParserImpl implements ParameterParser {
             log.debug("pixel服务器发送到主控模块的TencentClickBean：{}", bean);
             PixelFlowControl.getInstance().sendStatus(bean);
 
+
+            String act = urlRequest.get("act");
+            element.setWinNoticeTime(Long.valueOf(act));//竞价的时候，带过来的点击时间
+
+            log.debug("发送到Phoenix的DUFlowBean:{}", element);
+
             //pixel服务器发送到Phoenix
             MDC.put("phoenix", "Click");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +

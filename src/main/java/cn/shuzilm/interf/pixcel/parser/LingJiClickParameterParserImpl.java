@@ -136,6 +136,8 @@ public class LingJiClickParameterParserImpl implements ParameterParser {
 
             //pixel服务器发送到Phoenix
             MDC.put("sift", "LingJiClick");
+            String act = urlRequest.get("act");
+            element.setWinNoticeTime(Long.valueOf(act));//竞价的时候，带过来的点击时间
             log.debug("发送到Phoenix的DUFlowBean:{}", element);
             MDC.put("phoenix", "Click");
             log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
