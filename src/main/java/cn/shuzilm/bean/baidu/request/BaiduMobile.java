@@ -3,6 +3,7 @@ package cn.shuzilm.bean.baidu.request;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @Description: 设备信息
@@ -19,11 +20,9 @@ public class BaiduMobile implements Serializable {
     // 百度唯一标示移动设备的编号
     private String DEPRECATED_device_id;// 1;
 
-    // 序列号类型 imei, mac,或者未知
-    private String type;// 1;
 
-
-    private String id;// 2;   // 序列号
+    //设备id
+    private List<BaiduID> id;// 2;   // 序列号
 
     // 设备类型
     private String device_type;// 2;
@@ -59,5 +58,9 @@ public class BaiduMobile implements Serializable {
 
     //移动应用信息
     private BadiduMobileApp mobile_app;// 12;
+
+    //设备的广告id
+    private List<BadiduForAdvertisingId> for_advertising_id;// 12;
+
 
 }

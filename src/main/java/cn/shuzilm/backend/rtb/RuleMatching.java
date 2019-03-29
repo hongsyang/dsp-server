@@ -1114,6 +1114,7 @@ public class RuleMatching {
 		targetDuFlowBean.setDuration(material.getDuration());
 		targetDuFlowBean.setMaterialId(material.getUid());
 		targetDuFlowBean.setIpAddr(ipAddr);
+		targetDuFlowBean.setTradeId(creativeGroup.getTradeId());
 
 		String succReason = requestId+"\t"+widthHeightRatio+"\t"+1+"\t"+width+"_"+height+"\t"+adLocationId+"\t"+1+"\t"+
 				1+"\t"+1+"\t"+advertiser.getUid()+"\t"+ad.getAdUid()+"\t"+audience.getUid()+"\t"+creative.getUid()+"\t"+material.getUid()+"\t"+deviceId;

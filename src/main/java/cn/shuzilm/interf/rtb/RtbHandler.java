@@ -219,6 +219,12 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 JsonFormat.merge(resultData, builder);
                 GdtRtb.BidResponse build = builder.build();
                 content = build.toByteArray();
+            }else if (resultData.contains("sequence_id")) {
+                log.debug("resultData：{}",resultData);
+                BaiduRealtimeBidding.BidResponse.Builder builder = BaiduRealtimeBidding.BidResponse.newBuilder();
+                JsonFormat.merge(resultData, builder);
+                BaiduRealtimeBidding.BidResponse build = builder.build();
+                content = build.toByteArray();
             } else {
                 content = resultData.getBytes("utf-8");
             }

@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 /**
-* @Description:    java类作用描述
+* @Description:    标签
 * @Author:         houkp
 * @CreateDate:     2019/3/13 18:03
 * @UpdateUser:     houkp

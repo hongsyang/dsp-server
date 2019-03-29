@@ -6,14 +6,14 @@ import lombok.Data;
 import java.io.Serializable;
 import java.util.List;
 /**
-* @Description:     **** 广告位信息 ****
-* @Author:         houkp
-* @CreateDate:     2019/3/13 17:46
-* @UpdateUser:     houkp
-* @UpdateDate:     2019/3/13 17:46
-* @UpdateRemark:   修改内容
-* @Version:        1.0
-*/
+ * @Description:     **** 广告位信息 ****
+ * @Author:         houkp
+ * @CreateDate:     2019/3/13 17:46
+ * @UpdateUser:     houkp
+ * @UpdateDate:     2019/3/13 17:46
+ * @UpdateRemark:   修改内容
+ * @Version:        1.0
+ */
 @Data
 public class BaiduAdSlot implements Serializable {
     // 广告位ID, 全局唯一id
@@ -58,5 +58,15 @@ public class BaiduAdSlot implements Serializable {
     //       比如，存在url协议为HTTP而secure为true的情况，
     //       因此，需要使用secure字段来决定是否以HTTPS返回资源，而不要依赖url字段
     private  Boolean secure;
+
+
+
+    // 是否允许返回非原生广告创意，
+    // 如果为true，则对于存在原生诉求的情况下可以返回非原生广告创意，
+    // 如果为false，则必须返回原生创意
+    private Boolean  allowed_non_nativead ;
+
+    // 原生广告诉求参数
+    private BaiduNativeAdParam nativead_param ;
 
 }
