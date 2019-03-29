@@ -221,11 +221,11 @@ public class BaiduRequestServiceImpl implements RequestService {
         BaiduAd baiduAd = new BaiduAd();
         //当前页面广告位顺序 id，同一页面从 1 开始
         baiduAd.setSequence_id(bidRequestBean.getAdslot().get(0).getSequence_id());
-        baiduAd.setCreative_id(123456L);
+        baiduAd.setCreative_id(97464805728L);
         baiduAd.setHtml_snippet("http://rtb.shuzijz.cn");
-        baiduAd.setWidth(bidRequestBean.getAdslot().get(0).getWidth());
-        baiduAd.setHeight(bidRequestBean.getAdslot().get(0).getHeight());
-        baiduAd.setCategory(7901);
+        baiduAd.setWidth(bidRequestBean.getAdslot().get(0).getActual_width());
+        baiduAd.setHeight(bidRequestBean.getAdslot().get(0).getActual_height());
+        baiduAd.setCategory(7001);
         baiduAd.setType(1);
         baiduAd.setLanding_page("http://rtb.shuzijz.cn");
         baiduAd.setTarget_url("http://rtb.shuzijz.cn");
