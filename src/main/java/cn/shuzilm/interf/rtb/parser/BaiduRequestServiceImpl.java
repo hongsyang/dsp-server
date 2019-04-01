@@ -225,7 +225,7 @@ public class BaiduRequestServiceImpl implements RequestService {
 //        baiduAd.setHtml_snippet("http://rtb.shuzijz.cn");
         baiduAd.setWidth(bidRequestBean.getAdslot().get(0).getActual_width());
         baiduAd.setHeight(bidRequestBean.getAdslot().get(0).getActual_height());
-        baiduAd.setCategory(7605);//行业id
+        baiduAd.setCategory(7605);//行业id 
         baiduAd.setType(1);
         baiduAd.setLanding_page("https://www.shuzilm.cn");
         baiduAd.setTarget_url("http://pixel.shuzijz.cn/lingjitest");
