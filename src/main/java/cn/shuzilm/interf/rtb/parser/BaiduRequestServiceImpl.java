@@ -222,13 +222,13 @@ public class BaiduRequestServiceImpl implements RequestService {
         //当前页面广告位顺序 id，同一页面从 1 开始
         baiduAd.setSequence_id(bidRequestBean.getAdslot().get(0).getSequence_id());
         baiduAd.setCreative_id(97464805728L);
-        baiduAd.setHtml_snippet("http://rtb.shuzijz.cn");
+//        baiduAd.setHtml_snippet("http://rtb.shuzijz.cn");
         baiduAd.setWidth(bidRequestBean.getAdslot().get(0).getActual_width());
         baiduAd.setHeight(bidRequestBean.getAdslot().get(0).getActual_height());
         baiduAd.setCategory(7001);
         baiduAd.setType(1);
-        baiduAd.setLanding_page("http://rtb.shuzijz.cn");
-        baiduAd.setTarget_url("http://rtb.shuzijz.cn");
+        baiduAd.setLanding_page("https://www.shuzilm.cn");
+        baiduAd.setTarget_url("http://pixel.shuzijz.cn/lingjitest");
         baiduAd.setPreferred_order_id("3");
         baiduAd.setExtdata("test");
         baiduAd.setAdvertiser_id(654321L);
