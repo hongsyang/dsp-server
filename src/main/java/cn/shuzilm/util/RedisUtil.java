@@ -14,7 +14,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 public class RedisUtil {
-    private static final Logger log = LoggerFactory.getLogger(SSDBUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(RedisUtil.class);
 
     private static final String FILTER_CONFIG = "configs_rtb_redis.properties";
 

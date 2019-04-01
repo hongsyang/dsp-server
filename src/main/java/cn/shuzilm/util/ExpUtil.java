@@ -6,6 +6,10 @@ import cn.shuzilm.bean.control.AdPixelBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.common.jedis.Priority;
+import com.alibaba.fastjson.JSON;
+import org.nutz.json.Json;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
@@ -20,6 +24,8 @@ import java.util.UUID;
 */
 public class ExpUtil {
 
+    private static final Logger log = LoggerFactory.getLogger(ExpUtil.class);
+
     public static void main(String[] args) {
         try {
             System.out.println("开始");
@@ -31,7 +37,8 @@ public class ExpUtil {
                 DUFlowBean exp_error = (DUFlowBean) RedisQueueManager.getElementFromQueue("EXP_ERROR");
                 Long size = RedisQueueManager.getLength("EXP_ERROR");
                 System.out.println("EXP_ERROR的个数：" + size);
-                System.out.println(exp_error);
+//                System.out.println(exp_error);
+                log.debug( "Json:{}"+JSON.toJSONString(exp_error));
                 if (exp_error.getRequestId() != null) {
                     //计算价格
                     AdPixelBean bean = new AdPixelBean();
