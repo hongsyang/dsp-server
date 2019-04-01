@@ -231,7 +231,7 @@ public class BaiduRequestServiceImpl implements RequestService {
         baiduAd.setTarget_url("http://pixel.shuzijz.cn/lingjitest");
         baiduAd.setPreferred_order_id("3");
         baiduAd.setExtdata("test");
-        baiduAd.setAdvertiser_id(654321L);
+        baiduAd.setAdvertiser_id(78197397L);
         baiduAd.setMax_cpm(100000);
 //        baiduAd.setMonitor_urls("http://rtb.shuzijz.cn");
 //        ads.add(baiduAd);
