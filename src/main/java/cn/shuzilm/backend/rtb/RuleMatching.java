@@ -17,6 +17,8 @@ import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.common.jedis.JedisQueueManager;
+import cn.shuzilm.common.ssdb.SSDBQueueManager;
 import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.GPSDistance;
 import cn.shuzilm.util.JsonTools;
@@ -58,10 +60,6 @@ public class RuleMatching {
 
 	private static RuleMatching rule = null;
 
-	private AsyncRedisClient redis;
-
-	private Jedis jedis;
-
 	private RtbFlowControl rtbIns;
 
 	private RtbConstants constant;
@@ -93,10 +91,12 @@ public class RuleMatching {
 		String gradeRatioStr = constant.getRtbStrVar(RtbConstants.GRADE_RATIO);
 		gradeRatio = Integer.parseInt(gradeRatioStr);
 		String nodes[] = nodeStr.split(";");
-		redis = AsyncRedisClient.getInstance(nodes);
+		//redis = AsyncRedisClient.getInstance(nodes);
 		// jedis = JedisManager.getInstance().getResource();
+		SSDBQueueManager.init();
 		long start = System.currentTimeMillis();
 		RtbCronDispatch.startRtbDispatch();
+		
 		LOG.info("初始化缓存完成,加载时间:" + (System.currentTimeMillis() - start) + " ms");
 		rtbIns = RtbFlowControl.getInstance();
 
@@ -249,7 +249,8 @@ public class RuleMatching {
 		} else {
 			deviceId = deviceId.toLowerCase();
 			// 取出标签
-			String tagJson = redis.getAsync(deviceId);
+			//String tagJson = redis.getAsync(deviceId);
+			String tagJson = SSDBQueueManager.getDate(deviceId);
 			// String tagJson = jedis.get(deviceId);
 			tagBean = JSON.parseObject(tagJson, TagBean.class);
 			// TagBean tagBean = (TagBean) JsonTools.fromJson(tagJson);
@@ -434,7 +435,15 @@ public class RuleMatching {
 			appPreferenceIdList = new ArrayList<String>();
 			if (appPreferenceIdStr != null) {
 				String appPreferenceIds[] = appPreferenceIdStr.split(",");
-				appPreferenceIdList = Arrays.asList(appPreferenceIds);
+				for(String app:appPreferenceIds){
+					if(app.contains("_")){
+	                	String temp[] = app.split("_");
+	                	appPreferenceIdList.add(temp[0]);
+	                }else{
+	                	appPreferenceIdList.add(app);
+	                }
+				}
+				//appPreferenceIdList = Arrays.asList(appPreferenceIds);
 			}
 
 			String carrierIdStr = tagBean.getCarrierId();
