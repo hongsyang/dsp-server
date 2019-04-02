@@ -1027,8 +1027,8 @@ public class TaskServicve extends Service {
     	TaskServicve taskService = new TaskServicve();
     	
     	try {
-    		ResultList rl = taskService.queryAdviserAccount(true);
-    		System.out.println(rl);
+    		ArrayList<MediaBean> mediaList = taskService.queryMediaAll();
+    		System.out.println(mediaList);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

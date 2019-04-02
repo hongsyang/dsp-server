@@ -318,6 +318,10 @@ public class AudienceBean implements ICommand {
             String ra = "]";
             for (String s : split) {
                 String replace = s.replace(re, "").trim().replace(ra, "");
+                if(replace.contains("_")){
+                	String temp[] = replace.split("_");
+                	replace = temp[0];
+                }
                 set.add(replace);
             }
             this.appPreferenceIdSet = set;
@@ -376,9 +380,16 @@ public class AudienceBean implements ICommand {
             Set<Integer> set = new HashSet<Integer>();
             String re = "[";
             String ra = "]";
+            boolean flag = false;
             for (String s : split) {
                 String replace = s.replace(re, "").trim().replace(ra, "");
+                if("3".equals(replace)){
+                	flag = true;
+                }
                 set.add(Integer.parseInt(replace));
+            }
+            if(flag){
+            	set.add(4);
             }
             this.phonePriceLevelSet = set;
         }
