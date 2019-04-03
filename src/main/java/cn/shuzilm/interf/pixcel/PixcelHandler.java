@@ -92,7 +92,9 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 String redisStr="";
                 if (urlParser.size()>0){
                     redisStr = urlParser.get(0);
-                    if(redisStr.contains("lingji")|redisStr.contains("adview")|redisStr.contains("youyi")|redisStr.contains("tencent")){
+                    if(redisStr.contains("lingji")|redisStr.contains("adview")|
+                            redisStr.contains("youyi")|redisStr.contains("tencent")
+                            |redisStr.contains("baidu")){
                         boolean b = RedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
                         if (b) {
 
