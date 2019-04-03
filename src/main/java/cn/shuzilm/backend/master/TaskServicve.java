@@ -374,7 +374,7 @@ public class TaskServicve extends Service {
             	creativeGroup.setLink(cMap.getString("link_uri"));
             	creativeGroup.setTracking(cMap.getString("tracking_uri"));
             	creativeGroup.setClickTrackingUrl(cMap.getString("click_tracking_uri"));
-            	creativeGroup.setTradeId(cMap.getInteger("trade_id"));
+            	creativeGroup.setTradeId(cMap.getLong("trade_id").intValue());
             	aList.add(creativeGroup);
             }
             return aList;
@@ -1027,8 +1027,8 @@ public class TaskServicve extends Service {
     	TaskServicve taskService = new TaskServicve();
     	
     	try {
-    		ArrayList<MediaBean> mediaList = taskService.queryMediaAll();
-    		System.out.println(mediaList);
+    		List<CreativeGroupBean> list = taskService.queryCreativeGroupByAdUid("39ee41c1-478b-4f7d-9c8e-880fdd2083eb");
+    		System.out.println(list);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
