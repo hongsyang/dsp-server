@@ -18,11 +18,16 @@ public class BaiduDecodePriceUtil {
             String price_pad =  "0d1fe39e573488ee595acd5c6d4ce0f445476794";
             int[] test =new int[16];
             byte[] ciphertext_bytesa =  ciphertext_bytes.getBytes("US-ASCII");
+            System.out.println(Arrays.toString(ciphertext_bytesa));
             byte[] price_padbytes = price_pad.getBytes("US-ASCII");
-            for (int i = 0; i < 16; i++) {
+            System.out.println(Arrays.toString(price_padbytes));
+            for (int i = 0; i < ciphertext_bytes.length(); i++) {
                 test[i] = ciphertext_bytesa[i] ^ price_padbytes[i];
                 
             }
+            int i =99;
+            int j=101;
+            System.out.println( i^j);
             System.out.println(Arrays.toString(test));
             return "";
         } catch (Exception e) {

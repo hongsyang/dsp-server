@@ -216,30 +216,24 @@ public class BaiduRequestServiceImpl implements RequestService {
         BaiduBidResponse baiduBidResponse = new BaiduBidResponse();
         baiduBidResponse.setId(bidRequestBean.getId());
         //广告信息
-//        List ads = new ArrayList();
-        //广告信息
         BaiduAd baiduAd = new BaiduAd();
         //当前页面广告位顺序 id，同一页面从 1 开始
         baiduAd.setSequence_id(bidRequestBean.getAdslot().get(0).getSequence_id());
         baiduAd.setCreative_id(314136722806L);//推审id
-//        baiduAd.setHtml_snippet("http://rtb.shuzijz.cn");
         baiduAd.setWidth(bidRequestBean.getAdslot().get(0).getActual_width());
         baiduAd.setHeight(bidRequestBean.getAdslot().get(0).getActual_height());
         baiduAd.setCategory(7605);//行业id 
         baiduAd.setType(1);
         baiduAd.setLanding_page("https://www.shuzilm.cn");
         baiduAd.setTarget_url("http://pixel.shuzijz.cn/lingjitest");
-//        baiduAd.setPreferred_order_id("3");
         baiduAd.setExtdata("test");
         baiduAd.setAdvertiser_id(78197397L);//广告主id
         baiduAd.setMax_cpm(10000000);//价格
-//        baiduAd.setMonitor_urls("http://rtb.shuzijz.cn");
+        baiduAd.setMonitor_urls("http://rtb.shuzijz.cn");
 //        ads.add(baiduAd);
         baiduBidResponse.setAd(baiduAd);
 
 
-//        TencentSeatBid tencentSeatBid = new TencentSeatBid();
-//        baiduBidResponse.setAds();
 //        TencentBidResponse.setRequest_id(bidRequestBean.getId());
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 //        String format = LocalDateTime.now().format(formatter);//时间戳
@@ -321,13 +315,7 @@ public class BaiduRequestServiceImpl implements RequestService {
 //                "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
 ////                "&pmp=" + targetDuFlowBean.getDealid() + //私有交易
 //                "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
-//        tencentBid.setClick_param(curl);//点击通知
-//        //腾讯 Bid 类型列表
-//        tencentBidList.add(tencentBid);
-//        tencentSeatBid.setBids(tencentBidList);
-//        //腾讯  seat_bids类型列表
-//        ads.add(tencentSeatBid);
-//        TencentBidResponse.setSeat_bids(ads);
+
         MDC.put("sift", "baidubidResponseBean");
         log.debug("bidResponseBean:{}", JSON.toJSONString(baiduBidResponse));
         return baiduBidResponse;
