@@ -23,7 +23,7 @@ public class AdTagBlackListUtil {
 
     private static Set<String> adLocationSet = new HashSet();
 
-    public static void updateAdTagBlackList(){
+    /*public static void updateAdTagBlackList(){
         LOG.error("开始加载广告位黑名单");
         String sql = "SELECT * FROM adx_media_placement where active = 1 or deleted = 1";
         ArrayList<AdLocationBean> adLocationList = new ArrayList<AdLocationBean>();
@@ -69,6 +69,45 @@ public class AdTagBlackListUtil {
         } catch (Exception e){
             LOG.error("获取广告位黑名单失败 ",e);
         }
+    }*/
+
+    public static void updateAdTagBlackList(){
+        LOG.error("开始加载广告位黑名单");
+        String sql = "SELECT * FROM placement_black_list where deleted = 0";
+        ArrayList<AdLocationBean> adLocationList = new ArrayList<AdLocationBean>();
+        ResultList rl = new ResultList();
+        Set<String> tempSet = new HashSet();
+        try{
+            rl = select.select(sql);
+            LOG.error("广告位黑名单数量：{}", rl.size());
+            for(ResultMap rm:rl){
+                try{
+                    Integer adxId = rm.getInteger("adx_id");
+                    String packageName = rm.getString("package_name");
+                    Integer type = rm.getInteger("type");
+                    String placementId = rm.getString("placement_id");
+                    String width = rm.getString("width");
+                    String height = rm.getString("height");
+
+                    if(type == 1) {
+                        // 广告位
+                        //String adLocationStr1 = adxId+"_"+placementId;
+                        tempSet.add(adxId+"_"+placementId);
+                    }else if (type == 2) {
+                        // 包名 + 尺寸
+                        tempSet.add(adxId+"_"+packageName+"_"+width+"_"+height);
+                    }
+                }catch (Exception e) {
+                    LOG.error("转换广告位黑名单失败 ",e);
+                }
+            }
+            adLocationSet = tempSet;
+            /*for(String adTagId : adLocationSet) {
+                LOG.error("最终广告位黑名单： {}", adTagId);
+            }*/
+        } catch (Exception e){
+            LOG.error("获取广告位黑名单失败 ",e);
+        }
     }
 
     public static void main(String[] args) {
@@ -86,10 +125,10 @@ public class AdTagBlackListUtil {
         }
         if(adTagIdList.size() > 0) {
             for(String adTagId : adTagIdList) {
-                LOG.debug(" adTagId : {}", adTagId);
+                //LOG.debug(" adTagId : {}", adTagId);
                 String adLocationStr = "";
                 if(StringUtils.isNotEmpty(adTagId)) {
-                    adLocationStr = adxId+"_"+appPackageName+"_"+adTagId;
+                    adLocationStr = adTagId;
                 }else if(width > 0 && height > 0) {
                     adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
                 }else {
