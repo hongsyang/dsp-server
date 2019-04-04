@@ -102,47 +102,59 @@ public class AdTagBlackListUtil {
                 }
             }
             adLocationSet = tempSet;
-            /*for(String adTagId : adLocationSet) {
+            for(String adTagId : adLocationSet) {
                 LOG.error("最终广告位黑名单： {}", adTagId);
-            }*/
+            }
         } catch (Exception e){
             LOG.error("获取广告位黑名单失败 ",e);
         }
     }
 
-    public static void main(String[] args) {
-        updateAdTagBlackList();
-        System.out.println("");
-    }
-
-
     public static boolean inAdTagBlackList(String adxId, String appPackageName, List<String> adTagIdList, int width,int height) {
-        LOG.debug("adxId:{}, appPackageName: {}  width: {} height: {}", adxId, appPackageName, width, height);
+
+        if(adTagIdList != null && adTagIdList.size() > 0) {
+            for(String adTag : adTagIdList) {
+                LOG.debug("adxId:{}, appPackageName: {}  width: {} height: {} 广告位id： {}", adxId, appPackageName, width, height, adTag);
+            }
+        }else {
+            LOG.debug("adxId:{}, appPackageName: {}  width: {} height: {}", adxId, appPackageName, width, height);
+        }
         // adxId 和 appPackageName 为空，直接放过
         if(adxId == null || "".equals(adxId.trim())
             || appPackageName == null || "".equals(appPackageName.trim())) {
             return false;
         }
-        if(adTagIdList.size() > 0) {
+        Boolean adTagRs = false;
+        Boolean sizeRs = false;
+
+        // 匹配广告位id
+        if(adTagIdList != null && adTagIdList.size() > 0) {
             for(String adTagId : adTagIdList) {
-                //LOG.debug(" adTagId : {}", adTagId);
                 String adLocationStr = "";
                 if(StringUtils.isNotEmpty(adTagId)) {
                     adLocationStr = adTagId;
-                }else if(width > 0 && height > 0) {
-                    adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
-                }else {
-                    // 不符合规范，直接放过
-                    return false;
-                }
-                if(!adLocationSet.contains(adLocationStr)){
-                    return false;
+                    adTagRs = true;
+                    if(!adLocationSet.contains(adLocationStr)){
+                        adTagRs = false;
+                        break;
+                    }
                 }
             }
-            return true;
-        }else {
-            return false;
+            if(adTagRs != null && adTagRs) {
+                return true;
+            }
         }
+        // 匹配媒体+尺寸
+        if(StringUtils.isNotEmpty(appPackageName) && width > 0 && height > 0) {
+            String adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
+            sizeRs = adLocationSet.contains(adLocationStr);
+           /* if(!adLocationSet.contains(adLocationStr)){
+                sizeRs = false;
+            }else {
+                sizeRs = true;
+            }*/
+        }
+        return adTagRs || sizeRs;
     }
 
 
@@ -222,6 +234,18 @@ public class AdTagBlackListUtil {
             e.printStackTrace();
             return item;
         }
+    }
+
+    public static void stopTask(){
+        adLocationSet = new HashSet();
+    }
+
+    public static void main(String[] args) {
+        updateAdTagBlackList();
+        ArrayList list = new ArrayList<String>();
+        list.add("2_POSID0148df3wmgo6");
+        boolean rs  = inAdTagBlackList("2","com.iqiyi222",list,640,100);
+        System.out.println(rs);
     }
 
 
