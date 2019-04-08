@@ -317,7 +317,7 @@ public class AudienceBean implements ICommand {
             String re = "[";
             String ra = "]";
             for (String s : split) {
-                String replace = s.replace(re, "").trim().replace(ra, "");
+                String replace = s.replace(re, "").trim().replace(ra, "").replace("\"", "");
                 if(replace.contains("_")){
                 	String temp[] = replace.split("_");
                 	replace = temp[0];
