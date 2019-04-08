@@ -17,10 +17,13 @@ public class BaiduDecrypter {
 
     public static String decrypt(String b64EncodedCiphertext, String ekey, String ekey1) throws UnsupportedEncodingException {
         byte[] initialization_vector = Base64.decodeBase64(b64EncodedCiphertext.getBytes("US-ASCII"));
+        System.out.println("initialization_vector"+Arrays.toString(initialization_vector));
         //len(ciphertext_bytes) = 8 bytes
         byte[] ciphertext_bytes = Arrays.copyOf(initialization_vector, INITIALIZATION_VECTOR_SIZE);
+        System.out.println(Arrays.toString(ciphertext_bytes));
         //signatrue = initialization_vector + INITIALIZATION_VECTOR_SIZE(16) + CIPHER_TEXT_SIZE(8)
         byte[] signature = Arrays.copyOf(ciphertext_bytes, CIPHER_TEXT_SIZE);
+        System.out.println(Arrays.toString(signature));
 
         int pad_size = HASH_OUTPUT_SIZE;
         int[] price_pad = new int[HASH_OUTPUT_SIZE];
@@ -50,5 +53,9 @@ public class BaiduDecrypter {
 
 
         return null;
+    }
+
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        decrypt("Uja0xQADFz97jEpgW5IA8g0f455XNIjPRj8IqA","","");
     }
 }

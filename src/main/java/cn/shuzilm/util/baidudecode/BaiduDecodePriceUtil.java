@@ -28,7 +28,7 @@ public class BaiduDecodePriceUtil {
                 
             }
 
-            System.out.println( 16^15);
+            System.out.println( 207^238);
             System.out.println( 13^15);
             System.out.println(Arrays.toString(test));
             return "";
