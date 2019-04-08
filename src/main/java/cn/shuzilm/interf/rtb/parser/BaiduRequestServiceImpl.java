@@ -253,7 +253,7 @@ public class BaiduRequestServiceImpl implements RequestService {
 //                "&pmp=" + duFlowBean.getDealid() + //私有交易
 //                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
 
-        baiduAd.setExtdata("nurl");
+        baiduAd.setExtdata(nurl);
 
         executor.execute(new Runnable() {
             @Override
