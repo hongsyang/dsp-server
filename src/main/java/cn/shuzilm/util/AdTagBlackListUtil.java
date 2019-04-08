@@ -23,7 +23,7 @@ public class AdTagBlackListUtil {
 
     private static Set<String> adLocationSet = new HashSet();
 
-    public static void updateAdTagBlackList(){
+    /*public static void updateAdTagBlackList(){
         LOG.error("开始加载广告位黑名单");
         String sql = "SELECT * FROM adx_media_placement where active = 1 or deleted = 1";
         ArrayList<AdLocationBean> adLocationList = new ArrayList<AdLocationBean>();
@@ -69,41 +69,92 @@ public class AdTagBlackListUtil {
         } catch (Exception e){
             LOG.error("获取广告位黑名单失败 ",e);
         }
-    }
+    }*/
 
-    public static void main(String[] args) {
-        updateAdTagBlackList();
-        System.out.println("");
-    }
+    public static void updateAdTagBlackList(){
+        LOG.error("开始加载广告位黑名单");
+        String sql = "SELECT * FROM placement_black_list where deleted = 0";
+        ArrayList<AdLocationBean> adLocationList = new ArrayList<AdLocationBean>();
+        ResultList rl = new ResultList();
+        Set<String> tempSet = new HashSet();
+        try{
+            rl = select.select(sql);
+            LOG.error("广告位黑名单数量：{}", rl.size());
+            for(ResultMap rm:rl){
+                try{
+                    Integer adxId = rm.getInteger("adx_id");
+                    String packageName = rm.getString("package_name");
+                    Integer type = rm.getInteger("type");
+                    String placementId = rm.getString("placement_id");
+                    String width = rm.getString("width");
+                    String height = rm.getString("height");
 
+                    if(type == 1) {
+                        // 广告位
+                        //String adLocationStr1 = adxId+"_"+placementId;
+                        tempSet.add(adxId+"_"+placementId);
+                    }else if (type == 2) {
+                        // 包名 + 尺寸
+                        tempSet.add(adxId+"_"+packageName+"_"+width+"_"+height);
+                    }
+                }catch (Exception e) {
+                    LOG.error("转换广告位黑名单失败 ",e);
+                }
+            }
+            adLocationSet = tempSet;
+            for(String adTagId : adLocationSet) {
+                LOG.error("最终广告位黑名单： {}", adTagId);
+            }
+        } catch (Exception e){
+            LOG.error("获取广告位黑名单失败 ",e);
+        }
+    }
 
     public static boolean inAdTagBlackList(String adxId, String appPackageName, List<String> adTagIdList, int width,int height) {
-        LOG.debug("adxId:{}, appPackageName: {}  width: {} height: {}", adxId, appPackageName, width, height);
+
+        if(adTagIdList != null && adTagIdList.size() > 0) {
+            for(String adTag : adTagIdList) {
+                LOG.debug("adxId:{}, appPackageName: {}  width: {} height: {} 广告位id： {}", adxId, appPackageName, width, height, adTag);
+            }
+        }else {
+            LOG.debug("adxId:{}, appPackageName: {}  width: {} height: {}", adxId, appPackageName, width, height);
+        }
         // adxId 和 appPackageName 为空，直接放过
         if(adxId == null || "".equals(adxId.trim())
             || appPackageName == null || "".equals(appPackageName.trim())) {
             return false;
         }
-        if(adTagIdList.size() > 0) {
+        Boolean adTagRs = false;
+        Boolean sizeRs = false;
+
+        // 匹配广告位id
+        if(adTagIdList != null && adTagIdList.size() > 0) {
             for(String adTagId : adTagIdList) {
-                LOG.debug(" adTagId : {}", adTagId);
                 String adLocationStr = "";
                 if(StringUtils.isNotEmpty(adTagId)) {
-                    adLocationStr = adxId+"_"+appPackageName+"_"+adTagId;
-                }else if(width > 0 && height > 0) {
-                    adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
-                }else {
-                    // 不符合规范，直接放过
-                    return false;
-                }
-                if(!adLocationSet.contains(adLocationStr)){
-                    return false;
+                    adLocationStr = adTagId;
+                    adTagRs = true;
+                    if(!adLocationSet.contains(adLocationStr)){
+                        adTagRs = false;
+                        break;
+                    }
                 }
             }
-            return true;
-        }else {
-            return false;
+            if(adTagRs != null && adTagRs) {
+                return true;
+            }
         }
+        // 匹配媒体+尺寸
+        if(StringUtils.isNotEmpty(appPackageName) && width > 0 && height > 0) {
+            String adLocationStr = adxId+"_"+appPackageName+"_"+width+"_"+height;
+            sizeRs = adLocationSet.contains(adLocationStr);
+           /* if(!adLocationSet.contains(adLocationStr)){
+                sizeRs = false;
+            }else {
+                sizeRs = true;
+            }*/
+        }
+        return adTagRs || sizeRs;
     }
 
 
@@ -187,6 +238,14 @@ public class AdTagBlackListUtil {
 
     public static void stopTask(){
         adLocationSet = new HashSet();
+    }
+
+    public static void main(String[] args) {
+        updateAdTagBlackList();
+        ArrayList list = new ArrayList<String>();
+        list.add("2_POSID0148df3wmgo6");
+        boolean rs  = inAdTagBlackList("2","com.iqiyi222",list,640,100);
+        System.out.println(rs);
     }
 
 
