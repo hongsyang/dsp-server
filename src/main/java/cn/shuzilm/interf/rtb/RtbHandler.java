@@ -298,7 +298,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                             deviceIdBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
-                        if (result.contains("AdTagBlackListFlag")) {
+                        if (result.contains("AdTagBlackLis")) {
                             AdTagBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
@@ -329,7 +329,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                             deviceIdBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
-                        if (result.contains("AdTagBlackListFlag")) {
+                        if (result.contains("AdTagBlackList")) {
                             AdTagBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
@@ -360,7 +360,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                             deviceIdBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
-                        if (result.contains("AdTagBlackListFlag")) {
+                        if (result.contains("AdTagBlackList")) {
                             AdTagBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
@@ -390,7 +390,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                             deviceIdBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
-                        if (result.contains("AdTagBlackListFlag")) {
+                        if (result.contains("AdTagBlackList")) {
                             AdTagBlackListFlag = 0;
                             filterRuleBidRequestFlag = 0;
                         }
