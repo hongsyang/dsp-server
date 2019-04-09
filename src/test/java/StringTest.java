@@ -3,6 +3,9 @@ import java.util.Arrays;
 public class StringTest {
     public static void main(String[] args) {
         String url = "http://localhost:8880/baiduclick?reqid=%%ID%%&price=%%PRICE%%&ext_data=%%EXT_DATA%%&lpd=h55_shuzilm-cn&clk=admaster_click?shuzijz-0408";
+        if ( url.indexOf("lpd")>0){
+            System.out.println("--------------");
+        }
         String lpdAndClk = url.substring(url.indexOf("lpd") + 4);
         String http = "http://";
         if (lpdAndClk != null) {
