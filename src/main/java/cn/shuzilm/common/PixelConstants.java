@@ -16,9 +16,9 @@ public class PixelConstants
         {
             p = new java.util.Properties();
             //测试环境
-            String FileName = "C:\\Users\\houkp\\Desktop\\test\\pixel.properties";
+//            String FileName = "C:\\Users\\houkp\\Desktop\\test\\pixel.properties";
             //正式环境
-//            String FileName = "/home/srvadmin/dsp/pixel.properties";
+            String FileName = "/home/srvadmin/dsp/pixel.properties";
             //读取属性文件a.properties
             InputStream fis = new BufferedInputStream(new FileInputStream(FileName));
 //            InputStream fis = PixelConstants.class.getClassLoader().getResourceAsStream("pixel.properties");
