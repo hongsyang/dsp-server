@@ -6,6 +6,7 @@ import cn.shuzilm.common.redis.RedisQueueManager;
 import cn.shuzilm.interf.pixcel.parser.ParameterParser;
 import cn.shuzilm.interf.pixcel.parser.RequestParser;
 import cn.shuzilm.util.Help;
+import cn.shuzilm.util.HttpClientUtil;
 import cn.shuzilm.util.UrlParserUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -110,9 +111,48 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
 
                 if (url.contains("baiduclick")) {
-                    url.split("lpd");
-                    response.setStatus(HttpResponseStatus.FOUND);
-                    response.setHeader("location",url);
+
+
+                    String lpdAndClk = url.substring(url.indexOf("lpd") + 4);
+                    MDC.put("sift", "baiduClick302");
+                    log.debug("lpdAndClk:{}", lpdAndClk);
+                    MDC.remove("sift");
+                    String http = "http://";
+                    String htppLpdUrl = "";
+                    if (lpdAndClk != null) {
+                        String[] split = lpdAndClk.split("&clk=");
+                        if (split != null) {
+                            String lpd = split[0];
+                            if (lpd != null || "null".equals(lpd)) {
+                                String[] split1 = lpd.split("\\?");
+                                String replace = split1[0].replace("_", ".").replace("-", "/");
+                                if (split1.length > 1) {
+                                    replace = replace + "?" + split1[1];
+                                }
+                                htppLpdUrl = http + replace;
+                            }
+
+                            //百度302 转发
+                            response.setStatus(HttpResponseStatus.FOUND);
+                            response.setHeader("location", htppLpdUrl);
+
+                            //第三方点击监测
+                            String clk = split[1];
+                            if (clk != null || "null".equals(clk)) {
+                                String[] clkSplit = clk.split("\\?");
+                                String clkreplace = clkSplit[0].replace("_", ".").replace("-", "/");
+                                if (clkSplit.length > 1) {
+                                    clkreplace = clkreplace + "?" + clkSplit[1];
+                                }
+                                String htppClkUrl = http + clkreplace;
+                                //触发点击监测
+                                HttpClientUtil.get(htppClkUrl);
+                            }
+
+                        }
+
+                    }
+
 
                 } else {
                     //不做处理直接返回

@@ -2,7 +2,7 @@ import java.util.Arrays;
 
 public class StringTest {
     public static void main(String[] args) {
-        String url = "http://localhost:8880/baiduclick?reqid=%%ID%%&price=%%PRICE%%&ext_data=%%EXT_DATA%%&lpd=h55_shuzilm_cn&clk=admaster_click?shuzijz-0408";
+        String url = "http://localhost:8880/baiduclick?reqid=%%ID%%&price=%%PRICE%%&ext_data=%%EXT_DATA%%&lpd=h55_shuzilm-cn&clk=admaster_click?shuzijz-0408";
         String lpdAndClk = url.substring(url.indexOf("lpd") + 4);
         String http = "http://";
         if (lpdAndClk != null) {
@@ -13,20 +13,20 @@ public class StringTest {
                     String[] split1 = lpd.split("\\?");
                     String replace = split1[0].replace("_", ".").replace("-", "/");
                     if (split1.length > 1) {
-                        replace = replace + split1[1];
+                        replace = replace +"?"+ split1[1];
                     }
                     String htppLpdUrl = http + replace;
                     System.out.println(htppLpdUrl);
                 }
                 String clk = split[1];
                 if (clk != null || "null".equals(clk)) {
-                    String[] split1 = lpd.split("\\?");
-                    String replace = split1[0].replace("_", ".").replace("-", "/");
-                    if (split1.length > 1) {
-                        replace = replace + split1[1];
+                    String[] clkSplit = clk.split("\\?");
+                    String clkreplace = clkSplit[0].replace("_", ".").replace("-", "/");
+                    if (clkSplit.length > 1) {
+                        clkreplace = clkreplace +"?"+ clkSplit[1];
                     }
-                    String htppLpdUrl = http + replace;
-                    System.out.println(htppLpdUrl);
+                    String htppClkUrl = http + clkreplace;
+                    System.out.println(htppClkUrl);
                 }
 
             }
