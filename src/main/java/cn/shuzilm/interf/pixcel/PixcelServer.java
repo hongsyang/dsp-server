@@ -40,6 +40,7 @@ public class PixcelServer {
     private static ExecutorService executor3 = Executors.newFixedThreadPool(configs.getInt("YOUYI_THREADS"));
     private static ExecutorService executor4 = Executors.newFixedThreadPool(configs.getInt("ADVIEW_THREADS"));
     private static ExecutorService executor5 = Executors.newFixedThreadPool(configs.getInt("TENCENT_THREADS"));
+    private static ExecutorService executor6 = Executors.newFixedThreadPool(configs.getInt("BAIDU_THREADS"));
 
     //扫描包
     private static Reflections reflections = new Reflections("cn.shuzilm.interf.pixcel.parser");
@@ -61,6 +62,7 @@ public class PixcelServer {
         LingJiRedisTask lingJiRedisTask = new LingJiRedisTask();
         AdviewRedisTask adviewRedisTask = new AdviewRedisTask();
         TencentRedisTask tencentRedisTask = new TencentRedisTask();
+        BaiduRedisTask baiduRedisTask = new BaiduRedisTask();
         YouYiRedisTask youYIRedisTask = new YouYiRedisTask();
         for (int i = 0; i < configs.getInt("EXECUTOR_THREADS"); i++) {
             executor1.execute(clickRedisTask);
@@ -68,6 +70,7 @@ public class PixcelServer {
             executor3.execute(youYIRedisTask);
             executor4.execute(adviewRedisTask);
             executor5.execute(tencentRedisTask);
+            executor6.execute(baiduRedisTask);
         }
     }
 

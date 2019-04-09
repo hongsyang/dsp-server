@@ -27,6 +27,7 @@ public class ClickRedisTask implements Runnable {
                 Object youyiclick = RedisQueueManager.getElementFromQueue("youyiclick");
                 Object lingjiclick = RedisQueueManager.getElementFromQueue("lingjiclick");
                 Object tencentclick = RedisQueueManager.getElementFromQueue("tencentclick");
+                Object baiduclick = RedisQueueManager.getElementFromQueue("baiduclick");
                 if (adviewclick != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     AdViewClickParameterParserImpl.parseUrlStr(adviewclick.toString());
@@ -39,6 +40,9 @@ public class ClickRedisTask implements Runnable {
                 } else if (tencentclick != null) {
                     log.debug("线程号" + Thread.currentThread().getName());
                     TencentClickParameterParserImpl.parseUrlStr(tencentclick.toString());
+                }  else if (baiduclick != null) {
+                    log.debug("线程号" + Thread.currentThread().getName());
+                    BaiduClickParameterParserImpl.parseUrlStr(baiduclick.toString());
                 } else {
 //                    log.debug("等待中" + Thread.currentThread().getName());
                     Thread.currentThread().join(1000);

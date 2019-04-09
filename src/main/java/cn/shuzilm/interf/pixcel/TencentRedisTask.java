@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
-* @Description:    悠易解析器
+* @Description:    腾讯解析器
 * @Author:         houkp
 * @CreateDate:     2019/1/15 19:09
 * @UpdateUser:     houkp

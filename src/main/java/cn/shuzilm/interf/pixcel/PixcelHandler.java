@@ -106,7 +106,6 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                     }
 
                 }
-                //是否发送到redis
 
 
                 //不做处理直接返回

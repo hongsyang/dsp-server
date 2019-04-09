@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 /**
  * Created by thunders on 2019/4/4.
  */
-public class BaiduPriceDecrypt {
+public class BaiduPriceDecryptUtil {
     private static final char[] HEX_CHAR = {'0', '1', '2', '3', '4', '5',
             '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
@@ -70,7 +70,7 @@ public class BaiduPriceDecrypt {
 //        return sb.toString();
 //    }
     public static void main(String[] args) {
-        BaiduPriceDecrypt b = new BaiduPriceDecrypt();
+        BaiduPriceDecryptUtil b = new BaiduPriceDecryptUtil();
 //        String encryptStr = "Uja0xQADFz97jEpgW5IA8g0f455XNIjPRj8IqA";
         String encryptStr = "XKW6zwADP7Z7jEpgW5IA8hDT0dTLqeiTwzTu4g";
         int price = b.decodePrice(encryptStr);
@@ -91,7 +91,7 @@ public class BaiduPriceDecrypt {
      *
      * @return
      */
-    public int decodePrice(String encryptStr){
+    public static int decodePrice(String encryptStr){
 
         byte[] decryptArr = Base64Simple.decode(encryptStr + "==");
         System.out.println("base64 :" + bytesToHexFun2(decryptArr));
@@ -164,7 +164,7 @@ public class BaiduPriceDecrypt {
         return bb.array();
     }
 
-    public byte[] decodeWithHMAC(byte[] keyArray,byte[] encryptByteArray){
+    public static  byte[] decodeWithHMAC(byte[] keyArray,byte[] encryptByteArray){
         try {
             byte[] priceByteArray = HMACSHA1.hmacSHA1Encrypt(encryptByteArray,keyArray);
             return priceByteArray;
