@@ -1,6 +1,8 @@
 package cn.shuzilm.util.baidudecode;
 
 
+import cn.shuzilm.util.base64.Decrypter;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -72,8 +74,9 @@ public class BaiduPriceDecryptUtil {
     public static void main(String[] args) {
         BaiduPriceDecryptUtil b = new BaiduPriceDecryptUtil();
 //        String encryptStr = "Uja0xQADFz97jEpgW5IA8g0f455XNIjPRj8IqA";
-        String encryptStr = "XKW6zwADP7Z7jEpgW5IA8hDT0dTLqeiTwzTu4g";
-        int price = b.decodePrice(encryptStr);
+        String encryptStr = "XKqufAACrvN7jEpgW5IA8v3a5_BT14VfQwoGYA";
+        String unWebSafeAndPad = Decrypter.unWebSafeAndPad(encryptStr);
+        int price = b.decodePrice(unWebSafeAndPad);
         System.out.println("最终价格:" + price);
     }
     /**
@@ -92,8 +95,8 @@ public class BaiduPriceDecryptUtil {
      * @return
      */
     public static int decodePrice(String encryptStr){
-
-        byte[] decryptArr = Base64Simple.decode(encryptStr + "==");
+        String unWebSafeAndPad = Decrypter.unWebSafeAndPad(encryptStr);
+        byte[] decryptArr = Base64Simple.decode(unWebSafeAndPad );
         System.out.println("base64 :" + bytesToHexFun2(decryptArr));
         // 解密
         byte[] encryptP = new byte[28];
