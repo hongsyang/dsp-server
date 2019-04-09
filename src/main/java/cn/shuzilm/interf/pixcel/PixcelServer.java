@@ -59,17 +59,17 @@ public class PixcelServer {
         //从redis中取数据
 
         ClickRedisTask clickRedisTask = new ClickRedisTask();
-//        LingJiRedisTask lingJiRedisTask = new LingJiRedisTask();
-//        AdviewRedisTask adviewRedisTask = new AdviewRedisTask();
-//        TencentRedisTask tencentRedisTask = new TencentRedisTask();
-//        YouYiRedisTask youYIRedisTask = new YouYiRedisTask();
+        LingJiRedisTask lingJiRedisTask = new LingJiRedisTask();
+        AdviewRedisTask adviewRedisTask = new AdviewRedisTask();
+        TencentRedisTask tencentRedisTask = new TencentRedisTask();
+        YouYiRedisTask youYIRedisTask = new YouYiRedisTask();
         BaiduRedisTask baiduRedisTask = new BaiduRedisTask();
         for (int i = 0; i < configs.getInt("EXECUTOR_THREADS"); i++) {
             executor1.execute(clickRedisTask);
-//            executor2.execute(lingJiRedisTask);
-//            executor3.execute(youYIRedisTask);
-//            executor4.execute(adviewRedisTask);
-//            executor5.execute(tencentRedisTask);
+            executor2.execute(lingJiRedisTask);
+            executor3.execute(youYIRedisTask);
+            executor4.execute(adviewRedisTask);
+            executor5.execute(tencentRedisTask);
             executor6.execute(baiduRedisTask);
         }
     }
