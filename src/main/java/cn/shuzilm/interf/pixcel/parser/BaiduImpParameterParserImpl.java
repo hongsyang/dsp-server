@@ -87,8 +87,8 @@ public class BaiduImpParameterParserImpl {
                 element.setMaterialId(dmat);
                 String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");//用户ip
                 element.setIpAddr(userip);
-                element.setAdxId("4");
-                element.setAdxSource("Tencent");
+                element.setAdxId("5");
+                element.setAdxSource("Baidu");
                 //--------------------------------------------------不一定传过来，从redis中获取，如果没有就不要了
 
                 if (RedisUtil.getDUFlowBean(requestId) != null) {
