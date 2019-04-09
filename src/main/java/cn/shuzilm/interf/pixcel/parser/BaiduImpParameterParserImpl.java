@@ -138,7 +138,7 @@ public class BaiduImpParameterParserImpl {
             //解析价格
             String price = urlRequest.get("price");
             int decodePrice = BaiduPriceDecryptUtil.decodePrice(price);
-
+            bean.setCost(Double.valueOf(String.valueOf(decodePrice)));
             bean.setWinNoticeNums(1);
             //pixel服务器发送到主控模块
             log.debug("pixel服务器发送到主控模块的BaiduImpBean：{}", bean);
