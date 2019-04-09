@@ -89,12 +89,12 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                 //主业务逻辑  增加超时线程池
                 String remote = "&remoteIp=" + remoteIp;
                 List<String> urlParser = UrlParserUtil.urlParser(url);
-                String redisStr="";
-                if (urlParser.size()>0){
+                String redisStr = "";
+                if (urlParser.size() > 0) {
                     redisStr = urlParser.get(0);
-                    if(redisStr.contains("lingji")|redisStr.contains("adview")|
-                            redisStr.contains("youyi")|redisStr.contains("tencent")
-                            |redisStr.contains("baidu")){
+                    if (redisStr.contains("lingji") | redisStr.contains("adview") |
+                            redisStr.contains("youyi") | redisStr.contains("tencent")
+                            | redisStr.contains("baidu")) {
                         boolean b = RedisQueueManager.putElementToQueue(redisStr, url + remote, Priority.NORM_PRIORITY);
                         if (b) {
 
@@ -107,18 +107,26 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
 
                 }
 
-
-                //不做处理直接返回
-                byte[] content = redisStr.getBytes("utf-8");
-                ChannelBuffer buffer = new DynamicChannelBuffer(2048);
-
                 HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-                response.setHeader("Content-Type", "text/html");
-                response.setHeader("Connection", HttpHeaders.Values.CLOSE);
-                response.setHeader("Content-Length", content.length);
-                response.setHeader("Accept-Ranges", "bytes");
-                buffer.writeBytes(content);
-                response.setContent(buffer);
+
+                if (url.contains("baiduclick")) {
+                    url.split("lpd");
+                    response.setStatus(HttpResponseStatus.FOUND);
+                    response.setHeader("location",url);
+
+                } else {
+                    //不做处理直接返回
+                    byte[] content = redisStr.getBytes("utf-8");
+                    ChannelBuffer buffer = new DynamicChannelBuffer(2048);
+
+                    response.setHeader("Content-Type", "text/html");
+                    response.setHeader("Connection", HttpHeaders.Values.CLOSE);
+                    response.setHeader("Content-Length", content.length);
+                    response.setHeader("Accept-Ranges", "bytes");
+                    buffer.writeBytes(content);
+                    response.setContent(buffer);
+                }
+
 
                 // Write the response.
                 ChannelFuture future2 = messageEvent.getChannel().write(response);

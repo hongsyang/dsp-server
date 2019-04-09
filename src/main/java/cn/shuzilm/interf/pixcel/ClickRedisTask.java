@@ -23,10 +23,14 @@ public class ClickRedisTask implements Runnable {
     public void run() {
         while (true) {
             try {
-                Object adviewclick = RedisQueueManager.getElementFromQueue("adviewclick");
-                Object youyiclick = RedisQueueManager.getElementFromQueue("youyiclick");
-                Object lingjiclick = RedisQueueManager.getElementFromQueue("lingjiclick");
-                Object tencentclick = RedisQueueManager.getElementFromQueue("tencentclick");
+//                Object adviewclick = RedisQueueManager.getElementFromQueue("adviewclick");
+                Object adviewclick = RedisQueueManager.getElementFromQueue("adview");
+//                Object youyiclick = RedisQueueManager.getElementFromQueue("youyiclick");
+                Object youyiclick = RedisQueueManager.getElementFromQueue("youyi");
+//                Object lingjiclick = RedisQueueManager.getElementFromQueue("lingjiclick");
+                Object lingjiclick = RedisQueueManager.getElementFromQueue("lingji");
+//                Object tencentclick = RedisQueueManager.getElementFromQueue("tencentclick");
+                Object tencentclick = RedisQueueManager.getElementFromQueue("tencent");
                 Object baiduclick = RedisQueueManager.getElementFromQueue("baiduclick");
                 if (adviewclick != null) {
                     log.debug("线程号" + Thread.currentThread().getName());

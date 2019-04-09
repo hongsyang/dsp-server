@@ -223,7 +223,7 @@ public class BaiduRequestServiceImpl implements RequestService {
 //        baiduAd.setTarget_url("http://pixel.shuzijz.cn/lingjitest");
 //        baiduAd.setAdvertiser_id();//广告主id 对应advertiser 的nid ------------------78197397L  先不传
         Double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;
-        Integer price = Integer.valueOf(String.valueOf(biddingPrice));
+        Integer price = Integer.valueOf(biddingPrice.intValue());
         baiduAd.setMax_cpm(price);//价格 单位：分
 //        baiduAd.setMonitor_urls("http://rtb.shuzijz.cn");
         baiduBidResponse.setAd(baiduAd);
