@@ -22,13 +22,14 @@ public class Help {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        String huanhang = "\n";
+        String huanhang = "\r\n";
         String data = "test";
         System.out.println(ia.getHostAddress());
         System.out.println(ia.getHostName());
         System.out.println(LocalDateTime.now().toString().replace("T", " "));
-        String warningData = "告警等级：低  " + huanhang + "告警主机：" + ia.getHostName() + huanhang +"主机 IP：" + ia.getHostAddress() + huanhang +"告警时间：" + LocalDateTime.now().toString().replace("T", " ") +  huanhang + "告警业务： " + data;
+        String warningData = "告警等级：低  " + huanhang + "告警主机：" + ia.getHostName() + " \n" + huanhang + " 主机 IP：" + ia.getHostAddress() + huanhang + "告警时间：" + LocalDateTime.now().toString().replace("T", " ") + huanhang + "告警业务： " + data;
         System.out.println(warningData);
+        Help.sendAlert("侯克佩测试");
 
 
     }
@@ -37,14 +38,14 @@ public class Help {
         String id = ALERT_USER;
         byte level = ALERT_LEVEL;
         String data = null;
-        String huanhang = "\n";
-        String warningData=null;
+        String huanhang = "\r\n";
+        String warningData = null;
         InetAddress ia = null;
         try {
             ia = ia.getLocalHost();
 
             data = new String(content.getBytes(), "utf-8");
-            warningData = "告警等级：低  " + huanhang + "告警主机：" + ia.getHostName() + huanhang +"主机 IP：" + ia.getHostAddress() + huanhang +"告警时间：" + LocalDateTime.now().toString().replace("T", " ") +  huanhang + "告警业务： " + data;
+            warningData = "告警等级：低  " + " \n" + huanhang + "告警主机：" + ia.getHostName() + " \n" + huanhang + "主机 IP：" + ia.getHostAddress() + " \n" + huanhang + "告警时间：" + LocalDateTime.now().toString().replace("T", " ") + " \n" + huanhang + "告警业务： " + data;
         } catch (Exception e1) {
             e1.printStackTrace();
         }
