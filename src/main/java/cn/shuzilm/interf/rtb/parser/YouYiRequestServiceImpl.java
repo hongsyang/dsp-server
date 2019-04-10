@@ -269,6 +269,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&dpro=" + targetDuFlowBean.getProvince() +// 省
+                "&dcit=" + targetDuFlowBean.getCity() +// 市
+                "&dcou=" + targetDuFlowBean.getCountry() +// 县
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +
@@ -298,6 +301,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&dpro=" + targetDuFlowBean.getProvince() +// 省
+                "&dcit=" + targetDuFlowBean.getCity() +// 市
+                "&dcou=" + targetDuFlowBean.getCountry() +// 县
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +
@@ -325,6 +331,9 @@ public class YouYiRequestServiceImpl implements RequestService {
                 "&dage=" + targetDuFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + targetDuFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + targetDuFlowBean.getMaterialId() + //素材id
+                "&dpro=" + targetDuFlowBean.getProvince() +// 省
+                "&dcit=" + targetDuFlowBean.getCity() +// 市
+                "&dcou=" + targetDuFlowBean.getCountry() +// 县
                 "&userip=" + targetDuFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +

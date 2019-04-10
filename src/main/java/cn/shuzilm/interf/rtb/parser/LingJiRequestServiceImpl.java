@@ -62,15 +62,15 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
 
-    private  static Jedis jedis = resource.getResource();
+    private static Jedis jedis = resource.getResource();
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
     private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr,ExecutorService executor) throws Exception {
-        this.executor=executor;
+    public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
+        this.executor = executor;
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
             this.configs = AppConfigs.getInstance(FILTER_CONFIG);
@@ -123,7 +123,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                     }
                 }
             }
-
 
 
             //支持的文件类型
@@ -195,7 +194,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             }
 
 
-            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(),ADX_ID,adxNameList,width,height);//过滤规则的返回结果
+            Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(), ADX_ID, adxNameList, width, height);//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
@@ -204,7 +203,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                 return "bundleBlackList" + bidRequestBean.getId();
             } else if (msg.get("deviceIdBlackList") != null) {
                 return "deviceIdBlackList" + bidRequestBean.getId();
-            }else if (msg.get("AdTagBlackList") != null) {
+            } else if (msg.get("AdTagBlackList") != null) {
                 return "AdTagBlackList";
             }
             DUFlowBean targetDuFlowBean = ruleMatching.match(
@@ -354,6 +353,9 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
         bid.setNurl(nurl);
 
@@ -374,6 +376,9 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +
@@ -384,7 +389,6 @@ public class LingJiRequestServiceImpl implements RequestService {
 //                "&dcou=" + duFlowBean.getCountry() +// 县
 //                "&pmp=" + duFlowBean.getDealid() + //私有交易
 //                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
-
 
 
         String curl = serviceUrl + "lingjiclick?" +
@@ -402,6 +406,9 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +

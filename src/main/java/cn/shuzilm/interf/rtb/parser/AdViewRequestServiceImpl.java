@@ -60,7 +60,7 @@ public class AdViewRequestServiceImpl implements RequestService {
 
     private static JedisPool resource = new JedisPool(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
 
-    private  static Jedis jedis = resource.getResource();
+    private static Jedis jedis = resource.getResource();
 
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
@@ -365,13 +365,15 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +
 //                "&did=" + duFlowBean.getDid() +
 //                "&appv=" + duFlowBean.getAppVersion() +
-//                "&dpro=" + duFlowBean.getProvince() +// 省
-//                "&dcit=" + duFlowBean.getCity() +// 市
+
 //                "&dcou=" + duFlowBean.getCountry() +// 县
 //                "&pmp=" + duFlowBean.getDealid() + //私有交易
 //                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
@@ -473,6 +475,9 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +
@@ -504,6 +509,9 @@ public class AdViewRequestServiceImpl implements RequestService {
                 "&dage=" + duFlowBean.getAgencyUid() + //代理商id
                 "&daduid=" + duFlowBean.getAdUid() + // 广告id，
                 "&dmat=" + duFlowBean.getMaterialId() + //素材id
+                "&dpro=" + duFlowBean.getProvince() +// 省
+                "&dcit=" + duFlowBean.getCity() +// 市
+                "&dcou=" + duFlowBean.getCountry() +// 县
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
 //                "&impid=" + impression.getId() +
 //                "&adx=" + duFlowBean.getAdxId() +
@@ -593,7 +601,6 @@ public class AdViewRequestServiceImpl implements RequestService {
             resource.returnResource(jedis);
         }
     }
-
 
 
     /**

@@ -53,7 +53,6 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 element.setRequestId(requestId);//请求id
                 element.setBidid(urlRequest.get("bidid"));//去重id
 
-
                 String act = urlRequest.get("act");
                 element.setWinNoticeTime(new Date().getTime());//竞价的时候，带过来的点击时间
                 String did = urlRequest.get("device");//数盟设备id
@@ -78,8 +77,19 @@ public class AdViewExpParameterParserImpl implements ParameterParser {
                 element.setAgencyUid(dage);
                 String daduid = urlRequest.get("daduid").equals("null") ? "" : urlRequest.get("daduid");//广告ID
                 element.setAdUid(daduid);
+                if (urlRequest.get("dpro") != null && urlRequest.get("dcit") != null && urlRequest.get("dcou") != null) {
+                    String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");//省
+                    element.setProvince(dpro);
+                    String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");//市
+                    element.setCity(dcit);
+                    String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");//县
+                    element.setCountry(dcou);
+                }
+
+
                 String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//素材id
                 element.setMaterialId(dmat);
+
                 String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");//用户ip
                 element.setIpAddr(userip);
                 element.setAdxId("2");

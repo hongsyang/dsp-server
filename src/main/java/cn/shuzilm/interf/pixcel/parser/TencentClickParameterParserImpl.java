@@ -82,6 +82,14 @@ public class TencentClickParameterParserImpl implements ParameterParser {
                 element.setAdUid(daduid);
                 String dmat = urlRequest.get("dmat").equals("null") ? "" : urlRequest.get("dmat");//素材id
                 element.setMaterialId(dmat);
+                if (urlRequest.get("dpro") != null && urlRequest.get("dcit") != null && urlRequest.get("dcou") != null) {
+                    String dpro = urlRequest.get("dpro").equals("null") ? "" : urlRequest.get("dpro");//省
+                    element.setProvince(dpro);
+                    String dcit = urlRequest.get("dcit").equals("null") ? "" : urlRequest.get("dcit");//市
+                    element.setCity(dcit);
+                    String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");//县
+                    element.setCountry(dcou);
+                }
                 String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");//用户ip
                 element.setIpAddr(userip);
                 element.setAdxId("4");
