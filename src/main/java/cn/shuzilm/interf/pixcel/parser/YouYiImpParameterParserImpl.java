@@ -88,7 +88,7 @@ public class YouYiImpParameterParserImpl implements ParameterParser {
                     String dcou = urlRequest.get("dcou").equals("null") ? "" : urlRequest.get("dcou");//县
                     element.setCountry(dcou);
                 }
-                
+
                 String userip = urlRequest.get("userip").equals("null") ? "" : urlRequest.get("userip");//用户ip
                 element.setIpAddr(userip);
                 element.setAdxId("3");
