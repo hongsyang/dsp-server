@@ -154,10 +154,13 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                         }
                     }else {
                         //不做处理直接返回
-
+                        byte[] content = redisStr.getBytes("utf-8");
+                        ChannelBuffer buffer = new DynamicChannelBuffer(2048);
                         response.setHeader("Content-Type", "text/html");
                         response.setHeader("Connection", HttpHeaders.Values.CLOSE);
                         response.setHeader("Accept-Ranges", "bytes");
+                        buffer.writeBytes(content);
+                        response.setContent(buffer);
                     }
 
 
