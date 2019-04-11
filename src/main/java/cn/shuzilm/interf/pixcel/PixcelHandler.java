@@ -145,6 +145,9 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                                         clkreplace = clkreplace + "?" + clkSplit[1];
                                     }
                                     String htppClkUrl = http + clkreplace;
+
+                                    log.debug("htppClkUrl:{}",htppClkUrl);
+                                    MDC.remove("sift");
                                     //触发点击监测
                                     HttpClientUtil.get(htppClkUrl);
                                 }
