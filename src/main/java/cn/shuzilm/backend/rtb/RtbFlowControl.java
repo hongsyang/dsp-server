@@ -891,6 +891,9 @@ public class RtbFlowControl {
             if("b1f47c12-4c2f-4213-bd48-3635363acb5c".equals(auid) && !"4".equals(adxName)){
                 return false;
             }
+            if("caee1fe3-06ed-4f95-9657-73bcf83a42e6".equals(auid) && !"4".equals(adxName)){
+                return false;
+            }
   
 //        	String advertiserUid = adBean.getAdvertiser().getUid();
 //        	//针对推啊过滤快友广告
