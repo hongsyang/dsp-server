@@ -149,7 +149,7 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                                     log.debug("htppClkUrl:{}",htppClkUrl);
                                     MDC.remove("sift");
                                     //触发点击监测
-                                    HttpClientUtil.get(htppClkUrl);
+                                    HttpClientUtil.get(htppClkUrl.replace("%",""));
                                 }
 
                             }
