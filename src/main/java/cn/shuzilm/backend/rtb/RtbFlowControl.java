@@ -674,10 +674,11 @@ public class RtbFlowControl {
         HashSet<String> deviceIdSets = new HashSet();
         List<String> deviceIds = redis.zRangeByScoreAsync(adUid + postfix, frq, 100000000);
         // 为了快速随机读取，将list转成HashSet
-        deviceIds.forEach((value) -> {
-            deviceIdSets.add(value);
-        });
+        
         if(deviceIds != null && deviceIds.size() > 0) {
+            deviceIds.forEach((value) -> {
+                deviceIdSets.add(value);
+            });
             limitMap.put(adUid, deviceIdSets);
             myLog.info("更新: 广告 {} 投放限制 {} 超投设备 {}", adUid,frq, deviceIdSets.toString());
         }else {
