@@ -72,7 +72,7 @@ public class CronDispatch {
         
         AdFlowControl.getInstance().updateAndPushMediaList();
     	
-    	AdFlowControl.getInstance().updateAndPushAdLocationList();
+    	//AdFlowControl.getInstance().updateAndPushAdLocationList();
  
           // 5 s 触发
         CronDispatch.startTimer(0);
@@ -105,7 +105,7 @@ public class CronDispatch {
         
         CronDispatch.startTimer(13);
         
-        CronDispatch.startTimer(14);
+//        CronDispatch.startTimer(14);
 
         CronDispatch.startTimer(15);
         

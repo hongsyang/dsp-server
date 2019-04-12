@@ -75,6 +75,12 @@ public class RuleMatching {
 	private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
 
 	private static int gradeRatio = 30;
+	
+	//广点通非联盟资源模板ID
+	private Set<String> tencentModuleIdSet = null;
+	
+	//广点通非联盟资源媒体ID
+	private Long tencentModuleMediaId = 999L;
 
 	public static RuleMatching getInstance() {
 		if (rule == null) {
@@ -97,6 +103,10 @@ public class RuleMatching {
 		long start = System.currentTimeMillis();
 		RtbCronDispatch.startRtbDispatch();
 		
+		String tencentModuleIdStr[] = {"4_184","4_210","4_285","4_65","4_471","4_555","4_473","4_486","4_487"};
+		//广点通非联盟资源模板ID添加
+		tencentModuleIdSet = new HashSet<String>(Arrays.asList(tencentModuleIdStr));
+			
 		LOG.info("初始化缓存完成,加载时间:" + (System.currentTimeMillis() - start) + " ms");
 		rtbIns = RtbFlowControl.getInstance();
 
@@ -363,14 +373,20 @@ public class RuleMatching {
 			}else{
 				if(!isDimension){
 				for(String adLocationIdTemp:adxNameList){
-					if(rtbIns.getAdLocationMap().containsKey(adLocationIdTemp)){						
-						MediaBean media = rtbIns.getAdLocationMap().get(adLocationIdTemp).getMedia();
-						if(media != null){
-							mediaTempList.add(media.getId());
-							packageFlag = false;
+					if(tencentModuleIdSet.contains(adLocationIdTemp)){
+						packageFlag = false;
+						if(!mediaTempList.contains(tencentModuleMediaId)){
+							mediaTempList.add(tencentModuleMediaId);
 						}
-						
 					}
+//					if(rtbIns.getAdLocationMap().containsKey(adLocationIdTemp)){						
+//						MediaBean media = rtbIns.getAdLocationMap().get(adLocationIdTemp).getMedia();
+//						if(media != null){
+//							mediaTempList.add(media.getId());
+//							packageFlag = false;
+//						}
+//						
+//					}
 				}
 				}
 			}

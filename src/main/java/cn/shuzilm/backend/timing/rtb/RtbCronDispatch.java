@@ -101,7 +101,7 @@ public class RtbCronDispatch {
         
         RtbCronDispatch.startTimer(10);
 
-        RtbCronDispatch.startTimer(11);
+        //RtbCronDispatch.startTimer(11);
 
         // 动态出价定时任务
         RtbCronDispatch.startTimer(12);
