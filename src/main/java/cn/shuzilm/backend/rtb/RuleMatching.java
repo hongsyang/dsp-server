@@ -1,6 +1,5 @@
 package cn.shuzilm.backend.rtb;
 
-import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.timing.rtb.RtbCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
@@ -10,44 +9,30 @@ import cn.shuzilm.bean.control.CreativeGroupBean;
 import cn.shuzilm.bean.control.FlowTaskBean;
 import cn.shuzilm.bean.control.Image;
 import cn.shuzilm.bean.control.Material;
-import cn.shuzilm.bean.control.MediaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
-import cn.shuzilm.common.Constants;
-import cn.shuzilm.common.jedis.JedisManager;
-import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.ssdb.SSDBQueueManager;
-import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.GPSDistance;
-import cn.shuzilm.util.JsonTools;
 import cn.shuzilm.util.MathTools;
-import cn.shuzilm.util.TimeUtil;
-import com.google.common.util.concurrent.AtomicDouble;
 import org.apache.commons.lang.StringUtils;
-import redis.clients.jedis.Jedis;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
-import org.springframework.beans.BeanUtils;
 
 import com.alibaba.fastjson.JSON;
 
