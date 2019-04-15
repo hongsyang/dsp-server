@@ -674,10 +674,11 @@ public class RtbFlowControl {
         HashSet<String> deviceIdSets = new HashSet();
         List<String> deviceIds = redis.zRangeByScoreAsync(adUid + postfix, frq, 100000000);
         // 为了快速随机读取，将list转成HashSet
-        deviceIds.forEach((value) -> {
-            deviceIdSets.add(value);
-        });
+        
         if(deviceIds != null && deviceIds.size() > 0) {
+            deviceIds.forEach((value) -> {
+                deviceIdSets.add(value);
+            });
             limitMap.put(adUid, deviceIdSets);
             myLog.info("更新: 广告 {} 投放限制 {} 超投设备 {}", adUid,frq, deviceIdSets.toString());
         }else {
@@ -889,6 +890,9 @@ public class RtbFlowControl {
         	}
 
             if("b1f47c12-4c2f-4213-bd48-3635363acb5c".equals(auid) && !"4".equals(adxName)){
+                return false;
+            }
+            if("caee1fe3-06ed-4f95-9657-73bcf83a42e6".equals(auid) && !"4".equals(adxName)){
                 return false;
             }
   
