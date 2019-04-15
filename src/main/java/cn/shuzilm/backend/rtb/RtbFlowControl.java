@@ -125,9 +125,9 @@ public class RtbFlowControl {
 //    	return adLocationSet;
 //    }
     
-    public ConcurrentHashMap<String,AdLocationBean> getAdLocationMap(){
-    	return adLocationMap;
-    }
+//    public ConcurrentHashMap<String,AdLocationBean> getAdLocationMap(){
+//    	return adLocationMap;
+//    }
     
     public ConcurrentHashMap<Long,MediaBean> getMediaUselessMap(){
     	return mediaUselessMap;
@@ -197,7 +197,7 @@ public class RtbFlowControl {
      */
    // private static Set<String> adLocationSet = null;
     
-    private static ConcurrentHashMap<String,AdLocationBean> adLocationMap = null;
+//    private static ConcurrentHashMap<String,AdLocationBean> adLocationMap = null;
     
     private static ConcurrentHashMap<String,Integer> weekAndDayNumMap = null;
 
@@ -254,7 +254,7 @@ public class RtbFlowControl {
         mediaUselessMap = new ConcurrentHashMap<Long,MediaBean>();
         packageUselessMap = new ConcurrentHashMap<String,MediaBean>();
 //        adLocationSet = Collections.synchronizedSet(new HashSet<String>());
-        adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
+//        adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
         // 判断标签坐标是否在 广告主的选取范围内
 //        gridMap = new HashMap<>();
@@ -270,7 +270,7 @@ public class RtbFlowControl {
         // 5 s
     	pullAndUpdateMediaList();
     	
-    	pullAndUpdateAdLocationSet();
+    	//pullAndUpdateAdLocationSet();
     	
         pullAndUpdateTask();
         // 10分钟拉取一次最新的广告内容
@@ -788,7 +788,7 @@ public class RtbFlowControl {
 //	    		adLocationSet.add(adLocationStr2);
 //    		}
     	}
-    	adLocationMap = adLocationTempMap;
+//    	adLocationMap = adLocationTempMap;
     	adLocationTempMap = null;
     }
 
@@ -936,7 +936,7 @@ public class RtbFlowControl {
 		        		return false;
 		        	}
         		}else{
-        			if(!mediaTempList.isEmpty()){
+        			if(!mediaTempList.isEmpty()){//mediaTempList不为空，代表广告位管理中能找到媒体ID或者广点通非联盟资源
         				boolean flag = false;
         				for(Long mediaId:mediaTempList){
         					if(adBean.getMediaIdList().contains(mediaId)){

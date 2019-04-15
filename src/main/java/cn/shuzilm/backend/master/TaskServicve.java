@@ -1027,8 +1027,8 @@ public class TaskServicve extends Service {
     	TaskServicve taskService = new TaskServicve();
     	
     	try {
-    		List<CreativeGroupBean> list = taskService.queryCreativeGroupByAdUid("39ee41c1-478b-4f7d-9c8e-880fdd2083eb");
-    		System.out.println(list);
+    		List<AudienceBean> audience = taskService.queryAudienceByUpTime("43f364ec-7c2e-4d8c-8c7a-cf2749e44dfe");
+    		System.out.println(audience);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
