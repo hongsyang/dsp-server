@@ -8,6 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class ExpLogUtil {
 
@@ -21,20 +24,51 @@ public class ExpLogUtil {
 
         File[] files = file.listFiles();
         File[] files1 = file1.listFiles();
-        List<String> list= new ArrayList();
         for (File file2 : files1) {
-            BufferedReader bufferedRead = new BufferedReader(new FileReader(file2));
-            String str = "";
-            int j =1;
-//readLine判断一行是以\r\n来判断的。如果最后一段字符没有\r\n，那么采用这种方式将无法读出剩下的字符串
-            while ((str = bufferedRead.readLine()) != null) {
-                j++;
-                if (j>180132)
-                log.debug("list:{}", str);
-                list.add(str);
+            ZipFile zf = new ZipFile(file2);
+            InputStream in = new BufferedInputStream(new FileInputStream(file2));
+            ZipInputStream zin = new ZipInputStream(in);
+            ZipEntry ze;
+            while ((ze = zin.getNextEntry()) != null) {
+
+                if (ze.isDirectory()) {
+                } else {
+                    System.err.println("file - " + ze.getName() + " : "
+                            + ze.getSize() + " bytes");
+                    long size = ze.getSize();
+                    if (size > 0) {
+                        BufferedReader br = new BufferedReader(
+                                new InputStreamReader(zf.getInputStream(ze)));
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            System.out.println(line);
+                        }
+                        br.close();
+                    }
+                    System.out.println();
+                }
             }
+            zin.closeEntry();
+
+
+
+
 
         }
+//        List<String> list= new ArrayList();
+//        for (File file2 : files1) {
+//            BufferedReader bufferedRead = new BufferedReader(new FileReader(file2));
+//            String str = "";
+//            int j =1;
+////readLine判断一行是以\r\n来判断的。如果最后一段字符没有\r\n，那么采用这种方式将无法读出剩下的字符串
+//            while ((str = bufferedRead.readLine()) != null) {
+//                j++;
+//                if (j>180132)
+//                log.debug("list:{}", str);
+//                list.add(str);
+//            }
+//
+//        }
 //        for (File expFile : files) {
 //            System.out.println(expFile);
 //            try {

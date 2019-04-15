@@ -22,14 +22,8 @@ public class Help {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        String huanhang = "\r\n";
-        String data = "test";
         System.out.println(ia.getHostAddress());
         System.out.println(ia.getHostName());
-        System.out.println(LocalDateTime.now().toString().replace("T", " "));
-        String warningData = "告警等级：低  " + huanhang + "告警主机：" + ia.getHostName() + " \n" + huanhang + " 主机 IP：" + ia.getHostAddress() + huanhang + "告警时间：" + LocalDateTime.now().toString().replace("T", " ") + huanhang + "告警业务： " + data;
-        System.out.println(warningData);
-        Help.sendAlert("侯克佩测试");
 
 
     }

@@ -23,6 +23,8 @@ public class BaiduPriceDecryptUtil {
 //测试解密秘钥:    005e38cb01abc22fd5acd77001abc22fd5acfe8001abc22fd5ad06509b1bb875
 //    private static String ENCRYPT_KEY = "005e38cb01abc22fd5acd77001abc22fd5acfe8001abc22fd5ad06509b1bb875";
     //联调环境 解密秘钥
+//    private static String ENCRYPT_KEY = "01a4949700605b727c11c8e000605b727c11d6bc00605b727c11d92bf923d2bf";
+    //正式环境 解密秘钥
     private static String ENCRYPT_KEY = "01a4949700605b727c11c8e000605b727c11d6bc00605b727c11d92bf923d2bf";
 
 //    private static char encryption_key[] = {

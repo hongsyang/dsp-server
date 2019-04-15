@@ -15,6 +15,23 @@ public class TestSet {
 
     private static ExecutorService executor5 = Executors.newFixedThreadPool(100);
     public static void main(String[] args) throws Exception {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //        for (int i = 0; i < 1000; i++) {
 ////            executor1.execute(clickRedisTask);
 ////            executor2.execute(lingJiRedisTask);
