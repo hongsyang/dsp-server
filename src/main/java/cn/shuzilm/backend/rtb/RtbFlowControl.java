@@ -30,6 +30,8 @@ import cn.shuzilm.util.geo.GridMark;
 import cn.shuzilm.util.geo.GridMark2;
 
 import com.yao.util.db.bean.ResultList;
+import com.yao.util.db.bean.ResultMap;
+
 import org.apache.commons.lang.StringUtils;
 import org.python.jline.internal.Log;
 import org.slf4j.LoggerFactory;
@@ -192,6 +194,9 @@ public class RtbFlowControl {
     
     private static ArrayList<AdBidBean> bidList = null;
     
+    //广告单元投放指定ADX+媒体缓存
+    private static ConcurrentHashMap<String,String> adPushAdxAndMediaMap = null;
+    
     /**
      * 在投广告位集合
      */
@@ -253,6 +258,7 @@ public class RtbFlowControl {
         mediaMap = new ConcurrentHashMap<Long,MediaBean>();
         mediaUselessMap = new ConcurrentHashMap<Long,MediaBean>();
         packageUselessMap = new ConcurrentHashMap<String,MediaBean>();
+        adPushAdxAndMediaMap = new ConcurrentHashMap<String,String>();
 //        adLocationSet = Collections.synchronizedSet(new HashSet<String>());
 //        adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
@@ -270,6 +276,7 @@ public class RtbFlowControl {
         // 5 s
     	pullAndUpdateMediaList();
     	
+    	updateAdPushAdxAndMeidaMap();
     	//pullAndUpdateAdLocationSet();
     	
         pullAndUpdateTask();
@@ -888,6 +895,13 @@ public class RtbFlowControl {
         		return false;
         	}
         	
+        	if(!adxAndMedia.equals("") && adPushAdxAndMediaMap.containsKey(auid)){
+        		String adxAndMediaTemp = adPushAdxAndMediaMap.get(auid);
+        		if(!adxAndMediaTemp.equals(adxAndMedia)){
+        			return false;
+        		}
+        	}
+        	
 //        	String advertiserUid = adBean.getAdvertiser().getUid();
 //        	//针对推啊过滤快友广告
 //        	if("c5d2db7e-f356-4f78-970a-ccddd4259860".equals(advertiserUid) && "2".equals(adxName)){
@@ -979,6 +993,26 @@ public class RtbFlowControl {
         	return false;
         }
         return false;
+    }
+    
+    /**
+     * 每隔10分钟获取并更新广告单元投放指定ADX+媒体缓存
+     */
+    public void updateAdPushAdxAndMeidaMap(){
+    	Select select = new Select();
+    	try{
+    		String sql = "select * from ad_adx_meida_push";
+    		ResultList rsList = select.select(sql);
+    		for(ResultMap map:rsList){
+    			String adUid = map.getString("ad_uid");
+    			Integer adxId = map.getInteger("adx_id");
+    			String appPackageName = map.getString("app_package_name");
+    			String adxAndMeida = adxId + "_" + appPackageName;
+    			adPushAdxAndMediaMap.put(adUid, adxAndMeida);
+    		}
+    	}catch(Exception e){
+    		myLog.error("获取并更新广告单元投放指定ADX+媒体缓存失败:"+e.getMessage());
+    	}
     }
 
 
