@@ -147,8 +147,8 @@ public class RtbCronDispatch {
                dispatch(FetchDeviceLimitDataTask.class,"0 * * * * ?");
                break;
            case 9:
-//               dispatch(BlackListTask.class,"0 0 * * * ?");
-               dispatch(BlackListTask.class,"0/30 * * * * ?");
+               dispatch(BlackListTask.class,"0 0 12 * * ?");//每天中午12点
+//               dispatch(BlackListTask.class,"0/30 * * * * ?");
                break;
            case 10:
         	   dispatch(RtbPullAndUpdateMediaTask.class,"0/5 * * * * ?");
