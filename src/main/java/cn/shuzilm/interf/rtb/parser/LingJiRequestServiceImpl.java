@@ -81,8 +81,9 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     static {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-
+            MDC.put("sift", "https-count");
             log.debug("htpp和https的数据:{}", JSON.toJSONString(lingjiCountMap));
+            MDC.remove("sift");
         }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
     }
 
