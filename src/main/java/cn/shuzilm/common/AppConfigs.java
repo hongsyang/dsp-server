@@ -88,9 +88,9 @@ public class AppConfigs {
         try {
 //            URL url = this.getClass().getClassLoader().getResource(name);
             //测试环境
-            String FileName = "C:\\Users\\houkp\\Desktop\\test\\"+ name;
+//            String FileName = "C:\\Users\\houkp\\Desktop\\test\\"+ name;
             //正式环境
-//            String FileName = "/home/srvadmin/dsp/" + name;
+            String FileName = "/home/srvadmin/dsp/" + name;
 //            InputStream in = url.openStream();
             //读取属性文件a.properties
             InputStream fis = new BufferedInputStream(new FileInputStream(FileName));
