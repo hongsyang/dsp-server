@@ -1,8 +1,15 @@
 package cn.shuzilm.util;
 
 import cn.shuzilm.common.AppConfigs;
+import cn.shuzilm.util.db.Select;
+import com.yao.util.db.bean.ResultList;
+import com.yao.util.db.bean.ResultMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.HashMap;
 
 /**
@@ -18,11 +25,15 @@ public class IpBlacklistUtil {
 
     private static IpBlacklistUtil ipBlacklist = null;
 
+    private static final Logger LOG = LoggerFactory.getLogger(IpBlacklistUtil.class);
+
+    private static Select select = new Select();
+
     private static final String FILTER_CONFIG = "filter.properties";
 
     private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
-    private static HashMap<String, Integer> ipBlacklistMap;
+    private static HashMap<String, Integer> ipBlacklistMap ;
 
     public static IpBlacklistUtil getInstance() {
         if (ipBlacklist == null) {
@@ -32,7 +43,7 @@ public class IpBlacklistUtil {
     }
 
     public IpBlacklistUtil() {
-        String fileTest ="C:\\Users\\houkp\\Desktop\\duizhang\\ip_chinese_black_list.txt";
+        String fileTest = "C:\\Users\\houkp\\Desktop\\duizhang\\ip_chinese_black_list.txt";
         File file = new File(configs.getString("FILE_PATH"));
         ipBlacklistMap = getIpBlacklist(file);
 
@@ -81,9 +92,31 @@ public class IpBlacklistUtil {
         }
     }
 
+    /**
+     * 更新ip黑名单
+     */
+    public static void updateAdTagBlackList() {
+        String now = LocalDate.now().toString();
+        ResultList rl = new ResultList();
+        LOG.error("开始更新ip黑名单");
+
+        String sql = "SELECT a.`ip_blacklist` FROM blacklist_ip a " +
+                "WHERE a.`flag` = 1 AND  a.`start_time`<= '" + now
+                + "'AND a.`end_time`  >=  '" + now + "'";
+        try {
+            rl = select.select(sql);
+            for (ResultMap resultMap : rl) {
+                ipBlacklistMap.put(resultMap.getString("ip_blacklist"),1);
+//                System.out.println(resultMap.getString("ip_blacklist"));
+            }
+            LOG.debug("ipBlacklistMap的数量:{}",ipBlacklistMap.size());
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
-        IpBlacklistUtil instance = IpBlacklistUtil.getInstance();
-        System.out.println(instance.isIpBlacklist("39.167.203"));
+        updateAdTagBlackList();
 
     }
 }

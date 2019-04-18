@@ -5,6 +5,7 @@ import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.util.AdTagBlackListUtil;
 import cn.shuzilm.util.AppBlackListUtil;
 import cn.shuzilm.util.DeviceBlackListUtil;
+import cn.shuzilm.util.IpBlacklistUtil;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -38,6 +39,10 @@ public  class BlackListTask implements Job {
             AdTagBlackListUtil.updateAdTagBlackList();
         }else {
             AdTagBlackListUtil.stopTask();
+        }
+        // 定时更新广告位黑名单
+        if (Boolean.valueOf(configs.getString("IP_BLACK_LIST"))) {
+            IpBlacklistUtil.updateAdTagBlackList();
         }
     }
 
