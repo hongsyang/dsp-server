@@ -21,11 +21,14 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.net.URLEncoder;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description: LingjiParser 灵集post参数解析
@@ -46,11 +49,12 @@ public class LingJiRequestServiceImpl implements RequestService {
 
     private static final String ADX_ID = "1";
 
+
     private static RtbJedisManager jedisManager = RtbJedisManager.getInstance("configs_rtb_redis.properties");
 
     private static IpBlacklistUtil ipBlacklist = IpBlacklistUtil.getInstance();
 
-    private AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
+    private static AppConfigs configs = AppConfigs.getInstance(FILTER_CONFIG);
 
     private static RuleMatching ruleMatching = RuleMatching.getInstance();
 
@@ -67,6 +71,21 @@ public class LingJiRequestServiceImpl implements RequestService {
     //上传到ssdb 业务线程池
 //    private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("SSDB_EXECUTOR_THREADS"));
     private ExecutorService executor = null;
+
+    //初始统计次数
+    private static Integer lingjiNum = 1;
+
+    //统计流量中的http和https
+    private static ConcurrentHashMap<String, Integer> lingjiCountMap = new ConcurrentHashMap();
+
+
+    static {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+
+            log.debug("htpp和https的数据:{}", JSON.toJSONString(lingjiCountMap));
+        }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
+    }
+
 
     @Override
     public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
@@ -88,6 +107,7 @@ public class LingJiRequestServiceImpl implements RequestService {
             String adType = convertAdType(showtype); //对应内部 广告类型
 
             String tagid = userImpression.getTagid();//广告位id
+
 
             String stringSet = null;//文件类型列表
             String deviceId = null;//设备号
@@ -193,16 +213,50 @@ public class LingJiRequestServiceImpl implements RequestService {
                 isDimension = false;
             }
 
+            String http = "http";
+            String https = "https";
+            if (userImpression.getSecure() != null) {
+                if (userImpression.getSecure() == 1) {
+                    String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + https;
+                    if (lingjiCountMap.get(httpKey) != null) {
+                        Integer linkNum = lingjiCountMap.get(httpKey);
+                        linkNum++;//连接次数 + 1
+                        lingjiCountMap.put(httpKey, linkNum);
+                    } else {
+                        lingjiCountMap.put(httpKey, lingjiNum);
+                    }
+
+                } else if (userImpression.getSecure() == 0) {
+                    String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + http;
+                    if (lingjiCountMap.get(httpKey) != null) {
+                        Integer linkNum = lingjiCountMap.get(httpKey);
+                        linkNum++;//连接次数 + 1
+                        lingjiCountMap.put(httpKey, linkNum);
+                    } else {
+                        lingjiCountMap.put(httpKey, lingjiNum);
+                    }
+                } else {
+                    String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + userImpression.getSecure();
+                    if (lingjiCountMap.get(httpKey) != null) {
+                        Integer linkNum = lingjiCountMap.get(httpKey);
+                        linkNum++;//连接次数 + 1
+                        lingjiCountMap.put(httpKey, linkNum);
+                    } else {
+                        lingjiCountMap.put(httpKey, lingjiNum);
+                    }
+                }
+            }
+
 
             Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(), ADX_ID, adxNameList, width, height);//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
             if (msg.get("ipBlackList") != null) {
-                return "ipBlackList" + bidRequestBean.getId();
+                return "ipBlackList";
             } else if (msg.get("bundleBlackList") != null) {
-                return "bundleBlackList" + bidRequestBean.getId();
+                return "bundleBlackList";
             } else if (msg.get("deviceIdBlackList") != null) {
-                return "deviceIdBlackList" + bidRequestBean.getId();
+                return "deviceIdBlackList";
             } else if (msg.get("AdTagBlackList") != null) {
                 return "AdTagBlackList";
             }
