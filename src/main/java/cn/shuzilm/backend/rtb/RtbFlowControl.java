@@ -1003,13 +1003,16 @@ public class RtbFlowControl {
     	try{
     		String sql = "select * from ad_adx_meida_push";
     		ResultList rsList = select.select(sql);
+    		ConcurrentHashMap<String,String> tempMap = new ConcurrentHashMap<String,String>();
     		for(ResultMap map:rsList){
     			String adUid = map.getString("ad_uid");
     			Integer adxId = map.getInteger("adx_id");
     			String appPackageName = map.getString("app_package_name");
     			String adxAndMeida = adxId + "_" + appPackageName;
-    			adPushAdxAndMediaMap.put(adUid, adxAndMeida);
+    			tempMap.put(adUid, adxAndMeida);
     		}
+    		adPushAdxAndMediaMap = tempMap;
+    		tempMap = null;
     	}catch(Exception e){
     		myLog.error("获取并更新广告单元投放指定ADX+媒体缓存失败:"+e.getMessage());
     	}
