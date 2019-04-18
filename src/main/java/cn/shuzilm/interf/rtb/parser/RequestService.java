@@ -1,6 +1,7 @@
 package cn.shuzilm.interf.rtb.parser;
 
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -19,6 +20,7 @@ public interface RequestService {
      * @param dataStr 报文入参
      * @return
      */
-    public String parseRequest(String dataStr , ExecutorService executor) throws Exception;
+    public String parseRequest(String dataStr , ExecutorService executor,ConcurrentHashMap<String,Integer> countMap) throws Exception;
+
 
 }

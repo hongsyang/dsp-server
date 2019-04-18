@@ -71,9 +71,21 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     private String result = null;
 
 
-    public RtbHandler(ExecutorService executor) {
+    private static ConcurrentHashMap<String, Integer> countMap = new ConcurrentHashMap();
+
+        static {
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+
+            MDC.put("sift", "https-count");
+            log.debug("htpp和https 的数据:{}", JSON.toJSONString(countMap));
+            MDC.remove("sift");
+        }, 0, configs.getInt("COUNT_TIME"), TimeUnit.HOURS);
+    }
+
+    public RtbHandler(ExecutorService executor,ConcurrentHashMap countMap) {
         parser = new RtbRequestParser();
         this.executor = executor;
+        this.countMap = countMap;
         log.debug("ExecutorService: {}", executor);
     }
 
@@ -132,7 +144,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                 @Override
                 public Object call() throws Exception {
                     //主业务逻辑
-                    return parser.parseData(url, dataStr, remoteIp, executor);
+                    return parser.parseData(url, dataStr, remoteIp, executor,countMap);
                 }
             });
 
@@ -435,19 +447,19 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
         // super.exceptionCaught(ctx, e);//不打印堆栈日志
     }
 
-    /**
-     * 解析进来的请求数据
-     *
-     * @throws UnsupportedEncodingException
-     */
-    public String parseRequest(String url, String dataStr, String remoteIp) throws Exception {
-        /**********		POST主业务逻辑		***************/
-        String resultData = parser.parseData(url, dataStr, remoteIp, executor);//SDK 2.0.1
-
-        byte[] content = null;
-        content = resultData.getBytes("utf-8");
-        return resultData;
-    }
+//    /**
+//     * 解析进来的请求数据
+//     *
+//     * @throws UnsupportedEncodingException
+//     */
+//    public String parseRequest(String url, String dataStr, String remoteIp) throws Exception {
+//        /**********		POST主业务逻辑		***************/
+//        String resultData = parser.parseData(url, dataStr, remoteIp, executor,countMap);//SDK 2.0.1
+//
+//        byte[] content = null;
+//        content = resultData.getBytes("utf-8");
+//        return resultData;
+//    }
 
 
 }

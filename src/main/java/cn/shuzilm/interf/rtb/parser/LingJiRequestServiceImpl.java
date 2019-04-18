@@ -79,17 +79,17 @@ public class LingJiRequestServiceImpl implements RequestService {
     private static ConcurrentHashMap<String, Integer> lingjiCountMap = new ConcurrentHashMap();
 
 
-    static {
-        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
-            MDC.put("sift", "https-count");
-            log.debug("htpp和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
-            MDC.remove("sift");
-        }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
-    }
+//    static {
+//        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+//            MDC.put("sift", "https-count");
+//            log.debug("htpp和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
+//            MDC.remove("sift");
+//        }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
+//    }
 
 
     @Override
-    public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor,ConcurrentHashMap<String,Integer> countMap) throws Exception {
         this.executor = executor;
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
@@ -219,36 +219,46 @@ public class LingJiRequestServiceImpl implements RequestService {
             if (userImpression.getSecure() != null) {
                 if (userImpression.getSecure() == 1) {
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + https;
-                    if (lingjiCountMap.get(httpKey) != null) {
-                        Integer linkNum = lingjiCountMap.get(httpKey);
+                    if (countMap.get(httpKey) != null) {
+                        Integer linkNum = countMap.get(httpKey);
                         linkNum++;//连接次数 + 1
-                        lingjiCountMap.put(httpKey, linkNum);
+                        countMap.put(httpKey, linkNum);
                     } else {
-                        lingjiCountMap.put(httpKey, lingjiNum);
+                        countMap.put(httpKey, lingjiNum);
                     }
 
                 } else if (userImpression.getSecure() == 0) {
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + http;
-                    if (lingjiCountMap.get(httpKey) != null) {
-                        Integer linkNum = lingjiCountMap.get(httpKey);
+                    if (countMap.get(httpKey) != null) {
+                        Integer linkNum = countMap.get(httpKey);
                         linkNum++;//连接次数 + 1
-                        lingjiCountMap.put(httpKey, linkNum);
+                        countMap.put(httpKey, linkNum);
                     } else {
-                        lingjiCountMap.put(httpKey, lingjiNum);
+                        countMap.put(httpKey, lingjiNum);
                     }
                 } else {
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + userImpression.getSecure();
-                    if (lingjiCountMap.get(httpKey) != null) {
-                        Integer linkNum = lingjiCountMap.get(httpKey);
+                    if (countMap.get(httpKey) != null) {
+                        Integer linkNum = countMap.get(httpKey);
                         linkNum++;//连接次数 + 1
-                        lingjiCountMap.put(httpKey, linkNum);
+                        countMap.put(httpKey, linkNum);
                     } else {
-                        lingjiCountMap.put(httpKey, lingjiNum);
+                        countMap.put(httpKey, lingjiNum);
                     }
                 }
             }
-
-
+//            //增加统计日志
+//            executor.execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+//                        MDC.put("sift", "https-count");
+//                        log.debug("htpp和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
+//                        MDC.remove("sift");
+//                    }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
+//                }
+//            });
+            log.debug("htpp和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
             Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(), ADX_ID, adxNameList, width, height);//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回

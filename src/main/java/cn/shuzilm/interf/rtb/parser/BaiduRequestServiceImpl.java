@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 
@@ -57,7 +58,7 @@ public class BaiduRequestServiceImpl implements RequestService {
     private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor,ConcurrentHashMap countMap) throws Exception {
         this.executor = executor;
 
         String response = "";

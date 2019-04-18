@@ -29,6 +29,7 @@ import redis.clients.jedis.JedisPool;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -75,7 +76,7 @@ public class YouYiRequestServiceImpl implements RequestService {
     private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr,ExecutorService executor) throws Exception {
+    public String parseRequest(String dataStr,ExecutorService executor,ConcurrentHashMap countMap) throws Exception {
         this.executor=executor;
         String adxId = "3";
         String response = "";

@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -42,7 +43,7 @@ public class RtbRequestParser {
      * @param remoteIp
      * @return
      */
-    public String parseData(String url, String dataStr, String remoteIp , ExecutorService executor) throws Exception {
+    public String parseData(String url, String dataStr, String remoteIp , ExecutorService executor,ConcurrentHashMap<String,Integer> countMap) throws Exception {
         String responseStr = "";
         if (Boolean.valueOf(configs.getString("FILTER_RTB"))) {
             responseStr = "测试请求";
@@ -63,7 +64,7 @@ public class RtbRequestParser {
 
         if (className != null) {
             RequestService requestService = RequestServiceFactory.getRequestService(className);
-            responseStr = requestService.parseRequest(dataStr,executor);
+            responseStr = requestService.parseRequest(dataStr,executor,countMap);
         }
         return responseStr;
     }

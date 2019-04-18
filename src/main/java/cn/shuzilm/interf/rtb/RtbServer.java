@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,6 +41,7 @@ public class RtbServer {
     //超时线程池
     private ExecutorService executor = Executors.newFixedThreadPool(configs.getInt("RTB_EXECUTOR_THREADS"));
 
+    private static ConcurrentHashMap<String, Integer> countMap = new ConcurrentHashMap();
 
     public static void main(String[] args) {
         try {
@@ -96,7 +98,7 @@ public class RtbServer {
             //先注释掉，看看报不报错。
 //            pipeline.addLast("aggregator", new HttpChunkAggregator(20480000));//设置块的最大字节数
             //http处理handler
-            pipeline.addLast("handler", new RtbHandler(executor));
+            pipeline.addLast("handler", new RtbHandler(executor,countMap));
 
             return pipeline;
         }

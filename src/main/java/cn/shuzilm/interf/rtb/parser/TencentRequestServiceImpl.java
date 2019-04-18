@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -75,7 +76,7 @@ public class TencentRequestServiceImpl implements RequestService {
     private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr, ExecutorService executor) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor,ConcurrentHashMap countMap) throws Exception {
         this.executor = executor;
         String adxId = "4";
         String response = "";
