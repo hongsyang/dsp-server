@@ -195,7 +195,7 @@ public class RtbFlowControl {
     private static ArrayList<AdBidBean> bidList = null;
     
     //广告单元投放指定ADX+媒体缓存
-    private static ConcurrentHashMap<String,String> adPushAdxAndMediaMap = null;
+    private static ConcurrentHashMap<String,Set<String>> adPushAdxAndMediaMap = null;
     
     /**
      * 在投广告位集合
@@ -258,7 +258,7 @@ public class RtbFlowControl {
         mediaMap = new ConcurrentHashMap<Long,MediaBean>();
         mediaUselessMap = new ConcurrentHashMap<Long,MediaBean>();
         packageUselessMap = new ConcurrentHashMap<String,MediaBean>();
-        adPushAdxAndMediaMap = new ConcurrentHashMap<String,String>();
+        adPushAdxAndMediaMap = new ConcurrentHashMap<String,Set<String>>();
 //        adLocationSet = Collections.synchronizedSet(new HashSet<String>());
 //        adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
@@ -896,8 +896,8 @@ public class RtbFlowControl {
         	}
         	
         	if(!adxAndMedia.equals("") && adPushAdxAndMediaMap.containsKey(auid)){
-        		String adxAndMediaTemp = adPushAdxAndMediaMap.get(auid);
-        		if(!adxAndMediaTemp.equals(adxAndMedia)){
+        		Set<String> adxAndMediaTempSet = adPushAdxAndMediaMap.get(auid);
+        		if(!adxAndMediaTempSet.contains(adxAndMedia)){
         			return false;
         		}
         	}
@@ -1003,13 +1003,22 @@ public class RtbFlowControl {
     	try{
     		String sql = "select * from ad_adx_meida_push";
     		ResultList rsList = select.select(sql);
-    		ConcurrentHashMap<String,String> tempMap = new ConcurrentHashMap<String,String>();
+    		ConcurrentHashMap<String,Set<String>> tempMap = new ConcurrentHashMap<String,Set<String>>();
     		for(ResultMap map:rsList){
     			String adUid = map.getString("ad_uid");
     			Integer adxId = map.getInteger("adx_id");
     			String appPackageName = map.getString("app_package_name");
     			String adxAndMeida = adxId + "_" + appPackageName;
-    			tempMap.put(adUid, adxAndMeida);
+    			if (!tempMap.containsKey(adUid)) {
+                    Set<String> tempSet = new HashSet<String>();
+                    tempSet.add(adxAndMeida);
+                    adPushAdxAndMediaMap.put(adUid, tempSet);
+                } else {
+                    Set<String> tempSet = adPushAdxAndMediaMap.get(adUid);
+                    if (!tempSet.contains(adxAndMeida)) {
+                    	tempSet.add(adxAndMeida);
+                    }
+                }
     		}
     		adPushAdxAndMediaMap = tempMap;
     		tempMap = null;
