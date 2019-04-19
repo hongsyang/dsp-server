@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -117,20 +119,22 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                         MDC.put("sift", "baiduClick302");
                         log.debug("lpdAndClk:{}", lpdAndClk);
                         MDC.remove("sift");
-                        String http = "http://";
                         String htppLpdUrl = "";
                         if (lpdAndClk != null) {
                             String[] split = lpdAndClk.split("&clk=");
                             if (split != null) {
                                 String lpd = split[0];
                                 if (lpd != null || "null".equals(lpd)) {
-                                    String[] split1 = lpd.split("\\?");
-                                    String replace = split1[0].replace("_", ".").replace("-", "/");
-                                    if (split1.length > 1) {
-                                        replace = replace + "?" + split1[1];
-                                    }
-                                    htppLpdUrl = http + replace;
+                                    htppLpdUrl= URLDecoder.decode(lpd);
                                 }
+//                                if (lpd != null || "null".equals(lpd)) {
+//                                    String[] split1 = lpd.split("\\?");
+//                                    String replace = split1[0].replace("_", ".").replace("-", "/");
+//                                    if (split1.length > 1) {
+//                                        replace = replace + "?" + split1[1];
+//                                    }
+//                                    htppLpdUrl = http + replace;
+//                                }
 
                                 //百度302 转发
                                 response.setStatus(HttpResponseStatus.FOUND);
@@ -139,17 +143,18 @@ public class PixcelHandler extends SimpleChannelUpstreamHandler {
                                 //第三方点击监测
                                 String clk = split[1];
                                 if (clk != null || "null".equals(clk)) {
-                                    String[] clkSplit = clk.split("\\?");
-                                    String clkreplace = clkSplit[0].replace("_", ".").replace("-", "/");
-                                    if (clkSplit.length > 1) {
-                                        clkreplace = clkreplace + "?" + clkSplit[1];
-                                    }
-                                    String htppClkUrl = http + clkreplace;
-
-                                    log.debug("htppClkUrl:{}",htppClkUrl);
-                                    MDC.remove("sift");
+                                  String  htppClkUrl= URLDecoder.decode(lpd);
+//                                    String[] clkSplit = clk.split("\\?");
+//                                    String clkreplace = clkSplit[0].replace("_", ".").replace("-", "/");
+//                                    if (clkSplit.length > 1) {
+//                                        clkreplace = clkreplace + "?" + clkSplit[1];
+//                                    }
+//                                    String htppClkUrl = http + clkreplace;
+//
+//                                    log.debug("htppClkUrl:{}",htppClkUrl);
+//                                    MDC.remove("sift");
                                     //触发点击监测
-                                    HttpClientUtil.get(htppClkUrl.replace("%",""));
+                                    HttpClientUtil.get(htppClkUrl);
                                 }
 
                             }
