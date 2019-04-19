@@ -47,7 +47,7 @@ public class TaskServicve extends Service {
             bean.setAdviserId(rm.getString("advertiser_uid"));
 
             //特定人群
-            bean.setDemographicCitys(rm.getString("demographic_city"));
+            bean.setDemographicCitys(rm.getString("demographic_city"),rm.getString("type"));
             bean.setDemographicTagId(rm.getString("demographic_tag"));
             //兴趣偏好标签
             bean.setAppPreferenceIds(rm.getString("app_preference_ids"));
@@ -55,7 +55,7 @@ public class TaskServicve extends Service {
             bean.setCarrierId(rm.getString("carrier_id"));
             //选定城市或者经纬度 工作地、居住地、活动地
             bean.setMobilityType(rm.getString("location_type"));
-            bean.setCitys(rm.getString("location_city"));
+            bean.setCitys(rm.getString("location_city"),rm.getString("type"),rm.getString("location_mode"));
             bean.setGeos(rm.get("location_map") != null ? rm.getString("location_map") : "");
             bean.setIncomeLevel(rm.getString("income_level"));
             bean.setNetworkId(rm.getString("network_id"));
@@ -97,7 +97,7 @@ public class TaskServicve extends Service {
             bean.setAdviserId(rm.getString("advertiser_uid"));
 
             //特定人群
-            bean.setDemographicCitys(rm.getString("demographic_city"));
+            bean.setDemographicCitys(rm.getString("demographic_city"),rm.getString("type"));
             bean.setDemographicTagId(rm.getString("demographic_tag"));
             //兴趣偏好标签
             bean.setAppPreferenceIds(rm.getString("app_preference_ids"));
@@ -105,7 +105,7 @@ public class TaskServicve extends Service {
             bean.setCarrierId(rm.getString("carrier_id"));
             //选定城市或者经纬度 工作地、居住地、活动地
             bean.setMobilityType(rm.getString("location_type"));
-            bean.setCitys(rm.getString("location_city"));
+            bean.setCitys(rm.getString("location_city"),rm.getString("type"),rm.getString("location_mode"));
             bean.setGeos(rm.get("location_map") != null ? rm.getString("location_map") : "");
             bean.setIncomeLevel(rm.getString("income_level"));
             bean.setNetworkId(rm.getString("network_id"));
@@ -1027,7 +1027,7 @@ public class TaskServicve extends Service {
     	TaskServicve taskService = new TaskServicve();
     	
     	try {
-    		List<AudienceBean> audience = taskService.queryAudienceByUpTime("43f364ec-7c2e-4d8c-8c7a-cf2749e44dfe");
+    		List<AudienceBean> audience = taskService.queryAudienceByUpTime("4c370950-f7e0-4532-b978-191a62505aa8");
     		System.out.println(audience);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
