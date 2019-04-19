@@ -82,7 +82,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 //    static {
 //        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
 //            MDC.put("sift", "https-count");
-//            log.debug("htpp和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
+//            log.debug("http和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
 //            MDC.remove("sift");
 //        }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
 //    }
@@ -216,8 +216,10 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             String http = "http";
             String https = "https";
+            Integer secure=null;
             if (userImpression.getSecure() != null) {
                 if (userImpression.getSecure() == 1) {
+                    secure=userImpression.getSecure();
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + https;
                     if (countMap.get(httpKey) != null) {
                         Integer linkNum = countMap.get(httpKey);
@@ -228,6 +230,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     }
 
                 } else if (userImpression.getSecure() == 0) {
+                    secure=userImpression.getSecure();
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + http;
                     if (countMap.get(httpKey) != null) {
                         Integer linkNum = countMap.get(httpKey);
@@ -253,12 +256,12 @@ public class LingJiRequestServiceImpl implements RequestService {
 //                public void run() {
 //                    Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
 //                        MDC.put("sift", "https-count");
-//                        log.debug("htpp和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
+//                        log.debug("http和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
 //                        MDC.remove("sift");
 //                    }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
 //                }
 //            });
-            log.debug("htpp和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
+            log.debug("http和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
             Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(), ADX_ID, adxNameList, width, height);//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
@@ -313,7 +316,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets);
+            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets,secure);
             MDC.remove("sift");
 
             response = JSON.toJSONString(bidResponseBean);
@@ -368,7 +371,7 @@ public class LingJiRequestServiceImpl implements RequestService {
      * @param duFlowBean
      * @return
      */
-    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType, List<LJAssets> ljAssets) {
+    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType, List<LJAssets> ljAssets,Integer secure) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -486,13 +489,30 @@ public class LingJiRequestServiceImpl implements RequestService {
 //                "&app=" + URLEncoder.encode(duFlowBean.getAppName())+
 
         //人群包，创意id，省，市，广告主id，代理商id，广告id，
+        String materialUrl = duFlowBean.getAdmMap().get(0);//素材地址
 
+        if (secure!=null){
+            if (secure==1){
+               landingUrl= landingUrl.replace("http","https");
+                nurl= nurl.replace("http","https");
+                lingjiimp= lingjiimp.replace("http","https");
+                curl= curl.replace("http","https");
+                materialUrl= materialUrl.replace("http","https");
+            }else {
+                landingUrl= landingUrl.replace("https","http");
+                nurl= nurl.replace("https","http");
+                lingjiimp= lingjiimp.replace("https","http");
+                curl= curl.replace("https","http");
+                materialUrl= materialUrl.replace("https","http");
+
+            }
+        }
         if ("banner".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdmMap().get(0));//  横幅
+            bid.setAdm(materialUrl);//  横幅
         } else if ("fullscreen".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdmMap().get(0));// 开屏
+            bid.setAdm(materialUrl);// 开屏
         } else if ("interstitial".equals(adType)) {
-            bid.setAdm(duFlowBean.getAdmMap().get(0));// 插屏
+            bid.setAdm(materialUrl);// 插屏
         } else if ("feed".equals(adType)) {//信息流
             bid.setNurl("");//
             LJNativeResponse ljNativeResponse = new LJNativeResponse();
@@ -546,7 +566,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     if (ljAsset.getRequired().equals(true)) {
                         LJAssets assetsImg = new LJAssets();
                         LJNativeImg ljNativeImg = new LJNativeImg();
-                        String imgUrl = duFlowBean.getAdmMap().get(0);
+                        String imgUrl = materialUrl;
                         List<String> imgUrls = new ArrayList<>();
                         imgUrls.add(imgUrl);
                         ljNativeImg.setUrls(imgUrls);
@@ -558,7 +578,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     if (ljAsset.getRequired().equals(true)) {
                         LJAssets assetsVideo = new LJAssets();
                         LJNativeVideo ljNativeVideo = new LJNativeVideo();
-                        String videoUrl = duFlowBean.getAdmMap().get(0);
+                        String videoUrl =materialUrl;
                         ljNativeVideo.setUrl(videoUrl);
                         assetsVideo.setVideo(ljNativeVideo);
                         assetsVideo.setId(ljAsset.getId());
@@ -584,7 +604,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
         LJResponseExt ljResponseExt = new LJResponseExt();
 
-        ljResponseExt.setLdp(landingUrlA);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
+        ljResponseExt.setLdp(landingUrl);//落地页。广告点击后会跳转到物料上绑定的landingpage，还是取实时返回的ldp，参见
         //曝光监测数组
         List pm = new ArrayList();
 
