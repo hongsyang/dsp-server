@@ -105,6 +105,8 @@ public class RtbCronDispatch {
 
         // 动态出价定时任务
         RtbCronDispatch.startTimer(12);
+        
+        RtbCronDispatch.startTimer(13);
 
     }
 
@@ -159,6 +161,8 @@ public class RtbCronDispatch {
            case 12:
                dispatch(DynamicPriceTask.class,"0 0/10 * * * ?");
                break;
+           case 13:
+        	   dispatch(RtbUpdateAdPushAdxAndMediaTask.class,"0 0/10 * * * ?");
            default:
                break;
        }

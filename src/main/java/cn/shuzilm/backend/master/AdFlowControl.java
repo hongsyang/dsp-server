@@ -801,7 +801,7 @@ public class AdFlowControl {
     	MDC.put("sift", "control");
         HashSet<String> lowBalanceAdSet = new HashSet<>();
         long timeNow = System.currentTimeMillis();
-        long timeBefore = timeNow - 18 * 60 * 1000;
+        long timeBefore = timeNow - INTERVAL;
         timeBefore  = timeBefore / 1000;
         try {
             for (ResultMap map : adList) {

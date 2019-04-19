@@ -497,6 +497,10 @@ public class RuleMatching {
 		for (String adUid : auidList) {
 			
 			AdBean ad = rtbIns.getAdMap().get(adUid);
+			//广告单元获取判空
+			if(ad == null){
+				continue;
+			}
 			String advertierId = "";
 			if(ad != null && ad.getAdvertiser() != null){
 				advertierId = ad.getAdvertiser().getUid();
