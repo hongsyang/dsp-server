@@ -1012,9 +1012,9 @@ public class RtbFlowControl {
     			if (!tempMap.containsKey(adUid)) {
                     Set<String> tempSet = new HashSet<String>();
                     tempSet.add(adxAndMeida);
-                    adPushAdxAndMediaMap.put(adUid, tempSet);
+                    tempMap.put(adUid, tempSet);
                 } else {
-                    Set<String> tempSet = adPushAdxAndMediaMap.get(adUid);
+                    Set<String> tempSet = tempMap.get(adUid);
                     if (!tempSet.contains(adxAndMeida)) {
                     	tempSet.add(adxAndMeida);
                     }
