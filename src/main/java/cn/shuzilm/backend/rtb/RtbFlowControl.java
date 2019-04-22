@@ -1014,7 +1014,7 @@ public class RtbFlowControl {
     public void updateAdPushAdxAndMeidaMap(){
     	Select select = new Select();
     	try{
-    		String sql = "select * from ad_adx_meida_push";
+    		String sql = "select * from ad_adx_media_push";
     		ResultList rsList = select.select(sql);
     		ConcurrentHashMap<String,Set<String>> tempMap = new ConcurrentHashMap<String,Set<String>>();
     		ConcurrentHashMap<String,Set<String>> adxTempMap = new ConcurrentHashMap<String,Set<String>>();
