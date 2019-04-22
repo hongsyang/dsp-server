@@ -493,28 +493,17 @@ public class LingJiRequestServiceImpl implements RequestService {
 
         if (secure != null) {
             if (secure == 1) {
-                landingUrl = landingUrl.replace("http", "https");
-                nurl = nurl.replace("http", "https");
-                lingjiimp = lingjiimp.replace("http", "https");
-                curl = curl.replace("http", "https");
-                materialUrl = materialUrl.replace("http", "https");
+                landingUrl = landingUrl.replace("http://", "https://");
+                nurl = nurl.replace("http://", "https://");
+                lingjiimp = lingjiimp.replace("http://", "https://");
+                curl = curl.replace("http://", "https://");
+                materialUrl = materialUrl.replace("http://", "https://");
             } else {
-                if (landingUrl.contains("https")) {
-                    landingUrl = landingUrl.replace("https", "http");
-                } else if (nurl.contains("https")) {
-
-                    nurl = nurl.replace("https", "http");
-                } else if (lingjiimp.contains("https")) {
-
-                    lingjiimp = nurl.replace("https", "http");
-                } else if (curl.contains("https")) {
-
-                    curl = nurl.replace("https", "http");
-                } else if (materialUrl.contains("https")) {
-
-                    materialUrl = nurl.replace("https", "http");
-                }
-
+                    landingUrl = landingUrl.replace("https://", "http://");
+                    nurl = nurl.replace("https://", "http://");
+                    lingjiimp = nurl.replace("https://", "http://");
+                    curl = nurl.replace("https://", "http://");
+                    materialUrl = nurl.replace("https://", "http://");
 
             }
         }
