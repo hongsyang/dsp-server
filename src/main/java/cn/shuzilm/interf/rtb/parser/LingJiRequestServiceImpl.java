@@ -89,7 +89,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
     @Override
-    public String parseRequest(String dataStr, ExecutorService executor,ConcurrentHashMap<String,Integer> countMap) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor, ConcurrentHashMap<String, Integer> countMap) throws Exception {
         this.executor = executor;
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
@@ -216,10 +216,10 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             String http = "http";
             String https = "https";
-            Integer secure=null;
+            Integer secure = null;
             if (userImpression.getSecure() != null) {
                 if (userImpression.getSecure() == 1) {
-                    secure=userImpression.getSecure();
+                    secure = userImpression.getSecure();
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + https;
                     if (countMap.get(httpKey) != null) {
                         Integer linkNum = countMap.get(httpKey);
@@ -230,7 +230,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     }
 
                 } else if (userImpression.getSecure() == 0) {
-                    secure=userImpression.getSecure();
+                    secure = userImpression.getSecure();
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + http;
                     if (countMap.get(httpKey) != null) {
                         Integer linkNum = countMap.get(httpKey);
@@ -316,7 +316,7 @@ public class LingJiRequestServiceImpl implements RequestService {
 
 
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
-            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets,secure);
+            BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, adType, assets, secure);
             MDC.remove("sift");
 
             response = JSON.toJSONString(bidResponseBean);
@@ -371,7 +371,7 @@ public class LingJiRequestServiceImpl implements RequestService {
      * @param duFlowBean
      * @return
      */
-    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType, List<LJAssets> ljAssets,Integer secure) {
+    private BidResponseBean convertBidResponse(DUFlowBean duFlowBean, String adType, List<LJAssets> ljAssets, Integer secure) {
         BidResponseBean bidResponseBean = new BidResponseBean();
         //请求报文BidResponse返回
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
@@ -491,19 +491,30 @@ public class LingJiRequestServiceImpl implements RequestService {
         //人群包，创意id，省，市，广告主id，代理商id，广告id，
         String materialUrl = duFlowBean.getAdmMap().get(0);//素材地址
 
-        if (secure!=null){
-            if (secure==1){
-               landingUrl= landingUrl.replace("http","https");
-                nurl= nurl.replace("http","https");
-                lingjiimp= lingjiimp.replace("http","https");
-                curl= curl.replace("http","https");
-                materialUrl= materialUrl.replace("http","https");
-            }else {
-                landingUrl= landingUrl.replace("https","http");
-                nurl= nurl.replace("https","http");
-                lingjiimp= lingjiimp.replace("https","http");
-                curl= curl.replace("https","http");
-                materialUrl= materialUrl.replace("https","http");
+        if (secure != null) {
+            if (secure == 1) {
+                landingUrl = landingUrl.replace("http", "https");
+                nurl = nurl.replace("http", "https");
+                lingjiimp = lingjiimp.replace("http", "https");
+                curl = curl.replace("http", "https");
+                materialUrl = materialUrl.replace("http", "https");
+            } else {
+                if (landingUrl.contains("https")) {
+                    landingUrl = landingUrl.replace("https", "http");
+                } else if (nurl.contains("https")) {
+
+                    nurl = nurl.replace("https", "http");
+                } else if (lingjiimp.contains("https")) {
+
+                    lingjiimp = nurl.replace("https", "http");
+                } else if (curl.contains("https")) {
+
+                    curl = nurl.replace("https", "http");
+                } else if (materialUrl.contains("https")) {
+
+                    materialUrl = nurl.replace("https", "http");
+                }
+
 
             }
         }
@@ -578,7 +589,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                     if (ljAsset.getRequired().equals(true)) {
                         LJAssets assetsVideo = new LJAssets();
                         LJNativeVideo ljNativeVideo = new LJNativeVideo();
-                        String videoUrl =materialUrl;
+                        String videoUrl = materialUrl;
                         ljNativeVideo.setUrl(videoUrl);
                         assetsVideo.setVideo(ljNativeVideo);
                         assetsVideo.setId(ljAsset.getId());
