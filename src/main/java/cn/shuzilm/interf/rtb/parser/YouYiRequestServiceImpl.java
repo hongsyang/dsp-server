@@ -195,7 +195,8 @@ public class YouYiRequestServiceImpl implements RequestService {
                     adxNameList,//长宽列表
                     isDimension,
                     bidRequestBean.getSession_id(),
-                    tagid
+                    tagid,
+                    null
             );
             if (targetDuFlowBean == null) {
                 response = "204session_id:" + session_id;

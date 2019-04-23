@@ -289,7 +289,8 @@ public class LingJiRequestServiceImpl implements RequestService {
                     adxNameList,
                     isDimension,
                     bidRequestBean.getId(),
-                    tagid
+                    tagid,
+                    secure
             );
             if (targetDuFlowBean == null) {
                 response = "";
