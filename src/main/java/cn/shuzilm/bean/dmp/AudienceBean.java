@@ -108,12 +108,13 @@ public class AudienceBean implements ICommand {
     @Setter
     private String dmpId;
 
-    public void setDemographicCitys(String citys){
+    public void setDemographicCitys(String citys,String type){
         if(citys == null)
             citys = "";
         demographicCitys = citys;
         String[] split = citys.split("],");
         Set<String> set = new HashSet();
+        if("demographic".equals(type)){
         if(!citys.trim().equals("")){
         	String re = "[";
         	String ra = "]";
@@ -123,6 +124,7 @@ public class AudienceBean implements ICommand {
         	}
         }else{
         	set.add("0");
+        }
         }
         this.demographicCitySet = convertToAreaBeanSet(set);
     }
@@ -151,7 +153,7 @@ public class AudienceBean implements ICommand {
         return citys;
     }
 
-    public void setCitys(String citys) {
+    public void setCitys(String citys,String type,String mode) {
         this.citys = citys;
         if(citys == null){
         	citys = "";
@@ -159,6 +161,7 @@ public class AudienceBean implements ICommand {
         if (citys != null) {
             String[] split = citys.split("],");
             List<String> list = new ArrayList();
+            if("location".equals(type) && "city".equals(mode)){
             if(!citys.trim().equals("")){
             	String re = "[";
             	String ra = "]";
@@ -168,6 +171,7 @@ public class AudienceBean implements ICommand {
             	}
             }else{
             	list.add("0");
+            }
             }
             this.cityList = convertToAreaBeanList(list);
         }
@@ -181,6 +185,9 @@ public class AudienceBean implements ICommand {
      */
     private ArrayList<AreaBean> convertToAreaBeanList(List<String> list) {
         ArrayList<AreaBean> cityList = new ArrayList<>();
+        if(list ==null || list.isEmpty()){
+        	return null;
+        }
         for (String city : list) {
             if(city == null || city.equals(""))
                 continue;
@@ -214,6 +221,9 @@ public class AudienceBean implements ICommand {
      */
     private Set<AreaBean> convertToAreaBeanSet(Set<String> set) {
         HashSet<AreaBean> citySet = new HashSet<>();
+        if(set ==null || set.isEmpty()){
+        	return null;
+        }
         for (String city : set) {
             if(city == null || city.equals(""))
                 continue;

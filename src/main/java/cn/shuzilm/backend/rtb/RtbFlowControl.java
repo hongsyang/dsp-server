@@ -197,6 +197,9 @@ public class RtbFlowControl {
     //广告单元投放指定ADX+媒体缓存
     private static ConcurrentHashMap<String,Set<String>> adPushAdxAndMediaMap = null;
     
+    //广告单元投放指定ADX
+    private static ConcurrentHashMap<String,Set<String>> adPushAdxMap = null;
+    
     /**
      * 在投广告位集合
      */
@@ -259,6 +262,7 @@ public class RtbFlowControl {
         mediaUselessMap = new ConcurrentHashMap<Long,MediaBean>();
         packageUselessMap = new ConcurrentHashMap<String,MediaBean>();
         adPushAdxAndMediaMap = new ConcurrentHashMap<String,Set<String>>();
+        adPushAdxMap = new ConcurrentHashMap<String,Set<String>>();
 //        adLocationSet = Collections.synchronizedSet(new HashSet<String>());
 //        adLocationMap = new ConcurrentHashMap<String,AdLocationBean>();
         //redisGeoMap = new ConcurrentHashMap<>();
@@ -904,6 +908,15 @@ public class RtbFlowControl {
             }
   
         	
+        	//增加广告单元指定ADX投放限制
+        	if(adPushAdxMap.containsKey(auid)){
+        		Set<String> adxTempSet = adPushAdxMap.get(auid);
+        		if(!adxTempSet.contains(adxName)){
+        			return false;
+        		}
+        	}
+        	
+        	//增加广告单元指定ADX+媒体投放限制
         	if(!adxAndMedia.equals("") && adPushAdxAndMediaMap.containsKey(auid)){
         		Set<String> adxAndMediaTempSet = adPushAdxAndMediaMap.get(auid);
         		if(!adxAndMediaTempSet.contains(adxAndMedia)){
@@ -1010,27 +1023,45 @@ public class RtbFlowControl {
     public void updateAdPushAdxAndMeidaMap(){
     	Select select = new Select();
     	try{
-    		String sql = "select * from ad_adx_meida_push";
+    		String sql = "select * from ad_adx_media_push";
     		ResultList rsList = select.select(sql);
     		ConcurrentHashMap<String,Set<String>> tempMap = new ConcurrentHashMap<String,Set<String>>();
+    		ConcurrentHashMap<String,Set<String>> adxTempMap = new ConcurrentHashMap<String,Set<String>>();
     		for(ResultMap map:rsList){
     			String adUid = map.getString("ad_uid");
     			Integer adxId = map.getInteger("adx_id");
     			String appPackageName = map.getString("app_package_name");
-    			String adxAndMeida = adxId + "_" + appPackageName;
-    			if (!tempMap.containsKey(adUid)) {
-                    Set<String> tempSet = new HashSet<String>();
-                    tempSet.add(adxAndMeida);
-                    tempMap.put(adUid, tempSet);
-                } else {
-                    Set<String> tempSet = tempMap.get(adUid);
-                    if (!tempSet.contains(adxAndMeida)) {
-                    	tempSet.add(adxAndMeida);
-                    }
-                }
+    			boolean appointAllMedia = map.getBoolean("appoint_all_media");
+    			if(appointAllMedia){
+    				String adxIdStr = adxId + "";
+    				if (!adxTempMap.containsKey(adUid)) {
+	                    Set<String> tempSet = new HashSet<String>();
+	                    tempSet.add(adxIdStr);
+	                    adxTempMap.put(adUid, tempSet);
+	                } else {
+	                    Set<String> tempSet = adxTempMap.get(adUid);
+	                    if (!tempSet.contains(adxIdStr)) {
+	                    	tempSet.add(adxIdStr);
+	                    }
+	                }
+    			}else{
+	    			String adxAndMeida = adxId + "_" + appPackageName;
+	    			if (!tempMap.containsKey(adUid)) {
+	                    Set<String> tempSet = new HashSet<String>();
+	                    tempSet.add(adxAndMeida);
+	                    tempMap.put(adUid, tempSet);
+	                } else {
+	                    Set<String> tempSet = tempMap.get(adUid);
+	                    if (!tempSet.contains(adxAndMeida)) {
+	                    	tempSet.add(adxAndMeida);
+	                    }
+	                }
+    			}
     		}
     		adPushAdxAndMediaMap = tempMap;
+    		adPushAdxMap = adxTempMap;
     		tempMap = null;
+    		adxTempMap = null;
     	}catch(Exception e){
     		myLog.error("获取并更新广告单元投放指定ADX+媒体缓存失败:"+e.getMessage());
     	}
