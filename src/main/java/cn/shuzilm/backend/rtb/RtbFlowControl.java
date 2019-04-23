@@ -5,7 +5,6 @@ import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdBidBean;
 import cn.shuzilm.bean.control.AdLocationBean;
-import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.CreativeGroupBean;
