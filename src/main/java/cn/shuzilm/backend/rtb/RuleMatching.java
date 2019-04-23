@@ -1,5 +1,6 @@
 package cn.shuzilm.backend.rtb;
 
+import cn.shuzilm.backend.master.AdFlowControl;
 import cn.shuzilm.backend.timing.rtb.RtbCronDispatch;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdPropertyBean;
@@ -9,30 +10,44 @@ import cn.shuzilm.bean.control.CreativeGroupBean;
 import cn.shuzilm.bean.control.FlowTaskBean;
 import cn.shuzilm.bean.control.Image;
 import cn.shuzilm.bean.control.Material;
+import cn.shuzilm.bean.control.MediaBean;
 import cn.shuzilm.bean.dmp.AudienceBean;
 import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.TagBean;
 import cn.shuzilm.bean.internalflow.DUFlowBean;
+import cn.shuzilm.common.Constants;
+import cn.shuzilm.common.jedis.JedisManager;
+import cn.shuzilm.common.jedis.JedisQueueManager;
 import cn.shuzilm.common.ssdb.SSDBQueueManager;
+import cn.shuzilm.util.AsyncRedisClient;
 import cn.shuzilm.util.GPSDistance;
+import cn.shuzilm.util.JsonTools;
 import cn.shuzilm.util.MathTools;
+import cn.shuzilm.util.TimeUtil;
+import com.google.common.util.concurrent.AtomicDouble;
 import org.apache.commons.lang.StringUtils;
+import redis.clients.jedis.Jedis;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.BeanUtils;
 
 import com.alibaba.fastjson.JSON;
 
@@ -222,7 +237,8 @@ public class RuleMatching {
 	 */
 	public DUFlowBean match(String deviceId, String adType, int width, int height, boolean isResolutionRatio,
 							int widthDeviation, int heightDeviation, String adxName, String extStr, String ip,
-							String appPackageName,List<String> adxNameList,boolean isDimension,String requestId,String tagId)
+							String appPackageName,List<String> adxNameList,boolean isDimension,
+							String requestId,String tagId,Integer secure)
 			throws Exception {
 		MDC.put("sift", "rtb");
 		String reason = null;
@@ -342,6 +358,7 @@ public class RuleMatching {
 			return null;
 		}
 		//String adxNameTemp = adxName;
+		
 		String adxAndMedia = "";
 		boolean packageFlag = false;
 		List<Long> mediaTempList = new ArrayList<Long>();
@@ -655,6 +672,21 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			List<CreativeGroupBean> creativeGroupList = ad.getCreativeGroupList();
 			temp:for(CreativeGroupBean creativeGroup:creativeGroupList){
+				if(secure == null){
+					//不需要过滤
+				}else if(secure == 1){//代表https,只拉取落地页链接、曝光监测地址、点击监测地址为https的
+					if((creativeGroup.getLink() != null && creativeGroup.getLink().contains("http:"))
+							|| (creativeGroup.getClickTrackingUrl() != null && creativeGroup.getClickTrackingUrl().contains("http:"))
+							|| (creativeGroup.getTracking() != null && creativeGroup.getTracking().contains("http:"))){
+						continue;
+					}
+				}else{//代表http,只拉取落地页链接、曝光监测地址、点击监测地址为http的
+					if((creativeGroup.getLink() != null && creativeGroup.getLink().contains("https:"))
+							|| (creativeGroup.getClickTrackingUrl() != null && creativeGroup.getClickTrackingUrl().contains("https:"))
+							|| (creativeGroup.getTracking() != null && creativeGroup.getTracking().contains("https:"))){
+						continue;
+					}
+				}
 				List<CreativeBean> creativeList = creativeGroup.getCreativeList();
 				for(CreativeBean creative:creativeList){
 					List<Material> materialList = creative.getMaterialList();	
@@ -1251,7 +1283,7 @@ public class RuleMatching {
 			RuleMatching rule = RuleMatching.getInstance();
 //			while(true){
 			DUFlowBean duflowBean = rule.match("a24d0y33j853d4d9da28t69d4bf83e77", "banner", 200, 200, false, 5, 5, "1", "jpg,gif,png", "127.0.0.1",
-					"com.iflytek.inputmethod",new ArrayList(),true,"123","aaa");
+					"com.iflytek.inputmethod",new ArrayList(),true,"123","aaa",0);
 //			System.out.println(duflowBean);
 //			Thread.sleep(60 * 1000);
 //			}
