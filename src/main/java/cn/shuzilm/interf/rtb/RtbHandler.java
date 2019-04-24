@@ -7,6 +7,7 @@ import cn.shuzilm.bean.tencent.request.TencentBidRequest;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.common.AppConfigs;
 import cn.shuzilm.interf.rtb.parser.RtbRequestParser;
+import cn.shuzilm.util.HttpClientUtil;
 import com.alibaba.fastjson.JSON;
 import com.googlecode.protobuf.format.JsonFormat;
 import gdt.adx.GdtRtb;
@@ -70,16 +71,24 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     //返回结果
     private String result = null;
 
+    //初始统计次数
+    private static Integer countNum = 1;
 
+    //统计每家adx的请求数
     private static ConcurrentHashMap<String, Integer> countMap = new ConcurrentHashMap();
+
+    //统计每家adx的出手数
+    private static ConcurrentHashMap<String, Integer> bidCountMap = new ConcurrentHashMap();
 
         static {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
 
             MDC.put("sift", "https-count");
             log.debug("htpp和https 的数据:{}", JSON.toJSONString(countMap));
+            HttpClientUtil.HttpPostWithJson("","");
+            countMap.clear();
             MDC.remove("sift");
-        }, 0, configs.getInt("COUNT_TIME"), TimeUnit.HOURS);
+        }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
     }
 
     public RtbHandler(ExecutorService executor,ConcurrentHashMap countMap) {
@@ -427,6 +436,24 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         timeOutFlag, bidPriceFlag,
                         price, exceptionFlag, String.valueOf(filterRuleBidRequestFlag) + "," + AdTagBlackListFlag
                 );
+                String countMapKey=   LocalDateTime.now().toString() + "," + new Date().getTime() + "," +
+                        LocalDate.now().toString() + "," + LocalTime.now().getHour() + "," +
+                        LocalTime.now().getMinute() + "," + requestId + "," +
+                        adxId + "," + appName + "," +
+                        appPackageName + "," + ipBlackListFlag + "," +
+                        bundleBlackListFlag + "," + deviceIdBlackListFlag + "," +
+                        timeOutFlag + "," + bidPriceFlag + "," +
+                        price + "," + exceptionFlag;
+                countMap.put(countMapKey,countNum);
+                String bidCountMapKey=   LocalDateTime.now().toString() + "," + new Date().getTime() + "," +
+                        LocalDate.now().toString() + "," + LocalTime.now().getHour() + "," +
+                        LocalTime.now().getMinute() + "," + requestId + "," +
+                        adxId + "," + appName + "," +
+                        appPackageName + "," + ipBlackListFlag + "," +
+                        bundleBlackListFlag + "," + deviceIdBlackListFlag + "," +
+                        timeOutFlag + "," + bidPriceFlag + "," +
+                        price + "," + exceptionFlag;
+                bidCountMap.put(bidCountMapKey,countNum);
                 MDC.remove("phoenix");
             } catch (Exception e1) {
                 MDC.put("sift", "rtb-exception");
