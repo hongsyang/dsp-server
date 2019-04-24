@@ -498,11 +498,11 @@ public class LingJiRequestServiceImpl implements RequestService {
                 curl = curl.replace("http://", "https://");
                 materialUrl = materialUrl.replace("http://", "https://");
             } else {
-                    landingUrl = landingUrl.replace("https://", "http://");
-                    nurl = nurl.replace("https://", "http://");
-                    lingjiimp = nurl.replace("https://", "http://");
-                    curl = nurl.replace("https://", "http://");
-                    materialUrl = nurl.replace("https://", "http://");
+                landingUrl = landingUrl.replace("https://", "http://");
+                nurl = nurl.replace("https://", "http://");
+                lingjiimp = nurl.replace("https://", "http://");
+                curl = nurl.replace("https://", "http://");
+                materialUrl = nurl.replace("https://", "http://");
 
             }
         }
@@ -598,9 +598,13 @@ public class LingJiRequestServiceImpl implements RequestService {
         Double biddingPrice = duFlowBean.getBiddingPrice() * 100;
         Float price = Float.valueOf(String.valueOf(biddingPrice));
         bid.setPrice(price);//price 测试值  //CPM 出价，数值为 CPM 实际价格*100，如出价为 0.6 元， 单位：分
-        if (duFlowBean.getCrid()!=null){
-            bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
+        if (duFlowBean.getCrid() == null || "".equals(duFlowBean.getCrid().trim())||"null".equals(duFlowBean.getCrid().toLowerCase())) {
+            MDC.put("sift", "ExceptionMaterialId");
+            log.debug("这个素材id没有推审id:{}",duFlowBean.getMaterialId() );//
+            MDC.remove("sift");
+
         }
+        bid.setCrid(duFlowBean.getCrid());//duFlowBean.getCrid() 测试值//广告物料 ID  ,投放动态创意(即c类型的物料),需添加该字段
 
 
         LJResponseExt ljResponseExt = new LJResponseExt();

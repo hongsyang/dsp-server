@@ -254,7 +254,14 @@ public class YouYiRequestServiceImpl implements RequestService {
         double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;//广告出价
         youYiAd.setBid_price((int) biddingPrice);
         youYiAd.setAdvertiser_id(targetDuFlowBean.getAdvertiserUid());//广告主id
+
         youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
+        if (targetDuFlowBean.getCrid() == null || "".equals(targetDuFlowBean.getCrid().trim())||"null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
+            MDC.put("sift", "ExceptionMaterialId");
+            log.debug("这个素材id没有推审id:{}",targetDuFlowBean.getMaterialId() );//
+            MDC.remove("sift");
+
+        }
         //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id
