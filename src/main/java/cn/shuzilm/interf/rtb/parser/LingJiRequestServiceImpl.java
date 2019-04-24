@@ -261,7 +261,6 @@ public class LingJiRequestServiceImpl implements RequestService {
 //                    }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
 //                }
 //            });
-            log.debug("http和https 的数据:{}", JSON.toJSONString(lingjiCountMap));
             Map msg = FilterRule.filterRuleBidRequest(deviceId, appPackageName, userDevice.getIp(), ADX_ID, adxNameList, width, height);//过滤规则的返回结果
 
             //ip黑名单和 设备黑名单，媒体黑名单 内直接返回
