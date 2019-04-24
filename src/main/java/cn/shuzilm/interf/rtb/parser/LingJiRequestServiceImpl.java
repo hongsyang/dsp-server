@@ -500,9 +500,9 @@ public class LingJiRequestServiceImpl implements RequestService {
             } else {
                 landingUrl = landingUrl.replace("https://", "http://");
                 nurl = nurl.replace("https://", "http://");
-                lingjiimp = nurl.replace("https://", "http://");
-                curl = nurl.replace("https://", "http://");
-                materialUrl = nurl.replace("https://", "http://");
+                lingjiimp = lingjiimp.replace("https://", "http://");
+                curl = curl.replace("https://", "http://");
+                materialUrl = materialUrl.replace("https://", "http://");
 
             }
         }
