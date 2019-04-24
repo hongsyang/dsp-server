@@ -221,33 +221,33 @@ public class LingJiRequestServiceImpl implements RequestService {
                 if (userImpression.getSecure() == 1) {
                     secure = userImpression.getSecure();
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + https;
-                    if (countMap.get(httpKey) != null) {
-                        Integer linkNum = countMap.get(httpKey);
-                        linkNum++;//连接次数 + 1
-                        countMap.put(httpKey, linkNum);
-                    } else {
-                        countMap.put(httpKey, lingjiNum);
-                    }
+//                    if (countMap.get(httpKey) != null) {
+//                        Integer linkNum = countMap.get(httpKey);
+//                        linkNum++;//连接次数 + 1
+//                        countMap.put(httpKey, linkNum);
+//                    } else {
+//                        countMap.put(httpKey, lingjiNum);
+//                    }
 
                 } else if (userImpression.getSecure() == 0) {
                     secure = userImpression.getSecure();
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + http;
-                    if (countMap.get(httpKey) != null) {
-                        Integer linkNum = countMap.get(httpKey);
-                        linkNum++;//连接次数 + 1
-                        countMap.put(httpKey, linkNum);
-                    } else {
-                        countMap.put(httpKey, lingjiNum);
-                    }
+//                    if (countMap.get(httpKey) != null) {
+//                        Integer linkNum = countMap.get(httpKey);
+//                        linkNum++;//连接次数 + 1
+//                        countMap.put(httpKey, linkNum);
+//                    } else {
+//                        countMap.put(httpKey, lingjiNum);
+//                    }
                 } else {
                     String httpKey = LocalDate.now().toString() + "," + appPackageName + "," + userImpression.getSecure();
-                    if (countMap.get(httpKey) != null) {
-                        Integer linkNum = countMap.get(httpKey);
-                        linkNum++;//连接次数 + 1
-                        countMap.put(httpKey, linkNum);
-                    } else {
-                        countMap.put(httpKey, lingjiNum);
-                    }
+//                    if (countMap.get(httpKey) != null) {
+//                        Integer linkNum = countMap.get(httpKey);
+//                        linkNum++;//连接次数 + 1
+//                        countMap.put(httpKey, linkNum);
+//                    } else {
+//                        countMap.put(httpKey, lingjiNum);
+//                    }
                 }
             }
 //            //增加统计日志
