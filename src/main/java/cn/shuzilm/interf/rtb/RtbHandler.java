@@ -84,9 +84,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
 
             MDC.put("sift", "https-count");
-            log.debug("htpp和https 的数据:{}", JSON.toJSONString(countMap));
-            HttpClientUtil.HttpPostWithJson("","");
+            log.debug("请求 的数据:{}", JSON.toJSONString(countMap));
+            log.debug("出手 的数据:{}", JSON.toJSONString(bidCountMap));
+//            HttpClientUtil.HttpPostWithJson("","");
             countMap.clear();
+            bidCountMap.clear();
             MDC.remove("sift");
         }, 0, configs.getInt("COUNT_TIME"), TimeUnit.MINUTES);
     }
@@ -436,6 +438,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         timeOutFlag, bidPriceFlag,
                         price, exceptionFlag, String.valueOf(filterRuleBidRequestFlag) + "," + AdTagBlackListFlag
                 );
+                //请求统计次数
                 String countMapKey=   LocalDateTime.now().toString() + "," + new Date().getTime() + "," +
                         LocalDate.now().toString() + "," + LocalTime.now().getHour() + "," +
                         LocalTime.now().getMinute() + "," + requestId + "," +
@@ -444,7 +447,15 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         bundleBlackListFlag + "," + deviceIdBlackListFlag + "," +
                         timeOutFlag + "," + bidPriceFlag + "," +
                         price + "," + exceptionFlag;
+                if (countMap.get(countMapKey) != null) {
+                    Integer linkNum = countMap.get(countMapKey);
+                    linkNum++;//连接次数 + 1
+                    countMap.put(countMapKey, linkNum);
+                } else {
+                    countMap.put(countMapKey, countNum);
+                }
                 countMap.put(countMapKey,countNum);
+                //出手统计次数
                 String bidCountMapKey=   LocalDateTime.now().toString() + "," + new Date().getTime() + "," +
                         LocalDate.now().toString() + "," + LocalTime.now().getHour() + "," +
                         LocalTime.now().getMinute() + "," + requestId + "," +
@@ -453,7 +464,14 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         bundleBlackListFlag + "," + deviceIdBlackListFlag + "," +
                         timeOutFlag + "," + bidPriceFlag + "," +
                         price + "," + exceptionFlag;
-                bidCountMap.put(bidCountMapKey,countNum);
+
+                if (bidCountMap.get(bidCountMapKey) != null) {
+                    Integer linkNum = bidCountMap.get(bidCountMapKey);
+                    linkNum++;//连接次数 + 1
+                    bidCountMap.put(bidCountMapKey, linkNum);
+                } else {
+                    bidCountMap.put(bidCountMapKey, countNum);
+                }
                 MDC.remove("phoenix");
             } catch (Exception e1) {
                 MDC.put("sift", "rtb-exception");
