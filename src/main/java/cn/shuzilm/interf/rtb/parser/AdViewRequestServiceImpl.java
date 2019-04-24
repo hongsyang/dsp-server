@@ -542,6 +542,12 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setPrice(price);//CPM 出价
 
         bid.setAdct(0);//duFlowBean.getAdct() 广告点击行为类型，参考附录 9
+        if (duFlowBean.getCrid() == null || "".equals(duFlowBean.getCrid().trim())||"null".equals(duFlowBean.getCrid().toLowerCase())) {
+            MDC.put("sift", "ExceptionMaterialId");
+            log.debug("这个素材id没有推审id:{}",duFlowBean.getMaterialId() );//
+            MDC.remove("sift");
+
+        }
         bid.setCid(duFlowBean.getCrid());//duFlowBean.getCreativeUid()广告创意 ID，可用于去重
         //添加到list中
         bidList.add(bid);
