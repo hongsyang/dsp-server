@@ -265,6 +265,12 @@ public class AdViewRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAppVersion(app.getVer());//设备版本号
             targetDuFlowBean.setCreateTime(System.currentTimeMillis());//创建时间
             log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            if (targetDuFlowBean.getCrid()== null || "".equals(targetDuFlowBean.getCrid().trim()) || "null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
+                MDC.put("sift", "ExceptionMaterialId");
+                log.debug("请求id:{},素材id,推审id:{}", bidRequestBean.getId(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid());//
+                MDC.remove("sift");
+
+            }
             BidResponseBean bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             MDC.remove("sift");
             MDC.put("sift", "dsp-server");
@@ -542,12 +548,6 @@ public class AdViewRequestServiceImpl implements RequestService {
         bid.setPrice(price);//CPM 出价
 
         bid.setAdct(0);//duFlowBean.getAdct() 广告点击行为类型，参考附录 9
-        if (duFlowBean.getCrid() == null || "".equals(duFlowBean.getCrid().trim())||"null".equals(duFlowBean.getCrid().toLowerCase())) {
-            MDC.put("sift", "ExceptionMaterialId");
-            log.debug("这个素材id没有推审id:{}",duFlowBean.getMaterialId() );//
-            MDC.remove("sift");
-
-        }
         bid.setCid(duFlowBean.getCrid());//duFlowBean.getCreativeUid()广告创意 ID，可用于去重
         //添加到list中
         bidList.add(bid);

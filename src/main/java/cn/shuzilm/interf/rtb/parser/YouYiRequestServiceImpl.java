@@ -220,6 +220,12 @@ public class YouYiRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAppPackageName(userDevice.getApp_bundle());//APP包名
             targetDuFlowBean.setCreateTime(System.currentTimeMillis());//创建时间
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            if (targetDuFlowBean.getCrid()== null || "".equals(targetDuFlowBean.getCrid().trim()) || "null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
+                MDC.put("sift", "ExceptionMaterialId");
+                log.debug("请求id:{},素材id,推审id:{}",  bidRequestBean.getSession_id(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid());//
+                MDC.remove("sift");
+
+            }
             YouYiBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
             response = JSON.toJSONString(bidResponseBean);
             targetDuFlowBean = null;
@@ -254,14 +260,8 @@ public class YouYiRequestServiceImpl implements RequestService {
         double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;//广告出价
         youYiAd.setBid_price((int) biddingPrice);
         youYiAd.setAdvertiser_id(targetDuFlowBean.getAdvertiserUid());//广告主id
-
         youYiAd.setCreative_id(Integer.valueOf(targetDuFlowBean.getCrid()));//推审id
-        if (targetDuFlowBean.getCrid() == null || "".equals(targetDuFlowBean.getCrid().trim())||"null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
-            MDC.put("sift", "ExceptionMaterialId");
-            log.debug("这个素材id没有推审id:{}",targetDuFlowBean.getMaterialId() );//
-            MDC.remove("sift");
 
-        }
         //曝光通知Nurl
         String wurl = "id=" + targetDuFlowBean.getRequestId() +
                 "&bidid=" + targetDuFlowBean.getBidid() +//mysql去重id

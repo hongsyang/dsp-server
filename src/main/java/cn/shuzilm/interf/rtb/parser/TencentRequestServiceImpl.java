@@ -186,6 +186,12 @@ public class TencentRequestServiceImpl implements RequestService {
             targetDuFlowBean.setAppPackageName(appPackageName);//APP包名
             targetDuFlowBean.setCreateTime(System.currentTimeMillis());//创建时间
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            if (targetDuFlowBean.getCrid()== null || "".equals(targetDuFlowBean.getCrid().trim()) || "null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
+                MDC.put("sift", "ExceptionMaterialId");
+                log.debug("请求id:{},素材id,推审id:{}", bidRequestBean.getId(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid());//
+                MDC.remove("sift");
+
+            }
             TencentBidResponse bidResponseBean = convertBidResponse(targetDuFlowBean, bidRequestBean);
 
             response = JSON.toJSONString(bidResponseBean);
@@ -228,12 +234,6 @@ public class TencentRequestServiceImpl implements RequestService {
 
         double biddingPrice = targetDuFlowBean.getBiddingPrice() * 100;//广告出价
         tencentBid.setBid_price((int) biddingPrice);
-        if (targetDuFlowBean.getCrid() == null || "".equals(targetDuFlowBean.getCrid().trim())||"null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
-            MDC.put("sift", "ExceptionMaterialId");
-            log.debug("这个素材id没有推审id:{}",targetDuFlowBean.getMaterialId() );//
-            MDC.remove("sift");
-
-        }
         tencentBid.setCreative_id(targetDuFlowBean.getCrid());//推审id
         //曝光通知Nurl
         String wurl = targetDuFlowBean.getRequestId() +

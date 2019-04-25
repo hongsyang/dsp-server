@@ -181,6 +181,12 @@ public class BaiduRequestServiceImpl implements RequestService {
             targetDuFlowBean.setDspid(format + UUID.randomUUID());//dsp id
             targetDuFlowBean.setAppPackageName(appPackageName);//APP包名
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
+            if (targetDuFlowBean.getCrid()== null || "".equals(targetDuFlowBean.getCrid().trim()) || "null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
+                MDC.put("sift", "ExceptionMaterialId");
+                log.debug("请求id:{},素材id,推审id:{}", bidRequestBean.getId(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid());//
+                MDC.remove("sift");
+
+            }
 
             //测试使用
 //            DUFlowBean targetDuFlowBean = new DUFlowBean();
@@ -215,12 +221,6 @@ public class BaiduRequestServiceImpl implements RequestService {
         BaiduAd baiduAd = new BaiduAd();
         //当前页面广告位顺序 id，同一页面从 1 开始
         baiduAd.setSequence_id(bidRequestBean.getAdslot().get(0).getSequence_id());
-        if (targetDuFlowBean.getCrid() == null || "".equals(targetDuFlowBean.getCrid().trim())||"null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
-            MDC.put("sift", "ExceptionMaterialId");
-            log.debug("这个素材id没有推审id:{}",targetDuFlowBean.getMaterialId() );//
-            MDC.remove("sift");
-
-        }
         baiduAd.setCreative_id(Long.valueOf(targetDuFlowBean.getCrid()));//推审id   ---- 314136722806L
         baiduAd.setWidth(bidRequestBean.getAdslot().get(0).getActual_width());
         baiduAd.setHeight(bidRequestBean.getAdslot().get(0).getActual_height());
