@@ -90,6 +90,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             MDC.put("sift", "https-count");
             log.debug("请求 的数据:{}", JSON.toJSONString(countMap));
             log.debug("出手 的数据:{}", JSON.toJSONString(bidCountMap));
+            MDC.remove("sift");
             try {
                 HttpClientUtil.httpPostWithJson("http://172.17.129.131:8090/postRequest", JSON.toJSONString(countMap));
                 HttpClientUtil.httpPostWithJson("http://172.17.129.131:8090/postBid", JSON.toJSONString(bidCountMap));
