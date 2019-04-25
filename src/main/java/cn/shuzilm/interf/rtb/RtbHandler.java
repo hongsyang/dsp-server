@@ -87,7 +87,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     static {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
 
-            MDC.put("sift", "https-count");
+            MDC.put("sift", "https-count"); 
             log.debug("请求 的数据:{}", JSON.toJSONString(countMap));
             log.debug("出手 的数据:{}", JSON.toJSONString(bidCountMap));
             try {
