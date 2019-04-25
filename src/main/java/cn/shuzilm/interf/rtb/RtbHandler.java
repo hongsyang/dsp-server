@@ -87,7 +87,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
     static {
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
 
-            MDC.put("sift", "https-count"); 
+            MDC.put("sift", "https-count");
             log.debug("请求 的数据:{}", JSON.toJSONString(countMap));
             log.debug("出手 的数据:{}", JSON.toJSONString(bidCountMap));
             try {
@@ -459,7 +459,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         price, exceptionFlag, String.valueOf(filterRuleBidRequestFlag) + "," + AdTagBlackListFlag
                 );
                 //请求统计次数
-                String countMapKey = hostAddress + "$" + adxId + "$" + appName + "$" + appPackageName;
+                String countMapKey = hostAddress + "$" + adxId ;
                 if (countMap.get(countMapKey) != null) {
                     Integer linkNum = countMap.get(countMapKey);
                     linkNum++;//连接次数 + 1
@@ -468,7 +468,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     countMap.put(countMapKey, countNum);
                 }
                 //出手统计次数
-                String bidCountMapKey = hostAddress + "$" + adxId + "$" + appName + "$" + appPackageName;
+                String bidCountMapKey = hostAddress + "$" + adxId ;
                 if (bidPriceFlag == 1 && timeOutFlag == 1 && exceptionFlag == 1) {
                     if (bidCountMap.get(bidCountMapKey) != null) {
                         Integer linkNum = bidCountMap.get(bidCountMapKey);
