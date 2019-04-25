@@ -472,7 +472,7 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     }
                     if (result.contains("max_cpm\":")) {
                         bidPriceFlag = 1;
-                        String substring = result.substring(result.indexOf("price\":"));
+                        String substring = result.substring(result.indexOf("max_cpm\":"));
                         price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
                     }
                 }
