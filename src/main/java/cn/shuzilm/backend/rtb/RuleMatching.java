@@ -71,6 +71,11 @@ public class RuleMatching {
 	 * 随机数控制广告进度等顺序，雨露均沾
 	 */
 	private Random adRandom;
+	
+	/**
+	 * 随机数控制创意和物料的匹配顺序
+	 */
+	private Random creativeRandom;
 
 	private SimpleDateFormat dateFm = new SimpleDateFormat("EEEE_HH");
 
@@ -112,6 +117,7 @@ public class RuleMatching {
 
 		tagRandom = new Random();
 		adRandom = new Random();
+		creativeRandom = new Random();
 
 	}
 
@@ -667,13 +673,59 @@ public class RuleMatching {
 			
 			
 			//物料匹配环节
+//			boolean filterFlag = false;
+//			List<CreativeGroupBean> creativeGroupList = ad.getCreativeGroupList();
+//			temp:for(CreativeGroupBean creativeGroup:creativeGroupList){
+//				List<CreativeBean> creativeList = creativeGroup.getCreativeList();
+//				for(CreativeBean creative:creativeList){
+//					List<Material> materialList = creative.getMaterialList();	
+//					for (Material material : materialList) {
+//						List<Image> imageList = material.getImageList();
+//						if(isDimension && imageList.size() >= 3){
+//							continue;
+//						}
+//						for(Image image:imageList){
+//							if (filter(width, height, image.getWidth(), image.getHeight(), isResolutionRatio, widthDeviation,
+//									heightDeviation, adxName, material,image, extStr, materialSet,adxNameList,
+//									isDimension,adxNamePushList)) {
+//								metrialMap.put(ad.getAdUid(), material);
+//								creativeGroupMap.put(ad.getAdUid(), creativeGroup);
+//								creativeMap.put(ad.getAdUid(), creative);
+//								machedAdList.add(ad);
+//								filterFlag = true;
+//								break temp;
+//							}
+//						}
+//					}
+//				}
+//			}
+			
+			//物料匹配环节
 			boolean filterFlag = false;
 			List<CreativeGroupBean> creativeGroupList = ad.getCreativeGroupList();
-			temp:for(CreativeGroupBean creativeGroup:creativeGroupList){
+			if(creativeGroupList.isEmpty()){
+				continue;
+			}
+			int creativeGroupNum = creativeRandom.nextInt(creativeGroupList.size());
+			temp:for(int i=0;i<creativeGroupList.size();i++){
+				int creativeGroupTempNum = (i + creativeGroupNum) % creativeGroupList.size();
+				CreativeGroupBean creativeGroup = creativeGroupList.get(creativeGroupTempNum);
 				List<CreativeBean> creativeList = creativeGroup.getCreativeList();
-				for(CreativeBean creative:creativeList){
-					List<Material> materialList = creative.getMaterialList();	
-					for (Material material : materialList) {
+				if(creativeList.isEmpty()){
+					continue;
+				}
+				int creativeNum = creativeRandom.nextInt(creativeList.size());
+				for(int j=0;j<creativeList.size();j++){
+					int creativeTempNum = (j + creativeNum) % creativeList.size();
+					CreativeBean creative = creativeList.get(creativeTempNum);
+					List<Material> materialList = creative.getMaterialList();
+					if(materialList.isEmpty()){
+						continue;
+					}
+					int materialNum = creativeRandom.nextInt(materialList.size());
+					for(int k=0;k<materialList.size();k++){
+						int materialTempNum = (k + materialNum) % materialList.size();
+						Material material = materialList.get(materialTempNum);
 						List<Image> imageList = material.getImageList();
 						if(isDimension && imageList.size() >= 3){
 							continue;
@@ -693,6 +745,7 @@ public class RuleMatching {
 					}
 				}
 			}
+			
 			if (!filterFlag) {
 				//LOG.debug("广告ID[" + adUid + "]下未匹配到满足要求的物料,不参与投放!");
 				//reason = adUid+"\t"+deviceId+"\t"+adxName+"\t"+appPackageName+"\t"+width+"\t"+height+
