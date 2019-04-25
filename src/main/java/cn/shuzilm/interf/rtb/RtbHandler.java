@@ -91,8 +91,8 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
             log.debug("请求 的数据:{}", JSON.toJSONString(countMap));
             log.debug("出手 的数据:{}", JSON.toJSONString(bidCountMap));
             try {
-                HttpClientUtil.httpPostWithJson("http://localhost:8090/postRequest", JSON.toJSONString(countMap));
-                HttpClientUtil.httpPostWithJson("http://localhost:8090/postBid", JSON.toJSONString(bidCountMap));
+                HttpClientUtil.httpPostWithJson("http://172.17.129.131:8090/postRequest", JSON.toJSONString(countMap));
+                HttpClientUtil.httpPostWithJson("http://172.17.129.131:8090/postBid", JSON.toJSONString(bidCountMap));
             } catch (Exception e) {
                 MDC.put("sift", "rtb-exception");
                 log.error("发送统计请求数和出手数异常Exception:{}", e);
