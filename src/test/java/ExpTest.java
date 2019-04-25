@@ -1,5 +1,6 @@
 import cn.shuzilm.interf.pixcel.parser.LingJiClickParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.TencentImpParameterParserImpl;
+import cn.shuzilm.util.HttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -9,24 +10,25 @@ public class ExpTest {
     private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
     public static void main(String[] args) throws  Exception {
-        String result="ipBlackListmy089_8086-t25-1550823314-7-704";
-        if (result != null) {
-            if (result.contains("ipBlackList")) {
-                MDC.put("sift", "ipBlackList");
-                log.debug("requestId:{},result:{}",result);
-                MDC.remove("sift");
-                System.out.println("ipBlackList");
-            }
-            if (result.contains("bundleBlackList")) {
-                System.out.println("bundleBlackList");
-            }
-            if (result.contains("deviceIdBlackList")) {
-                MDC.put("sift", "deviceIdBlackList");
-                log.debug("requestId:{},result:{}",result);
-                MDC.remove("sift");
-                System.out.println("deviceIdBlackList");
-            }
-        }
+        HttpClientUtil.get("https://api.ipplus360.com/ip/res/v1/poi/?key=156186&ip=12.32.26.53&type=00");
+//        String result="ipBlackListmy089_8086-t25-1550823314-7-704";
+//        if (result != null) {
+//            if (result.contains("ipBlackList")) {
+//                MDC.put("sift", "ipBlackList");
+//                log.debug("requestId:{},result:{}",result);
+//                MDC.remove("sift");
+//                System.out.println("ipBlackList");
+//            }
+//            if (result.contains("bundleBlackList")) {
+//                System.out.println("bundleBlackList");
+//            }
+//            if (result.contains("deviceIdBlackList")) {
+//                MDC.put("sift", "deviceIdBlackList");
+//                log.debug("requestId:{},result:{}",result);
+//                MDC.remove("sift");
+//                System.out.println("deviceIdBlackList");
+//            }
+//        }
 //        String url="tencentimp?bidid=ancftd3dt6hla&win=hJBhSEhMKDrvIPEkHumcug==&impparam=ancftd3dt6hla&bidid=2019021915493968657605ba1-3618-4b11-9b&impid=1060515766791231&act=20190219154939686&adx=4&device=9fc5a30c-28a2-4405-9d0b-0c0bfdc60377&appn=com.chancky.365Read&pf=0.3&ddem=0698471f-1829-419d-9bde-49369151e66f&dcuid=f11d160c-8bd4-4333-94ef-a4818d30e318&dpro=2&dcit=36&dcou=377&dade=89633fef-b7d0-4a36-802d-8960ffe5e851&dage=null&daduid=fedf05bb-8b8c-499c-bb60-f3a4e64dd6cc&userip=124.193.88.142&ip=124.193.88.142&remoteIp=14.17.3.31";
 
 

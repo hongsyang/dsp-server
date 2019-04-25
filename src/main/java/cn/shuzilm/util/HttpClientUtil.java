@@ -98,7 +98,7 @@ public class HttpClientUtil {
         httpPost.setEntity(requestEntity);
 
         //第四步：发送HttpPost请求，获取返回值
-        returnValue = httpClient.execute(httpPost, responseHandler); //调接口获取返回值时，必须用此方法
+//        returnValue = httpClient.execute(httpPost, responseHandler); //调接口获取返回值时，必须用此方法
         CloseableHttpResponse httpResonse = httpClient.execute(httpPost);
         int statusCode = httpResonse.getStatusLine().getStatusCode();
         if (statusCode != 200) {
@@ -126,6 +126,18 @@ public class HttpClientUtil {
         CloseableHttpResponse response = null;
         try {
             response = httpClient.execute(get);
+            InputStream content = response.getEntity().getContent();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(content));
+
+            StringBuilder sb = new StringBuilder();
+            String msg="";
+            while ((msg = reader.readLine()) != null) {
+
+                sb.append(msg + "/n");
+
+                System.out.println(sb);
+            }
+            content.close();
             if (response != null && response.getStatusLine().getStatusCode() == 200) {
                 result = response.toString();
             }
