@@ -3,6 +3,7 @@ package cn.shuzilm.interf.rtb;
 import bidserver.BidserverSsp;
 import cn.shuzilm.BaiduRealtimeBidding;
 import cn.shuzilm.bean.adview.request.BidRequestBean;
+import cn.shuzilm.bean.baidu.request.BaiduBidRequest;
 import cn.shuzilm.bean.tencent.request.TencentBidRequest;
 import cn.shuzilm.bean.youyi.request.YouYiBidRequest;
 import cn.shuzilm.common.AppConfigs;
@@ -446,11 +447,11 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                     }
 
                 } else if (url.contains("baidu")) {
-                adxId = 4;
-                TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
+                adxId = 5;
+                BaiduBidRequest bidRequestBean = JSON.parseObject(dataStr, BaiduBidRequest.class);
                 requestId = bidRequestBean.getId();
-                if (bidRequestBean.getApp() != null) {
-                    appPackageName = bidRequestBean.getApp().getApp_bundle_id();
+                if (bidRequestBean.getMobile() != null) {
+                    appPackageName = bidRequestBean.getMobile().getMobile_app().getApp_bundle_id();
                 }
                 if (result != null) {
                     if (result.contains("ipBlackList")) {
