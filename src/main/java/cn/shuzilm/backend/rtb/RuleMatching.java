@@ -743,7 +743,6 @@ public class RuleMatching {
 		}
 		
 		// 排序
-
 		if (!machedAdList.isEmpty()) {
 			targetDuFlowBean = order(metrialMap, deviceId, machedAdList, tagBean, widthHeightRatio, audienceMap,
 					adxName, ip, rtbIpMap, demographicMap,appPackageName,requestId,width,height,
