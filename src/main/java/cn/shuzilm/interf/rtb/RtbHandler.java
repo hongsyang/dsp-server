@@ -445,7 +445,38 @@ public class RtbHandler extends SimpleChannelUpstreamHandler {
                         }
                     }
 
+                } else if (url.contains("baidu")) {
+                adxId = 4;
+                TencentBidRequest bidRequestBean = JSON.parseObject(dataStr, TencentBidRequest.class);
+                requestId = bidRequestBean.getId();
+                if (bidRequestBean.getApp() != null) {
+                    appPackageName = bidRequestBean.getApp().getApp_bundle_id();
                 }
+                if (result != null) {
+                    if (result.contains("ipBlackList")) {
+                        ipBlackListFlag = 0;
+                        filterRuleBidRequestFlag = 0;
+                    }
+                    if (result.contains("bundleBlackList")) {
+                        bundleBlackListFlag = 0;
+                        filterRuleBidRequestFlag = 0;
+                    }
+                    if (result.contains("deviceIdBlackList")) {
+                        deviceIdBlackListFlag = 0;
+                        filterRuleBidRequestFlag = 0;
+                    }
+                    if (result.contains("AdTagBlackList")) {
+                        AdTagBlackListFlag = 0;
+                        filterRuleBidRequestFlag = 0;
+                    }
+                    if (result.contains("max_cpm\":")) {
+                        bidPriceFlag = 1;
+                        String substring = result.substring(result.indexOf("price\":"));
+                        price = substring.substring(substring.indexOf("\":") + 2, substring.indexOf(",\""));
+                    }
+                }
+
+            }
 
                 MDC.put("phoenix", "rtb-houkp");
                 log.debug("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}" +
