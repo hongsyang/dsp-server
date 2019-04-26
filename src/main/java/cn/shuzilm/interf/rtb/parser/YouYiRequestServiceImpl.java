@@ -222,7 +222,7 @@ public class YouYiRequestServiceImpl implements RequestService {
             log.debug("没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             if (targetDuFlowBean.getCrid()== null || "".equals(targetDuFlowBean.getCrid().trim()) || "null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
                 MDC.put("sift", "ExceptionMaterialId");
-                log.debug("请求id:{},素材id,推审id:{}",  bidRequestBean.getSession_id(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid());//
+                log.debug("请求id:{},素材id:{},推审id:{}，广告位列表:{},是否匹配长宽:{}", bidRequestBean.getSession_id(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid(),adxNameList.toArray(),isDimension);//
                 MDC.remove("sift");
 
             }

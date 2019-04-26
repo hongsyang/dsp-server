@@ -1,3 +1,4 @@
+import cn.shuzilm.bean.internalflow.DUFlowBean;
 import cn.shuzilm.interf.pixcel.parser.LingJiClickParameterParserImpl;
 import cn.shuzilm.interf.pixcel.parser.TencentImpParameterParserImpl;
 import cn.shuzilm.util.HttpClientUtil;
@@ -10,7 +11,16 @@ public class ExpTest {
     private static final Logger log = LoggerFactory.getLogger(LingJiClickParameterParserImpl.class);
 
     public static void main(String[] args) throws  Exception {
-        HttpClientUtil.get("https://api.ipplus360.com/ip/res/v1/poi/?key=156186&ip=12.32.26.53&type=00");
+//        HttpClientUtil.get("https://api.ipplus360.com/ip/res/v1/poi/?key=156186&ip=12.32.26.53&type=00");
+        DUFlowBean targetDuFlowBean =new DUFlowBean();
+        targetDuFlowBean.setCrid("");
+        if (targetDuFlowBean.getCrid()== null || "".equals(targetDuFlowBean.getCrid().trim()) || "null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
+            MDC.put("sift", "ExceptionMaterialId");
+            log.debug("请求id:{},素材id,推审id:{}，广告位列表:{},是否匹配长宽:{}", "", targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid(),"222","1");//
+            MDC.remove("sift");
+
+        }
+
 //        String result="ipBlackListmy089_8086-t25-1550823314-7-704";
 //        if (result != null) {
 //            if (result.contains("ipBlackList")) {

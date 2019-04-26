@@ -240,7 +240,7 @@ public class AdViewRequestServiceImpl implements RequestService {
                     stringSet,//文件扩展名
                     userDevice.getIp(),//用户ip
                     appPackageName,//APP包名
-                    adxNameList,//宽列表
+                    adxNameList,//广告位列表
                     isDimension,
                     bidRequestBean.getId(),
                     tagid//广告id
@@ -267,7 +267,7 @@ public class AdViewRequestServiceImpl implements RequestService {
             log.debug("拷贝没有过滤的targetDuFlowBean:{}", targetDuFlowBean);
             if (targetDuFlowBean.getCrid()== null || "".equals(targetDuFlowBean.getCrid().trim()) || "null".equals(targetDuFlowBean.getCrid().toLowerCase())) {
                 MDC.put("sift", "ExceptionMaterialId");
-                log.debug("请求id:{},素材id,推审id:{}", bidRequestBean.getId(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid());//
+                log.debug("请求id:{},,素材id:{},推审id:{}，广告位列表:{},是否匹配长宽:{}", bidRequestBean.getId(), targetDuFlowBean.getMaterialId(), targetDuFlowBean.getCrid(),adxNameList.toArray(),isDimension);//
                 MDC.remove("sift");
 
             }
