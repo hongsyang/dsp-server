@@ -128,7 +128,7 @@ public class LingJiRequestServiceImpl implements RequestService {
                         if (userDevice.getDidmd5() != null) {
                             if (userDevice.getDidmd5().length() == 32) {
                             }
-                        } else if (userDevice.getMacmd5() != null) {
+                        } else if (userDevice.getExt().getMacmd5() != null) {
                             if (userDevice.getExt().getMacmd5().length() == 32) {
                                 userDevice.setDidmd5("mac-" + userDevice.getExt().getMacmd5());
                             }
