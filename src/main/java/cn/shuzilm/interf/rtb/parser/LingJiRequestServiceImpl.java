@@ -431,7 +431,6 @@ public class LingJiRequestServiceImpl implements RequestService {
                 "&dcit=" + duFlowBean.getCity() +// 市
                 "&dcou=" + duFlowBean.getCountry() +// 县
                 "&userip=" + duFlowBean.getIpAddr();//用户ip
-        bid.setNurl(nurl);
 
         //曝光检测地址
         String lingjiimp = serviceUrl + "lingjiimp?" +
@@ -513,6 +512,9 @@ public class LingJiRequestServiceImpl implements RequestService {
 
             }
         }
+        //更具条件替换为https
+        bid.setNurl(nurl);
+
         if ("banner".equals(adType)) {
             bid.setAdm(materialUrl);//  横幅
         } else if ("fullscreen".equals(adType)) {
