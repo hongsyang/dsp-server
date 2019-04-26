@@ -46,15 +46,19 @@ public class RedisUtil {
         MDC.put("sift", "redis");
         try {
             if (jedis != null) {
-                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
+//                jedis.setex()//设置超时时间
+                String setex = jedis.setex(targetDuFlowBean.getRequestId(), 60 * 60, JSON.toJSONString(targetDuFlowBean));
+//                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+//                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", setex, 1, targetDuFlowBean.getRequestId());
             } else {
                 jedis =  new Jedis(redisConfigs.getString("REDIS_SERVER_HOST"), redisConfigs.getInt("REDIS_SERVER_PORT"));
-                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
-                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
+                String setex = jedis.setex(targetDuFlowBean.getRequestId(), 60 * 60, JSON.toJSONString(targetDuFlowBean));
+
+//                String set = jedis.set(targetDuFlowBean.getRequestId(), JSON.toJSONString(targetDuFlowBean));
+//                Long expire = jedis.expire(targetDuFlowBean.getRequestId(), 60 * 60);//设置超时时间为60分钟
                 log.debug("jedis为空：{},重新加载", jedis);
-                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", set, expire, targetDuFlowBean.getRequestId());
+                log.debug("推送到redis服务器是否成功;{},设置超时时间是否成功(成功返回1)：{},RequestId;{}", setex, 0, targetDuFlowBean.getRequestId());
             }
         } catch (Exception e) {
 //            resource.returnBrokenResource(jedis);
