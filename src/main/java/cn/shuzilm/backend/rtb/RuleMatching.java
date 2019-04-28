@@ -666,8 +666,7 @@ public class RuleMatching {
 //			}
 
 			
-			
-			
+						
 			//物料匹配环节
 			boolean filterFlag = false;
 			List<CreativeGroupBean> creativeGroupList = ad.getCreativeGroupList();
