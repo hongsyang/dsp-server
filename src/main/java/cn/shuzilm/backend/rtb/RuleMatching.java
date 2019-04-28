@@ -672,18 +672,12 @@ public class RuleMatching {
 			boolean filterFlag = false;
 			List<CreativeGroupBean> creativeGroupList = ad.getCreativeGroupList();
 			temp:for(CreativeGroupBean creativeGroup:creativeGroupList){
-				if(secure == null){
+				if(secure == null || secure == 0){
 					//不需要过滤
 				}else if(secure == 1){//代表https,只拉取落地页链接、曝光监测地址、点击监测地址为https的
 					if((creativeGroup.getLink() != null && creativeGroup.getLink().contains("http:"))
 							|| (creativeGroup.getClickTrackingUrl() != null && creativeGroup.getClickTrackingUrl().contains("http:"))
 							|| (creativeGroup.getTracking() != null && creativeGroup.getTracking().contains("http:"))){
-						continue;
-					}
-				}else{//代表http,只拉取落地页链接、曝光监测地址、点击监测地址为http的
-					if((creativeGroup.getLink() != null && creativeGroup.getLink().contains("https:"))
-							|| (creativeGroup.getClickTrackingUrl() != null && creativeGroup.getClickTrackingUrl().contains("https:"))
-							|| (creativeGroup.getTracking() != null && creativeGroup.getTracking().contains("https:"))){
 						continue;
 					}
 				}
