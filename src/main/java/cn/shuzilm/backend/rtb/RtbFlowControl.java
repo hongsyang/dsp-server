@@ -20,6 +20,7 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.Help;
 import cn.shuzilm.util.MathTools;
 import cn.shuzilm.util.TimeUtil;
 import cn.shuzilm.util.db.Select;
@@ -518,6 +519,8 @@ public class RtbFlowControl {
                 myLog.info("广告共计加载条目数 : " + adBeanList.size());
                 //myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
 
+        }else{
+        	Help.sendAlert("RTB[" + nodeName + "]节点更新广告缓存失败!");
         }
 
     }
