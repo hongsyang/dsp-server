@@ -519,9 +519,10 @@ public class RtbFlowControl {
                 myLog.info("广告共计加载条目数 : " + adBeanList.size());
                 //myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
 
-        }else{
-        	Help.sendAlert("RTB[" + nodeName + "]节点更新广告缓存失败!");
         }
+//        else{
+//        	Help.sendAlert("RTB[" + nodeName + "]节点更新广告缓存失败!");
+//        }
 
     }
 
