@@ -161,7 +161,8 @@ public class TencentRequestServiceImpl implements RequestService {
                     adxNameList,//长宽列表
                     isDimension,
                     bidRequestBean.getId(),
-                    tagid
+                    tagid,
+                    null
             );
             if (targetDuFlowBean == null) {
                 response = "";

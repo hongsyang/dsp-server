@@ -68,7 +68,7 @@ public class AdViewRequestServiceImpl implements RequestService {
     private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr, ExecutorService executor,ConcurrentHashMap countMap) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor, ConcurrentHashMap countMap) throws Exception {
         this.executor = executor;
         String response = "空请求";
         if (StringUtils.isNotBlank(dataStr)) {
@@ -243,7 +243,8 @@ public class AdViewRequestServiceImpl implements RequestService {
                     adxNameList,//广告位列表
                     isDimension,
                     bidRequestBean.getId(),
-                    tagid//广告id
+                    tagid,//广告id
+                    null
             );
             if (targetDuFlowBean == null) {
                 response = "";

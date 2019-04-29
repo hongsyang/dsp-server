@@ -5,7 +5,6 @@ import cn.shuzilm.backend.master.MsgControlCenter;
 import cn.shuzilm.bean.control.AdBean;
 import cn.shuzilm.bean.control.AdBidBean;
 import cn.shuzilm.bean.control.AdLocationBean;
-import cn.shuzilm.bean.control.AdPropertyBean;
 import cn.shuzilm.bean.control.AdvertiserBean;
 import cn.shuzilm.bean.control.CreativeBean;
 import cn.shuzilm.bean.control.CreativeGroupBean;
@@ -21,6 +20,7 @@ import cn.shuzilm.bean.dmp.GpsBean;
 import cn.shuzilm.bean.dmp.GpsGridBean;
 import cn.shuzilm.common.Constants;
 import cn.shuzilm.util.AsyncRedisClient;
+import cn.shuzilm.util.Help;
 import cn.shuzilm.util.MathTools;
 import cn.shuzilm.util.TimeUtil;
 import cn.shuzilm.util.db.Select;
@@ -519,6 +519,8 @@ public class RtbFlowControl {
                 myLog.info("广告共计加载条目数 : " + adBeanList.size());
                 //myLog.info("广告中的经纬度坐标共计条目数：" + gpsAll.size());
 
+        }else{
+        	Help.sendAlert("RTB[" + nodeName + "]节点更新广告缓存失败!");
         }
 
     }
@@ -1022,7 +1024,7 @@ public class RtbFlowControl {
     public void updateAdPushAdxAndMeidaMap(){
     	Select select = new Select();
     	try{
-    		String sql = "select * from ad_adx_media_push";
+    		String sql = "select * from ad_adx_media_push"; 
     		ResultList rsList = select.select(sql);
     		ConcurrentHashMap<String,Set<String>> tempMap = new ConcurrentHashMap<String,Set<String>>();
     		ConcurrentHashMap<String,Set<String>> adxTempMap = new ConcurrentHashMap<String,Set<String>>();

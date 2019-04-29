@@ -58,7 +58,7 @@ public class BaiduRequestServiceImpl implements RequestService {
     private ExecutorService executor = null;
 
     @Override
-    public String parseRequest(String dataStr, ExecutorService executor,ConcurrentHashMap countMap) throws Exception {
+    public String parseRequest(String dataStr, ExecutorService executor, ConcurrentHashMap countMap) throws Exception {
         this.executor = executor;
 
         String response = "";
@@ -159,7 +159,8 @@ public class BaiduRequestServiceImpl implements RequestService {
                     adxNameList,//广告位列表
                     isDimension,
                     id,//请求id
-                    tagid//广告位id
+                    tagid,//广告位id,
+                    null
             );
             if (targetDuFlowBean == null) {
                 response = "204baidu_id:" + id;
